@@ -1,2 +1,2 @@
-# rhubarb
-The best of all the PHP frameworks.
+# module.stem
+A data modelling module for Rhubarb
