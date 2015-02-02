@@ -1,0 +1,16 @@
+{
+  "name": "rhubarbphp/rhubarb",
+  "description": "A data modelling and ORM module for the Rhubarb PHP framework",
+  "keywords": [ "modelling", "orm", "model", "data", "php", "framework" ],
+  "homepage": "http://www.rhubarbphp.com/",
+  "license": "Apache-2.0",
+  "autoload": {
+    "psr-4": {
+      "Rhubarb\\Stem\\": "src/",
+      "Rhubarb\\Stem\\Tests\\": "tests/"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "3.*"
+  }
+}
