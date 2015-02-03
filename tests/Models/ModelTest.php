@@ -314,7 +314,7 @@ class ModelTest extends ModelUnitTestCase
 		$e = 0;
 		$f = 0;
 
-		$example->AttachEventHandler( "Test", function( $a, $b, $c ) use ( &$d, &$e, &$f )
+		$example->attachEventHandler( "Test", function( $a, $b, $c ) use ( &$d, &$e, &$f )
 		{
 			$d = $a;
 			$e = $b;
@@ -361,7 +361,7 @@ class ModelTest extends ModelUnitTestCase
 
 		$saved = false;
 
-		$example->AttachEventHandler( "afterSave", function() use ( &$saved )
+		$example->attachEventHandler( "afterSave", function() use ( &$saved )
 		{
 			$saved = true;
 		});
@@ -379,7 +379,7 @@ class ModelTest extends ModelUnitTestCase
 
 		$saved = false;
 
-		$example->AttachEventHandler( "afterSave", function() use ( &$saved )
+		$example->attachEventHandler( "afterSave", function() use ( &$saved )
 		{
 			$saved = true;
 		});
