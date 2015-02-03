@@ -25,7 +25,7 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 
 class UpdateSchemas implements GeneratesResponse
 {
-    public function GenerateResponse($request = null)
+    public function generateResponse($request = null)
     {
         if (class_exists("Rhubarb\Crown\Layout\LayoutModule")) {
             LayoutModule::disableLayout();
