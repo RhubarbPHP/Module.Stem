@@ -1,5 +1,5 @@
 {
-  "name": "rhubarbphp/module.stem",
+  "name": "rhubarbphp/module-stem",
   "description": "A data modelling and ORM module for the Rhubarb PHP framework",
   "keywords": [ "modelling", "orm", "model", "data", "php", "framework" ],
   "homepage": "http://www.rhubarbphp.com/",
