@@ -25,22 +25,22 @@ class MySqlTest extends MySqlTestCase
 {
 	public function testInvalidSettingsThrowsException()
 	{
-		MySql::ResetDefaultConnection();
+		MySql::resetDefaultConnection();
 
 		$settings = new \Rhubarb\Stem\StemSettings();
 		$settings->Username = "bad-user";
 
 		$this->setExpectedException( "\Rhubarb\Stem\Exceptions\RepositoryConnectionException" );
 
-		MySql::GetDefaultConnection();
+		MySql::getDefaultConnection();
 	}
 
 	public function testHasADefaultConnection()
 	{
 		self::SetDefaultConnectionSettings();
-		MySql::ResetDefaultConnection();
+		MySql::resetDefaultConnection();
 
-		$defaultConnection = MySql::GetDefaultConnection();
+		$defaultConnection = MySql::getDefaultConnection();
 
 		$this->assertInstanceOf( "\PDO", $defaultConnection );
 	}
@@ -74,7 +74,7 @@ class MySqlTest extends MySqlTestCase
 
 		$this->assertEquals( 20, $size );
 
-		$statement = MySql::GetPreviousStatement( true );
+		$statement = MySql::getPreviousStatement( true );
 
 		$this->assertContains( "SQL_CALC_FOUND_ROWS", $statement );
 		$this->assertContains( "LIMIT 10, 4", $statement );
@@ -177,7 +177,7 @@ class MySqlTest extends MySqlTestCase
 
 		sizeof( $list );
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", MySql::GetPreviousStatement( ) );
+		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", MySql::getPreviousStatement( ) );
 		$this->assertTrue( $group->wasFilteredByRepository() );
 
 		$group = new Group();
@@ -189,7 +189,7 @@ class MySqlTest extends MySqlTestCase
 
 		sizeof( $list );
 
-		$statement = MySql::GetPreviousStatement( );
+		$statement = MySql::getPreviousStatement( );
 
 		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", $statement );
 		$this->assertFalse( $group->wasFilteredByRepository() );
@@ -202,7 +202,7 @@ class MySqlTest extends MySqlTestCase
 
 		sizeof( $list );
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` LIKE :", MySql::GetPreviousStatement( ) );
+		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` LIKE :", MySql::getPreviousStatement( ) );
 	}
 
 	public function testAutoHydration()
@@ -227,7 +227,7 @@ class MySqlTest extends MySqlTestCase
 
 		count( $users );
 
-		$this->assertStringStartsWith( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :", MySql::GetPreviousStatement( ) );
+		$this->assertStringStartsWith( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :", MySql::getPreviousStatement( ) );
 
 		$company->getRepository()->clearObjectCache();
 		$user->getRepository()->clearObjectCache();
@@ -237,7 +237,7 @@ class MySqlTest extends MySqlTestCase
 
 		count( $users );
 
-		$this->assertStringStartsWith( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` ORDER BY `Company`.`CompanyName` ASC", MySql::GetPreviousStatement( ) );
+		$this->assertStringStartsWith( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` ORDER BY `Company`.`CompanyName` ASC", MySql::getPreviousStatement( ) );
 
 		$user = $users[0];
 
@@ -301,7 +301,7 @@ class MySqlTest extends MySqlTestCase
 
 		$this->assertEquals( "UTV", $category2->Companies[0]->CompanyName );
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE `CategoriesRaw`.`CategoryID` = :", MySql::GetPreviousStatement( ) );
+		$this->assertStringStartsWith( "SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE `CategoriesRaw`.`CategoryID` = :", MySql::getPreviousStatement( ) );
 	}
 
 	public function testManualAutoHydration()
@@ -311,7 +311,7 @@ class MySqlTest extends MySqlTestCase
 
 		count( $users );
 
-		$this->assertEquals( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID`", MySql::GetPreviousStatement( ) );
+		$this->assertEquals( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID`", MySql::getPreviousStatement( ) );
 	}
 
 
@@ -389,7 +389,7 @@ class MySqlTest extends MySqlTestCase
 
 		$this->assertEquals( [300, 700], $results );
 
-		$sql = MySql::GetPreviousStatement();
+		$sql = MySql::getPreviousStatement();
 
 		$this->assertEquals( "SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`", $sql );
 

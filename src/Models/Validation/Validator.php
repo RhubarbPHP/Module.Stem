@@ -27,13 +27,13 @@ class Validator extends Validation
     const VALIDATE_ALL = 1;
     const VALIDATE_ONE = 2;
 
-    protected $_mode;
+    protected $mode;
 
     public function __construct($name = "", $mode = self::VALIDATE_ALL)
     {
         parent::__construct($name);
 
-        $this->_mode = $mode;
+        $this->mode = $mode;
     }
 
     /**
@@ -53,7 +53,7 @@ class Validator extends Validation
             }
         }
 
-        if ($this->_mode == self::VALIDATE_ALL) {
+        if ($this->mode == self::VALIDATE_ALL) {
             if (sizeof($exceptions) > 0) {
                 throw new ModelConsistencyValidationException($exceptions);
             }

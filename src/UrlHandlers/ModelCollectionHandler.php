@@ -55,18 +55,18 @@ abstract class ModelCollectionHandler extends UrlHandler
 
     public function getModelObject()
     {
-        if (!$this->_resourceIdentifier || !is_numeric($this->_resourceIdentifier)) {
+        if (!$this->resourceIdentifier || !is_numeric($this->resourceIdentifier)) {
             throw new CollectionUrlException();
         }
 
-        return SolutionSchema::getModel($this->modelName, $this->_resourceIdentifier);
+        return SolutionSchema::getModel($this->modelName, $this->resourceIdentifier);
     }
 
     protected function populateNewModelWithRelationshipValues(Model $model)
     {
         $schema = SolutionSchema::getModelSchema($this->modelName);
 
-        $model[$schema->uniqueIdentifierColumnName] = $this->_resourceIdentifier;
+        $model[$schema->uniqueIdentifierColumnName] = $this->resourceIdentifier;
 
         // If we have a parent handler - see if it can populate our model with some foreign keys.
         $parentHandler = $this->getParentHandler();

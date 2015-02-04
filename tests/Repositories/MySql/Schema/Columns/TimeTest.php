@@ -22,7 +22,7 @@ class TimeTest extends MySqlTestCase
 		$company->KnockOffTime = "17:01:02";
 		$company->save();
 
-		$params = MySql::GetPreviousParameters();
+		$params = MySql::getPreviousParameters();
 
 		$this->assertContains( "17:01:02", $params[ "KnockOffTime" ] );
 

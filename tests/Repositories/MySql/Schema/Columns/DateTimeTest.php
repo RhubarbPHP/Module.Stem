@@ -15,7 +15,7 @@ class DateTimeTest extends MySqlTestCase
 		$company->LastUpdatedDate = "2012-01-01 10:01:02";
 		$company->save();
 
-		$params = MySql::GetPreviousParameters();
+		$params = MySql::getPreviousParameters();
 
 		$this->assertContains( "2012-01-01 10:01:02", $params[ "LastUpdatedDate" ] );
 

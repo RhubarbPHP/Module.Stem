@@ -15,7 +15,7 @@ class DateTest extends MySqlTestCase
 		$company->InceptionDate = "2012-01-01";
 		$company->save();
 
-		$params = MySql::GetPreviousParameters();
+		$params = MySql::getPreviousParameters();
 
 		$this->assertContains( "2012-01-01", $params[ "InceptionDate" ] );
 

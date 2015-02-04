@@ -38,7 +38,7 @@ class JsonTextTest extends MySqlTestCase
 		$company->CompanyData = $this->data;
 		$company->save();
 
-		$params = MySql::GetPreviousParameters();
+		$params = MySql::getPreviousParameters();
 
 		$this->assertEquals( $this->constraint, $params[ "CompanyData" ] );
 

@@ -47,7 +47,7 @@ class CountTest extends MySqlTestCase
 
 		$this->assertEquals( 3, $sumTotal );
 
-		$lastStatement = MySql::GetPreviousStatement( false );
+		$lastStatement = MySql::getPreviousStatement( false );
 
 		$this->assertContains( "COUNT( `Balance` ) AS `CountOfBalance`", $lastStatement );
 	}

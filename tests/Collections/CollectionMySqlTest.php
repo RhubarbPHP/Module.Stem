@@ -103,7 +103,7 @@ class CollectionMySqlTest extends MySqlTestCase
 		// Trigger list fetching.
 		sizeof( $list );
 
-		$sql = Mysql::GetPreviousStatement();
+		$sql = Mysql::getPreviousStatement();
 
 		$this->assertContains( "ORDER BY CompanyName ASC", $sql );
 
@@ -112,7 +112,7 @@ class CollectionMySqlTest extends MySqlTestCase
 		// Trigger list fetching.
 		sizeof( $list );
 
-		$sql = Mysql::GetPreviousStatement();
+		$sql = Mysql::getPreviousStatement();
 
 		$this->assertContains( "ORDER BY CompanyName ASC, Balance DESC", $sql );
 
@@ -126,7 +126,7 @@ class CollectionMySqlTest extends MySqlTestCase
 		}
 		catch( SortNotValidException $er ){}
 
-		$sql = Mysql::GetPreviousStatement();
+		$sql = Mysql::getPreviousStatement();
 
 		// As NonExistant is at the end of the sort collection we can't use any back end performance
 		// optimisation (as the manual sorting will destroy it)
@@ -199,7 +199,7 @@ class CollectionMySqlTest extends MySqlTestCase
 
 		$this->assertCount( 6, $list );
 		$this->assertEquals( "C", $list[ 2 ]->CompanyName );
-		$sql = MySql::GetPreviousStatement( true );
+		$sql = MySql::getPreviousStatement( true );
 
 		$this->assertContains( "LIMIT 2, 6", $sql );
 
@@ -209,10 +209,10 @@ class CollectionMySqlTest extends MySqlTestCase
 		$this->assertCount( 6, $list );
 		$this->assertEquals( "C", $list[ 2 ]->CompanyName );
 
-		$sql = MySql::GetPreviousStatement();
+		$sql = MySql::getPreviousStatement();
 		$this->assertNotContains( "LIMIT 2, 6", $sql );
 
-		$sql = MySql::GetPreviousStatement( true );
+		$sql = MySql::getPreviousStatement( true );
 		$this->assertNotContains( "LIMIT 2, 6", $sql );
 
 	}

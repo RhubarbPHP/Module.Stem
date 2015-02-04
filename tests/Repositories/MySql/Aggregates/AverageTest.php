@@ -43,7 +43,7 @@ class AverageTest extends MySqlTestCase
 
 		$this->assertEquals( 3, $sumTotal );
 
-		$lastStatement = MySql::GetPreviousStatement( false );
+		$lastStatement = MySql::getPreviousStatement( false );
 
 		$this->assertContains( "AVG( `Balance` ) AS `AverageOfBalance`", $lastStatement );
 	}
