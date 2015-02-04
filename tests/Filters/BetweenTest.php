@@ -5,7 +5,7 @@ namespace Rhubarb\Stem\Tests\Filters;
 
 
 use Rhubarb\Stem\Collections\Collection;
-use Rhubarb\Crown\Scaffolds\Login\User;
+use Rhubarb\Scaffolds\Login\User;
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Filters\Between;
 
