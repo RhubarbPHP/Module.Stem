@@ -487,7 +487,7 @@ abstract class Model extends ModelState
         }
 
         $this->beforeSave();
-        $this->raiseEvent("beforeSave");
+        $this->raiseEvent("BeforeSave");
 
         $repository = $this->getRepository();
         $repository->saveObject($this);
@@ -495,7 +495,7 @@ abstract class Model extends ModelState
         $this->raiseAfterSaveEvents();
 
         $this->afterSave();
-        $this->raiseEvent("afterSave");
+        $this->raiseEvent("AfterSave");
 
         $this->takeChangeSnapshot();
 
@@ -531,13 +531,13 @@ abstract class Model extends ModelState
         }
 
         $this->beforeDelete();
-        $this->raiseEvent("beforeDelete");
+        $this->raiseEvent("BeforeDelete");
 
         $repository = $this->getRepository();
         $repository->deleteObject($this);
 
         $this->afterDelete();
-        $this->raiseEvent("afterDelete");
+        $this->raiseEvent("AfterDelete");
     }
 
     /**
