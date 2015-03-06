@@ -82,6 +82,20 @@ class ModelSchema
     }
 
     /**
+     * Removes a column from the collection using it's name.
+     *
+     * Often used when extending a model from a scaffold to make extensive changes.
+     *
+     * @param $columnName
+     */
+    public function removeColumnByName($columnName)
+    {
+        if (isset($this->columns[$columnName])) {
+            unset($this->columns[$columnName]);
+        }
+    }
+
+    /**
      * Returns an array of columns contained in the schema.
      *
      * @return \Rhubarb\Stem\Schema\Columns\Column[]
