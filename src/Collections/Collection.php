@@ -121,6 +121,25 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    /**
+     * Returns an array of the collection items.
+     *
+     * For large collections this is _VERY_ expensive and so should only be used for small
+     * collections < 100 items.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $items = [];
+
+        foreach( $this as $item ){
+            $items[] = $item;
+        }
+
+        return $items;
+    }
+
     public function getAggregates()
     {
         return $this->aggregates;

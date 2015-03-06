@@ -284,12 +284,12 @@ abstract class SolutionSchema
 
             $schemas = self::getAllSchemas();
 
+            self::$modelNamesCache = [];
+
             foreach ($schemas as $schema) {
                 self::$modelClassesCache = array_merge(self::$modelClassesCache, $schema->models);
+                self::$modelNamesCache = array_merge(self::$modelNamesCache, $schema->modelClassNames );
             }
-
-            self::$modelNamesCache = array_combine(array_values(self::$modelClassesCache),
-                array_keys(self::$modelClassesCache));
         }
 
         if (isset(self::$modelClassesCache[$name])) {
