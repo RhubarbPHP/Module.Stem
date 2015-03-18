@@ -6,7 +6,7 @@ In this example we effectively have combined filters to make a XOR. So we will g
 or the surname but NOT in both. You would be well advised to read up on some of the individual filters before looking
 at this example.
 
-~~~php
+```php
 <?php
 
 $filterOne = new \Gcd\Core\Modelling\Filters\Contains( "Forename", "Jo", true );
@@ -33,4 +33,4 @@ $filterXor->AddFilters(
 );
 $this->list->Filter( $filterXor );
 
-~~~
+```

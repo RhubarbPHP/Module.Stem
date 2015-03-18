@@ -17,18 +17,18 @@ Set to true to make the match case sensitive
 
 ###Keep all records with a Forename containing "jo", regardless of case
 
-~~~php
+```php
 <?php
 $filter = new \Gcd\Core\Modelling\Filters\Contains( "Forename", "jo", false );
 $this->list->Filter( $filter );
-~~~
+```
 
 ###Keep all records with a Forename containing jo
 
-~~~php
+```php
 <?php
 $filter = new \Gcd\Core\Modelling\Filters\Contains( "Forename", "jo", true );
 $this->list->Filter( $filter );
-~~~
+```
 
 

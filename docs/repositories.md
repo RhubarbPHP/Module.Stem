@@ -26,9 +26,9 @@ By default new model objects will use the Offline repository unless your applica
 each model object individually, or by changing the default repository. To change the default repository you must make a
 call to `SetDefaultRepositoryClassName` before any data objects are created.
 
-~~~ php
+``` php
 Gcd\Core\Modelling\Repositories\Repository::SetDefaultRepositoryClassName( "Gcd\Core\Modelling\Repositories\MySql\MySql" );
-~~~
+```
 
 A good place for this is in the Initialise() function of your site [Module](/basics/modules)
 

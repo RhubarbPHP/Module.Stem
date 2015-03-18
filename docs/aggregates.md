@@ -16,9 +16,9 @@ a Repository to do the same calculation on the database server before transmitti
 
 The syntax for creating an aggregate is extremely simple:
 
-~~~ php
+``` php
 $sum = new Sum( "FieldToSum" );
-~~~
+```
 
 Note that just like filters there will be repository specific versions of aggregates that **should
 not** be instantiated directly!
@@ -30,10 +30,10 @@ There are two occasions where aggregates are used - both subtly different.
 For example you might have a list of BankAccount models and you want to calculate the total balance
 of all accounts:
 
-~~~ php
+``` php
 $collection = new Collection( "BankAccount" );
 list( $totalBalance ) = $collection->CalculateAggregates( new Sum( "Balance" ) );
-~~~
+```
 
 The slightly arcane `list( $totalBalance )` is used here as this function actually returns an array
 of results. This is because the function actually supports being passed multiple aggregates. The
@@ -45,12 +45,12 @@ relationship
 
 Let's take our invoice example from the introduction:
 
-~~~ php
+``` php
 $invoices = new Collection( "Invoice" );
 $invoices->AddAggregateColumn( new Count( "InvoiceLines.InvoiceLineID" ) );
 
 print $invoices[0][ "CountOfInvoiceLinesInvoiceLineID" ];
-~~~
+```
 
 In this scenario we are actually registering new columns to be created using the result of the
 aggregate function. The column name becomes SumOf, CountOf etc. followed by the original column

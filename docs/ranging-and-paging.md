@@ -9,16 +9,16 @@ Note that if sorting has been applied and the repository was not able to fully u
 
 To apply a range simply call `SetRange()` with the starting index and count:
 
-~~~ php
+``` php
 $list->SetRange( 2, 4 );
 // $list now restricted to return indexes 2, 3, 4 and 5
-~~~
+```
 
 Also note that counting the list will always return the number of entries in the original list.
 
-~~~ php
+``` php
 $list->SetRange( 2, 4 );
 // $list now restricted to return indexes 2, 3, 4 and 5
 print count( $list );
 // Will print 88 if $list had 88 items before the range
-~~~
+```

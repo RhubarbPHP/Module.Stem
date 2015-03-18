@@ -14,8 +14,10 @@ Models are stored in a 'Repository', for example the MySQL repository.
 Models can be created singly or in a 'Collection' which can return all the models for a particular type
 or a subset by using one or more 'Filter' objects.
 
+## Modelling Topics
+
 [Model & Schema](models-and-schemas)
-:	Represents a single 'record' of data.
+:	Represents single 'records' of data and how they interrelate.
 
 [Collection](collections)
 :	An iterable collection of models of the same type

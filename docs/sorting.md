@@ -17,11 +17,11 @@ auto hydration will be used to improve performance of sorting on related propert
 To add an additional sort to an existing list simply call `AddSort()` passing the name of the column
 and either true for ascending or false for descending sort:
 
-~~~ php
+``` php
 $list->AddSort( "Surname", true );
 $list->AddSort( "Forename", false );
 // $list is now sorted by Surname ascending followed by Forename descending.
-~~~
+```
 
 ## ReplaceSort()
 
@@ -30,11 +30,11 @@ additional sort it first removes all existing sorts.
 
 You can also pass an array to `ReplaceSort()` with column name to direction boolean pairs:
 
-~~~
+```
 $list->ReplaceSort( "Balance", true );
 // Sorted by balance ascending
 $list->ReplaceSort( 
     [ "Balance" => true, "Surname" => false ]
 );
 // Sorted by balance ascending followed by surname descending.
-~~~
+```

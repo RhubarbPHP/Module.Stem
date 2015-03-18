@@ -16,7 +16,7 @@ The example below will match all Models with a Forename containing "Jo" and a Su
 There is no real advantage for doing this over simply using two separate Contains Filters, unless you wish to take that
 group filter and do something more complex with it later on.
 
-~~~php
+```php
 <?php
 $filterGroup = new \Gcd\Core\Modelling\Filters\Group( "And" );
 $filterGroup->AddFilters(
@@ -24,12 +24,12 @@ $filterGroup->AddFilters(
 	new \Gcd\Core\Modelling\Filters\Contains( "Surname", "Johnson", true )
 );
 $this->list->Filter( $filterGroup );
-~~~
+```
 
 ### Simple "Or" example
 The example below will match all Models with a Forename containing "Jo" OR a Surname containing "Johnson".
 
-~~~php
+```php
 <?php
 $filterGroup = new \Gcd\Core\Modelling\Filters\Group( "Or" );
 $filterGroup->AddFilters(
@@ -37,13 +37,13 @@ $filterGroup->AddFilters(
 	new \Gcd\Core\Modelling\Filters\Contains( "Surname", "Johnson", true )
 );
 $this->list->Filter( $filterGroup );
-~~~
+```
 
 ### Example Involving group
 As the group filter is an entirely normal filter, which behaves exactly as any other filter, it can operate on another group
 filter - as in this example:
 
-~~~php
+```php
 <?php
 $filterGroup1 = new \Gcd\Core\Modelling\Filters\Group( "And" );
 $filterGroup1->AddFilters(
@@ -63,5 +63,5 @@ $filterGroup->AddFilters(
 	$filterGroup2
 );
 $this->list->Filter( $filterGroup );
-~~~
+```
 

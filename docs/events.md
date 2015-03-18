@@ -35,7 +35,7 @@ than waiting until the model is saved.
 
 To attach a change notification handler call the `AddPropertyChangedNotificationHandler()`:
 
-~~~ php
+``` php
 $bucket = new CoalBucket();
 $bucket->AddPropertyChangeNotification( "LumpsOfCoal", function( $new )
 {
@@ -47,13 +47,13 @@ $bucket->AddPropertyChangeNotification( "LumpsOfCoal", function( $new )
 
 // The method call below might cause the function above to run - it may not. It depends on what `LumpsOfCoal` drops to.
 $bucket->StockTheFire();
-~~~
+```
 
 In practice this is most often used internally with a model to make sure that various computed properties are kept up to
 date. This pattern is used in place of calculating computed properties when models are saved. This ensures that
 the model is consistent even before the model is saved and reduces the overall number of calls make to save the model.
 
-~~~ php
+``` php
 class Member extends Model
 {
 	protected function AttachPropertyChangedNotificationHandlers()
@@ -64,7 +64,7 @@ class Member extends Model
             } );
 	}
 }
-~~~
+```
 
 Notice here that you can pass an array of column names instead of a single column name. Also notice that the
 callback function can take up to three parameters, the new value, the name of the changing property
@@ -88,33 +88,33 @@ Simply call the `RaiseEvent()` method. Pass the name of the event and any second
 you need to pass to the event handler. Note that while the event name is abitrary it is good to have a
 convention - UpperCamelCase seems as good as any.
 
-~~~ php
+``` php
 public function ResetPassword( $password )
 {
     $this->Password = $password;
 
     $this->RaiseEvent( "PasswordReset" );
 }
-~~~
+```
 
 ### Handling an event
 
 There are two ways to handle events from a model. If you have a reference to the actual instance of
 the model object throwing the event you can handle it directly:
 
-~~~ php
+``` php
 $modelFiringEvent->AttachEventHandler( "EventName", function()
 {
 	// Do event stuff in here.
 } );
-~~~
+```
 
 All model events also get marshalled through the ModelEventManager class. Handle events by asking
 the model event manager to listen for you can execute your callback. This is useful for situations
 where you want to handle an event thrown by any instance of a model, not just one specific model
 record.
 
-~~~ php
+``` php
 ModelEventManager::AttachEventHandler( "User", "PasswordReset", function( $model )
 {
     // Email the user to let them know...
@@ -124,7 +124,7 @@ ModelEventManager::AttachEventHandler( "User", [ "SubscriptionCancel", "Subscrip
 {
     // Email the user to let them know...
 } );
-~~~
+```
 
 `AttachEventHandler()` takes the alias name of the model and the either a single event name as a string or any number of
  event names in an array as the first two parameters and the callback function as the third. 
@@ -139,7 +139,7 @@ Occasionally it's important to ensure events get thrown just after a model is sa
 setting flags and picking up on these in the `AfterSave()` method you can simply call `RaiseEventAfterSave()` with
 the same parameters as you would call `RaiseEvent`:
 
-~~~ php
+``` php
 protected function BeforeSave()
 {
     if( $this->HasPropertyChanged( "Amount" ) )
@@ -148,7 +148,7 @@ protected function BeforeSave()
     }
     parent::BeforeSave();
 }
-~~~
+```
 
 ### Integration Events
 

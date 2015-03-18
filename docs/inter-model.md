@@ -23,7 +23,7 @@ the `$Lines` property. A `Customer` model would have `Order` models as children 
 In these cases the best practice is for the model to manipulate it's children directly as we can
 assume a parent knows all about their children.
 
-~~~ php
+``` php
 class Invoice extends Model
 {
 	// ...
@@ -36,7 +36,7 @@ class Invoice extends Model
 	}
 	// ...
 }
-~~~
+```
 
 ### 2. Updating a 'parent' or 'stranger'
 
@@ -51,7 +51,7 @@ In both cases the event should be handled by an external agent that is listening
 raised on the `ModelEventManager`. The best candidate for this agent is the application's
 `SolutionSchema` object where the models and relationships are registered.
 
-~~~ php
+``` php
 class MyDatabaseSchema extends SolutionSchema
 {
 	public function __construct()
@@ -68,7 +68,7 @@ class MyDatabaseSchema extends SolutionSchema
 		});
 	}
 }
-~~~
+```
 
 The solution schema knows best how the models inter-relate and so can be seen as good choice of
 co-ordinator for inter-model events.

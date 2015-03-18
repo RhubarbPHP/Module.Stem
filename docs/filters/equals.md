@@ -15,7 +15,7 @@ $contains
 
 Keep all records with a Forename of Tom:
 
-~~~php
+```php
 $filter = new \Gcd\Core\Modelling\Filters\Equals( "Forename", "Tom" );
 $this->list->Filter( $filter );
-~~~
+```

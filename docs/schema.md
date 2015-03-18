@@ -7,7 +7,7 @@ A model schema describes the persistent properties of a model object including i
 name, the 'columns' of the record and the name of it's unique identifier column. In order to populate or save a model
 object a schema object must be returned by the model's `CreateSchema()` method.
 
-~~~ php
+``` php
 class CoalBucket extends ModelObject
 {
 	public function CreateSchema()
@@ -25,7 +25,7 @@ class CoalBucket extends ModelObject
 		return $schema;
 	}
 }
-~~~
+```
 
 Notice in this example that we are using a `MySqlSchema` object and MySql specific column types.
 These columns extend generic base classes however these specialised columns support the extra
@@ -35,20 +35,20 @@ The `AutoIncrement` column type is special for MySql and it automatically sets t
 column name and adds a primary index. If your MySql schema doesn't have an auto increment column
 (not yet supported) you would need to register these manually:
 
-~~~ php
+``` php
 $schema->uniqueIdentifierColumnName = "CoalBucketID";
 $schema->AddIndex( new Index( "CoalBucketID", Index::PRIMARY ) );
-~~~
+```
 
 Our original example also states that, if required, a label for this model can be fetched by using
 the BucketName column.
 
 In code this is exposed by calling `GetLabel()` on the model object. e.g.
 
-~~~ php
+``` php
 $bucket = new CoalBucket( 2 );
 print $bucket->GetLabel();
-~~~
+```
 
 Schemas are used by repositories to query and update the back end data stores and to ensure the
 schema definition in the back end is up to date.
@@ -130,7 +130,7 @@ them. Don't forget for some large projects the solution schema object will be ve
 to avoid instantiating it whenever possible. `SolutionSchema` is therefore an abstract class so you
 must create your own extension of it:
 
-~~~ php
+``` php
 class SiteSchema extends SolutionSchema
 {
 	public function __construct()
@@ -152,7 +152,7 @@ class SiteSchema extends SolutionSchema
 		]);
 	}
 }
-~~~
+```
 
 The first task is to override the constructor and call the parent constructor with a version number.
 Every time you change the schema of any of the models you should update this version number by a
@@ -173,20 +173,20 @@ relationship which (as this schema isn't registered yet) will cause the schema t
 
 Relationships let you navigate between the models like this:
 
-~~~ php
+``` php
 $coals = $coalBucket->Coals;
 $coalBucket = $coals[0]->CoalBucket;
-~~~
+```
 
 ### Note:
-~~~
+```
 Under the bonnet relationships are implemented using classes that extend `Relationship`.
 `DeclareOneToManyRelationships` are merely convenience methods that
 wrap around the internal function `SolutionSchema::AddRelationship()`.
 
 `AddRelationship` registers a navigation property on a model that will instantiate the relationship
 class and call it's `FetchFor` method to return the matching object or list.
-~~~
+```
 
 ### Relationship Declaration Syntax
 
@@ -206,7 +206,7 @@ relationship
 
 The syntax of `DeclareOneToManyRelationships` and `DeclareOneToOneRelationships` is the same:
 
-~~~ php
+``` php
 $this->DeclareOneToManyRelationships(
 [
 	"OneModelName" =>
@@ -214,11 +214,11 @@ $this->DeclareOneToManyRelationships(
 		"CollectionName" => "ManyModelName.OneModelPrimaryKeyNameInManyModel"
 	]
 ] );
-~~~
+```
 
 Putting this into practice with the familiar example of a relationship between customer and orders:
 
-~~~ php
+``` php
 $this->DeclareOneToManyRelationships(
 [
 	"Customer" =>
@@ -226,13 +226,13 @@ $this->DeclareOneToManyRelationships(
 		"Orders" => "Order.CustomerID"
 	]
 ] );
-~~~
+```
 
 This is actually the condensed version of the declaration. We're assuming that the relationship is
 using the unique identifier (CustomerID) of the Customer model and that the reverse relationship
 will have the name "Customer". The previous example is syntactically equivalent to:
 
-~~~ php
+``` php
 $this->DeclareOneToManyRelationships(
 [
 	"Customer.CustomerID" =>
@@ -240,7 +240,7 @@ $this->DeclareOneToManyRelationships(
 		"Orders" => "Order.CustomerID:Customer"
 	]
 ] );
-~~~
+```
 
 Here we've added a column name after "Customer" and we've added a colon followed by the name of the
 reverse relationship.
@@ -248,7 +248,7 @@ reverse relationship.
 This allows for occasions where one table relates to another table several times. For example
 consider the following:
 
-~~~ php
+``` php
 $this->DeclareOneToManyRelationships(
 [
 	"User" =>
@@ -258,14 +258,14 @@ $this->DeclareOneToManyRelationships(
 		"AssignedTickets" => "Ticket.AssignedtoUserID:AssignedTo"
 	]
 ] );
-~~~
+```
 
 ### Many-to-Many Relationships
 
 `DeclareManyToManyRelationships` takes a slightly different syntax as we must also include the name
 of the linking table in the definition.
 
-~~~ php
+``` php
 $this->DeclareManyToManyRelationships(
 [
 	"Product" =>
@@ -273,28 +273,28 @@ $this->DeclareManyToManyRelationships(
 		"Categories" => "ProductCategory.ProductID_CategoryID.Category:Products" ]
 	]
 ] );
-~~~
+```
 
 Many to many relationships simplify your code by removing the need to 'daisy-chain' through the
 intermediate model object. Also items can be added to the collection without having to create the
 intermediate row yourself:
 
-~~~ php
+``` php
 $product = new Product( 1 );
 $category = new Category( 1 );
 
 $product->Categories->Append( $category );
 // OR
 $category->Products->Append( $product );
-~~~
+```
 
 ### Registering the schema
 
 In your site module (settings/modules.php) and the `Initialise` method you should add the following:
 
-~~~ php
+``` php
 SolutionSchema::RegisterSchema( "Gcd\Site\SiteSchema" );
-~~~
+```
 
 ### Updating the back end schemas
 
@@ -305,7 +305,7 @@ expect this will be a task for the deployment sub systems to complete.
 In development to trigger the schema checking you need to contrive a callable script somewhere that
 will ask each schema if it needs to update:
 
-~~~ php
+``` php
 <?php
 
 namespace Gcd\Site\Mvp\utility;
@@ -337,4 +337,4 @@ class UpdateSchema implements IGeneratesResponse
 		return $response;
 	}
 }
-~~~
+```

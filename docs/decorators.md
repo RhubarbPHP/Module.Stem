@@ -21,20 +21,20 @@ transforming it into a different representation of the same value. e.g. True to 
 
 To use a decorator simply call the static `DataDecorator::GetDecoratorForModel( Model $model )` function call:
 
-~~~ php
+``` php
 $decorator = DataDecorator::GetDecoratorForModel( $coalBucket );
-~~~
+```
 
 Note that this call may return false if there is no decorator available for a particular model.
 
 Once you have a decorator you can simply access properties on it much as you would for the underlying model.
 Properties that have been configured to have formats or decoration will be formatted and decorated as appropriate.
 
-~~~ php
+``` php
 $decorator = DataDecorator::GetDecoratorForModel( $coalBucket );
 
 print $decorator->IsFireRisk();     // Prints "No"
-~~~
+```
 
 Classes provided by Core like the Table presenter should make use of decorators by default.
 
@@ -47,9 +47,9 @@ in fact a "CommonDataDecorator" provided in Core to format some of the most basi
 
 To apply a decorator you need to call `DataDecorator::RegisterDecoratorClass( $decoratorClassName, $modelClassName );`
 
-~~~php
+```php
 DataDecorator::RegisterDecoratorClass( "Gcd\Core\Modelling\Decorators\CommonDataDecorator", "Gcd\Core\Modelling\Models\Model" );
-~~~
+```
 
 You can however only register one decorator for a model. In the case that a decorator is also available for a parent
 class, the most specific class matched decorator is used.
@@ -58,7 +58,7 @@ class, the most specific class matched decorator is used.
 
 Simply extend the most appropriate base decorator and then define the following methods:
 
-~~~ php
+``` php
 class MyDataDecorator extends CommonDataDecorator
 {
     protected function RegisterColumnDefinitions()
@@ -82,7 +82,7 @@ class MyDataDecorator extends CommonDataDecorator
         } );
     }
 }
-~~~
+```
 
 There are two types of definition; a column definition and a type definition. A type definition applies the
 transformation to all columns matching or being a sub class of a given schema column type. A column definition

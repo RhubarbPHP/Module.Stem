@@ -18,7 +18,7 @@ should form a key part of the application's defense.
 Simply override the `GetConsistencyValidationErrors()` method in your model classes. This method
 should return an array of any validation errors, and an empty array if there are none:
 
-~~~ php
+``` php
     protected function GetConsistencyValidationErrors()
 	{
 		$errors = [];
@@ -30,7 +30,7 @@ should return an array of any validation errors, and an empty array if there are
 
 		return $errors;
 	}
-~~~
+```
 
 There is no limit to the number of rules you can apply and all the validation rules should be
 evaluated so that developers and API users can quickly correct all outstanding issues.
@@ -41,7 +41,7 @@ The consistency of the model will be tested automatically when you call `Save()`
 errors exist, the model will not be saved and a `ModelConsistencyValidationException` will be thrown.
 You can call `GetErrors()` on this exception object to get the array of exception messages.
 
-~~~ php
+``` php
 try
 {
     $company->Save();
@@ -50,13 +50,13 @@ catch( ModelConsistencyValidationException $er )
 {
     $errors = $er->GetErrors();
 }
-~~~
+```
 
 If you want to test the model consistency before calling `Save()` you can simply call `IsConsistent()`.
 This method takes an optional boolean to control whether it simply returns true or false or
 throws the `ModelConsistencyValidationException` exception. The default is to throw the exception.
 
-~~~ php
+``` php
 // Approach 1 - let it throw if inconsistent
 try
 {
@@ -74,4 +74,4 @@ if ( !$consistent )
 {
     // ...
 }
-~~~
+```

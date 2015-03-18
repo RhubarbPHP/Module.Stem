@@ -7,18 +7,18 @@ and to exclude what the other filter includes
 
 ###Simple Example###
 Exclude all Modules with a Forename containing "jo"
-~~~php
+```php
 <?php
 
 $notFilter = new \Gcd\Core\Modelling\Filters\Not( new \Gcd\Core\Modelling\Filters\Contains( "Forename", "jo" ) );
 $this->list->Filter( $notFilter );
 
-~~~
+```
 
 
 ###Example with Groups
 This example will exclude any Models with a Forename containing Jo OR a surname Containing Johnson
-~~~php
+```php
 <?php
 
 $filterGroup = new \Gcd\Core\Modelling\Filters\Group( "And" );
@@ -28,4 +28,4 @@ $filterGroup->AddFilters(
 );
 $notFilter = new \Gcd\Core\Modelling\Filters\Not( $filterGroup );
 
-~~~
+```

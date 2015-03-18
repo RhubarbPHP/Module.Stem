@@ -6,7 +6,7 @@ sorted).
 For example, the following will ensure that only records without a DeletedFlag == true will be
 returned in collections by default.
 
-~~~php
+```php
 <?php
 
 public static function Find( Filter $filter = null )
@@ -24,7 +24,7 @@ public static function Find( Filter $filter = null )
 	return parent::Find( $filter );
 }
 
-~~~
+```
 
 ## Relationships
 

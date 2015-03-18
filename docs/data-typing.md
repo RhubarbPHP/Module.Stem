@@ -13,7 +13,7 @@ that regardless of the source and type of the assigned value, that it is convert
 `CoreDateTime` class. This means once the value is retrieved it is always a `CoreDateTime` object
 avoiding the need to ever manually create a date object to represent it. Consider these examples:
 
-~~~ php
+``` php
 
 $contact->DateOfBirth = "2001-01-01";
 print $contact->DateOfBirth->format( "d.m.Y" );
@@ -30,7 +30,7 @@ print $contact->DateOfBirth->format( "d.m.Y" );
 $contact->DateOfBirth = new DateTime( "2001-01-01" );
 print $contact->DateOfBirth->format( "d.m.Y" );
 // 01.01.2001
-~~~
+```
 
 In each case you can see a DateTime object is returned. Note that you can set the value to be any of
 the date stanzas supported by [strtotime](http://php.net/manual/en/datetime.formats.relative.php).
@@ -63,7 +63,7 @@ model access for that class a simple lookup is done to see if a transform exists
 
 Here's the stock Core Date object:
 
-~~~ php
+``` php
 class Date extends Column
 {
 	/// ...
@@ -78,13 +78,13 @@ class Date extends Column
 
 	/// ...
 }
-~~~
+```
 
 Here we just ensure that any assignment sets the value to be a `CoreDateTime` object.
 
 Here's the `MySql\Date` Variant:
 
-~~~ php
+``` php
 class Date extends \Gcd\Core\Modelling\Schema\Columns\Date
 {
 	/// ...
@@ -111,7 +111,7 @@ class Date extends \Gcd\Core\Modelling\Schema\Columns\Date
 
 	/// ...
 }
-~~~
+```
 
 These transforms ensure that MySql receives a proper date string and that the date is parsed
 properly upon loading data.

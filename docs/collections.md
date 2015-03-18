@@ -6,7 +6,7 @@ either by instantiating an instance of `Gcd\Core\Modelling\Collections\Collectio
 class name, by navigating through a one-to-many relationship of a model object or by calling the
 `Find()` static method on a model class:
 
-~~~ php
+``` php
 // Create a list of smiths manually:
 $contacts = new Collection( "Contact" );
 $contacts->Filter( new Equals( "Surname", "Smith" ) );
@@ -17,14 +17,14 @@ $contacts = Contact::Find( new Equals( "Surname", "Smith" ) );
 // Create a list of contacts from a relationship:
 $company = new Company( 1 );
 $contacts = $company->Contacts;
-~~~
+```
 
 ## Iteration
 
 A `Collection` object implements `\Iterator`, `\ArrayAccess` and `\Countable` so you can use the
 list much as you would an array:
 
-~~~ php
+``` php
 foreach( $contacts as $contact )
 {
 	// ...
@@ -35,7 +35,7 @@ for( $i = 0; $i < count( $contacts ); $i++ )
 	$contact = $contacts[ $i ];
 	// ...
 }
-~~~
+```
 
 The item returned by each iteration or array access is a model object matching the class name set on
 the collection.
@@ -54,9 +54,9 @@ Read the [guide to filters](filters/index) to find out more.
 With a collection, filtered or not, you can search for a model with a particular unique identifier by
 simply calling:
 
-~~~ php
+``` php
 $model = $collection->FindModelByUniqueIdentifier( $myModelId );
-~~~
+```
 
 If the model isn't in the collection a `RecordNotFoundException` will be thrown.
 
@@ -64,7 +64,7 @@ When processing user input this is the recommended way to create models if you h
 as a starting point. It protects you from the simple mistake of forgetting to validate user input against
 what is appropriate for them to access and so defends against simple request manipulation attacks. For example:
 
-~~~ php
+``` php
 // This is bad - we would have to remember to check that this ticket is allowed
 // for this user.
 $ticket = new Ticket( $ticketId );
@@ -78,7 +78,7 @@ catch( RecordNotFoundException $er )
 {
     // Call the police....
 }
-~~~
+```
 
 This is only a little slower than loading the model directly. It will require a hit on the model repository
 but internally this refines the collection by extending it's filters to include the unique identifier so it
@@ -88,12 +88,12 @@ won't cause the entire collection to be loaded.
 
 New models can be appending to a collection by calling the `Append` method:
 
-~~~ php
+``` php
 $contact = new Contact();
 $contact->Forename = "Andrew";
 
 $contacts->Append( $contact );
-~~~
+```
 
 Note: This has the side effect of saving new models to retrieve their unique identifier.
 
@@ -104,7 +104,7 @@ a Group filter in AND boolean mode.
 This pattern is the preferred way of attaching models to satisfy relationships as it lets you
 implement the following code:
 
-~~~php
+```php
 $contact = new Contact();
 $contact->Forename = "Andrew";
 
@@ -113,7 +113,7 @@ $company->Contacts->Append( $contact );
 
 print $contact->CompanyID;
 // Output: 3
-~~~
+```
 
 This is easier to read and understand than setting the CompanyID manually, but also should the
 filter returning Contacts change in future, the relationship will still be satisfied. For example
@@ -121,10 +121,10 @@ should the Contacts relationship be filtered so that it only returns contacts wh
 **adding a contact in this way will also set Active to 1**. This also means that adding an existing
 *inactive* contact to the Contacts collection will reactivate it.
 
-~~~
+```
 Note that the model is appended to the end of the collection regardless of any sorting applied. This
 is something we will consider changing in future versions so that the sort order is preserved.
-~~~
+```
 
 ## Auto Hydration
 
@@ -139,7 +139,7 @@ manually request this behaviour if you know that later in your program you will 
 relationship for a large number of models. The classic example is where you are displaying a table
 of data with some of the columns coming from a relationship:
 
-~~~ php
+``` php
 $contacts = new Collection( "Contacts" );
 $table = new Table( $contacts );
 $table->Columns =
@@ -151,12 +151,12 @@ $table->Columns =
 ];
 
 print $table;
-~~~
+```
 
 In this example we might be printing 100 contacts and for each contact we'll have to make another
 round trip to the database to get the related company. However consider the following amendment:
 
-~~~ php
+``` php
 $contacts = new Collection( "Contacts" );
 $contacts->AutoHydrate( "Company" );
 
@@ -170,15 +170,15 @@ $table->Columns =
 ];
 
 print $table;
-~~~
+```
 
 By calling `AutoHydrate()` passing the name of the Company relationship we provide the hint to the
 repository that it should load the Company objects through auto hydration if it can.
 
-~~~
+```
 Note it is important to call AutoHydrate() before any attempts to count, iterate or access elements
 of the Collection have taken place.
-~~~
+```
 
 ## Deleting Entries
 
