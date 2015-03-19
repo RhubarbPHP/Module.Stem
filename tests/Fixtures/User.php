@@ -6,12 +6,21 @@ use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\AutoIncrement;
+<<<<<<< HEAD
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Decimal;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Enum;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\ForeignKey;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\TinyInt;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Varchar;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlSchema;
+=======
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDecimal;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnum;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlForeignKey;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\TinyMySqlInt;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlString;
+use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
+>>>>>>> 47cd0ed3cd3eb59d8516a8eee85230348e38364b
 
 /**
  *
@@ -35,6 +44,7 @@ class User extends \Rhubarb\Stem\Models\Model
 	 */
 	protected function createSchema()
 	{
+<<<<<<< HEAD
 		$schema = new MySqlSchema( "tblUser" );
 
 		$schema->addColumn(
@@ -47,6 +57,20 @@ class User extends \Rhubarb\Stem\Models\Model
 			new Varchar( "Password", 120 ),
 			new TinyInt( "Active", 0 ),
 			new Decimal( "Wage" )
+=======
+		$schema = new MySqlModelSchema( "tblUser" );
+
+		$schema->addColumn(
+			new AutoIncrement( "UserID" ),
+			new MySqlForeignKey( "CompanyID" ),
+			new MySqlEnum( "UserType", "Staff", [ "Staff", "Administrator" ] ),
+			new MySqlString( "Username", 40 ),
+			new MySqlString( "Forename", 40 ),
+			new MySqlString( "Surname", 40 ),
+			new MySqlString( "Password", 120 ),
+			new TinyMySqlInt( "Active", 0 ),
+			new MySqlDecimal( "Wage" )
+>>>>>>> 47cd0ed3cd3eb59d8516a8eee85230348e38364b
 		);
 
 		$schema->uniqueIdentifierColumnName = "UserID";

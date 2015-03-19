@@ -4,7 +4,11 @@ namespace Rhubarb\Stem\Tests\Repositories\MySql\Schema;
 
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
+<<<<<<< HEAD
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Varchar;
+=======
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlString;
+>>>>>>> 47cd0ed3cd3eb59d8516a8eee85230348e38364b
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Fixtures\User;
@@ -83,7 +87,11 @@ ENGINE=InnoDB;
 
 		$this->assertFalse( $compareTo->createAlterTableStatementFor( $comparisonSchema ) );
 
+<<<<<<< HEAD
 		$schema->addColumn( new Varchar( "Town", 60, null ) );
+=======
+		$schema->addColumn( new MySqlString( "Town", 60, null ) );
+>>>>>>> 47cd0ed3cd3eb59d8516a8eee85230348e38364b
 
 		$compareTo = MySqlComparisonSchema::fromMySqlSchema( $schema );
 

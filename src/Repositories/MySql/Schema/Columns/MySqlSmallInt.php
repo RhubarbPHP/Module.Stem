@@ -18,12 +18,12 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . '/Int.php';
+require_once __DIR__ . '/MySqlInteger.php';
 
 /**
  * A MySQL smallint
  */
-class SmallInt extends Int
+class MySqlSmallMySqlInteger extends MySqlInteger
 {
 	use MySqlColumn;
 

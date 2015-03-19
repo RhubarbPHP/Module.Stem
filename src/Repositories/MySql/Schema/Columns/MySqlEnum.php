@@ -32,7 +32,7 @@ require_once __DIR__ . "/../../../../Schema/Columns/Column.php";
  * Nullable enums are very dangerous and no explicit default is a bad idea so we
  * force one to be configured.
  */
-class Enum extends Column
+class MySqlEnum extends Column
 {
     use MySqlColumn;
 

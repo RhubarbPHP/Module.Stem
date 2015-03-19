@@ -18,25 +18,28 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/Enum.php";
+use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Columns\Integer;
 
-class Set extends Enum
+require_once __DIR__ . "/../../../../Schema/Columns/Integer.php";
+
+class MySqlInteger extends Integer
 {
-    public $possibleValues = array();
+    use MySqlColumn;
 
-    public function __construct($columnName, $defaultValue, $possibleValues)
-    {
-        parent::__construct($columnName, $defaultValue, $possibleValues);
-
-        $this->possibleValues = $possibleValues;
-    }
+    protected $signed = true;
 
     public function getDefinition()
     {
-        $possibleString = "'" . implode("','", $this->possibleValues) . "'";
-
-        $sql = "`" . $this->columnName . "` set(" . $possibleString . ") " . $this->getDefaultDefinition();
+        $sql = "`" . $this->columnName . "` int(11) " . (!$this->signed ? "unsigned " : "") . $this->getDefaultDefinition();
 
         return $sql;
     }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new MySqlInteger($genericColumn->columnName);
+    }
+
+
 }

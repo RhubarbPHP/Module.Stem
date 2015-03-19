@@ -16,25 +16,14 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
+namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__ . '/MediumText.php';
+require_once __DIR__ . "/Column.php";
 
-class JsonText extends MediumText
+/**
+ * A string column of indeterminate length
+ */
+class LongString extends Column
 {
-	public function getTransformFromRepository()
-	{
-		return function( $data )
-		{
-			return json_decode( $data );
-		};
-	}
 
-	public function getTransformIntoRepository()
-	{
-		return function( $data )
-		{
-			return json_encode( $data );
-		};
-	}
 }

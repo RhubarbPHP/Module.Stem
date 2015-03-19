@@ -18,26 +18,21 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-use Rhubarb\Stem\Repositories\MySql\Schema\Index;
+require_once __DIR__ . '/MySqlInteger.php';
 
-require_once __DIR__ . "/Int.php";
-
-class AutoIncrement extends Int
+class MySqlTinyInt extends MySqlInteger
 {
-    public function __construct($columnName)
-    {
-        parent::__construct($columnName, null);
-    }
+	use MySqlColumn;
 
-    public function getDefinition()
-    {
-        $sql = "`" . $this->columnName . "` int(11) unsigned NOT NULL AUTO_INCREMENT";
+	/**
+	 * @return string The tinyint columns definition string
+	 */
+	public function getDefinition()
+	{
+		$sql = '`' . $this->columnName . '` TINYINT(4) ' .
+			   ( !$this->signed ? 'UNSIGNED ' : '' ) .
+			   $this->getDefaultDefinition();
 
-        return $sql;
-    }
-
-    public function getIndex()
-    {
-        return new Index($this->columnName, Index::PRIMARY);
-    }
+		return $sql;
+	}
 }

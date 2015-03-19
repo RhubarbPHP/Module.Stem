@@ -18,30 +18,31 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
+use Rhubarb\Crown\DateTime\RhubarbDate;
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
+use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Columns\Date;
 
-require_once __DIR__ . "/Date.php";
+require_once __DIR__ . "/../../../../Schema/Columns/Date.php";
 
-class DateTime extends \Rhubarb\Stem\Schema\Columns\DateTime
+class MySqlDate extends Date
 {
     use MySqlColumn;
 
     public function __construct($columnName)
     {
-        parent::__construct($columnName, "0000-00-00 00:00:00");
+        parent::__construct($columnName, "0000-00-00");
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new MySqlDate($genericColumn->columnName);
     }
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` datetime " . $this->getDefaultDefinition();
+        $sql = "`" . $this->columnName . "` date " . $this->getDefaultDefinition();
         return $sql;
-    }
-
-    public function getTransformIntoModelData()
-    {
-        return function ($data) {
-            return new RhubarbDateTime($data);
-        };
     }
 
     public function getTransformIntoRepository()
@@ -49,10 +50,10 @@ class DateTime extends \Rhubarb\Stem\Schema\Columns\DateTime
         return function ($data) {
             $data = new RhubarbDateTime($data);
 
-            if ($data->IsValidDateTime()) {
-                $date = $data->format("Y-m-d H:i:s");
+            if ($data->isValidDateTime()) {
+                $date = $data->format("Y-m-d");
             } else {
-                $date = "0000-00-00 00:00:00";
+                $date = "0000-00-00";
             }
 
             return $date;
@@ -62,7 +63,7 @@ class DateTime extends \Rhubarb\Stem\Schema\Columns\DateTime
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbDateTime($data);
+            $date = new RhubarbDate($data);
 
             return $date;
         };

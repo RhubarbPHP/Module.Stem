@@ -18,29 +18,33 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/../../../../Schema/Columns/String.php";
-require_once __DIR__ . "/MySqlColumn.php";
+use Rhubarb\Stem\Repositories\MySql\Schema\Index;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\Column;
 
-use Rhubarb\Stem\Schema\Columns\String;
+require_once __DIR__ . "/MySqlInteger.php";
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
-class Varchar extends String
+class MySqlAutoIncrement extends AutoIncrement
 {
-    use MySqlColumn;
-
-    public function __construct($columnName, $maximumLength, $defaultValue = "")
+    public function __construct($columnName)
     {
-        parent::__construct($columnName, $maximumLength, $defaultValue);
+        parent::__construct($columnName, null);
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new MySqlAutoIncrement( $genericColumn->columnName );
     }
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` varchar(" . $this->stringLength . ") " . $this->getDefaultDefinition();
+        $sql = "`" . $this->columnName . "` int(11) unsigned NOT NULL AUTO_INCREMENT";
 
         return $sql;
+    }
+
+    public function getIndex()
+    {
+        return new Index($this->columnName, Index::PRIMARY);
     }
 }

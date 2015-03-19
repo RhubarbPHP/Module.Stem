@@ -16,19 +16,32 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Schema\Columns;
+namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . '/Decimal.php';
+use Rhubarb\Stem\Schema\Columns\LongString;
 
-class Money extends Decimal
+require_once __DIR__ . '/LongString.php';
+
+class Json extends LongString
 {
-    /**
-     * @param string $columnName
-     * @param int $totalDigits
-     * @param int $defaultValue
-     */
-    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
-    {
-        parent::__construct($columnName, $totalDigits, 2, $defaultValue);
-    }
-} 
+	public function getTransformFromRepository()
+	{
+		return function( $data )
+		{
+			return json_decode( $data );
+		};
+	}
+
+	public function getTransformIntoRepository()
+	{
+		return function( $data )
+		{
+			return json_encode( $data );
+		};
+	}
+
+	public function getStorageColumn()
+	{
+		return new LongString($this->columnName);
+	}
+}

@@ -18,24 +18,19 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__."/MediumText.php";
+use Rhubarb\Stem\Schema\Columns\Column;
 
-class Text extends MediumText
+class MySqlLongTextMySql extends MySqlMediumText
 {
-	public function getDefaultDefinition()
-	{
-		if ( $this->defaultValue === "" )
-		{
-			return "NOT NULL";
-		}
-
-		return ( $this->defaultValue === null ) ? "DEFAULT NULL" : "NOT NULL DEFAULT '".$this->defaultValue."'";
-	}
+	use MySqlColumn;
 
 	public function getDefinition()
 	{
-		$sql = "`".$this->columnName."` text ".$this->getDefaultDefinition();
+		return "`".$this->columnName."` longtext ".$this->getDefaultDefinition();
+	}
 
-		return $sql;
+	protected static function fromGenericColumnType(Column $genericColumn)
+	{
+		return new self($genericColumn->columnName);
 	}
 }

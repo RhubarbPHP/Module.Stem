@@ -18,21 +18,29 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . '/Int.php';
+use Rhubarb\Stem\Schema\Columns\Boolean;
+use Rhubarb\Stem\Schema\Columns\Column;
 
-use Rhubarb\Stem\Repositories\MySql\Schema\Index;
+require_once __DIR__ . '/../../../../Schema/Columns/Boolean.php';
 
-class ForeignKey extends Int
+class MySqlBoolean extends Boolean
 {
-    public function __construct($columnName)
-    {
-        parent::__construct($columnName, 0);
+    use MySqlColumn;
 
-        $this->signed = false;
+    public function getDefinition()
+    {
+        return "`" . $this->columnName . "` tinyint(1) NOT NULL DEFAULT '" . ($this->defaultValue ? 1 : 0) . "'";
     }
 
-    public function GetIndex()
+    public function getTransformIntoRepository()
     {
-        return new Index($this->columnName, Index::INDEX);
+        return function ($value) {
+            return ($value) ? 1 : 0;
+        };
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new MySqlBoolean( $genericColumn->columnName );
     }
 }
