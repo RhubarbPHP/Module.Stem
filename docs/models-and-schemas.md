@@ -9,6 +9,8 @@ As a PHP object they provide an excellent container for any business logic relat
 This introduction is a guide to creating and using your first model class which will teach some of the key
 concepts along the way.
 
+## Creating a Model object
+
 To start modelling you need to create your own model classes. Any class that extends the `Model` base class is
 called a Model class.
 
@@ -316,6 +318,53 @@ This list of public properties controls two methods:
 * `serializeModelDataAsJson()` takes the response from exportPublicData() and encodes it as a json
 string.
 
+## Checking Model Data
+
+One of the Model's most important jobs is to verify the sanity of the data it's being asked to store.
+When you build models you should define the columns that are required under the appropriate circumstances.
+
+For example a `Customer` might not be valid if it doesn't have an AccountCode *unless* that Customer is
+marked as a "Cash Customer".
+
+These rules should be expressed by implementing the `getConsistencyValidationErrors()` function and returning
+an associative array of errors after your analysis. To codify the example above you would generate the following
+code:
+
+``` php
+class Customer extends Model
+{
+    protected function getConsistencyValidationErrors()
+    {
+        $errors = [];
+
+        if ( $this->AccountCode == "" && $this->AccountType != "Cash Customer" ){
+            $errors[ "AccountCode" ] = "Account code must be populated if the customer isn't a cash customer";
+        }
+
+        return $errors;
+    }
+}
+```
+
+> Implementing validation rules in this way is perhaps one of the most important (and efficient) ways to
+> spend your modelling budget as stopping damaged and invalid data entering your application saves untold
+> hours in the support of your application.
+
+Calling `save()` on an inconsistent model will throw a ModelConsistencyValidationException:
+
+``` php
+$customer = new Customer();
+$customer->AccountType = "Credit Customer";
+
+try {
+    // This will fail as credit customers needs an account code.
+    $customer->save();
+} catch( ModelConsistencyValidationException $er ) {
+    // The getErrors() function will retrieve the validation errors.
+    var_dump( $er->getErrors() );
+}
+```
+
 ## Sanitising Model Data
 
 Often it's appropriate to take various actions when a model is being saved:
@@ -330,9 +379,10 @@ To do this simply override one of two methods: `beforeSave()` or `afterSave()`. 
 called before the repository is given the model to store. `afterSave()` is called after the repository
 has stored the model. If it was a new record it should have a unique identifier at this point.
 
-> Note: Calling `save()` from within these methods will cause an infinite loop and shouldn't be done.
+> Note: Calling `save()` from within these methods will cause an infinite loop!
 
-## Advanced Topics
+## Further Reading
 
 * [Relationships between models](relationships)
-* [Model Consistency](consistency)
+* [Model Events](events)
+* [Columns](columns)
