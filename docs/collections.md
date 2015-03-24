@@ -2,17 +2,17 @@ Collections
 ===
 
 A collection is a list of model objects that you can iterate over. Collections are normally created
-either by instantiating an instance of `Gcd\Core\Modelling\Collections\Collection` with a model
+either by instantiating an instance of `Rhubarb\Stem\Collections\Collection` with a model
 class name, by navigating through a one-to-many relationship of a model object or by calling the
-`Find()` static method on a model class:
+`find()` static method on a model class.
 
 ``` php
-// Create a list of smiths manually:
+// Create a list of smiths:
 $contacts = new Collection( "Contact" );
-$contacts->Filter( new Equals( "Surname", "Smith" ) );
+$contacts->filter( new Equals( "Surname", "Smith" ) );
 
 // Same thing, less code:
-$contacts = Contact::Find( new Equals( "Surname", "Smith" ) );
+$contacts = Contact::find( new Equals( "Surname", "Smith" ) );
 
 // Create a list of contacts from a relationship:
 $company = new Company( 1 );
@@ -21,7 +21,7 @@ $contacts = $company->Contacts;
 
 ## Iteration
 
-A `Collection` object implements `\Iterator`, `\ArrayAccess` and `\Countable` so you can use the
+As the `Collection` class implements `\Iterator`, `\ArrayAccess` and `\Countable` you can use the
 list much as you would an array:
 
 ``` php
@@ -44,18 +44,56 @@ the collection.
 
 Collections work in tandem with the `Filter` object to allow a list to be filtered for matching
 models. The filtering is abstracted away from any particular repository and therefore you can filter
-on any property, even on computed properties. It is the responsibility of the repository to provide
+on any property, *even on computed properties*. It is the responsibility of the repository to provide
 whatever performance optimisations it can, such as altering SQL where clauses appropriately.
 
-Read the [guide to filters](filters/index) to find out more.
+Read the [guide to filters](filters/index) for an in-depth look at filters.
+
+## Sorting
+
+Sorting a collection is allowed for by two methods, `addSort()` and `replaceSort()`. You can sort on any
+property of the model even computed properties. Bear in mind that for large collections sorting can be
+expensive. If the repository for your model is able to it can improve performance by sorting at the
+back end data store (e.g. using an ORDER BY statement). You can safely mix sorts that get done by the
+back end with those that aren't e.g. database columns and computed properties - just bear in mind
+that performance may become an issue.
+
+You can also sort by columns in related models using the dot operator, e.g. `Company.CompanyName`,
+however the same reservations about performance must be borne in mind. If the repository supports it
+auto hydration will be used to improve performance of sorting on related properties.
+
+addSort()
+:	To add an additional sort to an existing list simply call `addSort()` passing the name of the column
+	and either true for ascending or false for descending sort:
+
+	``` php
+	$list->addSort( "Surname", true );
+	$list->addSort( "Forename", false );
+	// $list is now sorted by Surname ascending followed by Forename descending.
+	```
+
+replaceSort()
+:	`replaceSort()` can be called with the same parameters as `addSort()` however instead of adding an
+	additional sort it first removes all existing sorts.
+
+	You can also pass an array to `replaceSort()` with column name to direction boolean pairs:
+
+	``` php
+	$list->replaceSort( "Balance", true );
+	// Sorted by balance ascending
+	$list->replaceSort(
+	    [ "Balance" => true, "Surname" => false ]
+	);
+	// Sorted by balance ascending followed by surname descending.
+	```
 
 ## Finding Models
 
-With a collection, filtered or not, you can search for a model with a particular unique identifier by
+Within a collection, filtered or not, you can search for a model with a particular unique identifier by
 simply calling:
 
 ``` php
-$model = $collection->FindModelByUniqueIdentifier( $myModelId );
+$model = $collection->findModelByUniqueIdentifier( $myModelId );
 ```
 
 If the model isn't in the collection a `RecordNotFoundException` will be thrown.
@@ -72,11 +110,11 @@ $ticket = new Ticket( $ticketId );
 // This is better - it's not possible to get a ticket that isn't allowed for the user.
 try
 {
-    $ticket = $user->Tickets->FindModelByUniqueIdentifier( $ticketId );
+    $ticket = $user->Tickets->findModelByUniqueIdentifier( $ticketId );
 }
 catch( RecordNotFoundException $er )
 {
-    // Call the police....
+    die( "Sorry, invalid access attempt detected" );
 }
 ```
 
@@ -84,32 +122,33 @@ This is only a little slower than loading the model directly. It will require a 
 but internally this refines the collection by extending it's filters to include the unique identifier so it
 won't cause the entire collection to be loaded.
 
-## Appending Models to the Collection
+## Appending models to the Collection
 
-New models can be appending to a collection by calling the `Append` method:
+New models can be appended to a collection by calling the `append` method:
 
 ``` php
 $contact = new Contact();
 $contact->Forename = "Andrew";
 
-$contacts->Append( $contact );
+$contacts->append( $contact );
 ```
 
-Note: This has the side effect of saving new models to retrieve their unique identifier.
+> Note that this has the side effect of saving new models if necessary in order to retrieve their unique
+> identifier.
 
-If the collection has been filtered the filters will be given a chance to set values on the model
+If the collection was filtered many filters will be able to set values on the model being appended
 such that the same filters would match this new model. This also works when the filters are part of
 a Group filter in AND boolean mode.
 
 This pattern is the preferred way of attaching models to satisfy relationships as it lets you
-implement the following code:
+implement code like this:
 
 ```php
 $contact = new Contact();
 $contact->Forename = "Andrew";
 
 $company = new Company( 3 );
-$company->Contacts->Append( $contact );
+$company->Contacts->append( $contact );
 
 print $contact->CompanyID;
 // Output: 3
@@ -121,22 +160,21 @@ should the Contacts relationship be filtered so that it only returns contacts wh
 **adding a contact in this way will also set Active to 1**. This also means that adding an existing
 *inactive* contact to the Contacts collection will reactivate it.
 
-```
-Note that the model is appended to the end of the collection regardless of any sorting applied. This
-is something we will consider changing in future versions so that the sort order is preserved.
-```
+> Note that the model is appended to the end of the collection regardless of any sorting applied. If you
+> need the new model returned in the correct position according the sorting on the collection you need
+> to refetch the collection.
 
 ## Auto Hydration
 
-Some [repositories](data-repositories) support a performance enhancement called auto hydration. This
+Some [repositories](repositories) support a performance enhancement called "auto hydration". This
 allows them to load related models at the same time as the primary model to avoid having to make
 further round trips to the data store when those relationships are needed. For example the MySql
-repository can implement an `INNER JOIN` to load the relationship models along with the primary
+repository can implement an `INNER JOIN` to load relationship models along with the primary
 model.
 
 This happens automatically if you are filtering or sorting on a related property, however you can
-manually request this behaviour if you know that later in your program you will be accessing a
-relationship for a large number of models. The classic example is where you are displaying a table
+manually request this behaviour if you know that later in your code you will be accessing a
+relationship for a large number of models. A classic example is where you are displaying a table
 of data with some of the columns coming from a relationship:
 
 ``` php
@@ -158,7 +196,7 @@ round trip to the database to get the related company. However consider the foll
 
 ``` php
 $contacts = new Collection( "Contacts" );
-$contacts->AutoHydrate( "Company" );
+$contacts->autoHydrate( "Company" );
 
 $table = new Table( $contacts );
 $table->Columns =
@@ -172,23 +210,21 @@ $table->Columns =
 print $table;
 ```
 
-By calling `AutoHydrate()` passing the name of the Company relationship we provide the hint to the
+By calling `autoHydrate()` and passing the name of the Company relationship we provide a hint to the
 repository that it should load the Company objects through auto hydration if it can.
 
-```
-Note it is important to call AutoHydrate() before any attempts to count, iterate or access elements
-of the Collection have taken place.
-```
+> It is important to call autoHydrate() before any attempts to count, iterate or access elements
+> of the Collection have taken place.
 
 ## Deleting Entries
 
-The `Collection` class has a `DeleteAll()` method which deletes all the models from the repository (by calling
-Delete() in turn on each model). This is obviously a dangerous call and should always be used with caution.
-Note that while iterating over the loop is much more expensive than deleting all items with a matching query on the
-backend data store it offers a number of advantages:
+The `Collection` class has a `deleteAll()` function which deletes all of it's models from the repository (by
+calling delete() in turn on each model). This is obviously a dangerous function and should always be
+used with caution. While iterating over the loop is much more expensive than deleting all items with a
+matching query on the backend data store it offers a number of advantages:
 
 * Each delete could be logged if model logging was important to the application
 * Deleting individual items is safer when used in a replication environment
 
-If large volumes of rows need removed it would be best to use alternative methods such as using the MySql repository
-static methods directly.
+If large volumes of rows need removed it would still be best to use alternative methods such as using the
+MySql repository Execute method directly to perform a `DELETE` statement.
