@@ -131,6 +131,7 @@ class MySqlModelSchema extends ModelSchema
     public static function fromGenericSchema(ModelSchema $genericSchema, Repository $repository)
     {
         $schema = new MySqlModelSchema($genericSchema->schemaName);
+        $schema->labelColumnName = $genericSchema->labelColumnName;
 
         $columns = $genericSchema->columns;
 
