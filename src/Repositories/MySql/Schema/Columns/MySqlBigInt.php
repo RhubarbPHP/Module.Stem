@@ -16,19 +16,25 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Schema\Columns;
+namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . '/Decimal.php';
+use Rhubarb\Stem\Schema\Columns\Column;
 
-class Money extends Decimal
+require_once __DIR__ . "/MySqlInteger.php";
+
+class MySqlBigInt extends MySqlInteger
 {
-    /**
-     * @param string $columnName
-     * @param int $totalDigits
-     * @param int $defaultValue
-     */
-    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
+    public function getDefinition()
     {
-        parent::__construct($columnName, $totalDigits, 2, $defaultValue);
+        $sql = "`" . $this->columnName . "` bigint(20) " . $this->getDefaultDefinition();
+
+        return $sql;
     }
-} 
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new self($genericColumn->columnName, $genericColumn->defaultValue);
+    }
+
+
+}

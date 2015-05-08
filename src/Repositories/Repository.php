@@ -25,6 +25,7 @@ use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\Float;
 use Rhubarb\Stem\Schema\Columns\Integer;
+use Rhubarb\Stem\Schema\ModelSchema;
 
 /**
  * The base class for data repositories.
@@ -79,7 +80,7 @@ abstract class Repository
     public function __construct(Model $model)
     {
         $this->modelClassName = get_class($model);
-        $this->schema = $model->generateSchema();
+        $this->schema = $this->getRepositorySpecificSchema($model->generateSchema());
 
         $columns = $this->schema->getColumns();
 
@@ -90,6 +91,29 @@ abstract class Repository
                     $column->getTransformIntoRepository()
                 ];
         }
+    }
+
+    private function getRepositorySpecificSchema(ModelSchema $genericSchema)
+    {
+        $reposName = basename(str_replace("\\", "/", get_class($this)));
+
+        // Get the provider specific implementation of the column.
+        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Schema\\" . $reposName . basename(str_replace("\\",
+                "/", get_class($genericSchema)));
+
+        $superType = $genericSchema;
+
+        if (class_exists($className)) {
+            $superType = call_user_func_array($className . "::fromGenericSchema",
+                array($genericSchema, $this));
+
+            // getRepositorySpecificSchema could return false if it doesn't supply any schema details.
+            if ($superType === false) {
+                $superType = $genericSchema;
+            }
+        }
+
+        return $superType;
     }
 
     public function getModelClass()

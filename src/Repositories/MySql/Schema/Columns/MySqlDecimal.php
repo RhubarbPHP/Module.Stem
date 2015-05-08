@@ -20,27 +20,23 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 require_once __DIR__ . "/../../../../Schema/Columns/Float.php";
 
-use Rhubarb\Stem\Schema\Columns\Float;
+use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Columns\Decimal;
 
 /**
  * MySql DECIMAL column data type
  */
-class Decimal extends Float
+class MySqlDecimal extends Decimal
 {
     use MySqlColumn;
 
-    private $precision;
-
-    /**
-     * @param string $columnName
-     * @param string $precision MySql decimal precision format
-     * @param int $defaultValue
-     */
-    public function __construct($columnName, $precision = '8,2', $defaultValue = 0)
+    protected static function fromGenericColumnType(Column $genericColumn)
     {
-        parent::__construct($columnName, $defaultValue);
-
-        $this->precision = $precision;
+        return new MySqlDecimal(
+            $genericColumn->columnName,
+            $genericColumn->totalDigits,
+            $genericColumn->decimalDigits,
+            $genericColumn->defaultValue);
     }
 
     /**
@@ -48,12 +44,8 @@ class Decimal extends Float
      */
     public function getDefaultDefinition()
     {
-        $precisionParts = explode(',', $this->precision);
-
-        $decimalPrecision = count($precisionParts) === 2 ? $precisionParts[1] : 0;
-
         return ($this->defaultValue === null) ? "DEFAULT NULL"
-            : "NOT NULL DEFAULT '" . number_format($this->defaultValue, $decimalPrecision, '.', '') . "'";
+            : "NOT NULL DEFAULT '" . number_format($this->defaultValue, $this->decimalDigits, '.', '') . "'";
     }
 
     /**
@@ -61,7 +53,7 @@ class Decimal extends Float
      */
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` DECIMAL(" . $this->precision . ") " . $this->getDefaultDefinition();
+        $sql = "`" . $this->columnName . "` DECIMAL(" . $this->totalDigits . "," . $this->decimalDigits . ") " . $this->getDefaultDefinition();
 
         return $sql;
     }

@@ -18,21 +18,30 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . '/../../../../Schema/Columns/Boolean.php';
+require_once __DIR__ . "/../../../../Schema/Columns/String.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
-class Boolean extends \Rhubarb\Stem\Schema\Columns\Boolean
+use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Columns\String;
+
+class MySqlString extends String
 {
     use MySqlColumn;
 
-    public function getDefinition()
+    public function __construct($columnName, $maximumLength, $defaultValue = "")
     {
-        return "`" . $this->columnName . "` tinyint(1) NOT NULL DEFAULT '" . ($this->defaultValue ? 1 : 0) . "'";
+        parent::__construct($columnName, $maximumLength, $defaultValue);
     }
 
-    public function getTransformIntoRepository()
+    public function getDefinition()
     {
-        return function ($value) {
-            return ($value) ? 1 : 0;
-        };
+        $sql = "`" . $this->columnName . "` varchar(" . $this->maximumLength . ") " . $this->getDefaultDefinition();
+
+        return $sql;
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new self($genericColumn->columnName, $genericColumn->maximumLength, $genericColumn->defaultValue);
     }
 }

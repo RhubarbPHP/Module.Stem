@@ -18,14 +18,29 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__."/Int.php";
+require_once __DIR__ . '/MySqlInteger.php';
 
-class BigInt extends Int
+use Rhubarb\Stem\Repositories\MySql\Schema\Index;
+use Rhubarb\Stem\Schema\Columns\Column;
+
+class MySqlForeignKey extends MySqlInteger
 {
-	public function getDefinition()
-	{
-		$sql = "`".$this->columnName."` bigint(20) ".$this->getDefaultDefinition();
+    public function __construct($columnName)
+    {
+        parent::__construct($columnName, 0);
 
-		return $sql;
-	}
+        $this->signed = false;
+    }
+
+    public function GetIndex()
+    {
+        return new Index($this->columnName, Index::INDEX);
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new MySqlForeignKey($genericColumn->columnName);
+    }
+
+
 }

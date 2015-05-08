@@ -16,11 +16,21 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
+namespace Rhubarb\Stem\Schema\Columns;
 
-use Rhubarb\Stem\Schema\Columns\WithEncryptedText;
+require_once __DIR__."/Column.php";
 
-class EncryptedVarchar extends Varchar
+class Decimal extends Column
 {
-	use WithEncryptedText;
-} 
+    protected $totalDigits = 8;
+    protected $decimalDigits = 2;
+
+    public function __construct($columnName, $totalDigits = 8, $decimalDigits = 2, $defaultValue = null)
+    {
+        parent::__construct($columnName, $defaultValue);
+
+        $this->totalDigits = $totalDigits;
+        $this->decimalDigits = $decimalDigits;
+    }
+
+}

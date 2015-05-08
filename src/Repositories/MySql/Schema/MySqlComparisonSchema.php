@@ -52,7 +52,7 @@ class MySqlComparisonSchema
         return implode(",\r\n", $statements);
     }
 
-    public static function fromMySqlSchema(MySqlSchema $schema)
+    public static function fromMySqlSchema(MySqlModelSchema $schema)
     {
         $comparisonSchema = new MySqlComparisonSchema();
         $columns = $schema->getColumns();

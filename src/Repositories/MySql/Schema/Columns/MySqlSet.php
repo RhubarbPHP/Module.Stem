@@ -18,17 +18,24 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/../../../../Schema/Columns/Integer.php";
+require_once __DIR__ . "/MySqlEnum.php";
 
-class Int extends \Rhubarb\Stem\Schema\Columns\Integer
+class MySqlSet extends MySqlEnum
 {
-    use MySqlColumn;
+    public $possibleValues = array();
 
-    protected $signed = true;
+    public function __construct($columnName, $defaultValue, $possibleValues)
+    {
+        parent::__construct($columnName, $defaultValue, $possibleValues);
+
+        $this->possibleValues = $possibleValues;
+    }
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` int(11) " . (!$this->signed ? "unsigned " : "") . $this->getDefaultDefinition();
+        $possibleString = "'" . implode("','", $this->possibleValues) . "'";
+
+        $sql = "`" . $this->columnName . "` set(" . $possibleString . ") " . $this->getDefaultDefinition();
 
         return $sql;
     }

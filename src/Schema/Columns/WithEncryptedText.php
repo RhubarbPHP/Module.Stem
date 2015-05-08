@@ -37,4 +37,9 @@ trait WithEncryptedText
             return $encryption->decrypt($data, $this->columnName);
         };
     }
+
+    public function getStorageColumn()
+    {
+        return new String($this->columnName, $this->maximumLength, $this->defaultValue);
+    }
 }

@@ -18,6 +18,11 @@
 
 namespace Rhubarb\Stem\Schema;
 
+use Rhubarb\Stem\Exceptions\SchemaException;
+use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\Column;
+
 /**
  * A container of schema information for a single record type.
  *
@@ -41,7 +46,7 @@ class ModelSchema
      * Don't add columns directly to this collection - use addColumn() instead.
      *
      * @see Schema::addColumn()
-     * @var \Rhubarb\Stem\Schema\Columns\Column[]
+     * @var Columns\Column[]
      */
     protected $columns = array();
 
@@ -78,6 +83,10 @@ class ModelSchema
 
         foreach ($columns as $column) {
             $this->columns[$column->columnName] = $column;
+
+            if ($column instanceof AutoIncrement) {
+                $this->uniqueIdentifierColumnName = $column->columnName;
+            }
         }
     }
 
@@ -98,7 +107,7 @@ class ModelSchema
     /**
      * Returns an array of columns contained in the schema.
      *
-     * @return \Rhubarb\Stem\Schema\Columns\Column[]
+     * @return Columns\Column[]
      */
     public function getColumns()
     {
@@ -119,5 +128,27 @@ class ModelSchema
     public function destroySchema()
     {
 
+    }
+
+    public static function fromGenericSchema(ModelSchema $genericSchema, Repository $repository)
+    {
+        throw new SchemaException("The schema class " . get_called_class() . " does not implement fromGenericSchema().");
+    }
+
+    /**
+     * Converts all columns that can be to their repository specific implementations and returns the new collection
+     *
+     * @param Repository $repository
+     * @return Column[] The repository specific list of columns
+     */
+    protected function getColumnsAsRepositorySpecificTypes(Repository $repository)
+    {
+        $convertedColumns = [];
+
+        foreach ($this->columns as $columnName => $column) {
+            $convertedColumns[$columnName] = $column->getRepositorySpecificColumn($repository);
+        }
+
+        return $convertedColumns;
     }
 }

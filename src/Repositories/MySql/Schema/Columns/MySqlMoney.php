@@ -18,22 +18,29 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . '/Decimal.php';
+use Rhubarb\Stem\Schema\Columns\Column;
+
+require_once __DIR__ . '/MySqlDecimal.php';
 
 /**
  * Class Money
  *
  * Implementation of decimal column type accurate to 2dp
  */
-class Money extends Decimal
+class MySqlMoney extends MySqlDecimal
 {
     /**
      * @param string $columnName
-     * @param int $length Maximum length of the stored number including 2dp
+     * @param int $totalDigits
      * @param int $defaultValue
      */
-    public function __construct($columnName, $length = 8, $defaultValue = 0)
+    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
     {
-        parent::__construct($columnName, $length . ',2', $defaultValue);
+        parent::__construct($columnName, $totalDigits, 2, $defaultValue);
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new self($genericColumn->columnName, $genericColumn->totalDigits, $genericColumn->defaultValue);
     }
 }

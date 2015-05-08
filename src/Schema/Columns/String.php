@@ -25,7 +25,7 @@ require_once __DIR__ . "/Column.php";
  */
 class String extends Column
 {
-    public $stringLength;
+    public $maximumLength;
 
     public function __construct($columnName, $maximumLength, $defaultValue = "")
     {
@@ -35,6 +35,6 @@ class String extends Column
             throw new \InvalidArgumentException("maximumLength must be numeric");
         }
 
-        $this->stringLength = $maximumLength;
+        $this->maximumLength = $maximumLength;
     }
 }

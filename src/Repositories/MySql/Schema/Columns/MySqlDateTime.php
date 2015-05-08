@@ -18,32 +18,48 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-use Rhubarb\Crown\DateTime\RhubarbTime;
+use Rhubarb\Crown\DateTime\RhubarbDateTime;
+use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Columns\DateTime;
 
-class Time extends \Rhubarb\Stem\Schema\Columns\Time
+require_once __DIR__ . "/MySqlDate.php";
+
+class MySqlDateTime extends DateTime
 {
     use MySqlColumn;
 
     public function __construct($columnName)
     {
-        parent::__construct($columnName, "00:00:00");
+        parent::__construct($columnName, "0000-00-00 00:00:00");
+    }
+
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new MySqlDateTime($genericColumn->columnName);
     }
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` time " . $this->getDefaultDefinition();
+        $sql = "`" . $this->columnName . "` datetime " . $this->getDefaultDefinition();
         return $sql;
+    }
+
+    public function getTransformIntoModelData()
+    {
+        return function ($data) {
+            return new RhubarbDateTime($data);
+        };
     }
 
     public function getTransformIntoRepository()
     {
         return function ($data) {
-            $data = new RhubarbTime($data);
+            $data = new RhubarbDateTime($data);
 
-            if ($data->isValidDateTime()) {
-                $date = $data->format("H:i:s");
+            if ($data->IsValidDateTime()) {
+                $date = $data->format("Y-m-d H:i:s");
             } else {
-                $date = "00:00:00";
+                $date = "0000-00-00 00:00:00";
             }
 
             return $date;
@@ -53,9 +69,9 @@ class Time extends \Rhubarb\Stem\Schema\Columns\Time
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbTime($data);
+            $date = new RhubarbDateTime($data);
 
             return $date;
         };
     }
-} 
+}
