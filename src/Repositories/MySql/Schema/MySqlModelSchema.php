@@ -53,13 +53,15 @@ class MySqlModelSchema extends ModelSchema
 
     /**
      * Check to see if the back end schema is up to date - if not update it.
+     *
+     * @param Repository $inRepository The repository in which to check the schema
      */
-    public function checkSchema()
+    public function checkSchema( Repository $inRepository )
     {
         try {
-            $repos = Repository::getDefaultRepositoryClassName();
+            $repos = get_class( $inRepository );
 
-            if (ltrim($repos, '\\') != 'Rhubarb\Stem\Repositories\MySql\MySql') {
+            if (stripos($repos, "MySql")===false) {
                 // If our repos has been switched to something that isn't MySql (e.g. Offline if unit testing)
                 // we need to exit.
 

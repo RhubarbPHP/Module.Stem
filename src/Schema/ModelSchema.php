@@ -116,8 +116,10 @@ class ModelSchema
 
     /**
      * Compare's the schema with the back end data store and makes any necessary modifications.
+     *
+     * @param Repository $inRepository The repository in which to check the schema
      */
-    public function checkSchema()
+    public function checkSchema( Repository $inRepository )
     {
 
     }

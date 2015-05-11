@@ -101,7 +101,7 @@ abstract class Repository
         $reposName = basename(str_replace("\\", "/", get_class($this)));
 
         // Get the provider specific implementation of the column.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Schema\\" . $reposName . basename(str_replace("\\",
+        $className = "\\".str_replace("/", "\\",dirname(str_replace("\\", "/", get_class($this)))). "\\Schema\\" . $reposName . basename(str_replace("\\",
                 "/", get_class($genericSchema)));
 
         $superType = $genericSchema;

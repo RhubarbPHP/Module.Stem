@@ -652,8 +652,9 @@ abstract class SolutionSchema
         foreach ($this->models as $class) {
             $object = new $class();
 
-            $schema = $object->getSchema();
-            $schema->checkSchema();
+            $repository = $object->getRepository();
+            $schema = $repository->getSchema();
+            $schema->checkSchema($repository);
 
             $class::checkRecords($oldVersion, $this->version);
         }
