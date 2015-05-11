@@ -93,14 +93,13 @@ class MySqlSchema extends ModelSchema
         call_user_func_array("parent::addColumn", $columns);
 
         foreach ($columns as $column) {
-            $index = $column->getIndex();
 
-            if ($index !== false) {
-                $this->addIndex($index);
-            }
+            if (method_exists($column, "getIndex")) {
+                $index = $column->getIndex();
 
-            if ($column instanceof AutoIncrement) {
-                $this->uniqueIdentifierColumnName = $column->columnName;
+                if ($index !== false) {
+                    $this->addIndex($index);
+                }
             }
         }
     }
