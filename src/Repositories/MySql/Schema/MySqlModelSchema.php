@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema;
 require_once __DIR__ . "/../../../Schema/ModelSchema.php";
 
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\ModelSchema;
@@ -88,10 +89,15 @@ class MySqlModelSchema extends ModelSchema
     public function addColumn(Column $column)
     {
         $columns = func_get_args();
-
-        call_user_func_array("parent::addColumn", $columns);
+        $specificColumns = [];
 
         foreach ($columns as $column) {
+            $specificColumns[] = $column->getRepositorySpecificColumn("MySql");
+        }
+
+        call_user_func_array("parent::addColumn", $specificColumns);
+
+        foreach ($specificColumns as $column) {
 
             if (method_exists($column, "getIndex")) {
                 $index = $column->getIndex();
@@ -113,7 +119,11 @@ class MySqlModelSchema extends ModelSchema
         $definitions = array();
 
         foreach ($this->columns as $columnName => $column) {
-            $definitions[] = $column->getDefinition();
+            // The column might be using a more generic type for it's storage.
+            $storageColumn = $column->getStorageColumn();
+            // And if so that column will be a generic column type - we need to upgrade it.
+            $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
+            $definitions[] = $storageColumn->getDefinition();
         }
 
         foreach ($this->indexes as $indexName => $index) {
@@ -135,9 +145,9 @@ class MySqlModelSchema extends ModelSchema
 
         $columns = $genericSchema->columns;
 
-        $specificColumns = $genericSchema->getColumnsAsRepositorySpecificTypes($repository);
-
-        call_user_func_array([$schema, "addColumn"], $specificColumns);
+        // By simply adding the columns to the specific repository versioned schema, the columns
+        // should be 'upgraded' automatically.
+        call_user_func_array([$schema, "addColumn"], $columns);
 
         $schema->uniqueIdentifierColumnName = $genericSchema->uniqueIdentifierColumnName;
 

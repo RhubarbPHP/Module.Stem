@@ -134,21 +134,4 @@ class ModelSchema
     {
         throw new SchemaException("The schema class " . get_called_class() . " does not implement fromGenericSchema().");
     }
-
-    /**
-     * Converts all columns that can be to their repository specific implementations and returns the new collection
-     *
-     * @param Repository $repository
-     * @return Column[] The repository specific list of columns
-     */
-    protected function getColumnsAsRepositorySpecificTypes(Repository $repository)
-    {
-        $convertedColumns = [];
-
-        foreach ($this->columns as $columnName => $column) {
-            $convertedColumns[$columnName] = $column->getRepositorySpecificColumn($repository);
-        }
-
-        return $convertedColumns;
-    }
 }

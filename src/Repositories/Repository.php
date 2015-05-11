@@ -85,10 +85,13 @@ abstract class Repository
         $columns = $this->schema->getColumns();
 
         foreach ($columns as $column) {
+
+            $storageColumn = $column->getStorageColumn();
+
             $this->columnTransforms[$column->columnName] =
                 [
-                    $column->getTransformFromRepository(),
-                    $column->getTransformIntoRepository()
+                    $storageColumn->getTransformFromRepository(),
+                    $storageColumn->getTransformIntoRepository()
                 ];
         }
     }

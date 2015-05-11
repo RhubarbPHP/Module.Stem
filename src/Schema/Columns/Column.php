@@ -78,12 +78,12 @@ class Column
      *
      * If no repository specific version is available $this is passed back.
      *
-     * @param Repository $repository
+     * @param string $repositoryClassName
      * @return Column
      */
-    public final function getRepositorySpecificColumn( Repository $repository )
+    public final function getRepositorySpecificColumn( $repositoryClassName )
     {
-        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+        $reposName = basename(str_replace("\\", "/", $repositoryClassName));
 
         // Get the provider specific implementation of the column.
         $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Schema\\Columns\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
