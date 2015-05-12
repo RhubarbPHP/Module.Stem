@@ -43,6 +43,15 @@ abstract class ColumnFilter extends Filter
         return $this->columnName;
     }
 
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "columnName" ] = $this->columnName;
+
+        return $settings;
+    }
+
+
     /**
      * Converts the comparison value used in the constructor to one which can be compared against that returned
      * by the relevant model.

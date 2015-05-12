@@ -18,28 +18,31 @@
 
 namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__ . '/LongString.php';
+use Rhubarb\Stem\Filters\Filter;
 
-class Json extends LongString
+/**
+ * A column that supports converting filter objects into JSON and back.
+ */
+class FilterSettings extends Json
 {
-	public function getTransformFromRepository()
-	{
-		return function( $data )
-		{
-			return json_decode( $data );
-		};
-	}
+    public function __construct($columnName)
+    {
+        parent::__construct($columnName);
+    }
 
-	public function getTransformIntoRepository()
-	{
-		return function( $data )
-		{
-			return json_encode( $data );
-		};
-	}
+    public function getTransformIntoRepository()
+    {
+        return function ($value) {
+            return json_encode($value->getSettingsArray());
+        };
+    }
 
-	public function getStorageColumn()
-	{
-		return new LongString($this->columnName);
-	}
+    public function getTransformFromRepository()
+    {
+        return function ($value) {
+            $value = json_decode($value, true);
+
+            return Filter::speciateFromSettingsArray($value);
+        };
+    }
 }

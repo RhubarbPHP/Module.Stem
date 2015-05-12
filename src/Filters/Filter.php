@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem\Filters;
 
+use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
@@ -171,5 +172,31 @@ abstract class Filter
     public function wasFilteredByRepository()
     {
         return $this->filteredByRepository;
+    }
+
+    /**
+     * Returns an array of the settings needed to represent this filter.
+     */
+    public function getSettingsArray()
+    {
+        return [ "class" => get_class( $this ) ];
+    }
+
+    public static function fromSettingsArray( $settings )
+    {
+        throw new ImplementationException( "This filter doesn't support creation from a settings array" );
+    }
+
+    /**
+     * Create's a filter object of the correct type from the settings array.
+     *
+     * @param $settings
+     */
+    public static final function speciateFromSettingsArray( $settings )
+    {
+        $type = $settings[ "class" ];
+        $filter = $type::fromSettingsArray( $settings );
+
+        return $filter;
     }
 }

@@ -66,4 +66,16 @@ class DayOfWeek extends ColumnFilter
 
         return $idsToFilter;
     }
+
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "validDays" ] = $this->validDays;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["validDays"] );
+    }
 }

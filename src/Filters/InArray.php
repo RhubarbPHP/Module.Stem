@@ -36,6 +36,18 @@ class InArray extends ColumnFilter
         $this->candidates = array_values($candidates);
     }
 
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "candidates" ] = $this->candidates;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["candidates"] );
+    }
+
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      * @param \Rhubarb\Stem\Collections\Collection $list The data list to filter.

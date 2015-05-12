@@ -91,4 +91,16 @@ class CollectionPropertyMatches extends Equals
 
         return $ids;
     }
+
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "collectionProperty" ] = $this->collectionProperty;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings["collectionProperty"], $settings[ "columnName" ], $settings["equalTo"] );
+    }
 }

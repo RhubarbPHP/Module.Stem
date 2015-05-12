@@ -1,5 +1,7 @@
 develop
 
+* Feature: New FilterSettings column type
+* Feature: Filters can now express their settings in an array and be recreated from that array
 * Change: MySql columns are now prefixed with MySql
 * Change: Columns are now automatically 'upgraded' to their repository specific type if supported
 * Change: Models should just use ModelSchema which is now upgraded to the repository specific instance.

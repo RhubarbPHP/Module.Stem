@@ -49,6 +49,20 @@ class LessThan extends ColumnFilter
         $this->inclusive = $inclusive;
     }
 
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "lessThan" ] = $this->lessThan;
+        $settings[ "inclusive" ] = $this->inclusive;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["lessThan"], $settings["inclusive"] );
+    }
+
+
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
         $ids = array();

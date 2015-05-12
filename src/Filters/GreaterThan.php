@@ -49,6 +49,18 @@ class GreaterThan extends ColumnFilter
         $this->inclusive = $inclusive;
     }
 
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "greaterThan" ] = $this->greaterThan;
+        $settings[ "inclusive" ] = $this->inclusive;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["greaterThan"], $settings["inclusive"] );
+    }
 
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
