@@ -349,6 +349,21 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
+     * Returns true if the collection contains the model with the requested unique identifier
+     *
+     * @param $uniqueIdentifier
+     */
+    public function containsUniqueIdentifier($uniqueIdentifier)
+    {
+        try {
+            $this->findModelByUniqueIdentifier($uniqueIdentifier);
+            return true;
+        } catch ( RecordNotFoundException $er ){}
+
+        return false;
+    }
+
+    /**
      * filter the existing list using the supplied DataFilter.
      *
      * @param Filter $filter
