@@ -114,6 +114,20 @@ class Column
         return false;
     }
 
+    /**
+     * Optionally returns a Closure that will execute after a model using the column has been saved to the repository.
+     *
+     * We use closures here for speed - we want to cache these methods into an array on the Repository so that
+     * we don't have to call these methods for every set and get on the model - only where the column has
+     * defined these values.
+     *
+     * @return null
+     */
+    public function getOnSavedCallback()
+    {
+        return null;
+    }
+
 
     /**
      * Optionally returns a Closure that can transform model data as it is set by the user of the model.

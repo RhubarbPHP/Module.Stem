@@ -148,6 +148,13 @@ getTranformFromRepository()
     internally stored in the model. Receives a single argument containing the repository value
     and should return the transformed value.
 
+getOnSavedCallback()
+:   If required this should return a call back function that executes after a model using the column has been
+    saved to the repository. This can be used to represent data stored outside the repository itself or for
+    manipulations of the value which can only occur once the model has a unique identifier. An example use case
+    would be for a column type that populates a many to many table from an array, e.g. a Tags column. The reverse
+    process can be accomplished using getTransformFromRepository(), no counterpart call back is needed.
+
 getStorageColumn()
 :   Some generic column types perform useful data transformations making our life as a developer a lot easier,
     for example the Json column. Ultimately the Json column stores it's data in a simple string column type.

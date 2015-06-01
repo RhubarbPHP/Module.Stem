@@ -4,7 +4,9 @@ namespace Rhubarb\Stem\Tests\Schema\Columns;
 
 use Rhubarb\Crown\Encryption\EncryptionProvider;
 use Rhubarb\Crown\Encryption\UnitTesting\UnitTestingAes256EncryptionProvider;
+use Rhubarb\Crown\Tests\Encryption\UnitTestingAes256EncryptionProvider;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Schema\Columns\EncryptedString;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 
