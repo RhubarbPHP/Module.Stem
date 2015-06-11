@@ -90,13 +90,14 @@ abstract class Aggregate
      */
     public final function aggregateWithRepository(Repository $repository, &$relationshipsToAutoHydrate)
     {
-        // Get the repository specific implementation of the filter.
-        $className = "\Rhubarb\Stem\Repositories\\" . basename(str_replace("\\", "/",
-                get_class($repository))) . "\\Aggregates\\" . basename(str_replace("\\", "/", get_class($this)));
+        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+
+        // Get the repository specific implementation of the aggregate.
+        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Aggregates\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
             return call_user_func_array($className . "::calculateByRepository",
-                array($repository, $this, &$relationshipsToAutoHydrate));
+                [$repository, $this, &$relationshipsToAutoHydrate]);
         }
 
         return "";
