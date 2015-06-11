@@ -3,18 +3,11 @@
 namespace Rhubarb\Stem\Tests\Fixtures;
 
 use Rhubarb\Stem\Models\Model;
-<<<<<<< HEAD
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Date;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\DateTime;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Int;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\Varchar;
-=======
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDate;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDateTime;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlInteger;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlString;
->>>>>>> 47cd0ed3cd3eb59d8516a8eee85230348e38364b
 use Rhubarb\Stem\Schema\Columns\Boolean;
+use Rhubarb\Stem\Schema\Columns\Date;
+use Rhubarb\Stem\Schema\Columns\DateTime;
+use Rhubarb\Stem\Schema\Columns\Integer;
+use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\Columns\Time;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -37,23 +30,17 @@ class Example extends Model
 	protected function createSchema()
 	{
 		$schema = new ModelSchema( "tblContact" );
-<<<<<<< HEAD
-		$schema->addColumn( new Int( "ContactID", 0 ) );
-		$schema->addColumn( new Int( "CompanyID", 0 ) );
-		$schema->addColumn( new Date( "DateOfBirth" ) );
-		$schema->addColumn( new DateTime( "CreatedDate" ) );
-		$schema->addColumn( new Varchar( "Forename", 100 ) );
-		$schema->addColumn( new Varchar( "Surname", 100 ) );
-=======
-		$schema->addColumn( new MySqlInteger( "ContactID", 0 ) );
-		$schema->addColumn( new MySqlInteger( "CompanyID", 0 ) );
-		$schema->addColumn( new MySqlDate( "DateOfBirth" ) );
-		$schema->addColumn( new MySqlDateTime( "CreatedDate" ) );
-		$schema->addColumn( new MySqlString( "Forename", 100 ) );
-		$schema->addColumn( new MySqlString( "Surname", 100 ) );
->>>>>>> 47cd0ed3cd3eb59d8516a8eee85230348e38364b
-		$schema->addColumn( new Boolean( "KeyContact" ) );
-		$schema->addColumn( new Time( "CoffeeTime" ) );
+
+		$schema->addColumn(
+            new Integer( "ContactID", 0 ),
+            new Integer( "CompanyID", 0 ),
+            new Date( "DateOfBirth" ),
+            new DateTime( "CreatedDate" ),
+            new String( "Forename", 100 ),
+            new String( "Surname", 100 ),
+            new Boolean( "KeyContact" ),
+            new Time( "CoffeeTime" )
+        );
 
 		$schema->uniqueIdentifierColumnName = "ContactID";
 		$schema->labelColumnName = "Forename";
