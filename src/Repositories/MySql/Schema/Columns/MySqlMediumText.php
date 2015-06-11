@@ -20,7 +20,6 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 require_once __DIR__ . "/../../../../Schema/Columns/String.php";
 
-use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\String;
 
 class MySqlMediumText extends String
