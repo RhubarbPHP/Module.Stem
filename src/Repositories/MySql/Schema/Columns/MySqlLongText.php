@@ -20,7 +20,9 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 use Rhubarb\Stem\Schema\Columns\Column;
 
-class MySqlLongTextMySql extends MySqlMediumText
+require_once __DIR__ . "/MySqlMediumText.php";
+
+class MySqlLongText extends MySqlMediumText
 {
 	use MySqlColumn;
 
