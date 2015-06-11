@@ -4,11 +4,11 @@ namespace Rhubarb\Stem\Tests\Repositories\MySql;
 
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Tests\Fixtures\Company;
+use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 use Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema;
-use Rhubarb\Crown\Tests\RhubarbTestCase;
 
 class MySqlTestCase extends ModelUnitTestCase
 {
@@ -16,7 +16,7 @@ class MySqlTestCase extends ModelUnitTestCase
 	{
 		parent::setUpBeforeClass();
 
-		\Rhubarb\Stem\Repositories\Repository::setDefaultRepositoryClassName( "\Rhubarb\Stem\Repositories\MySql\MySql" );
+		Repository::setDefaultRepositoryClassName( MySql::class );
 
 		self::SetDefaultConnectionSettings();
 
@@ -32,7 +32,7 @@ class MySqlTestCase extends ModelUnitTestCase
 	protected static function SetDefaultConnectionSettings()
 	{
 		// Setup the data settings to make sure we get a connection to the unit testing database.
-		$settings = new \Rhubarb\Stem\StemSettings();
+		$settings = new StemSettings();
 
 		$settings->Host = "127.0.0.1";
 		$settings->Port = 3306;
