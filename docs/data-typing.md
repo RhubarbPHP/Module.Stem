@@ -10,7 +10,7 @@ data is required. This allows for two things:
 
 The best example in the Core library are dates. If a model contains a date column Core will ensure
 that regardless of the source and type of the assigned value, that it is converted to a
-`CoreDateTime` class. This means once the value is retrieved it is always a `CoreDateTime` object
+`RhubarbDateTime` class. This means once the value is retrieved it is always a `RhubarbDateTime` object
 avoiding the need to ever manually create a date object to represent it. Consider these examples:
 
 ``` php
@@ -72,7 +72,7 @@ class Date extends Column
 	{
 		return function( $data )
 		{
-			return new CoreDateTime( $data );
+			return new RhubarbDateTime( $data );
 		};
 	}
 
@@ -80,7 +80,7 @@ class Date extends Column
 }
 ```
 
-Here we just ensure that any assignment sets the value to be a `CoreDateTime` object.
+Here we just ensure that any assignment sets the value to be a `RhubarbDateTime` object.
 
 Here's the `MySql\Date` Variant:
 
@@ -103,7 +103,7 @@ class Date extends \Gcd\Core\Modelling\Schema\Columns\Date
 	{
 		return function( $data )
 		{
-			$date = new CoreDateTime( $data );
+			$date = new RhubarbDateTime( $data );
 
 			return $date;
 		};

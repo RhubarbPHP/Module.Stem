@@ -12,14 +12,14 @@ class CoalBucket extends ModelObject
 {
 	public function CreateSchema()
 	{
-		$schema = new MySqlSchema( "tblCoalBucket" );
+		$schema = new MySqlModelSchema( "tblCoalBucket" );
 
 		$schema->labelColumnName = "BucketName";
 
 		$schema->AddColumns(
 			new AutoIncrement( "CoalBucketID" ),
-			new Varchar( "BucketName", 200 ),
-			new Int( "Capacity" )
+			new String( "BucketName", 200 ),
+			new Integer( "Capacity" )
 		);
 
 		return $schema;
@@ -89,7 +89,7 @@ Int, BigInt, Decimal
 
 Date, DateTime, Time
 :   Date, DateTime and Time types with data transforms to understand and convert MySql formatted expressions
-into CoreDateTime etc. classes
+into RhubarbDateTime etc. classes
 
 Varchar, MediumText, Text
 :   The most popular string column types
