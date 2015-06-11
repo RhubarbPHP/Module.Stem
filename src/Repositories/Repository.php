@@ -291,7 +291,6 @@ abstract class Repository
      *
      * @see Repository::setDefaultRepositoryClassName()
      * @param \Rhubarb\Stem\Models\Model $forModel
-     * @internal param \Rhubarb\Stem\Schema\ModelSchema $forSchema
      * @return mixed
      */
     public static function getNewDefaultRepository(Model $forModel)
