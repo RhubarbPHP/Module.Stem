@@ -122,10 +122,13 @@ class MySqlModelSchema extends ModelSchema
 
         foreach ($this->columns as $columnName => $column) {
             // The column might be using a more generic type for it's storage.
-            $storageColumn = $column->getStorageColumn();
-            // And if so that column will be a generic column type - we need to upgrade it.
-            $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
-            $definitions[] = $storageColumn->getDefinition();
+            $storageColumns = $column->createStorageColumns();
+
+            foreach( $storageColumns as $storageColumn ) {
+                // And if so that column will be a generic column type - we need to upgrade it.
+                $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
+                $definitions[] = $storageColumn->getDefinition();
+            }
         }
 
         foreach ($this->indexes as $indexName => $index) {

@@ -140,16 +140,19 @@ getTransformFromModelData()
 
 getTransformIntoRepository()
 :   If required this should return a call back function to convert data from the internal stored model into a value
-    suitable for transmitting to the repository. Receives a single argument containing the internally held value
-    and should return the transformed value.
+    suitable for transmitting to the repository. Receives a single argument containing all the internally held model
+    data and should return either a single value representing the transformed value for this column **OR** an array of
+    transformed values if using multiple storage columns.
 
 getTranformFromRepository()
 :   If required this should return a call back function to convert data from the repository into the format
-    internally stored in the model. Receives a single argument containing the repository value
-    and should return the transformed value.
+    internally stored in the model. Receives a single argument containing the raw repository data for the model
+    and should return a single transformed value for the column.
 
-getStorageColumn()
-:   Some generic column types perform useful data transformations making our life as a developer a lot easier,
+getStorageColumns()
+:   Returns an array of lower level columns used to store the columns data. This allows two neat tricks.
+
+    1. Some generic column types perform useful data transformations making our life as a developer a lot easier,
     for example the Json column. Ultimately the Json column stores it's data in a simple string column type.
     To avoid having to create a specific column for Json every repository type, instead the generic column type
     can elect a different column type to handle the storage of it's data. Json returns an instance of the
@@ -158,8 +161,44 @@ getStorageColumn()
     Json class:
 
     ``` php
-    public function getStorageColumn()
+    public function getStorageColumns()
     {
-        return new LongString($this->columnName);
+        return [ new LongString($this->columnName) ];
     }
     ```
+    2. A column can be a composite column, where the column itself doesn't exist in the database but instead
+    stores it's data in a number of other fields. For example imagine an Address column. It might store it's
+    values in AddressLine1, City, Region and Country fields instead of a single Address field. In cases like this
+    you can return multiple storage columns:
+
+    ``` php
+    public function getStorageColumns()
+    {
+        return
+        [
+            new String("AddressLine1",50),
+            new String("City",50),
+            new String("Region",50),
+            new String("Country",50)
+        ];
+    }
+    ```
+
+    Note that this pattern is usually accompanied by getTransformIntoRepository and getTransformFromRepository
+    to handle the explosion and implosion of the component parts into one data structure. Also note that
+    while this works, it's more usual to see the name of the column included in the naming of the storage elements
+    e.g.
+
+    ``` php
+    public function getStorageColumns()
+    {
+        return
+        [
+            new String($this->columnName."Line1",50),
+            new String($this->columnName."City",50),
+            new String($this->columnName."Region",50),
+            new String($this->columnName."Country",50)
+        ];
+    }
+    ```
+

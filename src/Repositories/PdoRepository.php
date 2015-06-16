@@ -193,25 +193,6 @@ abstract class PdoRepository extends Repository
     }
 
     /**
-     * Checks if raw repository data needs transformed before passing to the model.
-     *
-     * @param $modelData
-     * @return mixed
-     */
-    protected function transformDataFromRepository($modelData)
-    {
-        foreach ($this->columnTransforms as $columnName => $transforms) {
-            if ($transforms[0] !== null) {
-                $closure = $transforms[0];
-
-                $modelData[$columnName] = $closure($modelData[$columnName]);
-            }
-        }
-
-        return $modelData;
-    }
-
-    /**
      * Executes the statement and returns the first column of the first row.
      *
      * @param $statement

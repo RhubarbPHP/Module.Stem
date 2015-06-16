@@ -34,12 +34,12 @@ class Json extends LongString
 	{
 		return function( $data )
 		{
-			return json_encode( $data );
+			return json_encode( $data[ $this->columnName ] );
 		};
 	}
 
-	public function getStorageColumn()
+	public function createStorageColumns()
 	{
-		return new LongString($this->columnName);
+		return [ new LongString($this->columnName) ];
 	}
 }

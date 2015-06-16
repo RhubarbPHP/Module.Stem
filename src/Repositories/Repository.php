@@ -86,14 +86,70 @@ abstract class Repository
 
         foreach ($columns as $column) {
 
-            $storageColumn = $column->getStorageColumn();
-
             $this->columnTransforms[$column->columnName] =
                 [
-                    $storageColumn->getTransformFromRepository(),
-                    $storageColumn->getTransformIntoRepository()
+                    $column->getTransformFromRepository(),
+                    $column->getTransformIntoRepository()
                 ];
+
+            $storageColumns = $column->createStorageColumns();
+
+            foreach( $storageColumns as $storageColumn ) {
+                $this->columnTransforms[$storageColumn->columnName] =
+                    [
+                        $storageColumn->getTransformFromRepository(),
+                        $storageColumn->getTransformIntoRepository()
+                    ];
+            }
         }
+    }
+
+    /**
+     * Checks if raw repository data needs transformed before passing to the model.
+     *
+     * @param $modelData
+     * @return mixed
+     */
+    protected function transformDataFromRepository($modelData)
+    {
+        foreach ($this->columnTransforms as $columnName => $transforms) {
+            if ($transforms[0] !== null) {
+                $closure = $transforms[0];
+
+                $modelData[$columnName] = $closure($modelData);
+            }
+        }
+
+        return $modelData;
+    }
+
+    /**
+     * Checks if model data needs transformed into raw model data before passing it for storage.
+     *
+     * @param $modelData array  An array of model data to transform.
+     * @return mixed            The transformed data
+     */
+    protected function transformDataForRepository($modelData)
+    {
+        foreach ($this->columnTransforms as $columnName => $transforms) {
+            if ($transforms[1] !== null) {
+                $closure = $transforms[1];
+
+                $transformedData = $closure($modelData);
+
+                if ( is_array($transformedData ) ) {
+                    // If the original value is to be retained, the transform function should
+                    // explicitly return it - in other cases we need to unset it here.
+                    unset($modelData[$columnName]);
+
+                    $modelData = array_merge( $modelData, $transformedData );
+                } else {
+                    $modelData[$columnName] = $transformedData;
+                }
+            }
+        }
+
+        return $modelData;
     }
 
     private function getRepositorySpecificSchema(ModelSchema $genericSchema)

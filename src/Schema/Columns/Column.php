@@ -58,7 +58,7 @@ class Column
     }
 
     /**
-     * Returns a column object capable of supplying the schema details for this column.
+     * Returns an array of column objects capable of supplying the schema details for this column.
      *
      * Normally a column can specify it's own schema, however sometimes a column extends another column type
      * simply to add some transforms, for example Json extends LongString and adds json encoding and decoding.
@@ -67,10 +67,31 @@ class Column
      *
      * By overriding this function you can delegate the storage of the raw data to another simpler column
      * type that has already had the repository specific instances created.
+     *
+     * @return Column[]
      */
-    public function getStorageColumn()
+    public function createStorageColumns()
     {
-        return $this;
+        return [ $this ];
+    }
+
+    /**
+     * Returns an array of named columns needed for storage.
+     *
+     * @see createStorageColumns()
+     * @return Column[]
+     */
+    public function getStorageColumns()
+    {
+        $columns = $this->createStorageColumns();
+
+        $namedColumns = [];
+
+        foreach( $columns as $column ){
+            $namedColumns[ $column->columnName ] = $column;
+        }
+
+        return $namedColumns;
     }
 
     /**

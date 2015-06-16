@@ -94,19 +94,37 @@ class MySql extends PdoRepository
         $sql = "UPDATE `{$schema->schemaName}`";
 
         foreach ($changes as $columnName => $value) {
+
             if ($columnName == $schema->uniqueIdentifierColumnName) {
                 continue;
             }
 
-            if (isset($schemaColumns[$columnName])) {
-                $columns[] = "`" . $columnName . "` = :" . $columnName;
+            $changeData = $changes;
 
-                if (isset($this->columnTransforms[$columnName][1]) && ($this->columnTransforms[$columnName][1] !== null)) {
-                    $closure = $this->columnTransforms[$columnName][1];
-                    $value = $closure($value);
+            if (isset($schemaColumns[$columnName])) {
+                $storageColumns = $schemaColumns[$columnName]->getStorageColumns();
+
+                $transforms = $this->columnTransforms[$columnName];
+
+                if ($transforms[1] !== null) {
+                    $closure = $transforms[1];
+
+                    $transformedData = $closure($changes);
+
+                    if ( is_array($transformedData ) ) {
+                        $changeData = $transformedData;
+                    } else {
+                        $changeData[$columnName] = $transformedData;
+                    }
                 }
 
-                $params[$columnName] = $value;
+                foreach( $storageColumns as $storageColumnName => $storageColumn ) {
+                    $value = ( isset($changeData[ $storageColumnName]) ) ? $changeData[ $storageColumnName] : null;
+
+                    $columns[] = "`" . $storageColumnName . "` = :" . $storageColumnName;
+
+                    $params[$storageColumnName] = $value;
+                }
             }
         }
 
@@ -140,20 +158,36 @@ class MySql extends PdoRepository
         $schemaColumns = $schema->getColumns();
 
         foreach ($changes as $columnName => $value) {
+            $changeData = $changes;
+
             if (isset($schemaColumns[$columnName])) {
-                $columns[] = "`" . $columnName . "` = :" . $columnName;
+                $storageColumns = $schemaColumns[$columnName]->getStorageColumns();
 
-                if (isset($this->columnTransforms[$columnName][1]) && ($this->columnTransforms[$columnName][1] !== null)) {
-                    $closure = $this->columnTransforms[$columnName][1];
-                    $value = $closure($value);
+                $transforms = $this->columnTransforms[$columnName];
+
+                if ($transforms[1] !== null) {
+                    $closure = $transforms[1];
+
+                    $transformedData = $closure($changes);
+
+                    if ( is_array($transformedData ) ) {
+                        $changeData = $transformedData;
+                    } else {
+                        $changeData[$columnName] = $transformedData;
+                    }
                 }
 
-                if ($value === null) {
-                    $column = $schemaColumns[$columnName];
-                    $value = $column->defaultValue;
-                }
+                foreach( $storageColumns as $storageColumnName => $storageColumn ) {
+                    $value = ( isset($changeData[ $storageColumnName]) ) ? $changeData[ $storageColumnName] : null;
 
-                $params[$columnName] = $value;
+                    $columns[] = "`" . $storageColumnName . "` = :" . $storageColumnName;
+
+                    if ($value === null) {
+                        $value = $storageColumn->defaultValue;
+                    }
+
+                    $params[$storageColumnName] = $value;
+                }
             }
         }
 
