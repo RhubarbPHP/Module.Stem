@@ -91,7 +91,8 @@ abstract class Repository
             $this->columnTransforms[$column->columnName] =
                 [
                     $storageColumn->getTransformFromRepository(),
-                    $storageColumn->getTransformIntoRepository()
+                    $storageColumn->getTransformIntoRepository(),
+                    $storageColumn->getOnSavedCallback()
                 ];
         }
     }
@@ -428,6 +429,13 @@ abstract class Repository
         }
 
         $this->cacheObjectData($object);
+
+        foreach( $this->columnTransforms as $columnName => $transforms ){
+            if ( $transforms[2] !== null ){
+                $callback = $transforms[2];
+                $callback( $object );
+            }
+        }
     }
 
     public final function deleteObject(Model $object)
