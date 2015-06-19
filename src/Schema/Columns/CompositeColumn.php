@@ -33,6 +33,8 @@ abstract class CompositeColumn extends Column
         parent::__construct($columnName, $this->getNewContainerObject() );
     }
 
+
+
     /**
      * Returns an array of strings; the names of the composite columns being used.
      *

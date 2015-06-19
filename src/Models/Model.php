@@ -43,10 +43,6 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 abstract class Model extends ModelState
 {
-    use EventEmitter {
-        RaiseEvent as TraitRaiseEvent;
-    }
-
     private $eventsToRaiseAfterSave = [];
 
     public final function __construct($uniqueIdentifier = null)
@@ -115,7 +111,13 @@ abstract class Model extends ModelState
             }
 
             if ($column->defaultValue !== null) {
-                $this[$column->columnName] = $column->defaultValue;
+                $defaultValue = $column->defaultValue;
+
+                if ( is_object($defaultValue) ){
+                    $defaultValue = clone( $defaultValue );
+                }
+
+                $this[$column->columnName] = $defaultValue;
             }
         }
     }
