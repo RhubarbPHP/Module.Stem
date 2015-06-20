@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Repositories\MySql;
 require_once __DIR__ . "/../PdoRepository.php";
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\StemSettings;
@@ -200,6 +201,50 @@ class MySql extends PdoRepository
         $id = self::executeInsertStatement($sql, $params);
 
         $object[$object->getUniqueIdentifierColumnName()] = $id;
+    }
+
+    public function batchCommitUpdatesFromCollection(
+        Collection $collection,
+        $propertyPairs
+    )
+    {
+        $filter = $collection->getFilter();
+
+        $namedParams = array();
+        $propertiesToAutoHydrate = [];
+        $whereClause = "";
+
+        $filteredExclusivelyByRepository = true;
+
+        if ($filter !== null) {
+            $filterSql = $filter->filterWithRepository($this, $namedParams, $propertiesToAutoHydrate);
+
+            if ($filterSql != "") {
+                $whereClause .= " WHERE " . $filterSql;
+            }
+
+            $filteredExclusivelyByRepository = $filter->wasFilteredByRepository();
+        }
+
+        if ( !$filteredExclusivelyByRepository || sizeof( $propertiesToAutoHydrate ) ){
+            throw new BatchUpdateNotPossibleException();
+        }
+
+        $schema = $this->schema;
+        $table = $schema->schemaName;
+        $sets = [];
+
+        foreach( $propertyPairs as $key => $value ){
+            $paramName = "Update".$key;
+
+            $namedParams[ $paramName ] = $value;
+            $sets[] = "`".$key."` = :".$paramName;
+
+        }
+
+        $sql = "UPDATE `{$table}` SET ".implode( ",", $sets ).$whereClause;
+
+        MySql::executeStatement( $sql, $namedParams );
     }
 
     /**

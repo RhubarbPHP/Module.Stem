@@ -23,11 +23,13 @@ require_once __DIR__ . "/../Schema/SolutionSchema.php";
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Exceptions\AggregateNotSupportedException;
+use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -378,6 +380,38 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $this->invalidateList();
+
+        return $this;
+    }
+
+    /**
+     * Applies the provided set of property values to all of the models in the collection.
+     *
+     * Where repository specific optimisation is available this will be leveraged to run the batch
+     * update at the data source rather than iterating over the items.
+     *
+     * @param Array $propertyPairs An associative array of key value pairs to update
+     * @param bool $fallBackToIteration If the repository can't perform the action directly, perform the update by
+     *                                  iterating over all the models in the collection.
+     * @return Collection The original collection returned for chaining
+     * @throws BatchUpdateNotPossibleException Thrown if the repository for the collection can't perform the update,
+     *                                         and $fallBackToIteration is false.
+     */
+    public function batchUpdate( $propertyPairs, $fallBackToIteration = false )
+    {
+        try {
+            $this->getRepository()->batchCommitUpdatesFromCollection( $this, $propertyPairs );
+        }
+        catch( BatchUpdateNotPossibleException $er ){
+            if ( $fallBackToIteration ){
+                foreach( $this as $item ){
+                    $item->mergeRawData( $propertyPairs );
+                    $item->save();
+                }
+            } else {
+                throw $er;
+            }
+        }
 
         return $this;
     }

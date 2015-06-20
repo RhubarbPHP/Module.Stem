@@ -178,7 +178,7 @@ relationship for a large number of models. A classic example is where you are di
 of data with some of the columns coming from a relationship:
 
 ``` php
-$contacts = new Collection( "Contacts" );
+$contacts = new Collection( "Contact" );
 $table = new Table( $contacts );
 $table->Columns =
 [
@@ -195,7 +195,7 @@ In this example we might be printing 100 contacts and for each contact we'll hav
 round trip to the database to get the related company. However consider the following amendment:
 
 ``` php
-$contacts = new Collection( "Contacts" );
+$contacts = new Collection( "Contact" );
 $contacts->autoHydrate( "Company" );
 
 $table = new Table( $contacts );
@@ -228,3 +228,44 @@ matching query on the backend data store it offers a number of advantages:
 
 If large volumes of rows need removed it would still be best to use alternative methods such as using the
 MySql repository Execute method directly to perform a `DELETE` statement.
+
+## Batch updates
+
+Sometimes you need to update all models in a collection with the same changes. To do this you can simply iterate:
+
+``` php
+// Deactivate all contacts.
+$contacts = Contact::find();
+
+foreach( $contacts as $contact ){
+	$contact->Active = false;
+	$contact->save();
+}
+```
+
+Iterating over the collection however, especially large ones, is slow and doesn't scale well. In a 1,000
+item collection the same update will involve 1,000 queries instead of just 1. Traditionally an application
+might use an UPDATE SQL statement to do this, which is fast and efficient. Once we resort to using a SQL
+statement, we loose the ability to easily unit test our code.
+
+In most cases Rhubarb offers a solution. The Collection class has a function called `batchUpdate` to which
+you can pass an associative array of property name to values. The collection will update all items with the
+new values. The interesting thing about this is that the repository can still optimise this back to a single
+update SQL statement under a number of conditions:
+
+1. The Repository in use must support it
+2. The filters on the collection must be entirely support by the repository
+3. The collection must not involve auto-hydration or filtering on related models (i.e. no JOINs).
+
+The example above can be rewritten as:
+
+``` php
+// Deactivate all contacts.
+$contacts = Contact::find();
+$contacts->batchUpdate( [ "Active" => false ] );
+```
+
+If any of the 3 rules above fail, calling batchUpdate will throw a `BatchUpdateNotPossible` exception. If you
+are unsure if your Collection meets the criteria AND still want to support falling back to the iterative
+approach (and you understand and accept the scalability issues that this might involve) you can pass true
+as the optional second argument to this function to do iteration as a fallback if Repository updating fails.
