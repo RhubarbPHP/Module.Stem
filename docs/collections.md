@@ -269,3 +269,6 @@ If any of the 3 rules above fail, calling batchUpdate will throw a `BatchUpdateN
 are unsure if your Collection meets the criteria AND still want to support falling back to the iterative
 approach (and you understand and accept the scalability issues that this might involve) you can pass true
 as the optional second argument to this function to do iteration as a fallback if Repository updating fails.
+
+As a general guide you should only call batchUpdate while passing true as a second parameter if you are
+100% confident you require it, and that the size of any iteration is going to be within safe limits.
