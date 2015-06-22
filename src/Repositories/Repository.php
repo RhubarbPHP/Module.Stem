@@ -486,6 +486,17 @@ abstract class Repository
         $this->cacheObjectData($object);
     }
 
+    /**
+     * If this Repository has it's own compliment of filters the namespace stub should be returned here.
+     *
+     * Returns false if the Repository doesn't have any.
+     *
+     * @return bool|string
+     */
+    public function getFiltersNamespace(){
+        return false;
+    }
+
     public final function deleteObject(Model $object)
     {
         if ($object->isNewRecord()) {

@@ -202,6 +202,11 @@ class MySql extends PdoRepository
         $object[$object->getUniqueIdentifierColumnName()] = $id;
     }
 
+    public function getFiltersNamespace()
+    {
+        return 'Rhubarb\Stem\Repositories\MySql\Filters';
+    }
+
     /**
      * Get's the unique identifiers required for the matching filters and loads the data into
      * the cache for performance reasons.

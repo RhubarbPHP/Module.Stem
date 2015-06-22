@@ -121,9 +121,16 @@ abstract class Filter
      */
     public final function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
     {
-        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+        $namespace = $repository->getFiltersNamespace();
+
+        if (!$namespace){
+            return "";
+        }
+
+        $parts = explode('\\', $namespace);
+
         // Get the provider specific implementation of the filter.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Filters\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
+        $className = rtrim( $namespace, '\\' ).'\\'.$parts[count($parts)-2]. basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
             return call_user_func_array($className . "::doFilterWithRepository",
