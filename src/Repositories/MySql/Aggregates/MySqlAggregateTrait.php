@@ -24,38 +24,36 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 
 trait MySqlAggregateTrait
 {
-	protected static function canAggregateInMySql( Repository $repository, $columnName, &$relationshipsToAutoHydrate )
-	{
-		$schema = $repository->getSchema();
-		$columns = $schema->getColumns();
+    protected static function canAggregateInMySql(Repository $repository, $columnName, &$relationshipsToAutoHydrate)
+    {
+        $schema = $repository->getSchema();
+        $columns = $schema->getColumns();
 
-		if ( !isset( $columns[ $columnName ] ) )
-		{
-			if ( strpos( $columnName, "." ) !== false )
-			{
-				$parts = explode( ".", $columnName, 2 );
+        if (isset($columns[$columnName])) {
+            return true;
+        }
 
-				$relationship = $parts[0];
-				$relationships = SolutionSchema::getAllRelationshipsForModel( $repository->getModelClass() );
+        if (strpos($columnName, ".") !== false) {
+            // If the column name contains a dot, the part before the dot is the name of a relationship to another model
+            list($relationship, $columnName) = explode(".", $columnName, 2);
 
-				if ( isset( $relationships[ $relationship ] ) && ( $relationships[ $relationship ] instanceof OneToMany ) )
-				{
-					$targetModelName = $relationships[ $relationship ]->getTargetModelName();
-					$targetSchema = SolutionSchema::getModelSchema( $targetModelName );
+            $relationships = SolutionSchema::getAllRelationshipsForModel($repository->getModelClass());
 
-					$targetColumns = $targetSchema->getColumns();
+            // Check for the name being that of a relationship
+            if (isset($relationships[$relationship]) && ($relationships[$relationship] instanceof OneToMany)) {
+                $targetModelName = $relationships[$relationship]->getTargetModelName();
+                $targetSchema = SolutionSchema::getModelSchema($targetModelName);
 
-					if ( isset( $targetColumns[ $parts[ 1 ] ] ) )
-					{
-						$relationshipsToAutoHydrate[] = $relationship;
-						return true;
-					}
-				}
-			}
+                $targetColumns = $targetSchema->getColumns();
 
-			return false;
-		}
+                // Check for the column name in the schema of the related model
+                if (isset($targetColumns[$columnName])) {
+                    $relationshipsToAutoHydrate[] = $relationship;
+                    return true;
+                }
+            }
+        }
 
-		return true;
-	}
-} 
+        return false;
+    }
+}
