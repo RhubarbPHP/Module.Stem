@@ -21,7 +21,6 @@ namespace Rhubarb\Stem\Models;
 require_once __DIR__ . '/../Schema/SolutionSchema.php';
 require_once __DIR__ . '/../Schema/ModelSchema.php';
 
-use Rhubarb\Crown\Events\EventEmitter;
 use Rhubarb\Crown\Modelling\ModelState;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Decorators\DataDecorator;
@@ -113,8 +112,8 @@ abstract class Model extends ModelState
             if ($column->defaultValue !== null) {
                 $defaultValue = $column->defaultValue;
 
-                if ( is_object($defaultValue) ){
-                    $defaultValue = clone( $defaultValue );
+                if (is_object($defaultValue)) {
+                    $defaultValue = clone $defaultValue;
                 }
 
                 $this[$column->columnName] = $defaultValue;
