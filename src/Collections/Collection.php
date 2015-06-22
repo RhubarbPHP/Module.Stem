@@ -57,7 +57,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @var array
      */
-    private $uniqueIdentifiers = array();
+    private $uniqueIdentifiers = [];
 
     /**
      * An array of names of navigation properties we will suggest to the repository should be auto hydrated.
@@ -409,7 +409,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function invalidateList()
     {
-        $this->uniqueIdentifiers = array();
+        $this->uniqueIdentifiers = [];
         $this->fetched = false;
         $this->iterator = -1;
     }
@@ -540,11 +540,11 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $modelSchema = $this->getModelSchema();
-        list($count) = $this->calculateAggregates(new Count($this->modelClassName . '.' . $modelSchema->uniqueIdentifierColumnName));
+        list($count) = $this->calculateAggregates(new Count($modelSchema->uniqueIdentifierColumnName));
         return $count;
     }
 
-    private $sorts = array();
+    private $sorts = [];
 
     /**
      * Adds a new column to the sort list.
@@ -645,7 +645,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             return false;
         }
 
-        return array($this->rangeStartIndex, $this->rangeEndIndex - $this->rangeStartIndex + 1);
+        return [$this->rangeStartIndex, $this->rangeEndIndex - $this->rangeStartIndex + 1];
     }
 
     public function getSerializableForm($columns = [])
