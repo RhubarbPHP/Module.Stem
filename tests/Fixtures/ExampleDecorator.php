@@ -6,5 +6,5 @@ use Rhubarb\Stem\Decorators\DataDecorator;
 
 class ExampleDecorator extends DataDecorator
 {
-	public $singletonMonitor = false;
+    public $singletonMonitor = false;
 }

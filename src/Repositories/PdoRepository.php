@@ -82,7 +82,7 @@ abstract class PdoRepository extends Repository
      *
      * @var /PDO[]
      */
-    protected static $connections = array();
+    protected static $connections = [];
 
     /**
      * Returns the last SQL statement executed.
@@ -147,7 +147,7 @@ abstract class PdoRepository extends Repository
      * @throws \Rhubarb\Stem\Exceptions\RepositoryStatementException
      * @return \PDOStatement
      */
-    public static function executeStatement($statement, $namedParameters = array(), $connection = null, $isInsertQuery = false)
+    public static function executeStatement($statement, $namedParameters = [], $connection = null, $isInsertQuery = false)
     {
         if ($connection === null) {
             $connection = static::getDefaultConnection();
@@ -219,7 +219,7 @@ abstract class PdoRepository extends Repository
      * @param null $connection
      * @return string
      */
-    public static function returnSingleValue($statement, $namedParameters = array(), $connection = null)
+    public static function returnSingleValue($statement, $namedParameters = [], $connection = null)
     {
         $statement = self::executeStatement($statement, $namedParameters, $connection);
 
@@ -234,7 +234,7 @@ abstract class PdoRepository extends Repository
      * @param null $connection
      * @return string
      */
-    public static function returnFirstRow($statement, $namedParameters = array(), $connection = null)
+    public static function returnFirstRow($statement, $namedParameters = [], $connection = null)
     {
         $statement = self::executeStatement($statement, $namedParameters, $connection);
 

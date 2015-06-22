@@ -32,7 +32,8 @@ class MySqlSum extends Sum
         Repository $repository,
         Aggregate $originalAggregate,
         &$relationshipsToAutoHydrate
-    ) {
+    )
+    {
         $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
 
         if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName,

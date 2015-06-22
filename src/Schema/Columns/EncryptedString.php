@@ -23,5 +23,5 @@ require_once __DIR__ . '/WithEncryptedText.php';
 
 class EncryptedString extends String
 {
-	use WithEncryptedText;
-} 
+    use WithEncryptedText;
+}

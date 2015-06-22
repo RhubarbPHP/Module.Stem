@@ -22,7 +22,7 @@ require_once __DIR__ . "/MySqlEnum.php";
 
 class MySqlSet extends MySqlEnum
 {
-    public $possibleValues = array();
+    public $possibleValues = [];
 
     public function __construct($columnName, $defaultValue, $possibleValues)
     {

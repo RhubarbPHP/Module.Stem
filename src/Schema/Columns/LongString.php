@@ -25,5 +25,4 @@ require_once __DIR__ . "/Column.php";
  */
 class LongString extends Column
 {
-
 }

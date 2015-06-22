@@ -42,7 +42,8 @@ class MySqlOneOf extends OneOf
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    ) {
+    )
+    {
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {

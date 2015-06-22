@@ -62,7 +62,7 @@ abstract class Filter
     public final function getUniqueIdentifiersToFilter(Collection $list)
     {
         if ($this->wasFilteredByRepository()) {
-            return array();
+            return [];
         }
 
         $list->disableRanging();
@@ -107,7 +107,8 @@ abstract class Filter
         Filter $originalFilter,
         &$params,
         &$propertiesToAutoHydrate
-    ) {
+    )
+    {
 
     }
 
@@ -127,7 +128,7 @@ abstract class Filter
 
         if (class_exists($className)) {
             return call_user_func_array($className . "::doFilterWithRepository",
-                array($repository, $this, &$params, &$propertiesToAutoHydrate));
+                [$repository, $this, &$params, &$propertiesToAutoHydrate]);
         }
 
         return "";

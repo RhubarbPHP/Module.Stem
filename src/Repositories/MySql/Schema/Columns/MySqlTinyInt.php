@@ -22,17 +22,17 @@ require_once __DIR__ . '/MySqlInteger.php';
 
 class MySqlTinyInt extends MySqlInteger
 {
-	use MySqlColumn;
+    use MySqlColumn;
 
-	/**
-	 * @return string The tinyint columns definition string
-	 */
-	public function getDefinition()
-	{
-		$sql = '`' . $this->columnName . '` TINYINT(4) ' .
-			   ( !$this->signed ? 'UNSIGNED ' : '' ) .
-			   $this->getDefaultDefinition();
+    /**
+     * @return string The tinyint columns definition string
+     */
+    public function getDefinition()
+    {
+        $sql = '`' . $this->columnName . '` TINYINT(4) ' .
+            (!$this->signed ? 'UNSIGNED ' : '') .
+            $this->getDefaultDefinition();
 
-		return $sql;
-	}
+        return $sql;
+    }
 }

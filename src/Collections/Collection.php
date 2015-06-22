@@ -133,7 +133,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         $items = [];
 
-        foreach( $this as $item ){
+        foreach ($this as $item) {
             $items[] = $item;
         }
 

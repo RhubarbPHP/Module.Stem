@@ -62,7 +62,7 @@ class ModelEventManager
         return $result;
     }
 
-    private static $eventHandlers = array();
+    private static $eventHandlers = [];
 
     public static function attachEventHandler($modelName, $events, callable $delegate)
     {
@@ -74,7 +74,7 @@ class ModelEventManager
 
         foreach ($eventsArray as $event) {
             if (!isset(self::$eventHandlers[$modelName . ":" . $event])) {
-                self::$eventHandlers[$modelName . ":" . $event] = array();
+                self::$eventHandlers[$modelName . ":" . $event] = [];
             }
 
             self::$eventHandlers[$modelName . ":" . $event][] = $delegate;

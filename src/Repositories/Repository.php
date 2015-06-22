@@ -49,7 +49,7 @@ abstract class Repository
      *
      * @var array
      */
-    public $cachedObjectData = array();
+    public $cachedObjectData = [];
 
     /**
      * Stores the class name for the default repository used by dataobjects.
@@ -149,7 +149,8 @@ abstract class Repository
         Collection $list,
         &$unfetchedRowCount = 0,
         $relationshipNavigationPropertiesToAutoHydrate = []
-    ) {
+    )
+    {
         // For now just returning all items in the collection.
         return array_keys($this->cachedObjectData);
     }
@@ -262,7 +263,7 @@ abstract class Repository
         $list->enableRanging();
 
         if (sizeof($arrays)) {
-            $params = array();
+            $params = [];
 
             foreach ($arrays as $column => $data) {
                 $params[] = &$arrays[$column];
@@ -283,7 +284,7 @@ abstract class Repository
      */
     public function clearObjectCache()
     {
-        $this->cachedObjectData = array();
+        $this->cachedObjectData = [];
     }
 
     /**

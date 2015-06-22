@@ -25,59 +25,59 @@ use Rhubarb\Stem\Schema\ModelSchema;
  */
 class Example extends Model
 {
-	public $loaded = false;
+    public $loaded = false;
 
-	protected function createSchema()
-	{
-		$schema = new ModelSchema( "tblContact" );
+    protected function createSchema()
+    {
+        $schema = new ModelSchema("tblContact");
 
-		$schema->addColumn(
-            new Integer( "ContactID", 0 ),
-            new Integer( "CompanyID", 0 ),
-            new Date( "DateOfBirth" ),
-            new DateTime( "CreatedDate" ),
-            new String( "Forename", 100 ),
-            new String( "Surname", 100 ),
-            new Boolean( "KeyContact" ),
-            new Time( "CoffeeTime" )
+        $schema->addColumn(
+            new Integer("ContactID", 0),
+            new Integer("CompanyID", 0),
+            new Date("DateOfBirth"),
+            new DateTime("CreatedDate"),
+            new String("Forename", 100),
+            new String("Surname", 100),
+            new Boolean("KeyContact"),
+            new Time("CoffeeTime")
         );
 
-		$schema->uniqueIdentifierColumnName = "ContactID";
-		$schema->labelColumnName = "Forename";
+        $schema->uniqueIdentifierColumnName = "ContactID";
+        $schema->labelColumnName = "Forename";
 
-		return $schema;
-	}
+        return $schema;
+    }
 
-	protected function onLoaded()
-	{
-		$this->loaded = true;
-	}
+    protected function onLoaded()
+    {
+        $this->loaded = true;
+    }
 
-	public function SimulateRaiseEvent( $eventName )
-	{
-		call_user_func_array( [ $this, "raiseEvent"], func_get_args() );
-	}
+    public function SimulateRaiseEvent($eventName)
+    {
+        call_user_func_array([$this, "raiseEvent"], func_get_args());
+    }
 
-	public function SimulateRaiseEventAfterSave( $eventName )
-	{
-		call_user_func_array( [ $this, "raiseEventAfterSave"], func_get_args() );
-	}
+    public function SimulateRaiseEventAfterSave($eventName)
+    {
+        call_user_func_array([$this, "raiseEventAfterSave"], func_get_args());
+    }
 
-	protected function getPublicPropertyList()
-	{
-		$properties = parent::getPublicPropertyList();
-		$properties[] = "Surname";
+    protected function getPublicPropertyList()
+    {
+        $properties = parent::getPublicPropertyList();
+        $properties[] = "Surname";
 
-		return $properties;
-	}
+        return $properties;
+    }
 
-	public function SetName( $name )
-	{
-		$this->modelData[ "Name" ] = strtoupper( $name );
-	}
+    public function SetName($name)
+    {
+        $this->modelData["Name"] = strtoupper($name);
+    }
 
-	public function GetMyTestValue()
-	{
-		return "TestValue";
-	}
+    public function GetMyTestValue()
+    {
+        return "TestValue";
+    }
 }

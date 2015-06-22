@@ -21,8 +21,8 @@ namespace Rhubarb\Stem\Repositories\MicrosoftSql;
 require_once __DIR__ . '/../PdoRepository.php';
 
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
-use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Repositories\PdoRepository;
+use Rhubarb\Stem\StemSettings;
 
 /**
  * Microsoft SQL Server repository.
@@ -41,7 +41,7 @@ class MicrosoftSql extends PdoRepository
                     "sqlsrv:server=" . $settings->Host . ";Database=" . $settings->Database,
                     $settings->Username,
                     $settings->Password,
-                    array(\PDO::ERRMODE_EXCEPTION => true));
+                    [\PDO::ERRMODE_EXCEPTION => true]);
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MicrosoftSql");
             }

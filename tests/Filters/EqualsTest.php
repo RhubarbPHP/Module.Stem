@@ -12,49 +12,49 @@ use Rhubarb\Stem\Tests\Fixtures\Example;
  */
 class EqualsTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 {
-	/**
-	 * @var Collection
-	 */
-	private $list;
+    /**
+     * @var Collection
+     */
+    private $list;
 
-	protected function setUp()
-	{
-		parent::setUp();
+    protected function setUp()
+    {
+        parent::setUp();
 
-		$example = new \Rhubarb\Stem\Tests\Fixtures\Example();
-		$example->getRepository()->clearObjectCache();
-		$example->Forename = "John";
-		$example->save();
+        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example->getRepository()->clearObjectCache();
+        $example->Forename = "John";
+        $example->save();
 
-		$example = new \Rhubarb\Stem\Tests\Fixtures\Example();
-		$example->Forename = "Mary";
-		$example->save();
+        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example->Forename = "Mary";
+        $example->save();
 
-		$example = new \Rhubarb\Stem\Tests\Fixtures\Example();
-		$example->Forename = "Tom";
-		$example->Surname = "Thumb";
-		$example->save();
+        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example->Forename = "Tom";
+        $example->Surname = "Thumb";
+        $example->save();
 
-		$this->list = new Collection( "\Rhubarb\Stem\Tests\Fixtures\Example" );
-	}
+        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+    }
 
-	public function testFiltersMatchingRows()
-	{
-		$filter = new \Rhubarb\Stem\Filters\Equals( "Forename", "Tom" );
+    public function testFiltersMatchingRows()
+    {
+        $filter = new \Rhubarb\Stem\Filters\Equals("Forename", "Tom");
 
-		$this->list->filter( $filter );
+        $this->list->filter($filter);
 
-		$this->assertCount( 1, $this->list );
-		$this->assertEquals( "Thumb", $this->list[0]->Surname );
-	}
+        $this->assertCount(1, $this->list);
+        $this->assertEquals("Thumb", $this->list[0]->Surname);
+    }
 
-	public function testSetFilterValue()
-	{
-		$filter = new \Rhubarb\Stem\Filters\Equals( "CompanyID", 1 );
-		$model = new Example();
+    public function testSetFilterValue()
+    {
+        $filter = new \Rhubarb\Stem\Filters\Equals("CompanyID", 1);
+        $model = new Example();
 
-		$filter->setFilterValuesOnModel( $model );
+        $filter->setFilterValuesOnModel($model);
 
-		$this->assertEquals( 1, $model->CompanyID );
-	}
+        $this->assertEquals(1, $model->CompanyID);
+    }
 }

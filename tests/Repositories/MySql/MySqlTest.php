@@ -7,14 +7,13 @@ use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Group;
-use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\MySql\Filters\MySqlInArray;
 use Rhubarb\Stem\Repositories\MySql\MySql;
-use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 use Rhubarb\Stem\Tests\Fixtures\Category;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\CompanyCategory;
 use Rhubarb\Stem\Tests\Fixtures\User;
+use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
 /**
  *
@@ -23,405 +22,402 @@ use Rhubarb\Stem\Tests\Fixtures\User;
  */
 class MySqlTest extends MySqlTestCase
 {
-	public function testInvalidSettingsThrowsException()
-	{
-		MySql::resetDefaultConnection();
+    public function testInvalidSettingsThrowsException()
+    {
+        MySql::resetDefaultConnection();
 
-		$settings = new \Rhubarb\Stem\StemSettings();
-		$settings->Username = "bad-user";
+        $settings = new \Rhubarb\Stem\StemSettings();
+        $settings->Username = "bad-user";
 
-		$this->setExpectedException( "\Rhubarb\Stem\Exceptions\RepositoryConnectionException" );
+        $this->setExpectedException("\Rhubarb\Stem\Exceptions\RepositoryConnectionException");
 
-		MySql::getDefaultConnection();
-	}
+        MySql::getDefaultConnection();
+    }
 
-	public function testHasADefaultConnection()
-	{
-		self::SetDefaultConnectionSettings();
-		MySql::resetDefaultConnection();
+    public function testHasADefaultConnection()
+    {
+        self::SetDefaultConnectionSettings();
+        MySql::resetDefaultConnection();
 
-		$defaultConnection = MySql::getDefaultConnection();
+        $defaultConnection = MySql::getDefaultConnection();
 
-		$this->assertInstanceOf( "\PDO", $defaultConnection );
-	}
+        $this->assertInstanceOf("\PDO", $defaultConnection);
+    }
 
-	public function testStatementsCanBeExecuted()
-	{
-		// No exception should be thrown as the statement should execute.
-		MySql::executeStatement( "SELECT 5" );
+    public function testStatementsCanBeExecuted()
+    {
+        // No exception should be thrown as the statement should execute.
+        MySql::executeStatement("SELECT 5");
 
-		$this->setExpectedException( "\Rhubarb\Stem\Exceptions\RepositoryStatementException" );
+        $this->setExpectedException("\Rhubarb\Stem\Exceptions\RepositoryStatementException");
 
-		// This should throw an exception
-		MySql::executeStatement( "BOSELECTA 5" );
-	}
+        // This should throw an exception
+        MySql::executeStatement("BOSELECTA 5");
+    }
 
-	public function testCollectionRangingCreatesLimitClause()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
+    public function testCollectionRangingCreatesLimitClause()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-		for( $x = 1; $x <= 20; $x++ )
-		{
-			$company = new Company();
-			$company->CompanyName = $x;
-			$company->save();
-		}
+        for ($x = 1; $x <= 20; $x++) {
+            $company = new Company();
+            $company->CompanyName = $x;
+            $company->save();
+        }
 
-		$collection = new Collection( "Rhubarb\Stem\Tests\Fixtures\Company" );
-		$collection->setRange( 10, 4 );
+        $collection = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $collection->setRange(10, 4);
 
-		$size = sizeof( $collection );
+        $size = sizeof($collection);
 
-		$this->assertEquals( 20, $size );
+        $this->assertEquals(20, $size);
 
-		$statement = MySql::getPreviousStatement( true );
+        $statement = MySql::getPreviousStatement(true);
 
-		$this->assertContains( "SQL_CALC_FOUND_ROWS", $statement );
-		$this->assertContains( "LIMIT 10, 4", $statement );
-	}
+        $this->assertContains("SQL_CALC_FOUND_ROWS", $statement);
+        $this->assertContains("LIMIT 10, 4", $statement);
+    }
 
-	public function testStatementsCanBeExecutedWithParameters()
-	{
-		$result = MySql::executeStatement( "SELECT :number", array( "number" => 5 ) );
-		$value = $result->fetchColumn( 0 );
+    public function testStatementsCanBeExecutedWithParameters()
+    {
+        $result = MySql::executeStatement("SELECT :number", ["number" => 5]);
+        $value = $result->fetchColumn(0);
 
-		$this->assertEquals( 5, $value );
-	}
+        $this->assertEquals(5, $value);
+    }
 
-	public function testSingleResultCanBeFetched()
-	{
-		$value = MySql::returnSingleValue( "SELECT :number", array( "number" => 5 ) );
+    public function testSingleResultCanBeFetched()
+    {
+        $value = MySql::returnSingleValue("SELECT :number", ["number" => 5]);
 
-		$this->assertEquals( 5, $value );
-	}
+        $this->assertEquals(5, $value);
+    }
 
-	public function testResultRowCanBeFetched()
-	{
-		$value = MySql::returnFirstRow( "SELECT :number, :number2 AS Goat", array( "number" => 5, "number2" => 10 ) );
+    public function testResultRowCanBeFetched()
+    {
+        $value = MySql::returnFirstRow("SELECT :number, :number2 AS Goat", ["number" => 5, "number2" => 10]);
 
-		$this->assertCount( 2, $value );
-		$this->assertEquals( 10, $value[ "Goat" ] );
-	}
+        $this->assertCount(2, $value);
+        $this->assertEquals(10, $value["Goat"]);
+    }
 
-	public function testReload()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
+    public function testReload()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-		$company = new \Rhubarb\Stem\Tests\Fixtures\Company();
-		$company->CompanyName = "GCD";
-		$company->save();
+        $company = new \Rhubarb\Stem\Tests\Fixtures\Company();
+        $company->CompanyName = "GCD";
+        $company->save();
 
-		$company2 = new Company( $company->CompanyID );
+        $company2 = new Company($company->CompanyID);
 
-		MySql::executeStatement( "UPDATE tblCompany SET CompanyName = 'test' WHERE CompanyID = :id", [ "id" => $company->CompanyID ] );
+        MySql::executeStatement("UPDATE tblCompany SET CompanyName = 'test' WHERE CompanyID = :id", ["id" => $company->CompanyID]);
 
-		$company2->reload();
+        $company2->reload();
 
-		$this->assertEquals( "test", $company2->CompanyName );
-	}
+        $this->assertEquals("test", $company2->CompanyName);
+    }
 
-	public function testDatabaseStorage()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
+    public function testDatabaseStorage()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-		// Check to see if a record can be saved.
+        // Check to see if a record can be saved.
 
-		$company = new Company();
-		$company->CompanyName = "GCD";
-		$company->save();
+        $company = new Company();
+        $company->CompanyName = "GCD";
+        $company->save();
 
-		$this->assertEquals( 1, $company->CompanyID );
+        $this->assertEquals(1, $company->CompanyID);
 
-		// Check to see if the loaded record matches
+        // Check to see if the loaded record matches
 
-		$repository = $company->getRepository();
-		$repository->clearObjectCache();
+        $repository = $company->getRepository();
+        $repository->clearObjectCache();
 
-		$company = new Company( 1 );
+        $company = new Company(1);
 
-		$this->assertEquals( "GCD", $company->CompanyName );
+        $this->assertEquals("GCD", $company->CompanyName);
 
-		// Check to see if changes are recorded
-		$company->CompanyName = "GoatsBoats";
-		$company->save();
+        // Check to see if changes are recorded
+        $company->CompanyName = "GoatsBoats";
+        $company->save();
 
-		$this->assertEquals( "GoatsBoats", $company->CompanyName );
+        $this->assertEquals("GoatsBoats", $company->CompanyName);
 
-		$repository->clearObjectCache();
-		$company = new Company( 1 );
-		$this->assertEquals( "GoatsBoats", $company->CompanyName );
+        $repository->clearObjectCache();
+        $company = new Company(1);
+        $this->assertEquals("GoatsBoats", $company->CompanyName);
 
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
-		$repository->clearObjectCache();
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        $repository->clearObjectCache();
 
-		// Check to see if a record can be saved.
+        // Check to see if a record can be saved.
 
-		$company = new Company();
-		$company->CompanyName = "GCD";
-		$company->save();
+        $company = new Company();
+        $company->CompanyName = "GCD";
+        $company->save();
 
-		$this->assertCount( 1, new Collection( "Company" ) );
+        $this->assertCount(1, new Collection("Company"));
 
-		$company->delete();
+        $company->delete();
 
-		$this->assertCount( 0, new Collection( "Company" ) );
-	}
+        $this->assertCount(0, new Collection("Company"));
+    }
 
-	public function testRepositoryFilters()
-	{
-		$group = new Group();
-		$group->addFilters( new Equals( "CompanyName", "GCD" ) );
+    public function testRepositoryFilters()
+    {
+        $group = new Group();
+        $group->addFilters(new Equals("CompanyName", "GCD"));
 
-		$list = new Collection( "Rhubarb\Stem\Tests\Fixtures\Company" );
-		$list->filter( $group );
+        $list = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $list->filter($group);
 
-		sizeof( $list );
+        sizeof($list);
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", MySql::getPreviousStatement( ) );
-		$this->assertTrue( $group->wasFilteredByRepository() );
+        $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", MySql::getPreviousStatement());
+        $this->assertTrue($group->wasFilteredByRepository());
 
-		$group = new Group();
-		$group->addFilters( new Equals( "CompanyName", "GCD" ) );
-		$group->addFilters( new Equals( "Test", "GCD" ) );
+        $group = new Group();
+        $group->addFilters(new Equals("CompanyName", "GCD"));
+        $group->addFilters(new Equals("Test", "GCD"));
 
-		$list = new Collection( "Rhubarb\Stem\Tests\Fixtures\Company" );
-		$list->filter( $group );
+        $list = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $list->filter($group);
 
-		sizeof( $list );
+        sizeof($list);
 
-		$statement = MySql::getPreviousStatement( );
+        $statement = MySql::getPreviousStatement();
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", $statement );
-		$this->assertFalse( $group->wasFilteredByRepository() );
+        $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", $statement);
+        $this->assertFalse($group->wasFilteredByRepository());
 
-		$group = new Group();
-		$group->addFilters( new Contains( "CompanyName", "GCD" ) );
+        $group = new Group();
+        $group->addFilters(new Contains("CompanyName", "GCD"));
 
-		$list = new Collection( "Rhubarb\Stem\Tests\Fixtures\Company" );
-		$list->filter( $group );
+        $list = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $list->filter($group);
 
-		sizeof( $list );
+        sizeof($list);
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` LIKE :", MySql::getPreviousStatement( ) );
-	}
+        $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` LIKE :", MySql::getPreviousStatement());
+    }
 
-	public function testAutoHydration()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
+    public function testAutoHydration()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-		$company = new Company();
-		$company->CompanyName = "GCD";
-		$company->save();
+        $company = new Company();
+        $company->CompanyName = "GCD";
+        $company->save();
 
-		$user = new User();
-		$user->Forename = "Andrew";
-		$user->save();
+        $user = new User();
+        $user->Forename = "Andrew";
+        $user->save();
 
-		$company->Users->Append( $user );
+        $company->Users->Append($user);
 
-		$company->getRepository()->clearObjectCache();
-		$user->getRepository()->clearObjectCache();
+        $company->getRepository()->clearObjectCache();
+        $user->getRepository()->clearObjectCache();
 
-		$users = new Collection( "Rhubarb\Stem\Tests\Fixtures\User" );
-		$users->filter( new Equals( "Company.CompanyName", "GCD" ) );
+        $users = new Collection("Rhubarb\Stem\Tests\Fixtures\User");
+        $users->filter(new Equals("Company.CompanyName", "GCD"));
 
-		count( $users );
+        count($users);
 
-		$this->assertStringStartsWith( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :", MySql::getPreviousStatement( ) );
+        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :", MySql::getPreviousStatement());
 
-		$company->getRepository()->clearObjectCache();
-		$user->getRepository()->clearObjectCache();
+        $company->getRepository()->clearObjectCache();
+        $user->getRepository()->clearObjectCache();
 
-		$users = new Collection( "Rhubarb\Stem\Tests\Fixtures\User" );
-		$users->replaceSort( "Company.CompanyName", true );
+        $users = new Collection("Rhubarb\Stem\Tests\Fixtures\User");
+        $users->replaceSort("Company.CompanyName", true);
 
-		count( $users );
+        count($users);
 
-		$this->assertStringStartsWith( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` ORDER BY `Company`.`CompanyName` ASC", MySql::getPreviousStatement( ) );
+        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` ORDER BY `Company`.`CompanyName` ASC", MySql::getPreviousStatement());
 
-		$user = $users[0];
+        $user = $users[0];
 
-		$this->assertCount( 9, $user->ExportRawData(), "The user model should only have 9 columns. More means that the joined tables aren't being removed after the join." );
+        $this->assertCount(9, $user->ExportRawData(), "The user model should only have 9 columns. More means that the joined tables aren't being removed after the join.");
 
-		$this->assertArrayHasKey( $company->CompanyID, $company->getRepository()->cachedObjectData, "After an auto hydrated fetch the auto hydrated relationship should now be cached and ready for use in the repository" );
-		$this->assertCount( 9, $company->getRepository()->cachedObjectData[ $company->CompanyID ], "The company model should only have 9 columns. More means that the joined tables aren't properly being broken up into their respective models." );
-	}
+        $this->assertArrayHasKey($company->CompanyID, $company->getRepository()->cachedObjectData, "After an auto hydrated fetch the auto hydrated relationship should now be cached and ready for use in the repository");
+        $this->assertCount(9, $company->getRepository()->cachedObjectData[$company->CompanyID], "The company model should only have 9 columns. More means that the joined tables aren't properly being broken up into their respective models.");
+    }
 
-	public function testManyToManyRelationships()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCategory" );
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
-		MySql::executeStatement( "TRUNCATE TABLE tblCompanyCategory" );
+    public function testManyToManyRelationships()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCategory");
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        MySql::executeStatement("TRUNCATE TABLE tblCompanyCategory");
 
-		// UnitTestingSolutionSchema sets up a many to many relationship between company and category
-		$company1 = new Company();
-		$company2 = new Company();
-		$company1->getRepository()->clearObjectCache();
+        // UnitTestingSolutionSchema sets up a many to many relationship between company and category
+        $company1 = new Company();
+        $company2 = new Company();
+        $company1->getRepository()->clearObjectCache();
 
-		$companyCategory = new CompanyCategory();
-		$companyCategory->getRepository()->clearObjectCache();
+        $companyCategory = new CompanyCategory();
+        $companyCategory->getRepository()->clearObjectCache();
 
-		$category1 = new Category();
-		$category2 = new Category();
-		$category1->getRepository()->clearObjectCache();
+        $category1 = new Category();
+        $category2 = new Category();
+        $category1->getRepository()->clearObjectCache();
 
-		$company1->CompanyName = "GCD";
-		$company1->save();
+        $company1->CompanyName = "GCD";
+        $company1->save();
 
-		$company2->CompanyName = "UTV";
-		$company2->save();
+        $company2->CompanyName = "UTV";
+        $company2->save();
 
-		$category1->CategoryName = "Fruit";
-		$category1->save();
+        $category1->CategoryName = "Fruit";
+        $category1->save();
 
-		$category2->CategoryName = "Apples";
-		$category2->save();
+        $category2->CategoryName = "Apples";
+        $category2->save();
 
-		$companyCategory->CategoryID = $category1->CategoryID;
-		$companyCategory->CompanyID = $company1->CompanyID;
-		$companyCategory->save();
+        $companyCategory->CategoryID = $category1->CategoryID;
+        $companyCategory->CompanyID = $company1->CompanyID;
+        $companyCategory->save();
 
-		$companyCategory = new CompanyCategory();
-		$companyCategory->CategoryID = $category1->CategoryID;
-		$companyCategory->CompanyID = $company2->CompanyID;
-		$companyCategory->save();
+        $companyCategory = new CompanyCategory();
+        $companyCategory->CategoryID = $category1->CategoryID;
+        $companyCategory->CompanyID = $company2->CompanyID;
+        $companyCategory->save();
 
-		$companyCategory = new CompanyCategory();
-		$companyCategory->CategoryID = $category2->CategoryID;
-		$companyCategory->CompanyID = $company2->CompanyID;
-		$companyCategory->save();
+        $companyCategory = new CompanyCategory();
+        $companyCategory->CategoryID = $category2->CategoryID;
+        $companyCategory->CompanyID = $company2->CompanyID;
+        $companyCategory->save();
 
-		// At this point GCD is in Fruit, while UTV is in Fruit and Apples.
-		$company1 = new Company( $company1->CompanyID );
+        // At this point GCD is in Fruit, while UTV is in Fruit and Apples.
+        $company1 = new Company($company1->CompanyID);
 
-		$this->assertCount( 1, $company1->Categories );
-		$this->assertCount( 2, $company2->Categories );
-		$this->assertCount( 2, $category1->Companies );
-		$this->assertCount( 1, $category2->Companies );
+        $this->assertCount(1, $company1->Categories);
+        $this->assertCount(2, $company2->Categories);
+        $this->assertCount(2, $category1->Companies);
+        $this->assertCount(1, $category2->Companies);
 
-		$this->assertEquals( "UTV", $category2->Companies[0]->CompanyName );
+        $this->assertEquals("UTV", $category2->Companies[0]->CompanyName);
 
-		$this->assertStringStartsWith( "SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE `CategoriesRaw`.`CategoryID` = :", MySql::getPreviousStatement( ) );
-	}
+        $this->assertStringStartsWith("SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE `CategoriesRaw`.`CategoryID` = :", MySql::getPreviousStatement());
+    }
 
-	public function testManualAutoHydration()
-	{
-		$users = new Collection( "Rhubarb\Stem\Tests\Fixtures\User" );
-		$users->autoHydrate( "Company" );
+    public function testManualAutoHydration()
+    {
+        $users = new Collection("Rhubarb\Stem\Tests\Fixtures\User");
+        $users->autoHydrate("Company");
 
-		count( $users );
+        count($users);
 
-		$this->assertEquals( "SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID`", MySql::getPreviousStatement( ) );
-	}
+        $this->assertEquals("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID`", MySql::getPreviousStatement());
+    }
 
 
-	public function testMySqlInArray()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
-		MySql::executeStatement( "TRUNCATE TABLE tblUser" );
+    public function testMySqlInArray()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        MySql::executeStatement("TRUNCATE TABLE tblUser");
 
-		$company1 = new Company();
-		$company1->getRepository()->clearObjectCache();
-		$company1->CompanyName = "1";
-		$company1->save();
+        $company1 = new Company();
+        $company1->getRepository()->clearObjectCache();
+        $company1->CompanyName = "1";
+        $company1->save();
 
-		$company2 = new Company();
-		$company2->CompanyName = "2";
-		$company2->save();
+        $company2 = new Company();
+        $company2->CompanyName = "2";
+        $company2->save();
 
-		$company3 = new Company();
-		$company3->CompanyName = "3";
-		$company3->save();
+        $company3 = new Company();
+        $company3->CompanyName = "3";
+        $company3->save();
 
-		$company4 = new Company();
-		$company4->CompanyName = "4";
-		$company4->save();
+        $company4 = new Company();
+        $company4->CompanyName = "4";
+        $company4->save();
 
-		$company4 = new Company();
-		$company4->CompanyName = "5";
-		$company4->save();
+        $company4 = new Company();
+        $company4->CompanyName = "5";
+        $company4->save();
 
-		$companies = new Collection( "Company" );
-		$companies->filter( new MySqlInArray("CompanyName", array( "1", "3", "5" ) ) );
+        $companies = new Collection("Company");
+        $companies->filter(new MySqlInArray("CompanyName", ["1", "3", "5"]));
 
-		$this->assertCount( 3, $companies );
-	}
+        $this->assertCount(3, $companies);
+    }
 
-	public function testMySqlAggregateSupport()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
-		MySql::executeStatement( "TRUNCATE TABLE tblUser" );
+    public function testMySqlAggregateSupport()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        MySql::executeStatement("TRUNCATE TABLE tblUser");
 
-		$company1 = new Company();
-		$company1->getRepository()->clearObjectCache();
-		$company1->CompanyName = "1";
-		$company1->save();
+        $company1 = new Company();
+        $company1->getRepository()->clearObjectCache();
+        $company1->CompanyName = "1";
+        $company1->save();
 
-		$company2 = new Company();
-		$company2->CompanyName = "2";
-		$company2->save();
+        $company2 = new Company();
+        $company2->CompanyName = "2";
+        $company2->save();
 
-		$user1 = new User();
-		$user1->Wage = 100;
-		$company1->Users->Append( $user1 );
+        $user1 = new User();
+        $user1->Wage = 100;
+        $company1->Users->Append($user1);
 
-		$user2 = new User();
-		$user2->Wage = 200;
-		$company1->Users->Append( $user2 );
+        $user2 = new User();
+        $user2->Wage = 200;
+        $company1->Users->Append($user2);
 
-		$user3 = new User();
-		$user3->Wage = 300;
-		$company2->Users->Append( $user3 );
+        $user3 = new User();
+        $user3->Wage = 300;
+        $company2->Users->Append($user3);
 
-		$user4 = new User();
-		$user4->Wage = 400;
-		$company2->Users->Append( $user4 );
+        $user4 = new User();
+        $user4->Wage = 400;
+        $company2->Users->Append($user4);
 
-		$companies = new Collection( "Company" );
-		$companies->addAggregateColumn( new Sum( "Users.Wage" ) );
+        $companies = new Collection("Company");
+        $companies->addAggregateColumn(new Sum("Users.Wage"));
 
-		$results = [];
+        $results = [];
 
-		foreach( $companies as $company )
-		{
-			$results[] = $company->SumOfUsersWage;
-		}
+        foreach ($companies as $company) {
+            $results[] = $company->SumOfUsersWage;
+        }
 
-		$this->assertEquals( [300, 700], $results );
+        $this->assertEquals([300, 700], $results);
 
-		$sql = MySql::getPreviousStatement();
+        $sql = MySql::getPreviousStatement();
 
-		$this->assertEquals( "SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`", $sql );
+        $this->assertEquals("SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`", $sql);
 
-		$companies = new Collection( "Company" );
-		$companies->addAggregateColumn( new Sum( "Users.BigWage" ) );
+        $companies = new Collection("Company");
+        $companies->addAggregateColumn(new Sum("Users.BigWage"));
 
-		$results = [];
+        $results = [];
 
-		foreach( $companies as $company )
-		{
-			$results[] = $company->SumOfUsersBigWage;
-		}
+        foreach ($companies as $company) {
+            $results[] = $company->SumOfUsersBigWage;
+        }
 
-		$this->assertEquals( [3000, 7000], $results );
-	}
+        $this->assertEquals([3000, 7000], $results);
+    }
 
-	public function testIsNullFilter()
-	{
-		MySql::executeStatement( "TRUNCATE TABLE tblCompany" );
+    public function testIsNullFilter()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-		$company = new \Rhubarb\Stem\Tests\Fixtures\Company();
-		$company->CompanyName = "GCD";
-		$company->save();
+        $company = new \Rhubarb\Stem\Tests\Fixtures\Company();
+        $company->CompanyName = "GCD";
+        $company->save();
 
-		$companies = new Collection( 'Rhubarb\Stem\Tests\Fixtures\Company' );
-		$companies->filter( new Equals( "CompanyName", null ) );
+        $companies = new Collection('Rhubarb\Stem\Tests\Fixtures\Company');
+        $companies->filter(new Equals("CompanyName", null));
 
-		$this->assertEquals( 0, $companies->count() );
+        $this->assertEquals(0, $companies->count());
 
-		$companies = new Collection( 'Rhubarb\Stem\Tests\Fixtures\Company' );
-		$companies->filter( new Equals( "ProjectCount", null ) );
+        $companies = new Collection('Rhubarb\Stem\Tests\Fixtures\Company');
+        $companies->filter(new Equals("ProjectCount", null));
 
-		$this->assertEquals( 1, $companies->count() );
-	}
+        $this->assertEquals(1, $companies->count());
+    }
 }

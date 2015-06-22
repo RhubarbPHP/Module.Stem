@@ -23,12 +23,12 @@ require_once __DIR__ . "/../PdoRepository.php";
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
-use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\StemSettings;
 
 class MySql extends PdoRepository
 {
@@ -68,7 +68,7 @@ class MySql extends PdoRepository
         $table = $schema->schemaName;
 
         $data = self::returnFirstRow("SELECT * FROM `" . $table . "` WHERE `{$schema->uniqueIdentifierColumnName}` = :id",
-            array("id" => $uniqueIdentifier));
+            ["id" => $uniqueIdentifier]);
 
         if ($data != null) {
             return $this->transformDataFromRepository($data);
@@ -88,8 +88,8 @@ class MySql extends PdoRepository
         $changes = $object->getModelChanges();
         $schemaColumns = $schema->getColumns();
 
-        $params = array();
-        $columns = array();
+        $params = [];
+        $columns = [];
 
         $sql = "UPDATE `{$schema->schemaName}`";
 
@@ -132,8 +132,8 @@ class MySql extends PdoRepository
         $schema = $this->schema;
         $changes = $object->takeChangeSnapshot();
 
-        $params = array();
-        $columns = array();
+        $params = [];
+        $columns = [];
 
         $sql = "INSERT INTO `{$schema->schemaName}`";
 
@@ -181,7 +181,8 @@ class MySql extends PdoRepository
         Collection $list,
         &$unfetchedRowCount = 0,
         $relationshipNavigationPropertiesToAutoHydrate = []
-    ) {
+    )
+    {
         $this->lastSortsUsed = [];
 
         $schema = $this->schema;
@@ -191,7 +192,7 @@ class MySql extends PdoRepository
 
         $filter = $list->getFilter();
 
-        $namedParams = array();
+        $namedParams = [];
         $propertiesToAutoHydrate = $relationshipNavigationPropertiesToAutoHydrate;
 
         $filteredExclusivelyByRepository = true;
@@ -361,7 +362,7 @@ class MySql extends PdoRepository
         $statement = self::executeStatement($sql, $namedParams);
 
         $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $uniqueIdentifiers = array();
+        $uniqueIdentifiers = [];
 
         if (sizeof($joinColumns)) {
             foreach ($joinColumnsByModel as $joinModel => $modelJoinedColumns) {
@@ -547,7 +548,7 @@ class MySql extends PdoRepository
         if (!isset(PdoRepository::$connections[$connectionHash])) {
             try {
                 $pdo = new \PDO("mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
-                    $settings->Username, $settings->Password, array(\PDO::ERRMODE_EXCEPTION => true));
+                    $settings->Username, $settings->Password, [\PDO::ERRMODE_EXCEPTION => true]);
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MySql");
             }
@@ -567,7 +568,7 @@ class MySql extends PdoRepository
                 $connectionString .= "dbname=" . $database . ";";
             }
 
-            $pdo = new \PDO($connectionString, $username, $password, array(\PDO::ERRMODE_EXCEPTION => true));
+            $pdo = new \PDO($connectionString, $username, $password, [\PDO::ERRMODE_EXCEPTION => true]);
 
             return $pdo;
         } catch (\PDOException $er) {

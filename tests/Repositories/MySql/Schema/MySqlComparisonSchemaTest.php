@@ -5,9 +5,9 @@ namespace Rhubarb\Stem\Tests\Repositories\MySql\Schema;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
 use Rhubarb\Stem\Schema\Columns\String;
-use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\User;
+use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
 class MySqlComparisonSchemaTest extends MySqlTestCase
 {

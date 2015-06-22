@@ -72,7 +72,7 @@ class CollectionPropertyMatches extends Equals
      */
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             $collection = $item[$this->collectionProperty];
