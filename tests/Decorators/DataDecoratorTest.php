@@ -9,118 +9,111 @@
 
 namespace Rhubarb\Stem;
 
-use Rhubarb\Crown\DateTime\RhubarbDateTime;
-use Rhubarb\Crown\Layout\LayoutModule;
+use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Decorators\DataDecorator;
-use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\Category;
 use Rhubarb\Stem\Tests\Fixtures\Company;
-use Rhubarb\Stem\Tests\Fixtures\CompanyDecorator;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Fixtures\User;
-use Rhubarb\Crown\Module;
-use Rhubarb\Crown\Tests\RhubarbTestCase;
 
 class DataDecoratorTest extends RhubarbTestCase
 {
-	public static function setUpBeforeClass()
-	{
-		parent::setUpBeforeClass();
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
 
-		DataDecorator::clearDecoratorClasses();
-		DataDecorator::registerDecoratorClass( "Rhubarb\Stem\Tests\Fixtures\ExampleDecorator", "Rhubarb\Stem\Tests\Fixtures\Example" );
-		DataDecorator::registerDecoratorClass( "Rhubarb\Stem\Tests\Fixtures\CompanyDecorator", "Rhubarb\Stem\Tests\Fixtures\Company" );
-	}
+        DataDecorator::clearDecoratorClasses();
+        DataDecorator::registerDecoratorClass("Rhubarb\Stem\Tests\Fixtures\ExampleDecorator", "Rhubarb\Stem\Tests\Fixtures\Example");
+        DataDecorator::registerDecoratorClass("Rhubarb\Stem\Tests\Fixtures\CompanyDecorator", "Rhubarb\Stem\Tests\Fixtures\Company");
+    }
 
-	public function testCorrectDecoratorCreated()
-	{
-		$company = new Company();
-		$decorator = DataDecorator::getDecoratorForModel( $company );
+    public function testCorrectDecoratorCreated()
+    {
+        $company = new Company();
+        $decorator = DataDecorator::getDecoratorForModel($company);
 
-		$this->assertInstanceOf( "Rhubarb\Stem\Tests\Fixtures\CompanyDecorator", $decorator );
+        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\CompanyDecorator", $decorator);
 
-		$decorator = DataDecorator::getDecoratorForModel( new Category() );
+        $decorator = DataDecorator::getDecoratorForModel(new Category());
 
-		$this->assertFalse( $decorator, "If no decorator exists false should be returned." );
+        $this->assertFalse($decorator, "If no decorator exists false should be returned.");
 
-		$example = new Example();
-		$decorator = DataDecorator::getDecoratorForModel( $example );
-		$this->assertInstanceOf( "Rhubarb\Stem\Tests\Fixtures\ExampleDecorator", $decorator );
+        $example = new Example();
+        $decorator = DataDecorator::getDecoratorForModel($example);
+        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\ExampleDecorator", $decorator);
 
-		DataDecorator::registerDecoratorClass( "Rhubarb\Stem\Tests\Fixtures\ModelDecorator", "Rhubarb\Stem\Models\Model" );
+        DataDecorator::registerDecoratorClass("Rhubarb\Stem\Tests\Fixtures\ModelDecorator", "Rhubarb\Stem\Models\Model");
 
-		$user = new User();
-		$decorator = DataDecorator::getDecoratorForModel( $user );
+        $user = new User();
+        $decorator = DataDecorator::getDecoratorForModel($user);
 
-		$this->assertInstanceOf( "Rhubarb\Stem\Tests\Fixtures\ModelDecorator", $decorator );
-	}
+        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\ModelDecorator", $decorator);
+    }
 
-	public function testColumnDecorator()
-	{
-		$company = new Company();
-		$company->CompanyName = "Oatfest";
+    public function testColumnDecorator()
+    {
+        $company = new Company();
+        $company->CompanyName = "Oatfest";
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
-		$this->assertEquals( "ABCOatfest", $decorator->CompanyName );
+        $decorator = DataDecorator::getDecoratorForModel($company);
+        $this->assertEquals("ABCOatfest", $decorator->CompanyName);
 
-		$company->CompanyName = "RyansBoats";
-		$this->assertEquals( "ABCRyansBoats", $decorator->CompanyName );
+        $company->CompanyName = "RyansBoats";
+        $this->assertEquals("ABCRyansBoats", $decorator->CompanyName);
 
-		$company = new Company();
-		$company->Balance = 34.30;
+        $company = new Company();
+        $company->Balance = 34.30;
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
-		$this->assertEquals( "&pound;34.30", $decorator->Balance );
-	}
+        $decorator = DataDecorator::getDecoratorForModel($company);
+        $this->assertEquals("&pound;34.30", $decorator->Balance);
+    }
 
-	public function testColumnFormatter()
-	{
-		Company::clearObjectCache();
+    public function testColumnFormatter()
+    {
+        Company::clearObjectCache();
 
-		$company = new Company();
-		$company->CompanyName = "abc";
-		$company->save();
+        $company = new Company();
+        $company->CompanyName = "abc";
+        $company->save();
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
+        $decorator = DataDecorator::getDecoratorForModel($company);
 
-		$this->assertSame( "00001", $decorator->CompanyID );
-	}
+        $this->assertSame("00001", $decorator->CompanyID);
+    }
 
-	public function testTypeFormatter()
-	{
-		$company = new Company();
-		$company->Balance = 44.2;
+    public function testTypeFormatter()
+    {
+        $company = new Company();
+        $company->Balance = 44.2;
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
-		$this->assertEquals( "&pound;44.20", $decorator->Balance );
-	}
+        $decorator = DataDecorator::getDecoratorForModel($company);
+        $this->assertEquals("&pound;44.20", $decorator->Balance);
+    }
 
-	public function testTypeDecorator()
-	{
-		$company = new Company();
-		$company->InceptionDate = "today";
+    public function testTypeDecorator()
+    {
+        $company = new Company();
+        $company->InceptionDate = "today";
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
+        $decorator = DataDecorator::getDecoratorForModel($company);
 
-		$this->assertEquals( date( "jS F Y" ), $decorator->InceptionDate );
-	}
+        $this->assertEquals(date("jS F Y"), $decorator->InceptionDate);
+    }
 
-	public function testDecoratorIsSingleton()
-	{
-		$company = new Company();
+    public function testDecoratorIsSingleton()
+    {
+        $company = new Company();
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
-		$decorator->singletonMonitor = true;
+        $decorator = DataDecorator::getDecoratorForModel($company);
+        $decorator->singletonMonitor = true;
 
-		$decorator = DataDecorator::getDecoratorForModel( $company );
+        $decorator = DataDecorator::getDecoratorForModel($company);
 
-		$this->assertTrue( $decorator->singletonMonitor );
+        $this->assertTrue($decorator->singletonMonitor);
 
-		$example = new Example();
-		$decorator = DataDecorator::getDecoratorForModel( $example );
+        $example = new Example();
+        $decorator = DataDecorator::getDecoratorForModel($example);
 
-		$this->assertFalse( $decorator->singletonMonitor );
-	}
+        $this->assertFalse($decorator->singletonMonitor);
+    }
 }

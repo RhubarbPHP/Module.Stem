@@ -18,7 +18,6 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
-use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -79,7 +78,8 @@ trait MySqlFilterTrait
         $columnName,
         $rawComparisonValue,
         Repository $repository
-    ) {
+    )
+    {
         $exampleObject = SolutionSchema::getModel($repository->getModelClass());
 
         $columnSchema = $exampleObject->getColumnSchemaForColumnReference($columnName);

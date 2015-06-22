@@ -49,7 +49,7 @@ class Index
      *
      * @var array
      */
-    public $columnNames = array();
+    public $columnNames = [];
 
     /**
      * Creates an index.
@@ -63,11 +63,11 @@ class Index
         $this->indexType = $indexType;
 
         if ($columnNames === null) {
-            $columnNames = array($indexName);
+            $columnNames = [$indexName];
         }
 
         if (!is_array($columnNames)) {
-            $columnNames = array($columnNames);
+            $columnNames = [$columnNames];
         }
 
         $this->columnNames = $columnNames;

@@ -14,33 +14,30 @@ use Gcd\Core\UnitTesting\CoreTestCase;
 
 class GreaterThanTest extends CoreTestCase
 {
-	function testValidation()
-	{
-		$user = new User();
-		$greaterThan = new GreaterThan( "UserID", 1000 );
+    function testValidation()
+    {
+        $user = new User();
+        $greaterThan = new GreaterThan("UserID", 1000);
 
-		$user->UserID = 500;
+        $user->UserID = 500;
 
-		try
-		{
-			$greaterThan->validate( $user );
-			$this->fail( "Validation should have failed" );
-		}
-		catch( ModelConsistencyValidationException $er )
-		{
-		}
+        try {
+            $greaterThan->validate($user);
+            $this->fail("Validation should have failed");
+        } catch (ModelConsistencyValidationException $er) {
+        }
 
-		$user->UserID = "2000";
-		$this->assertTrue( $greaterThan->validate( $user ) );
-	}
+        $user->UserID = "2000";
+        $this->assertTrue($greaterThan->validate($user));
+    }
 
-	function testEqualToValidation()
-	{
-		$user = new User();
-		$greaterThanOrEqual = new GreaterThan( "UserID", 1000, true );
+    function testEqualToValidation()
+    {
+        $user = new User();
+        $greaterThanOrEqual = new GreaterThan("UserID", 1000, true);
 
-		$user->UserID = "1000";
+        $user->UserID = "1000";
 
-		$this->assertTrue( $greaterThanOrEqual->validate( $user ) );
-	}
+        $this->assertTrue($greaterThanOrEqual->validate($user));
+    }
 }

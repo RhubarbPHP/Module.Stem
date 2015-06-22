@@ -44,7 +44,8 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    ) {
+    )
+    {
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {

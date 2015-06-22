@@ -33,7 +33,8 @@ class MySqlContains extends Contains
         Filter $originalFilter,
         &$params,
         &$propertiesToAutoHydrate
-    ) {
+    )
+    {
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $propertiesToAutoHydrate)) {

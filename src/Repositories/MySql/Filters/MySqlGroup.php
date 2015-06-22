@@ -31,7 +31,8 @@ class MySqlGroup extends Group
         Filter $originalFilter,
         &$params,
         &$propertiesToAutoHydrate
-    ) {
+    )
+    {
         $filters = $originalFilter->getFilters();
         $filterSql = [];
 

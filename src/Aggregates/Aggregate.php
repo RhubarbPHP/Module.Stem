@@ -74,7 +74,8 @@ abstract class Aggregate
         Repository $repository,
         Aggregate $originalAggregate,
         &$relationshipsToAutoHydrate
-    ) {
+    )
+    {
 
     }
 

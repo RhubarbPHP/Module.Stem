@@ -67,7 +67,7 @@ class StartsWith extends ColumnFilter
 
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             if (!$this->caseSensitive) {

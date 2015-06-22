@@ -254,14 +254,14 @@ abstract class Model extends ModelState
      *
      * @var Repository[]
      */
-    private static $repositories = array();
+    private static $repositories = [];
 
     /**
      * A cached collection of relationships
      *
      * @var \Rhubarb\Stem\Schema\Relationships\Relationship[]
      */
-    private static $relationships = array();
+    private static $relationships = [];
 
     /**
      * A cached collection of any properties that require it.
@@ -505,7 +505,7 @@ abstract class Model extends ModelState
     private function raiseAfterSaveEvents()
     {
         foreach ($this->eventsToRaiseAfterSave as $eventArgs) {
-            call_user_func_array(array($this, "raiseEvent"), $eventArgs);
+            call_user_func_array([$this, "raiseEvent"], $eventArgs);
         }
         $this->eventsToRaiseAfterSave = [];
     }

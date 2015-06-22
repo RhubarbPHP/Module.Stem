@@ -36,7 +36,7 @@ class MySqlEnum extends Column
 {
     use MySqlColumn;
 
-    public $enumValues = array();
+    public $enumValues = [];
 
     public function __construct($columnName, $defaultValue, $enumValues)
     {

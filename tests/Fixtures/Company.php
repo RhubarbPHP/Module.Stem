@@ -31,7 +31,6 @@ use Rhubarb\Stem\Schema\Columns\Time;
 
 class Company extends Model
 {
-
     /**
      * Returns the schema for this data object.
      *
@@ -43,11 +42,8 @@ class Company extends Model
 
         $schema->uniqueIdentifierColumnName = "CompanyID";
 
-        $companyId = new AutoIncrement("CompanyID");
-
-        $schema->addColumn($companyId);
-
         $schema->addColumn(
+            new AutoIncrement("CompanyID"),
             new String("CompanyName", 200),
             new Money("Balance"),
             new Date("InceptionDate"),

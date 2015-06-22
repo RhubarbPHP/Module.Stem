@@ -48,7 +48,7 @@ class ModelSchema
      * @see Schema::addColumn()
      * @var Columns\Column[]
      */
-    protected $columns = array();
+    protected $columns = [];
 
     /**
      * The name of the column providing the unique identifier for records in this schema.

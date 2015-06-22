@@ -118,8 +118,8 @@ abstract class SolutionSchema
      */
     public static function clearSchemas()
     {
-        self::$schemaClasses = array();
-        self::$schemas = array();
+        self::$schemaClasses = [];
+        self::$schemas = [];
     }
 
     /**
@@ -217,7 +217,7 @@ abstract class SolutionSchema
 
         if (!isset(self::$relationshipCache[$modelClassName])) {
             $schemas = self::getAllSchemas();
-            $relationships = array();
+            $relationships = [];
 
             foreach ($schemas as $schema) {
                 if (isset($schema->relationships[$modelClassName])) {
@@ -280,7 +280,7 @@ abstract class SolutionSchema
         }
 
         if (self::$modelClassesCache == null) {
-            self::$modelClassesCache = array();
+            self::$modelClassesCache = [];
 
             $schemas = self::getAllSchemas();
 
@@ -288,7 +288,7 @@ abstract class SolutionSchema
 
             foreach ($schemas as $schema) {
                 self::$modelClassesCache = array_merge(self::$modelClassesCache, $schema->models);
-                self::$modelNamesCache = array_merge(self::$modelNamesCache, $schema->modelClassNames );
+                self::$modelNamesCache = array_merge(self::$modelNamesCache, $schema->modelClassNames);
             }
         }
 
@@ -302,7 +302,7 @@ abstract class SolutionSchema
     public static function getModelNameFromClass($class)
     {
         if (self::$modelNamesCache == null) {
-            self::$modelNamesCache = array();
+            self::$modelNamesCache = [];
 
             $schemas = self::getAllSchemas();
 
@@ -342,7 +342,7 @@ abstract class SolutionSchema
         $modelName = self::getModelClass($modelName);
 
         if (!isset($this->relationships[$modelName])) {
-            $this->relationships[$modelName] = array();
+            $this->relationships[$modelName] = [];
         }
 
         $this->relationships[$modelName][$navigationPropertyName] = $relationship;
@@ -525,7 +525,8 @@ abstract class SolutionSchema
         $sourceColumnName,
         $targetColumnName,
         $navigationPropertyName = ""
-    ) {
+    )
+    {
         $oneToOne = new OneToOne($navigationPropertyName, $sourceModelName, $sourceColumnName, $targetModelName,
             $targetColumnName);
 
@@ -562,7 +563,8 @@ abstract class SolutionSchema
         $manyModelName,
         $manyColumnName = "",
         $manyNavigationName = ""
-    ) {
+    )
+    {
         $oneToMany = new OneToMany($oneNavigationName, $oneModelName, $oneColumnName, $manyModelName, $manyColumnName);
 
         $this->addRelationship(

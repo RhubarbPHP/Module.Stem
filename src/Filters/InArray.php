@@ -55,7 +55,7 @@ class InArray extends ColumnFilter
      */
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             $columnValue = $item[$this->columnName];

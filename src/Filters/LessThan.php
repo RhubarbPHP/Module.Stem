@@ -65,7 +65,7 @@ class LessThan extends ColumnFilter
 
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         $placeHolder = $this->detectPlaceHolder($this->lessThan);
 

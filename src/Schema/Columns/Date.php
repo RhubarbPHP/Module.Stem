@@ -19,7 +19,6 @@
 namespace Rhubarb\Stem\Schema\Columns;
 
 use Rhubarb\Crown\DateTime\RhubarbDate;
-use Rhubarb\Crown\DateTime\RhubarbDateTime;
 
 require_once __DIR__ . "/Column.php";
 

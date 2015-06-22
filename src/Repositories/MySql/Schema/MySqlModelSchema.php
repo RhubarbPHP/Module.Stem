@@ -39,7 +39,7 @@ class MySqlModelSchema extends ModelSchema
      * @see MySqlSchema::addIndex()
      * @var Index[]
      */
-    public $indexes = array();
+    public $indexes = [];
 
     /**
      * Adds an index to the indexes collection.
@@ -118,7 +118,7 @@ class MySqlModelSchema extends ModelSchema
     {
         $sql = "CREATE TABLE " . $this->schemaName . " (";
 
-        $definitions = array();
+        $definitions = [];
 
         foreach ($this->columns as $columnName => $column) {
             // The column might be using a more generic type for it's storage.

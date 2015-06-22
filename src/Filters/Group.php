@@ -18,7 +18,7 @@
 
 namespace Rhubarb\Stem\Filters;
 
-require_once __DIR__."/Filter.php";
+require_once __DIR__ . "/Filter.php";
 
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Models\Model;
@@ -30,135 +30,120 @@ use Rhubarb\Stem\Models\Model;
  */
 class Group extends Filter
 {
-	/**
-	 * The array of the Filters to Use for this filter
-	 *
-	 * @var Filter[]
-	 */
-	private $filters = [];
+    /**
+     * The array of the Filters to Use for this filter
+     *
+     * @var Filter[]
+     */
+    private $filters = [];
 
-	/**
-	 * The boolean type for this filter
-	 * - should be one of AND OR
-	 * @var string
-	 */
-	protected $booleanType = "And";
+    /**
+     * The boolean type for this filter
+     * - should be one of AND OR
+     * @var string
+     */
+    protected $booleanType = "And";
 
 
-	public function __construct( $booleanType = "And", $filters = [] )
-	{
-		$this->booleanType = $booleanType;
+    public function __construct($booleanType = "And", $filters = [])
+    {
+        $this->booleanType = $booleanType;
 
-		$this->filters = $filters;
-	}
+        $this->filters = $filters;
+    }
 
-	/**
-	 * Return all the filters as an array (combined with any children sub filters)
-	 *
-	 * @return array
-	 */
-	public function getAllFilters()
-	{
-		$filters = [];
+    /**
+     * Return all the filters as an array (combined with any children sub filters)
+     *
+     * @return array
+     */
+    public function getAllFilters()
+    {
+        $filters = [];
 
-		foreach( $this->filters as $filter )
-		{
-			$filters = array_merge( $filters, $filter->getAllFilters() );
-		}
+        foreach ($this->filters as $filter) {
+            $filters = array_merge($filters, $filter->getAllFilters());
+        }
 
-		return $filters;
-	}
+        return $filters;
+    }
 
-	public function wasFilteredByRepository()
-	{
-		$result = true;
+    public function wasFilteredByRepository()
+    {
+        $result = true;
 
-		foreach( $this->filters as $filter )
-		{
-			if ( !$filter->wasFilteredByRepository() )
-			{
-				$result = false;
-			}
-		}
+        foreach ($this->filters as $filter) {
+            if (!$filter->wasFilteredByRepository()) {
+                $result = false;
+            }
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
-	/**
-	 * Adds one or more filter objects to the filter collection.
-	 *
-	 * @throws \Exception
-	 */
-	public function addFilters()
-	{
-		foreach( func_get_args() as $filter )
-		{
-			if( is_a( $filter, 'Rhubarb\Stem\Filters\Filter' ) )
-			{
-				$this->filters[] = $filter;
-			}
-			else
-			{
-				throw new \Exception('Non filter object added to Group filter');
-			}
-		}
-	}
+    /**
+     * Adds one or more filter objects to the filter collection.
+     *
+     * @throws \Exception
+     */
+    public function addFilters()
+    {
+        foreach (func_get_args() as $filter) {
+            if (is_a($filter, 'Rhubarb\Stem\Filters\Filter')) {
+                $this->filters[] = $filter;
+            } else {
+                throw new \Exception('Non filter object added to Group filter');
+            }
+        }
+    }
 
-	/**
-	 * Returns the list of filters.
-	 *
-	 * @return array
-	 */
-	public function getFilters()
-	{
-		return $this->filters;
-	}
+    /**
+     * Returns the list of filters.
+     *
+     * @return array
+     */
+    public function getFilters()
+    {
+        return $this->filters;
+    }
 
-	public function doGetUniqueIdentifiersToFilter( Collection $list )
-	{
-		$filtered = array();
-		$firstFilter = true;
+    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    {
+        $filtered = [];
+        $firstFilter = true;
 
-		foreach( $this->filters as $filter )
-		{
-            if ( $filter->filteredByRepository )
-            {
-			    continue;
+        foreach ($this->filters as $filter) {
+            if ($filter->filteredByRepository) {
+                continue;
             }
 
-            $subFiltered = $filter->doGetUniqueIdentifiersToFilter( $list );
+            $subFiltered = $filter->doGetUniqueIdentifiersToFilter($list);
 
-			if( strtoupper( $this->booleanType) == "AND"  )
-			{
-				$filtered = array_merge($subFiltered, $filtered);
-			}
-			else
-			{
-				if( $firstFilter )
-				{
-					$filtered = $subFiltered;
-					$firstFilter = false;
-				}
+            if (strtoupper($this->booleanType) == "AND") {
+                $filtered = array_merge($subFiltered, $filtered);
+            } else {
+                if ($firstFilter) {
+                    $filtered = $subFiltered;
+                    $firstFilter = false;
+                }
 
-				$filtered = array_intersect( $filtered, $subFiltered );
-			}
+                $filtered = array_intersect($filtered, $subFiltered);
+            }
 
-			$filtered = array_unique( $filtered );
-		}
+            $filtered = array_unique($filtered);
+        }
 
-		return $filtered;
-	}
+        return $filtered;
+    }
 
-	public function setFilterValuesOnModel( Model $model )
-	{
-		if ( strtoupper( $this->booleanType) == "OR" )
-		{
-			return;
-		}
+    public function setFilterValuesOnModel(Model $model)
+    {
+        if (strtoupper($this->booleanType) == "OR") {
+            return;
+        }
 
-		foreach( $this->filters as $filter )
-		{
-			$filter->setFilterValuesOnModel( $model );
-		}
-	}
+        foreach ($this->filters as $filter) {
+            $filter->setFilterValuesOnModel($model);
+        }
+    }
 }

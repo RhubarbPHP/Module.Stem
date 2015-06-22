@@ -22,24 +22,22 @@ require_once __DIR__ . '/LongString.php';
 
 class Json extends LongString
 {
-	public function getTransformFromRepository()
-	{
-		return function( $data )
-		{
-			return json_decode( $data );
-		};
-	}
+    public function getTransformFromRepository()
+    {
+        return function ($data) {
+            return json_decode($data);
+        };
+    }
 
-	public function getTransformIntoRepository()
-	{
-		return function( $data )
-		{
-			return json_encode( $data );
-		};
-	}
+    public function getTransformIntoRepository()
+    {
+        return function ($data) {
+            return json_encode($data);
+        };
+    }
 
-	public function getStorageColumn()
-	{
-		return new LongString($this->columnName);
-	}
+    public function getStorageColumn()
+    {
+        return new LongString($this->columnName);
+    }
 }
