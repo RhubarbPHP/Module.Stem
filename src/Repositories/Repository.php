@@ -212,6 +212,22 @@ abstract class Repository
     }
 
     /**
+     * Commits changes to the repository in batch against a collection.
+     *
+     * @param Collection $collection
+     * @param $propertyPairs
+     */
+    public function batchCommitUpdatesFromCollection(
+        Collection $collection,
+        $propertyPairs)
+    {
+        foreach ($collection as $item) {
+            $item->mergeRawData($propertyPairs);
+            $item->save();
+        }
+    }
+
+    /**
      * Computes the given aggregates and returns an array of answers
      *
      * An answer will be null if the repository is unable to answer it.

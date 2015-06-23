@@ -8,14 +8,61 @@ namespace Gcd\Tests;
  * @copyright GCD Technologies 2012
  */
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
 class CollectionMySqlTest extends MySqlTestCase
 {
+    public function testBatchUpdate()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
+
+        $company = new Company();
+        $company->CompanyName = "GCD";
+        $company->Active = true;
+        $company->save();
+
+        $company = new Company();
+        $company->CompanyName = "Unit Design";
+        $company->Active = true;
+        $company->save();
+
+        $company = new Company();
+        $company->CompanyName = "Goats Boats";
+        $company->Active = true;
+        $company->save();
+
+        Company::find()->batchUpdate(["CompanyName" => "Test Company"]);
+
+        $lastStatement = MySql::getPreviousStatement();
+
+        $this->assertStringStartsWith("UPDATE `tblCompany` SET `CompanyName` = :UpdateCompanyName WHERE `tblCompany`.`Active` = ", $lastStatement);
+
+        $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company'");
+
+        $this->assertEquals(3, $count);
+
+        try {
+            Company::find(new GreaterThan("CompanyIDSquared", 0,
+                true))->batchUpdate(["CompanyName" => "Test Company 2"]);
+
+            $this->fail("Batch update shouldn't have been allowed if not filtered by the repository.");
+        } catch (BatchUpdateNotPossibleException $er) {
+        }
+
+        Company::find(new GreaterThan("CompanyIDSquared", 0,
+            true))->batchUpdate(["CompanyName" => "Test Company 2"], true);
+
+        $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company 2'");
+
+        $this->assertEquals(3, $count);
+    }
+
     public function testDataListFetchesObjects()
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
