@@ -59,7 +59,7 @@ class Contains extends ColumnFilter
      */
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             if (
@@ -72,5 +72,18 @@ class Contains extends ColumnFilter
         }
 
         return $ids;
+    }
+
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "contains" ] = $this->contains;
+        $settings[ "caseSensitive" ] = $this->caseSensitive;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["contains"], $settings["caseSensitive"] );
     }
 }

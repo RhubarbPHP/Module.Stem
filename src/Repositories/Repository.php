@@ -25,6 +25,7 @@ use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\Float;
 use Rhubarb\Stem\Schema\Columns\Integer;
+use Rhubarb\Stem\Schema\ModelSchema;
 
 /**
  * The base class for data repositories.
@@ -48,7 +49,7 @@ abstract class Repository
      *
      * @var array
      */
-    public $cachedObjectData = array();
+    public $cachedObjectData = [];
 
     /**
      * Stores the class name for the default repository used by dataobjects.
@@ -79,17 +80,99 @@ abstract class Repository
     public function __construct(Model $model)
     {
         $this->modelClassName = get_class($model);
-        $this->schema = $model->generateSchema();
+        $this->schema = $this->getRepositorySpecificSchema($model->generateSchema());
 
         $columns = $this->schema->getColumns();
 
         foreach ($columns as $column) {
+
             $this->columnTransforms[$column->columnName] =
                 [
                     $column->getTransformFromRepository(),
                     $column->getTransformIntoRepository()
                 ];
+
+            $storageColumns = $column->createStorageColumns();
+
+            foreach ($storageColumns as $storageColumn) {
+                $this->columnTransforms[$storageColumn->columnName] =
+                    [
+                        $storageColumn->getTransformFromRepository(),
+                        $storageColumn->getTransformIntoRepository()
+                    ];
+            }
         }
+    }
+
+    /**
+     * Checks if raw repository data needs transformed before passing to the model.
+     *
+     * @param $modelData
+     * @return mixed
+     */
+    protected function transformDataFromRepository($modelData)
+    {
+        foreach ($this->columnTransforms as $columnName => $transforms) {
+            if ($transforms[0] !== null) {
+                $closure = $transforms[0];
+
+                $modelData[$columnName] = $closure($modelData);
+            }
+        }
+
+        return $modelData;
+    }
+
+    /**
+     * Checks if model data needs transformed into raw model data before passing it for storage.
+     *
+     * @param $modelData array  An array of model data to transform.
+     * @return mixed            The transformed data
+     */
+    protected function transformDataForRepository($modelData)
+    {
+        foreach ($this->columnTransforms as $columnName => $transforms) {
+            if ($transforms[1] !== null) {
+                $closure = $transforms[1];
+
+                $transformedData = $closure($modelData);
+
+                if (is_array($transformedData)) {
+                    // If the original value is to be retained, the transform function should
+                    // explicitly return it - in other cases we need to unset it here.
+                    unset($modelData[$columnName]);
+
+                    $modelData = array_merge($modelData, $transformedData);
+                } else {
+                    $modelData[$columnName] = $transformedData;
+                }
+            }
+        }
+
+        return $modelData;
+    }
+
+    private function getRepositorySpecificSchema(ModelSchema $genericSchema)
+    {
+        $reposName = basename(str_replace("\\", "/", get_class($this)));
+
+        // Get the provider specific implementation of the column.
+        $className = "\\" . str_replace("/", "\\", dirname(str_replace("\\", "/", get_class($this)))) . "\\Schema\\" . $reposName . basename(str_replace("\\",
+                "/", get_class($genericSchema)));
+
+        $superType = $genericSchema;
+
+        if (class_exists($className)) {
+            $superType = call_user_func_array($className . "::fromGenericSchema",
+                [$genericSchema, $this]);
+
+            // getRepositorySpecificSchema could return false if it doesn't supply any schema details.
+            if ($superType === false) {
+                $superType = $genericSchema;
+            }
+        }
+
+        return $superType;
     }
 
     public function getModelClass()
@@ -122,7 +205,8 @@ abstract class Repository
         Collection $list,
         &$unfetchedRowCount = 0,
         $relationshipNavigationPropertiesToAutoHydrate = []
-    ) {
+    )
+    {
         // For now just returning all items in the collection.
         return array_keys($this->cachedObjectData);
     }
@@ -235,7 +319,7 @@ abstract class Repository
         $list->enableRanging();
 
         if (sizeof($arrays)) {
-            $params = array();
+            $params = [];
 
             foreach ($arrays as $column => $data) {
                 $params[] = &$arrays[$column];
@@ -256,7 +340,7 @@ abstract class Repository
      */
     public function clearObjectCache()
     {
-        $this->cachedObjectData = array();
+        $this->cachedObjectData = [];
     }
 
     /**
@@ -264,7 +348,6 @@ abstract class Repository
      *
      * @see Repository::setDefaultRepositoryClassName()
      * @param \Rhubarb\Stem\Models\Model $forModel
-     * @internal param \Rhubarb\Stem\Schema\ModelSchema $forSchema
      * @return mixed
      */
     public static function getNewDefaultRepository(Model $forModel)
@@ -402,6 +485,18 @@ abstract class Repository
         }
 
         $this->cacheObjectData($object);
+    }
+
+    /**
+     * If this Repository has it's own compliment of filters the namespace stub should be returned here.
+     *
+     * Returns false if the Repository doesn't have any.
+     *
+     * @return bool|string
+     */
+    public function getFiltersNamespace()
+    {
+        return false;
     }
 
     public final function deleteObject(Model $object)

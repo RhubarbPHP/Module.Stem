@@ -1,6 +1,7 @@
 <?php
 
 namespace Rhubarb\Stem\Exceptions;
+
 use Rhubarb\Crown\Exceptions\RhubarbException;
 
 /**
@@ -11,14 +12,14 @@ use Rhubarb\Crown\Exceptions\RhubarbException;
  */
 class RecordNotFoundException extends RhubarbException
 {
-	public $objectType;
-	public $uniqueIdentifier;
+    public $objectType;
+    public $uniqueIdentifier;
 
-	public function __construct( $objectType, $uniqueIdentifier = null )
-	{
-		$this->objectType = $objectType;
-		$this->uniqueIdentifier = $uniqueIdentifier;
+    public function __construct($objectType, $uniqueIdentifier = null)
+    {
+        $this->objectType = $objectType;
+        $this->uniqueIdentifier = $uniqueIdentifier;
 
-		parent::__construct( "A record of type '".$objectType."' could not be loaded for identifier '".$uniqueIdentifier."'" );
-	}
+        parent::__construct("A record of type '" . $objectType . "' could not be loaded for identifier '" . $uniqueIdentifier . "'");
+    }
 }

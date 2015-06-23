@@ -82,7 +82,7 @@ abstract class PdoRepository extends Repository
      *
      * @var /PDO[]
      */
-    protected static $connections = array();
+    protected static $connections = [];
 
     /**
      * Returns the last SQL statement executed.
@@ -147,7 +147,7 @@ abstract class PdoRepository extends Repository
      * @throws \Rhubarb\Stem\Exceptions\RepositoryStatementException
      * @return \PDOStatement
      */
-    public static function executeStatement($statement, $namedParameters = array(), $connection = null, $isInsertQuery = false)
+    public static function executeStatement($statement, $namedParameters = [], $connection = null, $isInsertQuery = false)
     {
         if ($connection === null) {
             $connection = static::getDefaultConnection();
@@ -193,25 +193,6 @@ abstract class PdoRepository extends Repository
     }
 
     /**
-     * Checks if raw repository data needs transformed before passing to the model.
-     *
-     * @param $modelData
-     * @return mixed
-     */
-    protected function transformDataFromRepository($modelData)
-    {
-        foreach ($this->columnTransforms as $columnName => $transforms) {
-            if ($transforms[0] !== null) {
-                $closure = $transforms[0];
-
-                $modelData[$columnName] = $closure($modelData[$columnName]);
-            }
-        }
-
-        return $modelData;
-    }
-
-    /**
      * Executes the statement and returns the first column of the first row.
      *
      * @param $statement
@@ -219,7 +200,7 @@ abstract class PdoRepository extends Repository
      * @param null $connection
      * @return string
      */
-    public static function returnSingleValue($statement, $namedParameters = array(), $connection = null)
+    public static function returnSingleValue($statement, $namedParameters = [], $connection = null)
     {
         $statement = self::executeStatement($statement, $namedParameters, $connection);
 
@@ -234,7 +215,7 @@ abstract class PdoRepository extends Repository
      * @param null $connection
      * @return string
      */
-    public static function returnFirstRow($statement, $namedParameters = array(), $connection = null)
+    public static function returnFirstRow($statement, $namedParameters = [], $connection = null)
     {
         $statement = self::executeStatement($statement, $namedParameters, $connection);
 

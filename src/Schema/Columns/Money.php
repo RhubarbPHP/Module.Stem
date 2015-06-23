@@ -18,9 +18,17 @@
 
 namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__ . '/Float.php';
+require_once __DIR__ . '/Decimal.php';
 
-class Money extends Float
+class Money extends Decimal
 {
-
+    /**
+     * @param string $columnName
+     * @param int $totalDigits
+     * @param int $defaultValue
+     */
+    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
+    {
+        parent::__construct($columnName, $totalDigits, 2, $defaultValue);
+    }
 } 

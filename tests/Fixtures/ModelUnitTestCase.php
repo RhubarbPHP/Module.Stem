@@ -2,8 +2,8 @@
 
 namespace Rhubarb\Stem\Tests\Fixtures;
 
-use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
  *
@@ -12,10 +12,10 @@ use Rhubarb\Crown\Tests\RhubarbTestCase;
  */
 class ModelUnitTestCase extends RhubarbTestCase
 {
-	public static function setUpBeforeClass()
-	{
-		parent::setUpBeforeClass();
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
 
-		SolutionSchema::registerSchema( "MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema" );
-	}
+        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+    }
 }

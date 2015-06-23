@@ -23,12 +23,12 @@ require_once __DIR__ . "/../PdoRepository.php";
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
-use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\StemSettings;
 
 class MySql extends PdoRepository
 {
@@ -68,7 +68,7 @@ class MySql extends PdoRepository
         $table = $schema->schemaName;
 
         $data = self::returnFirstRow("SELECT * FROM `" . $table . "` WHERE `{$schema->uniqueIdentifierColumnName}` = :id",
-            array("id" => $uniqueIdentifier));
+            ["id" => $uniqueIdentifier]);
 
         if ($data != null) {
             return $this->transformDataFromRepository($data);
@@ -88,25 +88,43 @@ class MySql extends PdoRepository
         $changes = $object->getModelChanges();
         $schemaColumns = $schema->getColumns();
 
-        $params = array();
-        $columns = array();
+        $params = [];
+        $columns = [];
 
         $sql = "UPDATE `{$schema->schemaName}`";
 
         foreach ($changes as $columnName => $value) {
+
             if ($columnName == $schema->uniqueIdentifierColumnName) {
                 continue;
             }
 
-            if (isset($schemaColumns[$columnName])) {
-                $columns[] = "`" . $columnName . "` = :" . $columnName;
+            $changeData = $changes;
 
-                if (isset($this->columnTransforms[$columnName][1]) && ($this->columnTransforms[$columnName][1] !== null)) {
-                    $closure = $this->columnTransforms[$columnName][1];
-                    $value = $closure($value);
+            if (isset($schemaColumns[$columnName])) {
+                $storageColumns = $schemaColumns[$columnName]->getStorageColumns();
+
+                $transforms = $this->columnTransforms[$columnName];
+
+                if ($transforms[1] !== null) {
+                    $closure = $transforms[1];
+
+                    $transformedData = $closure($changes);
+
+                    if (is_array($transformedData)) {
+                        $changeData = $transformedData;
+                    } else {
+                        $changeData[$columnName] = $transformedData;
+                    }
                 }
 
-                $params[$columnName] = $value;
+                foreach ($storageColumns as $storageColumnName => $storageColumn) {
+                    $value = (isset($changeData[$storageColumnName])) ? $changeData[$storageColumnName] : null;
+
+                    $columns[] = "`" . $storageColumnName . "` = :" . $storageColumnName;
+
+                    $params[$storageColumnName] = $value;
+                }
             }
         }
 
@@ -132,28 +150,44 @@ class MySql extends PdoRepository
         $schema = $this->schema;
         $changes = $object->takeChangeSnapshot();
 
-        $params = array();
-        $columns = array();
+        $params = [];
+        $columns = [];
 
         $sql = "INSERT INTO `{$schema->schemaName}`";
 
         $schemaColumns = $schema->getColumns();
 
         foreach ($changes as $columnName => $value) {
+            $changeData = $changes;
+
             if (isset($schemaColumns[$columnName])) {
-                $columns[] = "`" . $columnName . "` = :" . $columnName;
+                $storageColumns = $schemaColumns[$columnName]->getStorageColumns();
 
-                if (isset($this->columnTransforms[$columnName][1]) && ($this->columnTransforms[$columnName][1] !== null)) {
-                    $closure = $this->columnTransforms[$columnName][1];
-                    $value = $closure($value);
+                $transforms = $this->columnTransforms[$columnName];
+
+                if ($transforms[1] !== null) {
+                    $closure = $transforms[1];
+
+                    $transformedData = $closure($changes);
+
+                    if (is_array($transformedData)) {
+                        $changeData = $transformedData;
+                    } else {
+                        $changeData[$columnName] = $transformedData;
+                    }
                 }
 
-                if ($value === null) {
-                    $column = $schemaColumns[$columnName];
-                    $value = $column->defaultValue;
-                }
+                foreach ($storageColumns as $storageColumnName => $storageColumn) {
+                    $value = (isset($changeData[$storageColumnName])) ? $changeData[$storageColumnName] : null;
 
-                $params[$columnName] = $value;
+                    $columns[] = "`" . $storageColumnName . "` = :" . $storageColumnName;
+
+                    if ($value === null) {
+                        $value = $storageColumn->defaultValue;
+                    }
+
+                    $params[$storageColumnName] = $value;
+                }
             }
         }
 
@@ -166,6 +200,11 @@ class MySql extends PdoRepository
         $id = self::executeInsertStatement($sql, $params);
 
         $object[$object->getUniqueIdentifierColumnName()] = $id;
+    }
+
+    public function getFiltersNamespace()
+    {
+        return 'Rhubarb\Stem\Repositories\MySql\Filters';
     }
 
     /**
@@ -181,7 +220,8 @@ class MySql extends PdoRepository
         Collection $list,
         &$unfetchedRowCount = 0,
         $relationshipNavigationPropertiesToAutoHydrate = []
-    ) {
+    )
+    {
         $this->lastSortsUsed = [];
 
         $schema = $this->schema;
@@ -191,7 +231,7 @@ class MySql extends PdoRepository
 
         $filter = $list->getFilter();
 
-        $namedParams = array();
+        $namedParams = [];
         $propertiesToAutoHydrate = $relationshipNavigationPropertiesToAutoHydrate;
 
         $filteredExclusivelyByRepository = true;
@@ -361,7 +401,7 @@ class MySql extends PdoRepository
         $statement = self::executeStatement($sql, $namedParams);
 
         $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $uniqueIdentifiers = array();
+        $uniqueIdentifiers = [];
 
         if (sizeof($joinColumns)) {
             foreach ($joinColumnsByModel as $joinModel => $modelJoinedColumns) {
@@ -547,7 +587,7 @@ class MySql extends PdoRepository
         if (!isset(PdoRepository::$connections[$connectionHash])) {
             try {
                 $pdo = new \PDO("mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
-                    $settings->Username, $settings->Password, array(\PDO::ERRMODE_EXCEPTION => true));
+                    $settings->Username, $settings->Password, [\PDO::ERRMODE_EXCEPTION => true]);
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MySql");
             }
@@ -567,7 +607,7 @@ class MySql extends PdoRepository
                 $connectionString .= "dbname=" . $database . ";";
             }
 
-            $pdo = new \PDO($connectionString, $username, $password, array(\PDO::ERRMODE_EXCEPTION => true));
+            $pdo = new \PDO($connectionString, $username, $password, [\PDO::ERRMODE_EXCEPTION => true]);
 
             return $pdo;
         } catch (\PDOException $er) {

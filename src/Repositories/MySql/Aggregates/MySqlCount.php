@@ -32,7 +32,8 @@ class MySqlCount extends Count
         Repository $repository,
         Aggregate $originalAggregate,
         &$relationshipsToAutoHydrate
-    ) {
+    )
+    {
         $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
 
         if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName,

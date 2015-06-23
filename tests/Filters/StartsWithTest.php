@@ -11,68 +11,68 @@ use Rhubarb\Stem\Collections\Collection;
  */
 class StartsWithTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 {
-	/**
-	 * @var Collection
-	 */
-	private $list;
+    /**
+     * @var Collection
+     */
+    private $list;
 
-	protected function setUp()
-	{
-		unset( $this->list );
+    protected function setUp()
+    {
+        unset($this->list);
 
-		parent::setUp();
+        parent::setUp();
 
-		$example = new \Rhubarb\Stem\Tests\Fixtures\Example();
-		$example->getRepository()->clearObjectCache();
-		$example->Forename = "John";
-		$example->save();
+        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example->getRepository()->clearObjectCache();
+        $example->Forename = "John";
+        $example->save();
 
-		$example = new \Rhubarb\Stem\Tests\Fixtures\Example();
-		$example->Forename = "Mary";
-		$example->save();
+        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example->Forename = "Mary";
+        $example->save();
 
-		$example = new \Rhubarb\Stem\Tests\Fixtures\Example();
-		$example->Forename = "Tom";
-		$example->Surname = "Thumb";
-		$example->save();
+        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example->Forename = "Tom";
+        $example->Surname = "Thumb";
+        $example->save();
 
-		$this->list = new Collection( "\Rhubarb\Stem\Tests\Fixtures\Example" );
-	}
+        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+    }
 
-	public function testFiltersCaseInsensitive()
-	{
+    public function testFiltersCaseInsensitive()
+    {
 
-		$filter = new \Rhubarb\Stem\Filters\StartsWith( "Forename", "jo", false );
+        $filter = new \Rhubarb\Stem\Filters\StartsWith("Forename", "jo", false);
 
-		$this->list->filter( $filter );
-		$this->assertCount( 1, $this->list );
-		$this->assertContains( "John", $this->list[ 0 ]->Forename );
+        $this->list->filter($filter);
+        $this->assertCount(1, $this->list);
+        $this->assertContains("John", $this->list[0]->Forename);
 
-		$filter = new \Rhubarb\Stem\Filters\StartsWith( "Forename", "Jo", false );
+        $filter = new \Rhubarb\Stem\Filters\StartsWith("Forename", "Jo", false);
 
-		$this->list->filter( $filter );
-		$this->assertCount( 1, $this->list );
-		$this->assertContains( "John", $this->list[ 0 ]->Forename );
+        $this->list->filter($filter);
+        $this->assertCount(1, $this->list);
+        $this->assertContains("John", $this->list[0]->Forename);
 
-		$filter = new \Rhubarb\Stem\Filters\StartsWith( "Forename", "hn", false );
+        $filter = new \Rhubarb\Stem\Filters\StartsWith("Forename", "hn", false);
 
-		$this->list->filter( $filter );
-		$this->assertCount( 0, $this->list );
+        $this->list->filter($filter);
+        $this->assertCount(0, $this->list);
 
-	}
+    }
 
-	public function testFiltersCaseSensitive()
-	{
+    public function testFiltersCaseSensitive()
+    {
 
-		$filter = new \Rhubarb\Stem\Filters\StartsWith( "Forename", "Jo", true );
+        $filter = new \Rhubarb\Stem\Filters\StartsWith("Forename", "Jo", true);
 
-		$this->list->filter( $filter );
-		$this->assertCount( 1, $this->list );
-		$this->assertContains( "John", $this->list[ 0 ]->Forename );
+        $this->list->filter($filter);
+        $this->assertCount(1, $this->list);
+        $this->assertContains("John", $this->list[0]->Forename);
 
-		$filter = new \Rhubarb\Stem\Filters\StartsWith( "Forename", "hn", true );
+        $filter = new \Rhubarb\Stem\Filters\StartsWith("Forename", "hn", true);
 
-		$this->list->filter( $filter );
-		$this->assertCount( 0, $this->list );
-	}
+        $this->list->filter($filter);
+        $this->assertCount(0, $this->list);
+    }
 }

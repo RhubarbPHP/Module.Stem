@@ -44,7 +44,7 @@ class Not extends Filter
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
         $idsToKeep = $this->filter->doGetUniqueIdentifiersToFilter($list);
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             if (!in_array($item->UniqueIdentifier, $idsToKeep)) {

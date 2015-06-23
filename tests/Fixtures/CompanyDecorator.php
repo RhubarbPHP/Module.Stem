@@ -13,45 +13,39 @@ use Rhubarb\Stem\Decorators\DataDecorator;
 
 class CompanyDecorator extends DataDecorator
 {
-	public $singletonMonitor = false;
+    public $singletonMonitor = false;
 
-	protected function registerColumnDefinitions()
-	{
-		parent::registerColumnDefinitions();
+    protected function registerColumnDefinitions()
+    {
+        parent::registerColumnDefinitions();
 
-		$this->addColumnDecorator( "CompanyName", function( Company $model, $formattedValue )
-		{
-			return "ABC" . $model->CompanyName;
-		});
+        $this->addColumnDecorator("CompanyName", function (Company $model, $formattedValue) {
+            return "ABC" . $model->CompanyName;
+        });
 
-		$this->addColumnDecorator( "Balance", function( Company $model, $formattedValue )
-		{
-			if( $formattedValue == "" )
-			{
-				return "";
-			}
+        $this->addColumnDecorator("Balance", function (Company $model, $formattedValue) {
+            if ($formattedValue == "") {
+                return "";
+            }
 
-			return "&pound;" . $formattedValue;
-		});
+            return "&pound;" . $formattedValue;
+        });
 
-		$this->addColumnFormatter( "CompanyID", function( Company $model, $formattedValue )
-		{
-			return str_pad( $formattedValue, 5, "0", STR_PAD_LEFT );
-		});
-	}
+        $this->addColumnFormatter("CompanyID", function (Company $model, $formattedValue) {
+            return str_pad($formattedValue, 5, "0", STR_PAD_LEFT);
+        });
+    }
 
-	protected function registerTypeDefinitions()
-	{
-		parent::registerTypeDefinitions();
+    protected function registerTypeDefinitions()
+    {
+        parent::registerTypeDefinitions();
 
-		$this->addTypeFormatter( "\Rhubarb\Stem\Schema\Columns\Money", function( Company $model, $value )
-		{
-			return number_format( $value, 2 );
-		});
+        $this->addTypeFormatter("\Rhubarb\Stem\Schema\Columns\Money", function (Company $model, $value) {
+            return number_format($value, 2);
+        });
 
-		$this->addTypeDecorator( "\Rhubarb\Stem\Schema\Columns\Date", function( Company $model, $value )
-		{
-			return $value->format( "jS F Y" );
-		});
-	}
+        $this->addTypeDecorator("\Rhubarb\Stem\Schema\Columns\Date", function (Company $model, $value) {
+            return $value->format("jS F Y");
+        });
+    }
 }

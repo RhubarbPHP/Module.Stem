@@ -52,9 +52,22 @@ class StartsWith extends ColumnFilter
         $this->caseSensitive = $caseSensitive;
     }
 
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "startsWith" ] = $this->startsWith;
+        $settings[ "caseSensitive" ] = $this->caseSensitive;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["startsWith"], $settings["caseSensitive"] );
+    }
+
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             if (!$this->caseSensitive) {

@@ -44,7 +44,8 @@ class MySqlInArray extends InArray
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    ) {
+    )
+    {
         $columnName = $originalFilter->columnName;
 
         if (count($originalFilter->candidates) == 0) {

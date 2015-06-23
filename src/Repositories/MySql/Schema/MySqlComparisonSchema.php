@@ -52,13 +52,19 @@ class MySqlComparisonSchema
         return implode(",\r\n", $statements);
     }
 
-    public static function fromMySqlSchema(MySqlSchema $schema)
+    public static function fromMySqlSchema(MySqlModelSchema $schema)
     {
         $comparisonSchema = new MySqlComparisonSchema();
         $columns = $schema->getColumns();
 
         foreach ($columns as $column) {
-            $comparisonSchema->columns[$column->columnName] = $column->getDefinition();
+            // The column might be using more generic types for it's storage.
+            $storageColumns = $column->createStorageColumns();
+            foreach ($storageColumns as $storageColumn) {
+                // And if so that column will be a generic column type - we need to upgrade it.
+                $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
+                $comparisonSchema->columns[$storageColumn->columnName] = $storageColumn->getDefinition();
+            }
         }
 
         $indexes = $schema->indexes;
@@ -109,7 +115,7 @@ class MySqlComparisonSchema
             } else {
                 $words = explode(" ", $line);
 
-                $indexKeywords = array("PRIMARY", "KEY", "UNIQUE");
+                $indexKeywords = ["PRIMARY", "KEY", "UNIQUE"];
 
                 if (in_array($words[0], $indexKeywords)) {
                     $comparisonSchema->indexes[] = preg_replace('/\s+/', ' ', rtrim(trim($line), ","));

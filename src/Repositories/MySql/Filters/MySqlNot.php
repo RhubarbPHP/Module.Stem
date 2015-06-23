@@ -31,7 +31,8 @@ class MySqlNot extends Not
         Filter $originalFilter,
         &$params,
         &$propertiesToAutoHydrate
-    ) {
+    )
+    {
         /** @var MySqlNot $not */
         $not = $originalFilter;
 

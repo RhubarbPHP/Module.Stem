@@ -22,8 +22,8 @@ require_once __DIR__ . '/Column.php';
 
 use Rhubarb\Crown\DateTime\RhubarbTime;
 
-/** 
- * 
+/**
+ *
  *
  * @package Rhubarb\Stem\Schema\Columns
  * @author      acuthbert
@@ -31,11 +31,10 @@ use Rhubarb\Crown\DateTime\RhubarbTime;
  */
 class Time extends Column
 {
-	public function getTransformIntoModelData()
-	{
-		return function( $data )
-		{
-			return new RhubarbTime( $data );
-		};
-	}
-} 
+    public function getTransformIntoModelData()
+    {
+        return function ($data) {
+            return new RhubarbTime($data);
+        };
+    }
+}

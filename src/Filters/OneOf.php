@@ -46,9 +46,22 @@ class OneOf extends ColumnFilter
         $this->oneOf = $oneOf;
     }
 
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "oneOf" ] = $this->oneOf;
+
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings[ "columnName" ], $settings["oneOf"] );
+    }
+
     public function doGetUniqueIdentifiersToFilter(Collection $list)
     {
-        $ids = array();
+        $ids = [];
 
         foreach ($list as $item) {
             if (!in_array($item[$this->columnName], $this->oneOf)) {

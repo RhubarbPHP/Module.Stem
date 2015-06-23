@@ -21,7 +21,6 @@ namespace Rhubarb\Stem\Models;
 require_once __DIR__ . '/../Schema/SolutionSchema.php';
 require_once __DIR__ . '/../Schema/ModelSchema.php';
 
-use Rhubarb\Crown\Events\EventEmitter;
 use Rhubarb\Crown\Modelling\ModelState;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Decorators\DataDecorator;
@@ -43,11 +42,14 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 abstract class Model extends ModelState
 {
-    use EventEmitter {
-        RaiseEvent as TraitRaiseEvent;
-    }
-
     private $eventsToRaiseAfterSave = [];
+
+    /**
+     * Tracks if default values have been set yet.
+     *
+     * @var bool
+     */
+    private $defaultsSet = false;
 
     public final function __construct($uniqueIdentifier = null)
     {
@@ -81,10 +83,9 @@ abstract class Model extends ModelState
         }
 
         if ($uniqueIdentifier !== null) {
+            $this->defaultsSet = true;
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
-        } else {
-            $this->setDefaultValues();
         }
 
         parent::__construct();
@@ -107,6 +108,12 @@ abstract class Model extends ModelState
 
     protected function setDefaultValues()
     {
+        if ($this->defaultsSet) {
+            return;
+        }
+
+        $this->defaultsSet = true;
+
         $columns = $this->getSchema()->getColumns();
 
         foreach ($columns as $column) {
@@ -115,7 +122,13 @@ abstract class Model extends ModelState
             }
 
             if ($column->defaultValue !== null) {
-                $this[$column->columnName] = $column->defaultValue;
+                $defaultValue = $column->defaultValue;
+
+                if (is_object($defaultValue)) {
+                    $defaultValue = clone $defaultValue;
+                }
+
+                $this[$column->columnName] = $defaultValue;
             }
         }
     }
@@ -254,14 +267,14 @@ abstract class Model extends ModelState
      *
      * @var Repository[]
      */
-    private static $repositories = array();
+    private static $repositories = [];
 
     /**
      * A cached collection of relationships
      *
      * @var \Rhubarb\Stem\Schema\Relationships\Relationship[]
      */
-    private static $relationships = array();
+    private static $relationships = [];
 
     /**
      * A cached collection of any properties that require it.
@@ -505,7 +518,7 @@ abstract class Model extends ModelState
     private function raiseAfterSaveEvents()
     {
         foreach ($this->eventsToRaiseAfterSave as $eventArgs) {
-            call_user_func_array(array($this, "raiseEvent"), $eventArgs);
+            call_user_func_array([$this, "raiseEvent"], $eventArgs);
         }
         $this->eventsToRaiseAfterSave = [];
     }
@@ -619,6 +632,10 @@ abstract class Model extends ModelState
 
     public function __set($propertyName, $value)
     {
+        if (!$this->defaultsSet) {
+            $this->setDefaultValues();
+        }
+
         if ($propertyName == $this->uniqueIdentifierColumnName) {
             $this->uniqueIdentifier = $value;
         }
@@ -696,6 +713,10 @@ abstract class Model extends ModelState
 
     public function __get($propertyName)
     {
+        if (!$this->defaultsSet) {
+            $this->setDefaultValues();
+        }
+
         // Should any type of magical getter below require that the value is cached for performance
         // this boolean will be set to true. At the end of the function we pick up on this and do the
         // caching - instead of having the caching line repeated all over the place.

@@ -18,7 +18,7 @@
 
 namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__."/Column.php";
+require_once __DIR__ . "/Column.php";
 
 class Integer extends Column
 {

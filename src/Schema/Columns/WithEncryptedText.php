@@ -26,7 +26,7 @@ trait WithEncryptedText
     {
         return function ($data) {
             $encryption = EncryptionProvider::getEncryptionProvider();
-            return $encryption->encrypt($data, $this->columnName);
+            return $encryption->encrypt($data[$this->columnName], $this->columnName);
         };
     }
 
@@ -34,7 +34,12 @@ trait WithEncryptedText
     {
         return function ($data) {
             $encryption = EncryptionProvider::getEncryptionProvider();
-            return $encryption->decrypt($data, $this->columnName);
+            return $encryption->decrypt($data[$this->columnName], $this->columnName);
         };
+    }
+
+    public function createStorageColumns()
+    {
+        return [new String($this->columnName, $this->maximumLength, $this->defaultValue)];
     }
 }

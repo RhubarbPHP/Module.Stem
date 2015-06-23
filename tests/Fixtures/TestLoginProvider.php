@@ -9,9 +9,9 @@ namespace Rhubarb\Stem\Tests\Fixtures;
  */
 class TestLoginProvider extends \Rhubarb\Stem\LoginProviders\ModelLoginProvider
 {
-	public function __construct()
-	{
-		parent::__construct( "Rhubarb\Stem\Tests\Fixtures\User", "Username", "Password", "Active" );
-	}
+    public function __construct()
+    {
+        parent::__construct("Rhubarb\Stem\Tests\Fixtures\User", "Username", "Password", "Active");
+    }
 
 }

@@ -14,33 +14,30 @@ use Gcd\Core\UnitTesting\CoreTestCase;
 
 class LessThanTest extends CoreTestCase
 {
-	function testValidation()
-	{
-		$user = new User();
-		$lessThan = new LessThan( "UserID", 1000 );
+    function testValidation()
+    {
+        $user = new User();
+        $lessThan = new LessThan("UserID", 1000);
 
-		$user->UserID = 2000;
+        $user->UserID = 2000;
 
-		try
-		{
-			$lessThan->validate( $user );
-			$this->fail( "Validation should have failed" );
-		}
-		catch( ModelConsistencyValidationException $er )
-		{
-		}
+        try {
+            $lessThan->validate($user);
+            $this->fail("Validation should have failed");
+        } catch (ModelConsistencyValidationException $er) {
+        }
 
-		$user->UserID = "500";
-		$this->assertTrue( $lessThan->validate( $user ) );
-	}
+        $user->UserID = "500";
+        $this->assertTrue($lessThan->validate($user));
+    }
 
-	function testEqualToValidation()
-	{
-		$user = new User();
-		$lessThanOrEqual = new LessThan( "UserID", 1000, true );
+    function testEqualToValidation()
+    {
+        $user = new User();
+        $lessThanOrEqual = new LessThan("UserID", 1000, true);
 
-		$user->UserID = "1000";
+        $user->UserID = "1000";
 
-		$this->assertTrue( $lessThanOrEqual->validate( $user ) );
-	}
+        $this->assertTrue($lessThanOrEqual->validate($user));
+    }
 }

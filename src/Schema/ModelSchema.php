@@ -18,6 +18,11 @@
 
 namespace Rhubarb\Stem\Schema;
 
+use Rhubarb\Stem\Exceptions\SchemaException;
+use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\Column;
+
 /**
  * A container of schema information for a single record type.
  *
@@ -41,9 +46,9 @@ class ModelSchema
      * Don't add columns directly to this collection - use addColumn() instead.
      *
      * @see Schema::addColumn()
-     * @var \Rhubarb\Stem\Schema\Columns\Column[]
+     * @var Columns\Column[]
      */
-    protected $columns = array();
+    protected $columns = [];
 
     /**
      * The name of the column providing the unique identifier for records in this schema.
@@ -78,6 +83,10 @@ class ModelSchema
 
         foreach ($columns as $column) {
             $this->columns[$column->columnName] = $column;
+
+            if ($column instanceof AutoIncrement) {
+                $this->uniqueIdentifierColumnName = $column->columnName;
+            }
         }
     }
 
@@ -98,7 +107,7 @@ class ModelSchema
     /**
      * Returns an array of columns contained in the schema.
      *
-     * @return \Rhubarb\Stem\Schema\Columns\Column[]
+     * @return Columns\Column[]
      */
     public function getColumns()
     {
@@ -107,8 +116,10 @@ class ModelSchema
 
     /**
      * Compare's the schema with the back end data store and makes any necessary modifications.
+     *
+     * @param Repository $inRepository The repository in which to check the schema
      */
-    public function checkSchema()
+    public function checkSchema( Repository $inRepository )
     {
 
     }
@@ -119,5 +130,10 @@ class ModelSchema
     public function destroySchema()
     {
 
+    }
+
+    public static function fromGenericSchema(ModelSchema $genericSchema, Repository $repository)
+    {
+        throw new SchemaException("The schema class " . get_called_class() . " does not implement fromGenericSchema().");
     }
 }

@@ -26,12 +26,19 @@ require_once __DIR__ . '/Group.php';
  */
 class AllWordsGroup extends Group
 {
+    private $fieldNames;
+
+    private $words;
+
     /**
      * @param string[] $fieldNames An array of field names
      * @param string|string[] $words An array of words or a string of whitespace or comma separated words
      */
     public function __construct($fieldNames, $words)
     {
+        $this->fieldNames = $fieldNames;
+        $this->words = $words;
+
         if (!is_array($words)) {
             $words = preg_split('/[\s,]+/', $words);
         }
@@ -44,5 +51,18 @@ class AllWordsGroup extends Group
             $groups[] = new OrGroup($filters);
         }
         parent::__construct("AND", $groups);
+    }
+
+    public function getSettingsArray()
+    {
+        $settings = parent::getSettingsArray();
+        $settings[ "fieldNames" ] = $this->fieldNames;
+        $settings[ "words" ] = $this->words;
+        return $settings;
+    }
+
+    public static function fromSettingsArray($settings)
+    {
+        return new self( $settings["fieldNames"], $settings["words"] );
     }
 }

@@ -11,11 +11,11 @@ use Rhubarb\Stem\Schema\Columns\Column;
  */
 class ColumnTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 {
-	public function testColumnCreationStoresNameAndDefault()
-	{
-		$column = new Column( "Forename", "SensibleDefault" );
+    public function testColumnCreationStoresNameAndDefault()
+    {
+        $column = new Column("Forename", "SensibleDefault");
 
-		$this->assertEquals( "Forename", $column->columnName );
-		$this->assertEquals( "SensibleDefault", $column->defaultValue );
-	}
+        $this->assertEquals("Forename", $column->columnName);
+        $this->assertEquals("SensibleDefault", $column->defaultValue);
+    }
 }
