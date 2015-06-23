@@ -108,7 +108,7 @@ abstract class Model extends ModelState
 
     protected function setDefaultValues()
     {
-        if ( $this->defaultsSet ){
+        if ($this->defaultsSet) {
             return;
         }
 
@@ -632,7 +632,7 @@ abstract class Model extends ModelState
 
     public function __set($propertyName, $value)
     {
-        if ( !$this->defaultsSet ){
+        if (!$this->defaultsSet) {
             $this->setDefaultValues();
         }
 
@@ -713,7 +713,7 @@ abstract class Model extends ModelState
 
     public function __get($propertyName)
     {
-        if ( !$this->defaultsSet ){
+        if (!$this->defaultsSet) {
             $this->setDefaultValues();
         }
 
