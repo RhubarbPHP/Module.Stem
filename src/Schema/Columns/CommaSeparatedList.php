@@ -31,23 +31,23 @@ class CommaSeparatedList extends String
     public function getTransformIntoRepository()
     {
         return function ($data) {
-            if (!is_array($data)) {
+            if (!is_array($data[$this->columnName])) {
                 return "";
             }
 
-            return implode(",", $data);
+            return implode(",", $data[$this->columnName]);
         };
     }
 
     public function getTransformFromRepository()
     {
         return function ($data) {
-            return explode(",", $data);
+            return explode(",", $data[$this->columnName]);
         };
     }
 
-    public function getStorageColumn()
+    public function createStorageColumns()
     {
-        return new String($this->columnName, $this->maximumLength, $this->defaultValue);
+        return [new String($this->columnName, $this->maximumLength, $this->defaultValue)];
     }
 }

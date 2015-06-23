@@ -58,11 +58,13 @@ class MySqlComparisonSchema
         $columns = $schema->getColumns();
 
         foreach ($columns as $column) {
-            // The column might be using a more generic type for it's storage.
-            $storageColumn = $column->getStorageColumn();
-            // And if so that column will be a generic column type - we need to upgrade it.
-            $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
-            $comparisonSchema->columns[$column->columnName] = $storageColumn->getDefinition();
+            // The column might be using more generic types for it's storage.
+            $storageColumns = $column->createStorageColumns();
+            foreach ($storageColumns as $storageColumn) {
+                // And if so that column will be a generic column type - we need to upgrade it.
+                $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
+                $comparisonSchema->columns[$storageColumn->columnName] = $storageColumn->getDefinition();
+            }
         }
 
         $indexes = $schema->indexes;

@@ -18,8 +18,6 @@
 
 namespace Rhubarb\Stem\Schema\Columns;
 
-use Rhubarb\Stem\Repositories\Repository;
-
 /**
  * Schema information about a column.
  */
@@ -58,7 +56,7 @@ class Column
     }
 
     /**
-     * Returns a column object capable of supplying the schema details for this column.
+     * Returns an array of column objects capable of supplying the schema details for this column.
      *
      * Normally a column can specify it's own schema, however sometimes a column extends another column type
      * simply to add some transforms, for example Json extends LongString and adds json encoding and decoding.
@@ -67,10 +65,31 @@ class Column
      *
      * By overriding this function you can delegate the storage of the raw data to another simpler column
      * type that has already had the repository specific instances created.
+     *
+     * @return Column[]
      */
-    public function getStorageColumn()
+    public function createStorageColumns()
     {
-        return $this;
+        return [$this];
+    }
+
+    /**
+     * Returns an array of named columns needed for storage.
+     *
+     * @see createStorageColumns()
+     * @return Column[]
+     */
+    public function getStorageColumns()
+    {
+        $columns = $this->createStorageColumns();
+
+        $namedColumns = [];
+
+        foreach ($columns as $column) {
+            $namedColumns[$column->columnName] = $column;
+        }
+
+        return $namedColumns;
     }
 
     /**
@@ -81,19 +100,18 @@ class Column
      * @param string $repositoryClassName
      * @return Column
      */
-    public final function getRepositorySpecificColumn( $repositoryClassName )
+    public final function getRepositorySpecificColumn($repositoryClassName)
     {
         $reposName = basename(str_replace("\\", "/", $repositoryClassName));
 
         // Get the provider specific implementation of the column.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Schema\\Columns\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
+        $className = '\Rhubarb\Stem\Repositories\\' . $reposName . '\Schema\Columns\\' . $reposName . basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
-            $superType = call_user_func_array($className . "::fromGenericColumnType",
-                array($this));
+            $superType = call_user_func_array($className . "::fromGenericColumnType", [$this]);
 
             // fromGenericColumnType could return false if it doesn't supply any schema details.
-            if ($superType !== false){
+            if ($superType !== false) {
                 return $superType;
             }
         }
@@ -109,7 +127,7 @@ class Column
      * @param Column $genericColumn
      * @return bool|Column Returns the repository specific column or false if the column doesn't support that.
      */
-    protected static function fromGenericColumnType( Column $genericColumn )
+    protected static function fromGenericColumnType(Column $genericColumn)
     {
         return false;
     }

@@ -21,7 +21,6 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema;
 require_once __DIR__ . "/../../../Schema/ModelSchema.php";
 
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
-use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\ModelSchema;
@@ -56,12 +55,12 @@ class MySqlModelSchema extends ModelSchema
      *
      * @param Repository $inRepository The repository in which to check the schema
      */
-    public function checkSchema( Repository $inRepository )
+    public function checkSchema(Repository $inRepository)
     {
         try {
-            $repos = get_class( $inRepository );
+            $repos = get_class($inRepository);
 
-            if (stripos($repos, "MySql")===false) {
+            if (stripos($repos, "MySql") === false) {
                 // If our repos has been switched to something that isn't MySql (e.g. Offline if unit testing)
                 // we need to exit.
 
@@ -122,10 +121,13 @@ class MySqlModelSchema extends ModelSchema
 
         foreach ($this->columns as $columnName => $column) {
             // The column might be using a more generic type for it's storage.
-            $storageColumn = $column->getStorageColumn();
-            // And if so that column will be a generic column type - we need to upgrade it.
-            $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
-            $definitions[] = $storageColumn->getDefinition();
+            $storageColumns = $column->createStorageColumns();
+
+            foreach ($storageColumns as $storageColumn) {
+                // And if so that column will be a generic column type - we need to upgrade it.
+                $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
+                $definitions[] = $storageColumn->getDefinition();
+            }
         }
 
         foreach ($this->indexes as $indexName => $index) {

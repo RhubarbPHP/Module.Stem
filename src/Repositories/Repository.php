@@ -86,14 +86,70 @@ abstract class Repository
 
         foreach ($columns as $column) {
 
-            $storageColumn = $column->getStorageColumn();
-
             $this->columnTransforms[$column->columnName] =
                 [
-                    $storageColumn->getTransformFromRepository(),
-                    $storageColumn->getTransformIntoRepository()
+                    $column->getTransformFromRepository(),
+                    $column->getTransformIntoRepository()
                 ];
+
+            $storageColumns = $column->createStorageColumns();
+
+            foreach ($storageColumns as $storageColumn) {
+                $this->columnTransforms[$storageColumn->columnName] =
+                    [
+                        $storageColumn->getTransformFromRepository(),
+                        $storageColumn->getTransformIntoRepository()
+                    ];
+            }
         }
+    }
+
+    /**
+     * Checks if raw repository data needs transformed before passing to the model.
+     *
+     * @param $modelData
+     * @return mixed
+     */
+    protected function transformDataFromRepository($modelData)
+    {
+        foreach ($this->columnTransforms as $columnName => $transforms) {
+            if ($transforms[0] !== null) {
+                $closure = $transforms[0];
+
+                $modelData[$columnName] = $closure($modelData);
+            }
+        }
+
+        return $modelData;
+    }
+
+    /**
+     * Checks if model data needs transformed into raw model data before passing it for storage.
+     *
+     * @param $modelData array  An array of model data to transform.
+     * @return mixed            The transformed data
+     */
+    protected function transformDataForRepository($modelData)
+    {
+        foreach ($this->columnTransforms as $columnName => $transforms) {
+            if ($transforms[1] !== null) {
+                $closure = $transforms[1];
+
+                $transformedData = $closure($modelData);
+
+                if (is_array($transformedData)) {
+                    // If the original value is to be retained, the transform function should
+                    // explicitly return it - in other cases we need to unset it here.
+                    unset($modelData[$columnName]);
+
+                    $modelData = array_merge($modelData, $transformedData);
+                } else {
+                    $modelData[$columnName] = $transformedData;
+                }
+            }
+        }
+
+        return $modelData;
     }
 
     private function getRepositorySpecificSchema(ModelSchema $genericSchema)
@@ -101,14 +157,14 @@ abstract class Repository
         $reposName = basename(str_replace("\\", "/", get_class($this)));
 
         // Get the provider specific implementation of the column.
-        $className = "\\".str_replace("/", "\\",dirname(str_replace("\\", "/", get_class($this)))). "\\Schema\\" . $reposName . basename(str_replace("\\",
+        $className = "\\" . str_replace("/", "\\", dirname(str_replace("\\", "/", get_class($this)))) . "\\Schema\\" . $reposName . basename(str_replace("\\",
                 "/", get_class($genericSchema)));
 
         $superType = $genericSchema;
 
         if (class_exists($className)) {
             $superType = call_user_func_array($className . "::fromGenericSchema",
-                array($genericSchema, $this));
+                [$genericSchema, $this]);
 
             // getRepositorySpecificSchema could return false if it doesn't supply any schema details.
             if ($superType === false) {
@@ -429,6 +485,18 @@ abstract class Repository
         }
 
         $this->cacheObjectData($object);
+    }
+
+    /**
+     * If this Repository has it's own compliment of filters the namespace stub should be returned here.
+     *
+     * Returns false if the Repository doesn't have any.
+     *
+     * @return bool|string
+     */
+    public function getFiltersNamespace()
+    {
+        return false;
     }
 
     public final function deleteObject(Model $object)

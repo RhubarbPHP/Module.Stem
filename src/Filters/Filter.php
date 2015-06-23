@@ -122,9 +122,16 @@ abstract class Filter
      */
     public final function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
     {
-        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+        $namespace = $repository->getFiltersNamespace();
+
+        if (!$namespace) {
+            return "";
+        }
+
+        $parts = explode('\\', $namespace);
+
         // Get the provider specific implementation of the filter.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Filters\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
+        $className = rtrim($namespace, '\\') . '\\' . $parts[count($parts) - 2] . basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
             return call_user_func_array($className . "::doFilterWithRepository",
@@ -180,12 +187,12 @@ abstract class Filter
      */
     public function getSettingsArray()
     {
-        return [ "class" => get_class( $this ) ];
+        return ["class" => get_class($this)];
     }
 
-    public static function fromSettingsArray( $settings )
+    public static function fromSettingsArray($settings)
     {
-        throw new ImplementationException( "This filter doesn't support creation from a settings array" );
+        throw new ImplementationException("This filter doesn't support creation from a settings array");
     }
 
     /**
@@ -193,10 +200,10 @@ abstract class Filter
      *
      * @param $settings
      */
-    public static final function speciateFromSettingsArray( $settings )
+    public static final function speciateFromSettingsArray($settings)
     {
-        $type = $settings[ "class" ];
-        $filter = $type::fromSettingsArray( $settings );
+        $type = $settings["class"];
+        $filter = $type::fromSettingsArray($settings);
 
         return $filter;
     }
