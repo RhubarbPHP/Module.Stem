@@ -83,9 +83,9 @@ abstract class Model extends ModelState
         }
 
         if ($uniqueIdentifier !== null) {
+            $this->defaultsSet = true;
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
-            $this->defaultsSet = true;
         }
 
         parent::__construct();
