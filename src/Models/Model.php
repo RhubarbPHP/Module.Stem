@@ -44,6 +44,13 @@ abstract class Model extends ModelState
 {
     private $eventsToRaiseAfterSave = [];
 
+    /**
+     * Tracks if default values have been set yet.
+     *
+     * @var bool
+     */
+    private $defaultsSet = false;
+
     public final function __construct($uniqueIdentifier = null)
     {
         $this->modelName = SolutionSchema::getModelNameFromClass(get_class($this));
@@ -78,8 +85,7 @@ abstract class Model extends ModelState
         if ($uniqueIdentifier !== null) {
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
-        } else {
-            $this->setDefaultValues();
+            $this->defaultsSet = true;
         }
 
         parent::__construct();
@@ -102,6 +108,12 @@ abstract class Model extends ModelState
 
     protected function setDefaultValues()
     {
+        if ( $this->defaultsSet ){
+            return;
+        }
+
+        $this->defaultsSet = true;
+
         $columns = $this->getSchema()->getColumns();
 
         foreach ($columns as $column) {
@@ -620,6 +632,10 @@ abstract class Model extends ModelState
 
     public function __set($propertyName, $value)
     {
+        if ( !$this->defaultsSet ){
+            $this->setDefaultValues();
+        }
+
         if ($propertyName == $this->uniqueIdentifierColumnName) {
             $this->uniqueIdentifier = $value;
         }
@@ -697,6 +713,10 @@ abstract class Model extends ModelState
 
     public function __get($propertyName)
     {
+        if ( !$this->defaultsSet ){
+            $this->setDefaultValues();
+        }
+
         // Should any type of magical getter below require that the value is cached for performance
         // this boolean will be set to true. At the end of the function we pick up on this and do the
         // caching - instead of having the caching line repeated all over the place.
