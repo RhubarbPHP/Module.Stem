@@ -23,7 +23,7 @@ namespace Rhubarb\Stem\Schema\Columns;
  */
 class CommaSeparatedList extends String
 {
-    public function __construct($columnName, $maximumLength = 200, $defaultValue = "")
+    public function __construct($columnName, $maximumLength = 200, $defaultValue = [])
     {
         parent::__construct($columnName, $maximumLength, $defaultValue);
     }
@@ -48,6 +48,6 @@ class CommaSeparatedList extends String
 
     public function createStorageColumns()
     {
-        return [new String($this->columnName, $this->maximumLength, $this->defaultValue)];
+        return [new String($this->columnName, $this->maximumLength, "")];
     }
 }
