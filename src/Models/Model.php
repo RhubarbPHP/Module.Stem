@@ -117,7 +117,7 @@ abstract class Model extends ModelState
         $columns = $this->getSchema()->getColumns();
 
         foreach ($columns as $column) {
-            if ($column->columnName == $this->UniqueIdentifierColumnName) {
+            if ($column->columnName == $this->uniqueIdentifierColumnName) {
                 continue;
             }
 
