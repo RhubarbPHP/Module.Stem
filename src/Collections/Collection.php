@@ -467,10 +467,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $model->save();
 
-        // Make sure the list has been fetched so we can pop the unique identifer on the end.
-        if (!$this->fetched) {
-            $this->fetchList();
-        } else {
+        // Make sure the list has been fetched so we can pop the unique identifier on the end.
+        if ($this->fetched) {
             $this->uniqueIdentifiers[] = $model->UniqueIdentifier;
         }
 
