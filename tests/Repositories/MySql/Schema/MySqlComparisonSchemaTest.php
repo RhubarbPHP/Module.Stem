@@ -92,6 +92,5 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
         $compareTo = MySqlComparisonSchema::fromMySqlSchema($schema);
 
         $this->assertContains("ADD COLUMN `Town` varchar(60) DEFAULT NULL", $compareTo->createAlterTableStatementFor($comparisonSchema));
-
     }
 }

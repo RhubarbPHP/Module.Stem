@@ -3,9 +3,10 @@
 namespace Rhubarb\Stem\Tests\Schema\Columns;
 
 use Rhubarb\Crown\Encryption\EncryptionProvider;
-use Rhubarb\Crown\Encryption\UnitTesting\UnitTestingAes256EncryptionProvider;
+use Rhubarb\Crown\Tests\Encryption\UnitTestingAes256EncryptionProvider;
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Schema\Columns\EncryptedString;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 class EncryptedStringTest extends RhubarbTestCase
@@ -14,7 +15,7 @@ class EncryptedStringTest extends RhubarbTestCase
     {
         parent::setUp();
 
-        EncryptionProvider::SetEncryptionProviderClassName('\Rhubarb\Crown\Encryption\UnitTesting\UnitTestingAes256EncryptionProvider');
+        EncryptionProvider::SetEncryptionProviderClassName(UnitTestingAes256EncryptionProvider::class);
     }
 
     public function testEncryption()

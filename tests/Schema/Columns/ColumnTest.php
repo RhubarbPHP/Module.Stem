@@ -1,15 +1,11 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Schema\Columns;
 
+use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Schema\Columns\Column;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
-class ColumnTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class ColumnTest extends RhubarbTestCase
 {
     public function testColumnCreationStoresNameAndDefault()
     {

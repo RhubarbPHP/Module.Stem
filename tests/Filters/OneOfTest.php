@@ -1,15 +1,13 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\OneOf;
+use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-/**
- *
- * @author    rkilfedder
- * @copyright GCD Technologies 2012
- */
-class OneOfTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class OneOfTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -22,52 +20,49 @@ class OneOfTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "Pugh";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Pugh";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Barney";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "McGrew";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Cuthbert";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Dibble";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Grub";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testFilters()
     {
-
-        $filter = new \Rhubarb\Stem\Filters\OneOf("Forename", ["Cuthbert", "Dibble", "Grub", "Pugh"]);
+        $filter = new OneOf("Forename", ["Cuthbert", "Dibble", "Grub", "Pugh"]);
 
         $this->list->filter($filter);
         $this->assertCount(5, $this->list);
         $this->assertContains("Pugh", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\OneOf("Forename", ["Cuthbert", "Dibble", "Grub"]);
+        $filter = new OneOf("Forename", ["Cuthbert", "Dibble", "Grub"]);
         $this->list->filter($filter);
         $this->assertCount(3, $this->list);
         $this->assertContains("Cuthbert", $this->list[0]->Forename);
     }
-
-
 }

@@ -19,9 +19,6 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $Forename
  * @property string $Surname
  * @property \Date $DateOfBirth
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
  */
 class Example extends Model
 {

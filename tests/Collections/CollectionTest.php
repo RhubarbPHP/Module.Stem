@@ -1,6 +1,6 @@
 <?php
 
-namespace Rhubarb\Stem\Tests\Collections\CollectionTest;
+namespace Rhubarb\Stem\Tests\Collections;
 
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Tests\Fixtures\Company;

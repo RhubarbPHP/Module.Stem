@@ -1,12 +1,13 @@
 <?php
 
-namespace Rhubarb\Stem\Models\Validation;
+namespace Rhubarb\Stem\Tests\Models\Validation;
 
-use Gcd\Core\Modelling\Exceptions\ModelConsistencyValidationException;
-use Gcd\Core\Modelling\UnitTesting\User;
-use Gcd\Core\UnitTesting\CoreTestCase;
+use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
+use Rhubarb\Stem\Models\Validation\EqualTo;
+use Rhubarb\Stem\Tests\Fixtures\User;
 
-class EqualToTest extends CoreTestCase
+class EqualToTest extends RhubarbTestCase
 {
     public function testValidation()
     {
@@ -20,9 +21,7 @@ class EqualToTest extends CoreTestCase
             $equals->validate($user);
             $this->fail("Validation should have failed");
         } catch (ModelConsistencyValidationException $er) {
-
         }
-
 
         $user->Username = "abc";
         $this->assertTrue($equals->validate($user));

@@ -6,13 +6,14 @@
  * Time: 08:54
  */
 
-namespace Rhubarb\Stem\Models\Validation;
+namespace Rhubarb\Stem\Tests\Models\Validation;
 
-use Gcd\Core\Modelling\Exceptions\ModelConsistencyValidationException;
-use Gcd\Core\Modelling\UnitTesting\User;
-use Gcd\Core\UnitTesting\CoreTestCase;
+use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
+use Rhubarb\Stem\Models\Validation\GreaterThan;
+use Rhubarb\Stem\Tests\Fixtures\User;
 
-class GreaterThanTest extends CoreTestCase
+class GreaterThanTest extends RhubarbTestCase
 {
     function testValidation()
     {

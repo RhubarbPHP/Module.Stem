@@ -55,14 +55,14 @@ class StartsWith extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "startsWith" ] = $this->startsWith;
-        $settings[ "caseSensitive" ] = $this->caseSensitive;
+        $settings["startsWith"] = $this->startsWith;
+        $settings["caseSensitive"] = $this->caseSensitive;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["startsWith"], $settings["caseSensitive"] );
+        return new self($settings["columnName"], $settings["startsWith"], $settings["caseSensitive"]);
     }
 
     public function doGetUniqueIdentifiersToFilter(Collection $list)

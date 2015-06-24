@@ -11,9 +11,13 @@ namespace Rhubarb\Stem;
 
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Decorators\DataDecorator;
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Tests\Fixtures\Category;
 use Rhubarb\Stem\Tests\Fixtures\Company;
+use Rhubarb\Stem\Tests\Fixtures\CompanyDecorator;
 use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ExampleDecorator;
+use Rhubarb\Stem\Tests\Fixtures\ModelDecorator;
 use Rhubarb\Stem\Tests\Fixtures\User;
 
 class DataDecoratorTest extends RhubarbTestCase
@@ -23,8 +27,8 @@ class DataDecoratorTest extends RhubarbTestCase
         parent::setUpBeforeClass();
 
         DataDecorator::clearDecoratorClasses();
-        DataDecorator::registerDecoratorClass("Rhubarb\Stem\Tests\Fixtures\ExampleDecorator", "Rhubarb\Stem\Tests\Fixtures\Example");
-        DataDecorator::registerDecoratorClass("Rhubarb\Stem\Tests\Fixtures\CompanyDecorator", "Rhubarb\Stem\Tests\Fixtures\Company");
+        DataDecorator::registerDecoratorClass(ExampleDecorator::class, Example::class);
+        DataDecorator::registerDecoratorClass(CompanyDecorator::class, Company::class);
     }
 
     public function testCorrectDecoratorCreated()
@@ -32,7 +36,7 @@ class DataDecoratorTest extends RhubarbTestCase
         $company = new Company();
         $decorator = DataDecorator::getDecoratorForModel($company);
 
-        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\CompanyDecorator", $decorator);
+        $this->assertInstanceOf(CompanyDecorator::class, $decorator);
 
         $decorator = DataDecorator::getDecoratorForModel(new Category());
 
@@ -40,14 +44,14 @@ class DataDecoratorTest extends RhubarbTestCase
 
         $example = new Example();
         $decorator = DataDecorator::getDecoratorForModel($example);
-        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\ExampleDecorator", $decorator);
+        $this->assertInstanceOf(ExampleDecorator::class, $decorator);
 
-        DataDecorator::registerDecoratorClass("Rhubarb\Stem\Tests\Fixtures\ModelDecorator", "Rhubarb\Stem\Models\Model");
+        DataDecorator::registerDecoratorClass(ModelDecorator::class, Model::class);
 
         $user = new User();
         $decorator = DataDecorator::getDecoratorForModel($user);
 
-        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\ModelDecorator", $decorator);
+        $this->assertInstanceOf(ModelDecorator::class, $decorator);
     }
 
     public function testColumnDecorator()

@@ -1,21 +1,22 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Models;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Models\ModelEventManager;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDate;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlString;
+use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
+use Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\User;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 class ModelTest extends ModelUnitTestCase
 {
     public function testModelLabelReturnedInToString()
@@ -32,7 +33,7 @@ class ModelTest extends ModelUnitTestCase
         $schema = $example->generateSchema();
 
         // Make sure we have a schema
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\ModelSchema", $schema);
+        $this->assertInstanceOf(ModelSchema::class, $schema);
 
         // Make sure the unique identifier exists
         $this->assertEquals("ContactID", $schema->uniqueIdentifierColumnName);
@@ -114,14 +115,14 @@ class ModelTest extends ModelUnitTestCase
 
     public function testLoadingMissingRecordThrowsException()
     {
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\RecordNotFoundException");
+        $this->setExpectedException(RecordNotFoundException::class);
 
         new Example(55);
     }
 
     public function testLoadingZeroRecordThrowException()
     {
-        $this->setExpectedException('Rhubarb\Stem\Exceptions\RecordNotFoundException');
+        $this->setExpectedException(RecordNotFoundException::class);
 
         new Example(0);
     }
@@ -154,7 +155,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testRelationships()
     {
-        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+        SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
         $company = new Company();
         $company->CompanyName = "Test Company";
@@ -176,7 +177,7 @@ class ModelTest extends ModelUnitTestCase
 
         $company = $user->Company;
 
-        $this->assertInstanceOf("\Rhubarb\Stem\Tests\Fixtures\Company", $company);
+        $this->assertInstanceOf(Company::class, $company);
         $this->assertEquals("Test Company", $company->CompanyName);
 
         $users = $company->Users;
@@ -259,7 +260,7 @@ class ModelTest extends ModelUnitTestCase
 
         $this->assertEquals("def", $user->Username);
 
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\RecordNotFoundException");
+        $this->setExpectedException(RecordNotFoundException::class);
 
         User::FromUsername("123");
     }
@@ -296,7 +297,7 @@ class ModelTest extends ModelUnitTestCase
 
         // Test that deleting a new model throws an exception.
 
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\DeleteModelException");
+        $this->setExpectedException(DeleteModelException::class);
 
         $example = new Example();
         $example->delete();
@@ -387,11 +388,11 @@ class ModelTest extends ModelUnitTestCase
 
         $schema = $example->getColumnSchemaForColumnReference("Forename");
 
-        $this->assertInstanceOf("\Rhubarb\Stem\Repositories\MySql\Schema\Columns\Varchar", $schema);
+        $this->assertInstanceOf(MySqlString::class, $schema);
         $this->assertEquals("Forename", $schema->columnName);
 
         $schema = $example->getColumnSchemaForColumnReference("ExampleRelationshipName.InceptionDate");
-        $this->assertInstanceOf("\Rhubarb\Stem\Repositories\MySql\Schema\Columns\Date", $schema);
+        $this->assertInstanceOf(MySqlDate::class, $schema);
         $this->assertEquals("InceptionDate", $schema->columnName);
     }
 

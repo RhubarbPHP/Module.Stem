@@ -1,16 +1,16 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
 /**
  * Data filter used to keep all records with a variable which is exactly equal to a particular variable.
- * @author acuthbert
- * @copyright GCD Technologies 2012
  */
-class EqualsTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class EqualsTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -21,26 +21,26 @@ class EqualsTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
     {
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testFiltersMatchingRows()
     {
-        $filter = new \Rhubarb\Stem\Filters\Equals("Forename", "Tom");
+        $filter = new Equals("Forename", "Tom");
 
         $this->list->filter($filter);
 
@@ -50,7 +50,7 @@ class EqualsTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     public function testSetFilterValue()
     {
-        $filter = new \Rhubarb\Stem\Filters\Equals("CompanyID", 1);
+        $filter = new Equals("CompanyID", 1);
         $model = new Example();
 
         $filter->setFilterValuesOnModel($model);

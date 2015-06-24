@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\Repositories\MySql\Aggregates;
 
+use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\MySql\MySql;
@@ -39,8 +40,7 @@ class SumTest extends MySqlTestCase
     {
         $examples = new Collection("Company");
 
-        list($sumTotal) = $examples->calculateAggregates(
-            [new MySqlSum("Balance")]);
+        list($sumTotal) = $examples->calculateAggregates(new Sum("Balance"));
 
         $this->assertEquals(6, $sumTotal);
 
@@ -51,7 +51,7 @@ class SumTest extends MySqlTestCase
         $examples = new Collection("Company");
         $examples->filter(new GreaterThan("Balance", 1));
 
-        list($sumTotal) = $examples->calculateAggregates(new MySqlSum("Balance"));
+        list($sumTotal) = $examples->calculateAggregates(new Sum("Balance"));
 
         $this->assertEquals(5, $sumTotal);
 

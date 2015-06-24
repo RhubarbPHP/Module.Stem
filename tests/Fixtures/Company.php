@@ -7,9 +7,6 @@ namespace Rhubarb\Stem\Tests\Fixtures;
  *
  * @property int $CompanyID
  * @property string $CompanyName
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
  */
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;

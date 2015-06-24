@@ -25,13 +25,6 @@ use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
-/**
- *
- *
- * @package Gcd\Tests
- * @author      acuthbert
- * @copyright   2013 GCD Technologies Ltd.
- */
 class CollectionPropertyMatches extends Equals
 {
     protected $matchesFilter;
@@ -95,12 +88,12 @@ class CollectionPropertyMatches extends Equals
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "collectionProperty" ] = $this->collectionProperty;
+        $settings["collectionProperty"] = $this->collectionProperty;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings["collectionProperty"], $settings[ "columnName" ], $settings["equalTo"] );
+        return new self($settings["collectionProperty"], $settings["columnName"], $settings["equalTo"]);
     }
 }

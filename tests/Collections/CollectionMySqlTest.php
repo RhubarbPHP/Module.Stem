@@ -1,12 +1,7 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Collections;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
@@ -79,27 +74,27 @@ class CollectionMySqlTest extends MySqlTestCase
         $company->CompanyName = "Goats Boats";
         $company->save();
 
-        $list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
 
         $this->assertCount(3, $list);
 
         $repository = $company->getRepository();
         $repository->clearObjectCache();
 
-        $list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
 
         $this->assertCount(3, $list);
         $this->assertEquals("Unit Design", $list[1]->CompanyName);
 
         $filter = new Equals("CompanyName", "Unit Design");
-        $list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->filter($filter);
 
         $this->assertCount(1, $list);
         $this->assertEquals("Unit Design", $list[0]->CompanyName);
 
         $filter = new Equals("CompanyIDSquared", $company->CompanyID * $company->CompanyID);
-        $list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->filter($filter);
 
         $this->assertCount(1, $list);
@@ -144,7 +139,7 @@ class CollectionMySqlTest extends MySqlTestCase
         $company->Balance = 1;
         $company->save();
 
-        $list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->addSort("CompanyName", true);
 
         // Trigger list fetching.
@@ -240,7 +235,7 @@ class CollectionMySqlTest extends MySqlTestCase
         $company->CompanyName = "D";
         $company->save();
 
-        $list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->setRange(2, 6);
 
         $this->assertCount(6, $list);

@@ -2,12 +2,12 @@
 /*
  * Suspended while validation is in flux
 
-namespace Rhubarb\Stem\Models\Validation;
+namespace Rhubarb\Stem\Tests\Models\Validation;
 
-use Gcd\Core\Modelling\UnitTesting\User;
-use Gcd\Core\UnitTesting\CoreTestCase;
+use Rhubarb\Stem\Tests\Fixtures\User;
+use Rhubarb\Crown\Tests\RhubarbTestCase;
 
-class ValidatorTest extends CoreTestCase
+class ValidatorTest extends RhubarbTestCase
 {
 	public function testValidatorThrowsException()
 	{

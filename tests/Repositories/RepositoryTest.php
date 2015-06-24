@@ -1,7 +1,10 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
+use Rhubarb\Stem\Exceptions\ModelException;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Offline\Offline;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Tests\Fixtures\Example;
@@ -13,33 +16,33 @@ class RepositoryTest extends ModelUnitTestCase
     {
         $repository = Repository::getNewDefaultRepository(new Example());
 
-        $this->assertInstanceOf("\Rhubarb\Stem\Repositories\Offline\Offline", $repository);
+        $this->assertInstanceOf(Offline::class, $repository);
     }
 
     public function testDefaultRepositoryCanBeChanged()
     {
-        Repository::setDefaultRepositoryClassName("\Rhubarb\Stem\Repositories\MySql\MySql");
+        Repository::setDefaultRepositoryClassName(MySql::class);
 
         $repository = Repository::getNewDefaultRepository(new Example());
 
-        $this->assertInstanceOf("\Rhubarb\Stem\Repositories\MySql\MySql", $repository);
+        $this->assertInstanceOf(MySql::class, $repository);
 
         // Also check that non extant repositories throw an exception.
-        $this->setExpectedException("\Rhubarb\Stem\Exceptions\ModelException");
+        $this->setExpectedException(ModelException::class);
 
-        Repository::setDefaultRepositoryClassName("\Rhubarb\Stem\Repositories\Fictional\Fictional");
+        Repository::setDefaultRepositoryClassName('\Rhubarb\Stem\Repositories\Fictional\Fictional');
 
         // Reset to the normal so we don't upset other unit tests.
-        Repository::setDefaultRepositoryClassName("\Rhubarb\Stem\Repositories\Offline\Offline");
+        Repository::setDefaultRepositoryClassName(Offline::class);
     }
 
     public function testHydrationOfNonExtantObjectThrowsException()
     {
         $offline = new Offline(new Example());
 
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\RecordNotFoundException");
+        $this->setExpectedException(RecordNotFoundException::class);
 
         // Load the example data object with a silly identifier that doesn't exist.
-        $offline->hydrateObject(new \Rhubarb\Stem\Tests\Fixtures\Example(), 10);
+        $offline->hydrateObject(new Example(), 10);
     }
 }

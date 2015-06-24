@@ -2,21 +2,18 @@
 
 namespace Rhubarb\Stem\Tests\Schema\Relationships;
 
+use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
+use Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\User;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
- */
 class OneToManyTest extends ModelUnitTestCase
 {
     public function testOneToMany()
     {
-        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+        SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
         $company = new Company();
         $company->getRepository()->clearObjectCache();

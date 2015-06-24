@@ -70,12 +70,12 @@ class DayOfWeek extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "validDays" ] = $this->validDays;
+        $settings["validDays"] = $this->validDays;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["validDays"] );
+        return new self($settings["columnName"], $settings["validDays"]);
     }
 }

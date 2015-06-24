@@ -14,24 +14,24 @@ class DateTest extends RhubarbTestCase
 
         $rawData = $example->ExportRawData();
 
-        $this->assertInstanceOf("\DateTime", $rawData["DateOfBirth"]);
+        $this->assertInstanceOf(\DateTime::class, $rawData["DateOfBirth"]);
         $this->assertEquals("1st October 2012", $rawData["DateOfBirth"]->format("jS F Y"));
 
         $dob = $example->DateOfBirth;
 
-        $this->assertInstanceOf("\DateTime", $dob);
+        $this->assertInstanceOf(\DateTime::class, $dob);
         $this->assertEquals("1st October 2012", $dob->format("jS F Y"));
 
         $example->DateOfBirth = "2012-10-02";
 
         $rawData = $example->ExportRawData();
 
-        $this->assertInstanceOf("\DateTime", $rawData["DateOfBirth"]);
+        $this->assertInstanceOf(\DateTime::class, $rawData["DateOfBirth"]);
         $this->assertEquals("2nd October 2012", $rawData["DateOfBirth"]->format("jS F Y"));
 
         $dob = $example->DateOfBirth;
 
-        $this->assertInstanceOf("\DateTime", $dob);
+        $this->assertInstanceOf(\DateTime::class, $dob);
         $this->assertEquals("2nd October 2012", $dob->format("jS F Y"));
 
         $example->DateOfBirth = mktime(0, 0, 0, 10, 3, 2012);

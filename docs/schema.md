@@ -316,9 +316,6 @@ use Gcd\Core\Modelling\Schema\SolutionSchema;
 
 /**
  * A simple script to trigger schema versioning
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
  */
 class UpdateSchema implements IGeneratesResponse
 {

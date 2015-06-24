@@ -7,13 +7,6 @@ use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\ModelSchema;
 
-/**
- *
- *
- * @package Rhubarb\Stem\Tests\Fixtures
- * @author      acuthbert
- * @copyright   2013 GCD Technologies Ltd.
- */
 class Category extends Model
 {
     /**

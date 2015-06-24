@@ -1,16 +1,19 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\Contains;
+use Rhubarb\Stem\Filters\Group;
+use Rhubarb\Stem\Filters\LessThan;
+use Rhubarb\Stem\Filters\Not;
+use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
 /**
- *
- * @author    rkilfedder
- * @copyright GCD Technologies 2012
  * Tests the NOT filter.
  */
-class NotTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class NotTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -23,7 +26,7 @@ class NotTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->Surname = "Joe";
@@ -43,40 +46,40 @@ class NotTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
         $example->ContactID = 3;
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->Surname = "Smithe";
         $example->DateOfBirth = "1980-06-09";
         $example->ContactID = 4;
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
         $example->ContactID = 5;
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "James";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
         $example->ContactID = 6;
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "John";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
         $example->ContactID = 7;
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     function testFiltersSimple()
     {
-        $notFilter = new \Rhubarb\Stem\Filters\Not(new \Rhubarb\Stem\Filters\Contains("Forename", "jo"));
+        $notFilter = new Not(new Contains("Forename", "jo"));
         $this->list->filter($notFilter);
         $this->assertCount(3, $this->list);
         $this->assertContains("Mary", $this->list[0]->Forename);
@@ -84,12 +87,12 @@ class NotTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     function testFiltersWithGroup()
     {
-        $filterGroup = new \Rhubarb\Stem\Filters\Group("And");
+        $filterGroup = new Group("And");
         $filterGroup->addFilters(
-            new \Rhubarb\Stem\Filters\Contains("Forename", "Jo", true),
-            new \Rhubarb\Stem\Filters\Contains("Surname", "Johnson", true)
+            new Contains("Forename", "Jo", true),
+            new Contains("Surname", "Johnson", true)
         );
-        $notFilter = new \Rhubarb\Stem\Filters\Not($filterGroup);
+        $notFilter = new Not($filterGroup);
         $this->list->filter($notFilter);
         $this->assertCount(6, $this->list);
         $this->assertContains("Joe", $this->list[0]->Surname);
@@ -97,25 +100,25 @@ class NotTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     function testFiltersWithGroupedGroup()
     {
-        $filterGroup1 = new \Rhubarb\Stem\Filters\Group("And");
+        $filterGroup1 = new Group("And");
         $filterGroup1->addFilters(
-            new \Rhubarb\Stem\Filters\Contains("Forename", "Jo", true),
-            new \Rhubarb\Stem\Filters\Contains("Surname", "Jo", true)
+            new Contains("Forename", "Jo", true),
+            new Contains("Surname", "Jo", true)
         );
 
-        $filterGroup2 = new \Rhubarb\Stem\Filters\Group("Or");
+        $filterGroup2 = new Group("Or");
         $filterGroup2->addFilters(
-            new \Rhubarb\Stem\Filters\Contains("Surname", "Luc", true),
-            new \Rhubarb\Stem\Filters\LessThan("DateOfBirth", "1980-01-01", true)
+            new Contains("Surname", "Luc", true),
+            new LessThan("DateOfBirth", "1980-01-01", true)
         );
 
-        $filterGroup = new \Rhubarb\Stem\Filters\Group("Or");
+        $filterGroup = new Group("Or");
         $filterGroup->addFilters(
             $filterGroup1,
             $filterGroup2
         );
 
-        $notFilter = new \Rhubarb\Stem\Filters\Not($filterGroup);
+        $notFilter = new Not($filterGroup);
         $this->list->filter($notFilter);
         $this->assertCount(3, $this->list);
         $this->assertContains("Smithe", $this->list[0]->Surname);
@@ -123,24 +126,24 @@ class NotTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     function testXOR()
     {
-        $filterOne = new \Rhubarb\Stem\Filters\Contains("Forename", "Jo", true);
-        $filterTwo = new \Rhubarb\Stem\Filters\Contains("Surname", "Jo", true);
+        $filterOne = new Contains("Forename", "Jo", true);
+        $filterTwo = new Contains("Surname", "Jo", true);
 
-        $filterAnd = new \Rhubarb\Stem\Filters\Group("And");
+        $filterAnd = new Group("And");
         $filterAnd->addFilters(
             $filterOne,
             $filterTwo
         );
 
-        $filterOr = new \Rhubarb\Stem\Filters\Group("Or");
+        $filterOr = new Group("Or");
         $filterOr->addFilters(
             $filterOne,
             $filterTwo
         );
 
-        $filterNotAnd = new \Rhubarb\Stem\Filters\Not($filterAnd);
+        $filterNotAnd = new Not($filterAnd);
 
-        $filterXor = new \Rhubarb\Stem\Filters\Group("And");
+        $filterXor = new Group("And");
         $filterXor->addFilters(
             $filterNotAnd,
             $filterOr

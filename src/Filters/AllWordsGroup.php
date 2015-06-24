@@ -56,13 +56,13 @@ class AllWordsGroup extends Group
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "fieldNames" ] = $this->fieldNames;
-        $settings[ "words" ] = $this->words;
+        $settings["fieldNames"] = $this->fieldNames;
+        $settings["words"] = $this->words;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings["fieldNames"], $settings["words"] );
+        return new self($settings["fieldNames"], $settings["words"]);
     }
 }

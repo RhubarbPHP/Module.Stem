@@ -14,11 +14,6 @@ use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 class MySqlSchemaTest extends MySqlTestCase
 {
     public function testEnumRequiresDefault()

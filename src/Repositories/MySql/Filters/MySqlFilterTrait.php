@@ -24,10 +24,6 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
  * Adds a method used to determine if the filter requires auto hydration of navigation properties.
- *
- * @package Rhubarb\Stem\Repositories\MySql\Filters
- * @author      acuthbert
- * @copyright   2013 GCD Technologies Ltd.
  */
 trait MySqlFilterTrait
 {

@@ -77,13 +77,13 @@ class Contains extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "contains" ] = $this->contains;
-        $settings[ "caseSensitive" ] = $this->caseSensitive;
+        $settings["contains"] = $this->contains;
+        $settings["caseSensitive"] = $this->caseSensitive;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["contains"], $settings["caseSensitive"] );
+        return new self($settings["columnName"], $settings["contains"], $settings["caseSensitive"]);
     }
 }

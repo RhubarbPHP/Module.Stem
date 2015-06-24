@@ -15,7 +15,6 @@ use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 /**
- *
  * @property int $UserID
  * @property int $CompanyID
  * @property string $Username
@@ -23,9 +22,6 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $Surname
  * @property string $Password
  * @property bool $Active
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
  */
 class User extends Model
 {

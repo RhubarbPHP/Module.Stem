@@ -20,11 +20,6 @@ namespace Rhubarb\Stem\Exceptions;
 
 use Rhubarb\Crown\Exceptions\RhubarbException;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 class ModelException extends RhubarbException
 {
     /**
