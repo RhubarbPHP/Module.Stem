@@ -40,7 +40,7 @@ class MySqlTime extends Time
     public function getTransformIntoRepository()
     {
         return function ($data) {
-            $data = new RhubarbTime($data);
+            $data = new RhubarbTime($data[$this->columnName]);
 
             if ($data->isValidDateTime()) {
                 $date = $data->format("H:i:s");
@@ -55,7 +55,7 @@ class MySqlTime extends Time
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbTime($data);
+            $date = new RhubarbTime($data[$this->columnName]);
 
             return $date;
         };
