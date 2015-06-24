@@ -35,9 +35,7 @@ class MySqlString extends String
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` varchar(" . $this->maximumLength . ") " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` varchar(" . $this->maximumLength . ") " . $this->getDefaultDefinition();
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)

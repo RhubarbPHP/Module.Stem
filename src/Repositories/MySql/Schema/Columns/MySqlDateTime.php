@@ -40,8 +40,7 @@ class MySqlDateTime extends DateTime
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` datetime " . $this->getDefaultDefinition();
-        return $sql;
+        return "`" . $this->columnName . "` datetime " . $this->getDefaultDefinition();
     }
 
     public function getTransformIntoModelData()
@@ -69,9 +68,7 @@ class MySqlDateTime extends DateTime
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbDateTime($data[$this->columnName]);
-
-            return $date;
+            return new RhubarbDateTime($data[$this->columnName]);
         };
     }
 }

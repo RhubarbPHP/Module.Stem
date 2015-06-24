@@ -29,10 +29,8 @@ class MySqlTinyInt extends MySqlInteger
      */
     public function getDefinition()
     {
-        $sql = '`' . $this->columnName . '` TINYINT(4) ' .
+        return '`' . $this->columnName . '` TINYINT(4) ' .
             (!$this->signed ? 'UNSIGNED ' : '') .
             $this->getDefaultDefinition();
-
-        return $sql;
     }
 }

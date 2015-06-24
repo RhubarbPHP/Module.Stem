@@ -39,8 +39,6 @@ class MySqlMediumText extends String
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` mediumtext " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` mediumtext " . $this->getDefaultDefinition();
     }
 }

@@ -33,8 +33,7 @@ class MySqlTime extends Time
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` time " . $this->getDefaultDefinition();
-        return $sql;
+        return "`" . $this->columnName . "` time " . $this->getDefaultDefinition();
     }
 
     public function getTransformIntoRepository()
@@ -55,9 +54,7 @@ class MySqlTime extends Time
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbTime($data[$this->columnName]);
-
-            return $date;
+            return new RhubarbTime($data[$this->columnName]);
         };
     }
 

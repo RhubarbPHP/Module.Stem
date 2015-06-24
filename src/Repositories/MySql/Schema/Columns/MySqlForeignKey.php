@@ -41,6 +41,4 @@ class MySqlForeignKey extends MySqlInteger
     {
         return new MySqlForeignKey($genericColumn->columnName);
     }
-
-
 }

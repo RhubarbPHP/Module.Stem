@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
+use Rhubarb\Stem\Exceptions\SchemaException;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -41,7 +42,7 @@ class MySqlEnum extends Column
     public function __construct($columnName, $defaultValue, $enumValues)
     {
         if ($defaultValue === null || !in_array($defaultValue, $enumValues)) {
-            throw new \Rhubarb\Stem\Exceptions\SchemaException("The enum column does not have a default matching one of the enum values.");
+            throw new SchemaException("The enum column does not have a default matching one of the enum values.");
         }
 
         parent::__construct($columnName, $defaultValue);

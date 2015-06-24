@@ -32,10 +32,8 @@ class MySqlSmallMySqlInteger extends MySqlInteger
      */
     public function getDefinition()
     {
-        $sql = '`' . $this->columnName . '` SMALLINT(6) ' .
+        return '`' . $this->columnName . '` SMALLINT(6) ' .
             (!$this->signed ? 'UNSIGNED ' : '') .
             $this->getDefaultDefinition();
-
-        return $sql;
     }
 }

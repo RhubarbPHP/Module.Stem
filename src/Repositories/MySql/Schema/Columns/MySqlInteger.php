@@ -31,15 +31,11 @@ class MySqlInteger extends Integer
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` int(11) " . (!$this->signed ? "unsigned " : "") . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` int(11) " . (!$this->signed ? "unsigned " : "") . $this->getDefaultDefinition();
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
         return new MySqlInteger($genericColumn->columnName);
     }
-
-
 }

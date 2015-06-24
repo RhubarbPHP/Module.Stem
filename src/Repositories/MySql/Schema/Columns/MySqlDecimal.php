@@ -36,7 +36,8 @@ class MySqlDecimal extends Decimal
             $genericColumn->columnName,
             $genericColumn->totalDigits,
             $genericColumn->decimalDigits,
-            $genericColumn->defaultValue);
+            $genericColumn->defaultValue
+        );
     }
 
     /**
@@ -53,8 +54,6 @@ class MySqlDecimal extends Decimal
      */
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` DECIMAL(" . $this->totalDigits . "," . $this->decimalDigits . ") " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` DECIMAL(" . $this->totalDigits . "," . $this->decimalDigits . ") " . $this->getDefaultDefinition();
     }
 }

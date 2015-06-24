@@ -35,8 +35,6 @@ class MySqlSet extends MySqlEnum
     {
         $possibleString = "'" . implode("','", $this->possibleValues) . "'";
 
-        $sql = "`" . $this->columnName . "` set(" . $possibleString . ") " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` set(" . $possibleString . ") " . $this->getDefaultDefinition();
     }
 }

@@ -38,9 +38,7 @@ class MySqlAutoIncrement extends AutoIncrement
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` int(11) unsigned NOT NULL AUTO_INCREMENT";
-
-        return $sql;
+        return "`" . $this->columnName . "` int(11) unsigned NOT NULL AUTO_INCREMENT";
     }
 
     public function getIndex()

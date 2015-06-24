@@ -41,8 +41,7 @@ class MySqlDate extends Date
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` date " . $this->getDefaultDefinition();
-        return $sql;
+        return "`" . $this->columnName . "` date " . $this->getDefaultDefinition();
     }
 
     public function getTransformIntoRepository()
@@ -63,9 +62,7 @@ class MySqlDate extends Date
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbDate($data[$this->columnName]);
-
-            return $date;
+            return new RhubarbDate($data[$this->columnName]);
         };
     }
 }
