@@ -44,13 +44,6 @@ abstract class Model extends ModelState
 {
     private $eventsToRaiseAfterSave = [];
 
-    /**
-     * Tracks if default values have been set yet.
-     *
-     * @var bool
-     */
-    private $defaultsSet = false;
-
     public final function __construct($uniqueIdentifier = null)
     {
         $this->modelName = SolutionSchema::getModelNameFromClass(get_class($this));
@@ -83,7 +76,6 @@ abstract class Model extends ModelState
         }
 
         if ($uniqueIdentifier !== null) {
-            $this->defaultsSet = true;
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
         }
@@ -108,29 +100,7 @@ abstract class Model extends ModelState
 
     protected function setDefaultValues()
     {
-        if ( $this->defaultsSet ){
-            return;
-        }
 
-        $this->defaultsSet = true;
-
-        $columns = $this->getSchema()->getColumns();
-
-        foreach ($columns as $column) {
-            if ($column->columnName == $this->UniqueIdentifierColumnName) {
-                continue;
-            }
-
-            if ($column->defaultValue !== null) {
-                $defaultValue = $column->defaultValue;
-
-                if (is_object($defaultValue)) {
-                    $defaultValue = clone $defaultValue;
-                }
-
-                $this[$column->columnName] = $defaultValue;
-            }
-        }
     }
 
     public function importRawData($data)
@@ -632,14 +602,6 @@ abstract class Model extends ModelState
 
     public function __set($propertyName, $value)
     {
-        if ( !$this->defaultsSet ){
-            $this->setDefaultValues();
-        }
-
-        if ($propertyName == $this->uniqueIdentifierColumnName) {
-            $this->uniqueIdentifier = $value;
-        }
-
         if (isset(self::$modelDataTransforms[$this->modelName][$propertyName][1])) {
             $closure = self::$modelDataTransforms[$this->modelName][$propertyName][1];
             $value = $closure($value);
@@ -663,6 +625,10 @@ abstract class Model extends ModelState
             if (isset($this->propertyCache[$propertyName])) {
                 $this->propertyCache[$propertyName] = $propertyName;
             }
+        }
+
+        if ($propertyName == $this->uniqueIdentifierColumnName) {
+            $this->captureUniqueIdentifier();
         }
     }
 
@@ -713,10 +679,6 @@ abstract class Model extends ModelState
 
     public function __get($propertyName)
     {
-        if ( !$this->defaultsSet ){
-            $this->setDefaultValues();
-        }
-
         // Should any type of magical getter below require that the value is cached for performance
         // this boolean will be set to true. At the end of the function we pick up on this and do the
         // caching - instead of having the caching line repeated all over the place.
@@ -752,6 +714,26 @@ abstract class Model extends ModelState
 
                 if ($value instanceof Model) {
                     $addToPropertyCache = true;
+                }
+            }
+
+            if ($propertyName != $this->UniqueIdentifierColumnName) {
+                // See if the column has a default
+                $columns = $this->getSchema()->getColumns();
+                if (isset($columns[$propertyName])) {
+                    $defaultValue = $columns[$propertyName]->defaultValue;
+                    if (is_object($defaultValue)){
+                        $defaultValue = clone $defaultValue;
+                    }
+                    // We actually have to set the default value on the model - to ensure this value
+                    // goes through the normal setting pathway.
+                    // First we disable change events - this is to stop infinite loops and really would
+                    // you expect those to fire for the setting of defaults anyway?
+                    $this->propertyChangeEventsDisabled = true;
+                    $this[$propertyName] = $defaultValue;
+                    $this->propertyChangeEventsDisabled = false;
+
+                    $value = parent::__get($propertyName);
                 }
             }
         }
