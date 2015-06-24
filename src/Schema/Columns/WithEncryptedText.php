@@ -26,7 +26,7 @@ trait WithEncryptedText
     {
         return function ($data) {
             $encryption = EncryptionProvider::getEncryptionProvider();
-            return $encryption->encrypt($data[$this->columnName], $this->columnName);
+            return $encryption->encrypt($data, $this->columnName);
         };
     }
 
@@ -34,7 +34,7 @@ trait WithEncryptedText
     {
         return function ($data) {
             $encryption = EncryptionProvider::getEncryptionProvider();
-            return $encryption->decrypt($data[$this->columnName], $this->columnName);
+            return $encryption->decrypt($data, $this->columnName);
         };
     }
 
