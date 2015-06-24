@@ -573,7 +573,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $modelSchema = $this->getModelSchema();
-        list($count) = $this->calculateAggregates(new Count($modelSchema->uniqueIdentifierColumnName));
+        list($count) = $this->calculateAggregates(new Count($modelSchema->schemaName.".".$modelSchema->uniqueIdentifierColumnName));
         return $count;
     }
 
