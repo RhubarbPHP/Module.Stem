@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\LoginProviders;
 
 use Rhubarb\Crown\Encryption\HashProvider;
 use Rhubarb\Crown\Exceptions\ImplementationException;
+use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
@@ -67,6 +68,7 @@ class ModelLoginProvider extends LoginProvider
         $list->filter(new Equals($this->usernameColumnName, $username));
 
         if (!sizeof($list)) {
+            Log::debug( "Login failed for {$username} - the username didn't match a user", "LOGIN" );
             throw new LoginFailedException();
         }
 
@@ -76,6 +78,7 @@ class ModelLoginProvider extends LoginProvider
         // unique *combinations* of username and password but it's a potential security issue and
         // could trip us up when supporting the project.
         if (sizeof($list) > 1) {
+            Log::debug( "Login failed for {$username} - the username wasn't unique", "LOGIN" );
             throw new LoginFailedException();
         }
 
@@ -96,9 +99,12 @@ class ModelLoginProvider extends LoginProvider
 
                 return true;
             } else {
+                Log::debug( "Login failed for {$username} - the user is disabled.", "LOGIN" );
                 throw new LoginDisabledException();
             }
         }
+
+        Log::debug( "Login failed for {$username} - the password hash $userPasswordHash didn't match the stored hash.", "LOGIN" );
 
         throw new LoginFailedException();
     }
