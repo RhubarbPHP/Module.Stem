@@ -572,7 +572,7 @@ class MySql extends PdoRepository
 
             if ($clause != "") {
                 $c++;
-                $clauses[] = str_replace('.', '`.`', $clause);
+                $clauses[] = $clause;
                 $clausePositions[$c] = $i;
             } else {
                 $results[$i] = null;
