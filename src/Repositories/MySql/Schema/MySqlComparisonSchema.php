@@ -115,7 +115,7 @@ class MySqlComparisonSchema
             } else {
                 $words = explode(" ", $line);
 
-                $indexKeywords = ["PRIMARY", "KEY", "UNIQUE"];
+                $indexKeywords = ["PRIMARY", "KEY", "UNIQUE", "FULLTEXT"];
 
                 if (in_array($words[0], $indexKeywords)) {
                     $comparisonSchema->indexes[] = preg_replace('/\s+/', ' ', rtrim(trim($line), ","));
