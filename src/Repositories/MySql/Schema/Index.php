@@ -97,7 +97,7 @@ class Index
                 return "UNIQUE `" . $this->indexName . "`" . $columnNames;
                 break;
             case Index::FULLTEXT:
-                return "FULLTEXT INDEX `" . $this->indexName . "`" . $columnNames;
+                return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
                 break;
         }
 
