@@ -34,8 +34,8 @@ class MySqlBoolean extends Boolean
 
     public function getTransformIntoRepository()
     {
-        return function ($value) {
-            return ($value) ? 1 : 0;
+        return function ($data) {
+            return ($data[$this->columnName]) ? 1 : 0;
         };
     }
 
