@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema;
 
 require_once __DIR__ . "/../../../Schema/ModelSchema.php";
 
+use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\Column;
@@ -79,7 +80,7 @@ class MySqlModelSchema extends ModelSchema
                     $repos::executeStatement($alterStatement);
                 } catch (RepositoryStatementException $er) {
                     // The update of the schema failed - probably meaning bad news!
-                    /// TODO: Handle reporting of this information.
+                    Log::error("Database schema update failed: $this->schemaName", "ERROR", "SQL Statement: $alterStatement\r\n\r\nException: ".$er->getMessage());
                 }
             }
         } catch (RepositoryStatementException $er) {
