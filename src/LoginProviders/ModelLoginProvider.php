@@ -26,6 +26,7 @@ use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
 use Rhubarb\Crown\LoginProviders\LoginProvider;
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -82,6 +83,7 @@ class ModelLoginProvider extends LoginProvider
             throw new LoginFailedException();
         }
 
+        /** @var Model $user */
         $user = $list[0];
 
         $this->checkUserIsPermitted($user);
@@ -159,7 +161,7 @@ class ModelLoginProvider extends LoginProvider
         if (isset($this->LoggedInUserIdentifier)) {
             try {
                 return SolutionSchema::getModel($this->modelClassName, $this->LoggedInUserIdentifier);
-            } catch (\Rhubarb\Stem\Exceptions\RecordNotFoundException $er) {
+            } catch (RecordNotFoundException $er) {
                 throw new NotLoggedInException();
             }
         }
@@ -174,4 +176,10 @@ class ModelLoginProvider extends LoginProvider
 
         parent::onLogOut();
     }
+
+	protected function getUsername()
+	{
+		$user = $this->getModel();
+		return $user->{$this->usernameColumnName};
+	}
 }
