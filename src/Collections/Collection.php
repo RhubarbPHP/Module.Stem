@@ -29,6 +29,7 @@ use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -209,6 +210,13 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         return $this;
+    }
+
+    public function getRepositoryFetchCommand(&$namedParams = null)
+    {
+        $repository = $this->getRepository();
+
+        return $repository->getRepositoryFetchCommandForDataList($this, $this->relationshipNavigationPropertiesToAutoHydrate, $namedParams);
     }
 
     /**
@@ -573,7 +581,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $modelSchema = $this->getModelSchema();
-        list($count) = $this->calculateAggregates(new Count($modelSchema->schemaName.".".$modelSchema->uniqueIdentifierColumnName));
+        list($count) = $this->calculateAggregates(new Count($modelSchema->schemaName . "." . $modelSchema->uniqueIdentifierColumnName));
         return $count;
     }
 
