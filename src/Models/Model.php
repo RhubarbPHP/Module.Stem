@@ -340,11 +340,11 @@ abstract class Model extends ModelState
      *
      * @param Filter $filter
      * @throws RecordNotFoundException
-     * @return Model
+     * @return Model|static
      */
     public static function findFirst(Filter $filter = null)
     {
-        $results = self::find($filter);
+        $results = static::find($filter);
 
         if (sizeof($results) == 0) {
             throw new RecordNotFoundException(get_called_class(), 0);
@@ -358,11 +358,11 @@ abstract class Model extends ModelState
      *
      * @param Filter $filter
      * @throws RecordNotFoundException
-     * @return Model
+     * @return Model|static
      */
     public static function findLast(Filter $filter = null)
     {
-        $results = self::find($filter);
+        $results = static::find($filter);
         $modelClass = get_called_class();
         $model = new $modelClass();
         $results->addSort($model->getUniqueIdentifierColumnName(), false);
@@ -378,7 +378,7 @@ abstract class Model extends ModelState
      * Returns the Collection of models matching the given filter.
      *
      * @param Filter $filter
-     * @return Collection
+     * @return Collection|static[]
      */
     public static function find(Filter $filter = null)
     {
