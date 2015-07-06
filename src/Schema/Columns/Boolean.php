@@ -31,8 +31,8 @@ class Boolean extends Column
 
     public function getTransformFromRepository()
     {
-        return function ($value) {
-            return (bool)$value;
+        return function ($data) {
+            return (bool)$data[$this->columnName];
         };
     }
 }
