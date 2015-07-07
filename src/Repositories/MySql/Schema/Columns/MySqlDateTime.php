@@ -22,7 +22,8 @@ use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateTime;
 
-require_once __DIR__ . "/MySqlDate.php";
+require_once __DIR__ . "/../../../../Schema/Columns/DateTime.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlDateTime extends DateTime
 {

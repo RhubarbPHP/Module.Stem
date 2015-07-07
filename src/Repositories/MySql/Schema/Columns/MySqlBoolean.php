@@ -22,6 +22,7 @@ use Rhubarb\Stem\Schema\Columns\Boolean;
 use Rhubarb\Stem\Schema\Columns\Column;
 
 require_once __DIR__ . '/../../../../Schema/Columns/Boolean.php';
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlBoolean extends Boolean
 {

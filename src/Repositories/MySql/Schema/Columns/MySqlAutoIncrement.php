@@ -22,7 +22,8 @@ use Rhubarb\Stem\Repositories\MySql\Schema\Index;
 use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Columns\Column;
 
-require_once __DIR__ . "/MySqlInteger.php";
+require_once __DIR__ . "/../../../../Schema/Columns/AutoIncrement.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlAutoIncrement extends AutoIncrement
 {

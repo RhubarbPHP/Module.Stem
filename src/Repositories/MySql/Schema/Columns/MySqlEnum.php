@@ -23,6 +23,7 @@ use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 require_once __DIR__ . "/../../../../Schema/Columns/Column.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 /**
  * Represents a MySql enum column type

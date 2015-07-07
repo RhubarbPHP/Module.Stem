@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 require_once __DIR__ . "/../../../../Schema/Columns/String.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 use Rhubarb\Stem\Schema\Columns\String;
 
