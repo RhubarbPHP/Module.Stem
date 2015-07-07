@@ -24,6 +24,8 @@ class Decimal extends Column
 {
     protected $totalDigits = 8;
     protected $decimalDigits = 2;
+    protected $maxValue;
+    protected $minValue;
 
     public function __construct($columnName, $totalDigits = 8, $decimalDigits = 2, $defaultValue = null)
     {
@@ -31,6 +33,10 @@ class Decimal extends Column
 
         $this->totalDigits = $totalDigits;
         $this->decimalDigits = $decimalDigits;
+
+        // Calculate the range of values allowed by $totalDigits
+        $this->maxValue = (float) (pow(10, $totalDigits - $decimalDigits) - '0.' . str_repeat('0', $decimalDigits - 1) . '1');
+        $this->minValue = $this->maxValue * -1;
     }
 
     /**
@@ -47,5 +53,18 @@ class Decimal extends Column
     public function getDecimalDigits()
     {
         return $this->decimalDigits;
+    }
+
+    public function getTransformIntoModelData()
+    {
+        return function ($value) {
+            $value = round((float)$value, $this->decimalDigits);
+
+            // Ensure the value isn't outside the range that $this->totalDigits allows
+            $value = min($this->maxValue, $value);
+            $value = max($this->minValue, $value);
+
+            return $value;
+        };
     }
 }
