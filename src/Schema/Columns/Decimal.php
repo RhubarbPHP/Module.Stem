@@ -33,4 +33,19 @@ class Decimal extends Column
         $this->decimalDigits = $decimalDigits;
     }
 
+    /**
+     * @return int
+     */
+    public function getTotalDigits()
+    {
+        return $this->totalDigits;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDecimalDigits()
+    {
+        return $this->decimalDigits;
+    }
 }
