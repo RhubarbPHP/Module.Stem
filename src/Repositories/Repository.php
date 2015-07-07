@@ -98,7 +98,7 @@ abstract class Repository
 
             foreach ($storageColumns as $storageColumn) {
                 if (!isset($this->columnTransforms[$storageColumn->columnName]) ) {
-                    $this->columnTransforms[$storageColumn->columnName] = [];
+                    $this->columnTransforms[$storageColumn->columnName] = [null,null];
                 }
 
                 $this->columnTransforms[$storageColumn->columnName][0] =
