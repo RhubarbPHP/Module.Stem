@@ -25,7 +25,7 @@ class Json extends LongString
     public function getTransformFromRepository()
     {
         return function ($data) {
-            return json_decode($data);
+            return json_decode($data[$this->columnName]);
         };
     }
 

@@ -40,9 +40,15 @@ class FilterSettings extends Json
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $value = json_decode($data[$this->columnName], true);
+            $value = $data[$this->columnName];
 
-            return Filter::speciateFromSettingsArray($value);
+            if ( $value == "" ){
+                return [];
+            }
+
+            $value = json_decode($value, true);
+
+            return ($value != null ) ? Filter::speciateFromSettingsArray($value) : [];
         };
     }
 }

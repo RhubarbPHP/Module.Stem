@@ -97,11 +97,17 @@ abstract class Repository
             $storageColumns = $column->createStorageColumns();
 
             foreach ($storageColumns as $storageColumn) {
-                $this->columnTransforms[$storageColumn->columnName] =
-                    [
-                        $storageColumn->getTransformFromRepository(),
-                        $storageColumn->getTransformIntoRepository()
-                    ];
+                if (!isset($this->columnTransforms[$storageColumn->columnName]) ) {
+                    $this->columnTransforms[$storageColumn->columnName] = [];
+                }
+
+                $this->columnTransforms[$storageColumn->columnName][0] =
+                    ( $this->columnTransforms[$storageColumn->columnName][0] == null ) ?
+                        $storageColumn->getTransformFromRepository() : $this->columnTransforms[$storageColumn->columnName][0];
+
+                $this->columnTransforms[$storageColumn->columnName][1] =
+                    ( $this->columnTransforms[$storageColumn->columnName][1] == null ) ?
+                        $storageColumn->getTransformIntoRepository() : $this->columnTransforms[$storageColumn->columnName][1];
             }
         }
     }
