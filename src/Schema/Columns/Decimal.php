@@ -35,7 +35,7 @@ class Decimal extends Column
         $this->decimalDigits = $decimalDigits;
 
         // Calculate the range of values allowed by $totalDigits
-        $this->maxValue = (float) (pow(10, $totalDigits - $decimalDigits) - '0.' . str_repeat('0', $decimalDigits - 1) . '1');
+        $this->maxValue = (float) (pow(10, $totalDigits - $decimalDigits) - ('0.' . str_repeat('0', $decimalDigits - 1) . '1'));
         $this->minValue = $this->maxValue * -1;
     }
 
