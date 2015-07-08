@@ -624,10 +624,11 @@ class MySql extends PdoRepository
 
             $sql .= $groupClause;
 
-            $row = array_values(self::returnFirstRow($sql, $namedParams));
+            $firstRow = self::ReturnFirstRow($sql, $namedParams);
+            $row = is_array($firstRow) ? array_values($firstRow) : null;
 
             foreach ($clausePositions as $rowPosition => $resultPosition) {
-                $results[$resultPosition] = $row[$rowPosition];
+                $results[$resultPosition] = $row === null ? null : $row[$rowPosition];
             }
         }
 
