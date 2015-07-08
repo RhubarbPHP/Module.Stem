@@ -18,6 +18,9 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
+require_once __DIR__ . "/../../../../Schema/Columns/Time.php";
+require_once __DIR__ . "/MySqlColumn.php";
+
 use Rhubarb\Crown\DateTime\RhubarbTime;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Time;

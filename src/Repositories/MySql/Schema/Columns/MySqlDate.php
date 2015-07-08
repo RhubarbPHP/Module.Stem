@@ -24,6 +24,7 @@ use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Date;
 
 require_once __DIR__ . "/../../../../Schema/Columns/Date.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlDate extends Date
 {

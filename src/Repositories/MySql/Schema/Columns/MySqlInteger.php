@@ -22,6 +22,7 @@ use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Integer;
 
 require_once __DIR__ . "/../../../../Schema/Columns/Integer.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlInteger extends Integer
 {

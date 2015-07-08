@@ -18,7 +18,8 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/../../../../Schema/Columns/Float.php";
+require_once __DIR__ . "/../../../../Schema/Columns/Decimal.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Decimal;
@@ -30,6 +31,10 @@ class MySqlDecimal extends Decimal
 {
     use MySqlColumn;
 
+    /**
+     * @param Decimal|Column $genericColumn
+     * @return MySqlDecimal
+     */
     protected static function fromGenericColumnType(Column $genericColumn)
     {
         return new MySqlDecimal(
