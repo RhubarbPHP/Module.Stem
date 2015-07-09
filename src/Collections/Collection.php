@@ -647,8 +647,9 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * This can be used by the repository to employ limits but generally allows for easy paging of a list.
      *
-     * @param $startIndex
-     * @param $maxItems
+     * @param int $startIndex
+     * @param int $maxItems
+     * @return $this
      */
     public function setRange($startIndex, $maxItems)
     {
@@ -673,6 +674,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             // as that would cause another query being sent to the database.
             $this->invalidateList();
         }
+
+        return $this;
     }
 
     /**
