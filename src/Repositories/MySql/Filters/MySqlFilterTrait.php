@@ -92,7 +92,7 @@ trait MySqlFilterTrait
             $closure = $columnSchema->getTransformIntoRepository();
 
             if ($closure !== null) {
-                $rawComparisonValue = $closure([$columnName=>$rawComparisonValue]);
+                $rawComparisonValue = $closure([$columnSchema->columnName=>$rawComparisonValue]);
             }
         }
 
