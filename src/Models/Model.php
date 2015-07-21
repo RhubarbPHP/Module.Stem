@@ -78,6 +78,8 @@ abstract class Model extends ModelState
         if ($uniqueIdentifier !== null) {
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
+        } else {
+            $this->setDefaultValues();
         }
 
         parent::__construct();
@@ -158,12 +160,10 @@ abstract class Model extends ModelState
     {
         $args = func_get_args();
 
-        call_user_func_array([$this, "TraitRaiseEvent"], $args);
-
         array_splice($args, 1, 0, [$this]);
 
-        // In addition to the standard object level event dispatch we raise a class level dispatch
-        // This allows global listeners like the solution schema to co-ordinate inter model activities
+        // Raise a class level dispatch which allows global listeners like the solution schema to
+        // co-ordinate inter model activities.
 
         call_user_func_array("Rhubarb\Stem\Models\ModelEventManager::dispatchModelEvent", $args);
     }
