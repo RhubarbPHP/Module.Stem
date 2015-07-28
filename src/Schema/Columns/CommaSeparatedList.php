@@ -42,6 +42,9 @@ class CommaSeparatedList extends String
     public function getTransformFromRepository()
     {
         return function ($data) {
+            if (empty($data[$this->columnName])) {
+                return [];
+            }
             return explode(",", $data[$this->columnName]);
         };
     }
