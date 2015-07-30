@@ -37,7 +37,7 @@ class MySqlMin extends Max
 
             $originalAggregate->aggregatedByRepository = true;
 
-            return "MIN( `{$columnName}` ) AS `{$aliasName}`";
+            return "MIN( `{$repository->getSchema()->schemaName}`.`{$columnName}` ) AS `{$aliasName}`";
         }
 
         return "";

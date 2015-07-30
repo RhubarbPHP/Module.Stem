@@ -28,25 +28,18 @@ class MySqlCountDistinct extends CountDistinct
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(
-        Repository $repository,
-        Aggregate $originalAggregate,
-        &$relationshipsToAutoHydrate
-    )
+    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, &$relationshipsToAutoHydrate)
     {
         $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
 
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName,
-            $relationshipsToAutoHydrate)
-        ) {
+        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName, $relationshipsToAutoHydrate)) {
             $aliasName = $originalAggregate->getAlias();
 
             $originalAggregate->aggregatedByRepository = true;
 
-            return "COUNT( DISTINCT `{$columnName}` ) AS `{$aliasName}`";
+            return "COUNT( DISTINCT `{$repository->getSchema()->schemaName}`.`{$columnName}` ) AS `{$aliasName}`";
         }
 
         return "";
     }
-
 }
