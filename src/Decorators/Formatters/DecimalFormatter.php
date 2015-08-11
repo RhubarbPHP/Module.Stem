@@ -20,7 +20,7 @@ class DecimalFormatter extends TypeFormatter
         $decimalDigits = $column->getDecimalDigits();
 
         return function(Model $model, $value) use($decimalDigits) {
-            number_format($value, $decimalDigits);
+            return number_format($value, $decimalDigits);
         };
     }
 }
