@@ -29,7 +29,7 @@ class MySqlMediumText extends String
 
     public function __construct($columnName)
     {
-        parent::__construct($columnName, 0, false);
+        parent::__construct($columnName, 0, null);
     }
 
     public function getDefaultDefinition()

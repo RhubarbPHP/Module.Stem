@@ -40,6 +40,7 @@ class MySqlLongString extends MySqlMediumText
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new self($genericColumn->columnName);
+        $column = new self($genericColumn->columnName);
+        return $column;
     }
 }
