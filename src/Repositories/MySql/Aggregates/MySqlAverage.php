@@ -37,7 +37,9 @@ class MySqlAverage extends Average
 
             $originalAggregate->aggregatedByRepository = true;
 
-            return "AVG( `{$repository->getSchema()->schemaName}`.`{$columnName}` ) AS `{$aliasName}`";
+            $prefix = ( strpos( $columnName, '.') === false ) ? "`{$repository->getSchema()->schemaName}`." : "";
+
+            return "AVG( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
         }
 
         return "";

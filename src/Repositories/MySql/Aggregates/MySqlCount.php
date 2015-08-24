@@ -37,7 +37,9 @@ class MySqlCount extends Count
 
             $originalAggregate->aggregatedByRepository = true;
 
-            return "COUNT( `{$repository->getSchema()->schemaName}`.`{$columnName}` ) AS `{$aliasName}`";
+            $prefix = ( strpos( $columnName, '.') === false ) ? "`{$repository->getSchema()->schemaName}`." : "";
+
+            return "COUNT( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
         }
 
         return "";

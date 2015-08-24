@@ -36,8 +36,9 @@ class MySqlCountDistinct extends CountDistinct
             $aliasName = $originalAggregate->getAlias();
 
             $originalAggregate->aggregatedByRepository = true;
+            $prefix = ( strpos( $columnName, '.') === false ) ? "`{$repository->getSchema()->schemaName}`." : "";
 
-            return "COUNT( DISTINCT `{$repository->getSchema()->schemaName}`.`{$columnName}` ) AS `{$aliasName}`";
+            return "COUNT( DISTINCT {$prefix}`{$columnName}` ) AS `{$aliasName}`";
         }
 
         return "";
