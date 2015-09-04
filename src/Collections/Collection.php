@@ -52,14 +52,14 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @var bool
      */
-    private $fetched = false;
+    protected $fetched = false;
 
     /**
      * The collection of unique identifiers comprising the list.
      *
      * @var array
      */
-    private $uniqueIdentifiers = [];
+    protected $uniqueIdentifiers = [];
 
     /**
      * An array of names of navigation properties we will suggest to the repository should be auto hydrated.
@@ -73,21 +73,21 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @var Filter
      */
-    private $filter;
+    protected $filter;
 
     /**
      * A collection of aggregates to compute for the collection.
      *
      * @var Aggregate[]
      */
-    private $aggregates = [];
+    protected $aggregates = [];
 
     /**
      * A list of aggregates that need to be solved by iteration as models are pulled from the collection.
      *
      * @var Aggregate[]
      */
-    private $aggregatesNeedingIterated = [];
+    protected $aggregatesNeedingIterated = [];
 
     public function __construct($modelClassName)
     {
@@ -487,7 +487,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     //// Interface methods
     ////////////////////////////////////////////////////////
 
-    private $iterator = -1;
+    protected $iterator = -1;
 
     public function current()
     {
@@ -585,7 +585,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         return $count;
     }
 
-    private $sorts = [];
+    protected $sorts = [];
 
     /**
      * Adds a new column to the sort list.
@@ -627,10 +627,10 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
-    private $rangeStartIndex = 0;
-    private $rangeEndIndex = null;
-    private $unfetchedRowCount = 0;
-    private $rangingDisabled = false;
+    protected $rangeStartIndex = 0;
+    protected $rangeEndIndex = null;
+    protected $unfetchedRowCount = 0;
+    protected $rangingDisabled = false;
 
     public function disableRanging()
     {
