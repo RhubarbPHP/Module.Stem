@@ -118,7 +118,9 @@ class MySqlComparisonSchema
                 $indexKeywords = ["PRIMARY", "KEY", "UNIQUE", "FULLTEXT"];
 
                 if (in_array($words[0], $indexKeywords)) {
-                    $comparisonSchema->indexes[] = preg_replace('/\s+/', ' ', rtrim(trim($line), ","));
+                    $index = preg_replace('/\s+/', ' ', rtrim(trim($line), ","));
+                    $index = preg_replace('/^UNIQUE KEY/', 'UNIQUE', $index);
+                    $comparisonSchema->indexes[] = $index;
                 }
             }
         }
