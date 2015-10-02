@@ -24,6 +24,11 @@ use Rhubarb\Crown\DateTime\RhubarbTime;
 
 class Time extends Column
 {
+    public function getPhpType()
+    {
+        return '\\' . RhubarbTime::class;
+    }
+
     public function getTransformIntoModelData()
     {
         return function ($data) {

@@ -36,6 +36,11 @@ class Json extends LongString
         $this->decodeAsArrays = $decodeAsArrays;
     }
 
+    public function getPhpType()
+    {
+        return \stdClass::class;
+    }
+
     public function getTransformFromRepository()
     {
         return function ($data) {

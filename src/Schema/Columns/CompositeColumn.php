@@ -33,6 +33,11 @@ abstract class CompositeColumn extends Column
         parent::__construct($columnName, $this->getNewContainerObject());
     }
 
+    public function getPhpType()
+    {
+        return "string[]";
+    }
+
     /**
      * Returns an array of strings; the names of the composite columns being used.
      *
