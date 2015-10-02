@@ -22,4 +22,8 @@ require_once __DIR__ . "/Column.php";
 
 class Integer extends Column
 {
+    public function getPhpType()
+    {
+        return "int";
+    }
 }

@@ -131,7 +131,17 @@ abstract class SolutionSchema
     }
 
     /**
-     * Get's an empty model of the appropriate type for a given model name.
+     * Gets an array of all named models and their class names
+     *
+     * @return Model[]
+     */
+    public function getAllModels()
+    {
+        return $this->models;
+    }
+
+    /**
+     * Gets an empty model of the appropriate type for a given model name.
      *
      * @param      $modelName
      * @param null $uniqueIdentifier Optionally a unique identifier to load.

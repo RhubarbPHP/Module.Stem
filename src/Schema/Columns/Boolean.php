@@ -22,6 +22,11 @@ require_once __DIR__ . "/Column.php";
 
 class Boolean extends Column
 {
+    public function getPhpType()
+    {
+        return "bool";
+    }
+
     public function getTransformIntoModelData()
     {
         return function ($value) {

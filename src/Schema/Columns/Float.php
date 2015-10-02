@@ -22,5 +22,8 @@ require_once __DIR__ . "/Column.php";
 
 class Float extends Column
 {
-
+    public function getPhpType()
+    {
+        return "float";
+    }
 }

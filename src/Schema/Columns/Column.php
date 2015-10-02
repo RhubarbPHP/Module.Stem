@@ -45,6 +45,11 @@ class Column
         $this->defaultValue = $defaultValue;
     }
 
+    public function getPhpType()
+    {
+        return "string";
+    }
+
     /**
      * Return the definition string needed to update the back end storage schema to match.
      *

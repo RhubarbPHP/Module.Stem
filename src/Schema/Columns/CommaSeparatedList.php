@@ -28,6 +28,11 @@ class CommaSeparatedList extends String
         parent::__construct($columnName, $maximumLength, $defaultValue);
     }
 
+    public function getPhpType()
+    {
+        return "string[]";
+    }
+
     public function getTransformIntoRepository()
     {
         return function ($data) {
