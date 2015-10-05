@@ -40,6 +40,11 @@ class Decimal extends Column
         $this->minValue = $this->maxValue * -1;
     }
 
+    public function getPhpType()
+    {
+        return "float";
+    }
+
     /**
      * @return int
      */
