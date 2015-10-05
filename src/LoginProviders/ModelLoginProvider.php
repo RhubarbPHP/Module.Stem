@@ -35,10 +35,10 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class ModelLoginProvider extends LoginProvider
 {
-    private $usernameColumnName = "";
-    private $passwordColumnName = "";
-    private $activeColumnName = "";
-    private $modelClassName = "";
+    protected $usernameColumnName = "";
+    protected $passwordColumnName = "";
+    protected $activeColumnName = "";
+    protected $modelClassName = "";
 
     public function __construct($modelClassName, $usernameColumnName, $passwordColumnName, $activeColumnName = "")
     {
