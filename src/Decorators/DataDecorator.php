@@ -333,7 +333,7 @@ abstract class DataDecorator implements \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return isset($this->$offset);
+        return (isset($this->model[$offset]) || isset($this->columnDecorators[$offset]));
     }
 
     /**
