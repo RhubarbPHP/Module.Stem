@@ -23,7 +23,7 @@ require_once __DIR__ . '/MySqlInteger.php';
 /**
  * A MySQL smallint
  */
-class MySqlSmallMySqlInteger extends MySqlInteger
+class MySqlSmallInteger extends MySqlInteger
 {
     use MySqlColumn;
 
