@@ -184,4 +184,12 @@ class Column
     {
         return null;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultValue()
+    {
+        return $this->defaultValue;
+    }
 }

@@ -25,6 +25,7 @@ use Rhubarb\Stem\Schema\Columns\Json;
 use Rhubarb\Stem\Schema\Columns\Money;
 use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\Columns\Time;
+use Rhubarb\Stem\Schema\Columns\UUID;
 
 class Company extends Model
 {
@@ -49,7 +50,8 @@ class Company extends Model
             new Boolean("BlueChip", false),
             new Integer("ProjectCount"),
             new Json("CompanyData"),
-            new Boolean("Active", true)
+            new Boolean("Active", true),
+            new UUID()
         );
 
         $schema->addIndex(new Index("CompanyID", Index::PRIMARY));

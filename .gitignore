@@ -5,3 +5,5 @@ composer.lock
 *.lock
 /vendor/
 /cache/
+
+tests/_output/*

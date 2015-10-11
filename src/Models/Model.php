@@ -29,6 +29,7 @@ use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\ModelValueInitialiserInterface;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -79,6 +80,7 @@ abstract class Model extends ModelState
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
         } else {
+            $this->onNewModelInitialised();
             $this->setDefaultValues();
         }
 
@@ -351,6 +353,18 @@ abstract class Model extends ModelState
         }
 
         return $results[0];
+    }
+
+    private function onNewModelInitialised()
+    {
+        $schema = $this->getSchema();
+        $columns = $schema->getColumns();
+
+        foreach( $columns as $column ){
+            if ( $column instanceof ModelValueInitialiserInterface ) {
+                $column->onNewModelInitialising($this);
+            }
+        }
     }
 
     /**
@@ -721,7 +735,7 @@ abstract class Model extends ModelState
                 // See if the column has a default
                 $columns = $this->getSchema()->getColumns();
                 if (isset($columns[$propertyName])) {
-                    $defaultValue = $columns[$propertyName]->defaultValue;
+                    $defaultValue = $columns[$propertyName]->getDefaultValue();
                     if (is_object($defaultValue)){
                         $defaultValue = clone $defaultValue;
                     }
@@ -730,7 +744,9 @@ abstract class Model extends ModelState
                     // First we disable change events - this is to stop infinite loops and really would
                     // you expect those to fire for the setting of defaults anyway?
                     $this->propertyChangeEventsDisabled = true;
-                    $this[$propertyName] = $defaultValue;
+                    if ( $defaultValue !== null ) {
+                        $this[$propertyName] = $defaultValue;
+                    }
                     $this->propertyChangeEventsDisabled = false;
 
                     $value = parent::__get($propertyName);
