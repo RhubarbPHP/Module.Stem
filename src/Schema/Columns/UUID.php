@@ -18,6 +18,24 @@ class UUID extends String implements ModelValueInitialiserInterface
         parent::__construct($columnName, 100, null);
     }
 
+    /**
+     * Returns an array of column objects capable of supplying the schema details for this column.
+     *
+     * Normally a column can specify it's own schema, however sometimes a column extends another column type
+     * simply to add some transforms, for example Json extends LongString and adds json encoding and decoding.
+     * However for this column to be supported in all repository types you would need to create a separate
+     * repository specific extension of the class for every repository.
+     *
+     * By overriding this function you can delegate the storage of the raw data to another simpler column
+     * type that has already had the repository specific instances created.
+     *
+     * @return Column[]
+     */
+    public function createStorageColumns()
+    {
+        return [ new String($this->columnName, 100, $this->defaultValue) ];
+    }
+
     private function generateUUID()
     {
         return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
