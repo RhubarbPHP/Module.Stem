@@ -55,7 +55,7 @@ abstract class ModelCollectionHandler extends UrlHandler
 
     public function getModelObject()
     {
-        if (!$this->resourceIdentifier || !is_numeric($this->resourceIdentifier)) {
+        if (!$this->resourceIdentifier) {
             throw new CollectionUrlException();
         }
 
