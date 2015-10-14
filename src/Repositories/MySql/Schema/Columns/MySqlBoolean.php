@@ -42,6 +42,6 @@ class MySqlBoolean extends Boolean
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new MySqlBoolean( $genericColumn->columnName );
+        return new MySqlBoolean( $genericColumn->columnName, $genericColumn->defaultValue );
     }
 }
