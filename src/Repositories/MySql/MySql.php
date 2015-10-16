@@ -26,6 +26,7 @@ use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -39,7 +40,18 @@ class MySql extends PdoRepository
         if ($object->isNewRecord()) {
             $this->insertObject($object);
         } else {
-            $this->updateObject($object);
+            $rowsUpdated = $this->updateObject($object);
+
+            if ( $rowsUpdated == 0 ){
+                $schema = $object->getSchema();
+                $columns = $schema->getColumns();
+
+                // String based unique identifiers won't appear to Stem as needing inserted.
+                // We will insert them if the update fails (i.e. updates no rows).
+                if ( !($columns[$schema->uniqueIdentifierColumnName] instanceof AutoIncrement ) ) {
+                    $this->insertObject($object);
+                }
+            }
         }
     }
 
@@ -138,7 +150,9 @@ class MySql extends PdoRepository
 
         $params[$schema->uniqueIdentifierColumnName] = $object->UniqueIdentifier;
 
-        $this->executeStatement($sql, $params);
+        $statement = $this->executeStatement($sql, $params);
+
+        return $statement->rowCount();
     }
 
     /**
