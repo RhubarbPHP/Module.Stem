@@ -147,7 +147,7 @@ abstract class PdoRepository extends Repository
      * @throws \Rhubarb\Stem\Exceptions\RepositoryStatementException
      * @return \PDOStatement
      */
-    public static function executeStatement($statement, $namedParameters = [], $connection = null, $isInsertQuery = false)
+    public static function executeStatement($statement, $namedParameters = [], $connection = null)
     {
         if ($connection === null) {
             $connection = static::getDefaultConnection();
@@ -178,10 +178,6 @@ abstract class PdoRepository extends Repository
             throw new RepositoryStatementException($error[2], $statement);
         }
 
-        if ($isInsertQuery) {
-            $pdoStatement = $connection->lastInsertId();
-        }
-
         Log::CreateEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, "Statement successful", "PDO");
 
         return $pdoStatement;
@@ -189,7 +185,13 @@ abstract class PdoRepository extends Repository
 
     public static function executeInsertStatement($sql, $namedParameters = [], $connection = null)
     {
-        return self::executeStatement($sql, $namedParameters, $connection, true);
+        self::executeStatement($sql, $namedParameters, $connection);
+
+        if ($connection === null) {
+            $connection = static::getDefaultConnection();
+        }
+
+        return $connection->lastInsertId();
     }
 
     /**

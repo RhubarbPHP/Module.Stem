@@ -214,7 +214,9 @@ class MySql extends PdoRepository
 
         $id = self::executeInsertStatement($sql, $params);
 
-        $object[$object->getUniqueIdentifierColumnName()] = $id;
+        if ($id > 0) {
+            $object[$object->getUniqueIdentifierColumnName()] = $id;
+        }
     }
 
     public function getFiltersNamespace()
