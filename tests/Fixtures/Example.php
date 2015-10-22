@@ -3,6 +3,7 @@
 namespace Rhubarb\Stem\Tests\Fixtures;
 
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Columns\Boolean;
 use Rhubarb\Stem\Schema\Columns\Date;
 use Rhubarb\Stem\Schema\Columns\DateTime;
@@ -30,7 +31,7 @@ class Example extends Model
         $schema = new ModelSchema("tblContact");
 
         $schema->addColumn(
-            new Integer("ContactID", 0),
+            new AutoIncrement("ContactID"),
             new Integer("CompanyID", 0),
             new Date("DateOfBirth"),
             new DateTime("CreatedDate"),
