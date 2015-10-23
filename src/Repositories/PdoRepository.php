@@ -140,14 +140,15 @@ abstract class PdoRepository extends Repository
      *
      * If no connection is provided the default connection will be used.
      *
-     * @param $statement
+     * @param       $statement
      * @param array $namedParameters
-     * @param \PDO $connection
-     * @param bool $isInsertQuery True if the query is an insert and the ID should be returned
-     * @throws \Rhubarb\Stem\Exceptions\RepositoryStatementException
+     * @param \PDO  $connection
+     * @param null  $insertedId  Will contain the ID of the last inserted record after statement is executed
+     *
      * @return \PDOStatement
+     * @throws RepositoryStatementException
      */
-    public static function executeStatement($statement, $namedParameters = [], $connection = null)
+    public static function executeStatement($statement, $namedParameters = [], $connection = null, &$insertedId = null)
     {
         if ($connection === null) {
             $connection = static::getDefaultConnection();
@@ -178,6 +179,8 @@ abstract class PdoRepository extends Repository
             throw new RepositoryStatementException($error[2], $statement);
         }
 
+        $insertedId = $connection->lastInsertId();
+
         Log::CreateEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, "Statement successful", "PDO");
 
         return $pdoStatement;
@@ -185,13 +188,9 @@ abstract class PdoRepository extends Repository
 
     public static function executeInsertStatement($sql, $namedParameters = [], $connection = null)
     {
-        self::executeStatement($sql, $namedParameters, $connection);
+        self::executeStatement($sql, $namedParameters, $connection, $insertedId);
 
-        if ($connection === null) {
-            $connection = static::getDefaultConnection();
-        }
-
-        return $connection->lastInsertId();
+        return $insertedId;
     }
 
     /**
