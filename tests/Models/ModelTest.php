@@ -8,7 +8,7 @@ use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Models\ModelEventManager;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDate;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlString;
+use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\Company;
@@ -246,14 +246,17 @@ class ModelTest extends ModelUnitTestCase
     {
         $user = new User();
         $user->Username = "abc";
+        $user->Active = true;
         $user->save();
 
         $user = new User();
         $user->Username = "def";
+        $user->Active = true;
         $user->save();
 
         $user = new User();
         $user->Username = "ghi";
+        $user->Active = true;
         $user->save();
 
         $user = User::FromUsername("def");
@@ -307,20 +310,6 @@ class ModelTest extends ModelUnitTestCase
     {
         $example = new Example();
 
-        $d = 0;
-        $e = 0;
-        $f = 0;
-
-        $example->attachEventHandler("Test", function ($a, $b, $c) use (&$d, &$e, &$f) {
-            $d = $a;
-            $e = $b;
-            $f = $c;
-        });
-
-        $example->SimulateRaiseEvent("Test", 1, 2, 3);
-
-        $this->assertEquals(6, $d + $e + $f);
-
         $product = 0;
 
         ModelEventManager::attachEventHandler("Example", "Test", function ($model, $x, $y, $z) use (&$product) {
@@ -356,7 +345,7 @@ class ModelTest extends ModelUnitTestCase
 
         $saved = false;
 
-        $example->attachEventHandler("afterSave", function () use (&$saved) {
+        ModelEventManager::attachEventHandler('Example', 'AfterSave', function () use (&$saved) {
             $saved = true;
         });
 
@@ -373,7 +362,7 @@ class ModelTest extends ModelUnitTestCase
 
         $saved = false;
 
-        $example->attachEventHandler("afterSave", function () use (&$saved) {
+        ModelEventManager::attachEventHandler('Example', 'AfterSave', function () use (&$saved) {
             $saved = true;
         });
 
@@ -388,7 +377,7 @@ class ModelTest extends ModelUnitTestCase
 
         $schema = $example->getColumnSchemaForColumnReference("Forename");
 
-        $this->assertInstanceOf(MySqlString::class, $schema);
+        $this->assertInstanceOf(String::class, $schema);
         $this->assertEquals("Forename", $schema->columnName);
 
         $schema = $example->getColumnSchemaForColumnReference("ExampleRelationshipName.InceptionDate");

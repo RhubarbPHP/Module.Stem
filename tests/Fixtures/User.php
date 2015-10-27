@@ -69,7 +69,7 @@ class User extends Model
 
     public static function find(Filter $filter = null)
     {
-        $activeFilter = new Equals('Active', 1);
+        $activeFilter = new Equals('Active', true);
         if ($filter === null) {
             $filter = $activeFilter;
         } else {
