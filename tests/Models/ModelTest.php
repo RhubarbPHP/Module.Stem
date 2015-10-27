@@ -11,6 +11,7 @@ use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDate;
 use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Tests\Fixtures\Account;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
@@ -422,4 +423,32 @@ class ModelTest extends ModelUnitTestCase
 
         $this->assertTrue($newContact->isNewRecord());
     }
+
+    public function testIsNewRecordFlagWithNonAutoIncrementID()
+    {
+        $account = new Account();
+        $account->AccountID = 'test1';
+        $account->AccountName = 'test 1';
+
+        $this->assertTrue($account->isNewRecord());
+        $account->save();
+        $this->assertFalse($account->isNewRecord());
+
+        $accountReload = new Account('test1');
+        $this->assertFalse($accountReload->isNewRecord());
+        $accountReload->AccountName = 'test 1-1';
+        $accountReload->save();
+        $this->assertFalse($accountReload->isNewRecord());
+
+        $accountImport = new Account();
+        $this->assertTrue( $accountImport->isNewRecord() );
+        $accountImport->importRawData( [
+            'AccountName' => 'Account 2',
+            'AccountID' => 'Account2',
+        ] );
+        $this->assertTrue( $accountImport->isNewRecord() );
+        $accountImport->save();
+        $this->assertFalse( $accountImport->isNewRecord() );
+    }
+
 }
