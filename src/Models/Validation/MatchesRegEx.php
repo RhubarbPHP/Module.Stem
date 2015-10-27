@@ -6,18 +6,19 @@ class MatchesRegEx extends Validation
 {
     protected $regEx;
 
-    public function __construct($name, $regEx = "")
+    /**
+     * @param $name
+     * @param string $regEx Regex pattern WITHOUT DELIMITERS
+     */
+    public function __construct($name, $regEx)
     {
         parent::__construct($name);
-
-        if ($regEx) {
-            $this->regEx = $regEx;
-        }
+        $this->regEx = $regEx;
     }
 
     public function test($value, $model = null)
     {
-        return (bool)(preg_match($this->regEx, $value));
+        return preg_match('/' . str_replace('/', '\\/', $this->regEx) . '/', $value) > 0;
     }
 
     public function getDefaultFailedMessage()
