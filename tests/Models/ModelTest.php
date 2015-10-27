@@ -397,6 +397,8 @@ class ModelTest extends ModelUnitTestCase
         $example = new Example($example->UniqueIdentifier);
         $this->assertTrue($example->loaded);
 
+
+        // This is the old, bad pattern. Unless this can be justified - importing into a new record is NOT loading.
         $example = new Example();
         $example->importRawData(["a" => "b"]);
 
@@ -404,7 +406,7 @@ class ModelTest extends ModelUnitTestCase
 
         $example->importRawData([$example->UniqueIdentifierColumnName => 2]);
 
-        $this->assertTrue($example->loaded);
+        $this->assertFalse($example->loaded);
     }
 
     public function testModelGetsDefaultValues()
