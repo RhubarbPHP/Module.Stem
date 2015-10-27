@@ -76,12 +76,15 @@ abstract class Model extends ModelState
             }
         }
 
+        $this->uniqueIdentifier = $uniqueIdentifier;
+
         if ($uniqueIdentifier !== null) {
+            $this->newRecord = false;
             $repository = $this->getRepository();
             $repository->hydrateObject($this, $uniqueIdentifier);
+            $this->onLoaded();
         } else {
             $this->onNewModelInitialised();
-            $this->setDefaultValues();
         }
 
         parent::__construct();
@@ -109,22 +112,10 @@ abstract class Model extends ModelState
 
     public function importRawData($data)
     {
-        $wasNewRecord = $this->isNewRecord();
-
         parent::importRawData($data);
 
-        $this->captureUniqueIdentifier();
-
-        if ($wasNewRecord && !$this->isNewRecord()) {
-            $this->onLoaded();
-        }
-    }
-
-    private function captureUniqueIdentifier()
-    {
         $this->uniqueIdentifier = $this[$this->uniqueIdentifierColumnName];
     }
-
     function __toString()
     {
         return $this->getLabel();
@@ -357,6 +348,7 @@ abstract class Model extends ModelState
 
     private function onNewModelInitialised()
     {
+        $this->newRecord = true;
         $schema = $this->getSchema();
         $columns = $schema->getColumns();
 
@@ -365,6 +357,8 @@ abstract class Model extends ModelState
                 $column->onNewModelInitialising($this);
             }
         }
+
+        $this->setDefaultValues();
     }
 
     /**
@@ -489,6 +483,8 @@ abstract class Model extends ModelState
         $repository = $this->getRepository();
         $repository->saveObject($this);
 
+        $this->newRecord = false;
+
         $this->raiseAfterSaveEvents();
 
         $this->afterSave();
@@ -599,19 +595,24 @@ abstract class Model extends ModelState
      */
     public function setUniqueIdentifier($value)
     {
+        $this->newRecord = $value === null;
+        $this->uniqueIdentifier = $value;
         $this[$this->uniqueIdentifierColumnName] = $value;
     }
 
     /**
-     * Returns true if the record is new, by virtue of not having a unique identifier.
+     * @var bool Flag used to control the result of calls to isNewRecord
+     */
+    private $newRecord = true;
+
+    /**
+     * Returns true if the record is new, using a flag set on the object when it is saved/loaded with an ID
      *
      * @return bool
      */
     public function isNewRecord()
     {
-        $identifier = $this->uniqueIdentifier;
-
-        return ($identifier === null);
+        return $this->newRecord;
     }
 
     public function __set($propertyName, $value)
@@ -642,7 +643,7 @@ abstract class Model extends ModelState
         }
 
         if ($propertyName == $this->uniqueIdentifierColumnName) {
-            $this->captureUniqueIdentifier();
+            $this->uniqueIdentifier = $value;
         }
     }
 

@@ -40,18 +40,7 @@ class MySql extends PdoRepository
         if ($object->isNewRecord()) {
             $this->insertObject($object);
         } else {
-            $rowsUpdated = $this->updateObject($object);
-
-            if ( $rowsUpdated == 0 ){
-                $schema = $object->getSchema();
-                $columns = $schema->getColumns();
-
-                // String based unique identifiers won't appear to Stem as needing inserted.
-                // We will insert them if the update fails (i.e. updates no rows).
-                if ( !($columns[$schema->uniqueIdentifierColumnName] instanceof AutoIncrement ) ) {
-                    $this->insertObject($object);
-                }
-            }
+            $this->updateObject($object);
         }
     }
 
