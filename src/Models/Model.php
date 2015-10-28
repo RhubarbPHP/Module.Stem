@@ -79,10 +79,7 @@ abstract class Model extends ModelState
         $this->uniqueIdentifier = $uniqueIdentifier;
 
         if ($uniqueIdentifier !== null) {
-            $this->newRecord = false;
-            $repository = $this->getRepository();
-            $repository->hydrateObject($this, $uniqueIdentifier);
-            $this->onLoaded();
+            $this->loadFromUniqueIdentifier($uniqueIdentifier);
         } else {
             $this->onNewModelInitialised();
         }
@@ -848,5 +845,18 @@ abstract class Model extends ModelState
      */
     public static function checkRecords($oldVersion, $newVersion)
     {
+    }
+
+    /**
+     * Loads a record using the unique identifier.
+     *
+     * @param $uniqueIdentifier
+     */
+    protected function loadFromUniqueIdentifier($uniqueIdentifier)
+    {
+        $this->newRecord = false;
+        $repository = $this->getRepository();
+        $repository->hydrateObject($this, $uniqueIdentifier);
+        $this->onLoaded();
     }
 }
