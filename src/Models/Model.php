@@ -497,10 +497,12 @@ abstract class Model extends ModelState
 
     private function raiseAfterSaveEvents()
     {
-        foreach ($this->eventsToRaiseAfterSave as $eventArgs) {
+        $eventsToRaiseAfterSave = $this->eventsToRaiseAfterSave;
+        $this->eventsToRaiseAfterSave = [];
+
+        foreach ($eventsToRaiseAfterSave as $eventArgs) {
             call_user_func_array([$this, "raiseEvent"], $eventArgs);
         }
-        $this->eventsToRaiseAfterSave = [];
     }
 
     /**
