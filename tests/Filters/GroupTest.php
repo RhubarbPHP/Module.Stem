@@ -29,12 +29,14 @@ class GroupTest extends ModelUnitTestCase
         $example->ContactID = 1;
         $example->save();
 
+        $example = new Example();
         $example->Forename = "John";
         $example->Surname = "Johnson";
         $example->DateOfBirth = "1988-01-01";
         $example->ContactID = 2;
         $example->save();
 
+        $example = new Example();
         $example->Forename = "John";
         $example->Surname = "Luc";
         $example->DateOfBirth = "1990-01-01";
