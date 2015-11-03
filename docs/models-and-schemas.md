@@ -30,8 +30,8 @@ stored data and having that data in an array is a great advantage.
 The array is not public however so access must be provided by creating getter and setter functions.
 
 Some model classes can have many dozens of columns stored in the data store. Creating getters and setters for
-all of these is tedious and clutters the class with a large volumn of 'plumbing' code. Models therefore provide
-your class with a [magical getter and setter](http://uk.php.net/manual/en/language.oop5.magic.php) which assumes
+all of these is tedious and clutters the class with a large volume of 'plumbing' code. Models therefore provide
+your class with a [magical getter and setter](http://php.net/manual/en/language.oop5.magic.php) which assumes
 any unknown property will be accessed in the `$modelData` array.
 
 ## Accessing properties
@@ -81,6 +81,12 @@ You must define a schema for your model by implementing the `createSchema` funct
 > Note that the createSchema function is abstract and so you can't actually create a Model class without it.
 
 ``` php
+use Rhubarb\Stem\Schema\ModelSchema
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\ForeignKey;
+use Rhubarb\Stem\Schema\Columns\Integer;
+use Rhubarb\Stem\Schema\Columns\String;
+
 class Customer extends ModelObject
 {
 	public function createSchema()
@@ -109,7 +115,7 @@ The remaining columns are more simple - two string columns and an integer.
 Column objects are responsible for generating the correct column type in the data store but they also convert
 the raw repository data into a form more suitable for your application.
 
-A `CommaSeparatedList` column for example creates itself as a string field in the repository put presentes
+A `CommaSeparatedList` column for example creates itself as a string field in the repository put presents
 the data stored there as an array. The `CommaSeparatedList` column will convert the array to a comma separated
 string when saving and restore it to an array when loading data.
 
@@ -232,7 +238,7 @@ This will get the CompanyName property of the Company model connected to our `$c
 is this useful?
 
 1. Templates can drill through the relationships simply by using the dot notation in field placeholders
-2. Other sub systems of Stem can make use this feature for example filtering and sorting.
+2. Other sub systems of Stem can make use of this feature for example filtering and sorting.
 
 Performance permitting, there is no limit to how deep you can drill with this pattern.
 
@@ -309,7 +315,7 @@ On occasion you need to move model data in and out of the model in bulk
 Often you need a representation of a model that is for public consumption, whether that be an API
 end point or simple serialization (where you can't be sure the data won't be inspected or tampered with).
 Necessarily we need to define which properties should be available for public export. You do this by
-overriding the `getPublicPropertyList()` method and simply return an array of properties names.
+overriding the `getPublicPropertyList()` method and simply return an array of property names.
 This can include the names of computed properties.
 
 This list of public properties controls two methods:
