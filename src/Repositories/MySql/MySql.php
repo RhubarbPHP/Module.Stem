@@ -686,4 +686,11 @@ class MySql extends PdoRepository
             throw new RepositoryConnectionException("MySql");
         }
     }
+
+    public function clearRepositoryData()
+    {
+        $schema = $this->getSchema();
+
+        self::executeStatement("TRUNCATE TABLE `".$schema->schemaName."`");
+    }
 }
