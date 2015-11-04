@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem;
 use Rhubarb\Stem\Custard\DocumentModelsCommand;
+use Rhubarb\Stem\Custard\SeedDemoDataCommand;
 use Rhubarb\Stem\Custard\UpdateRepositorySchemasCommand;
 use Symfony\Component\Console\Command\Command;
 
@@ -42,7 +43,8 @@ class StemModule extends \Rhubarb\Crown\Module
         return
         [
             new DocumentModelsCommand(),
-            new UpdateRepositorySchemasCommand()
+            new UpdateRepositorySchemasCommand(),
+            new SeedDemoDataCommand()
         ];
     }
 
