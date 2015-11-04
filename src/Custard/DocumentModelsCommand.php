@@ -24,7 +24,7 @@ class DocumentModelsCommand extends CustardCommand
 {
     protected function configure()
     {
-        $this->setName('rhubarb:document-models')
+        $this->setName('stem:document-models')
             ->setDescription('Generate phpDoc comments for Rhubarb Stem models, describing their fields and relationships')
             ->addArgument('schema', InputArgument::REQUIRED, 'The name of the schema to scan models in');
     }

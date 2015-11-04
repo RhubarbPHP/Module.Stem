@@ -380,6 +380,8 @@ abstract class Repository
         $this->cachedObjectData = [];
     }
 
+    public abstract function clearRepositoryData();
+
     /**
      * Returns a new default repository of the current default repository type.
      *

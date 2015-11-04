@@ -50,4 +50,9 @@ class Offline extends Repository
 
         $this->autoNumberCount = 0;
     }
+
+    public function clearRepositoryData()
+    {
+        $this->clearObjectCache();
+    }
 }

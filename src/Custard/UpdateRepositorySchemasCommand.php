@@ -16,7 +16,7 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 {
     protected function configure()
     {
-        $this->setName('rhubarb:update-schemas')
+        $this->setName('stem:update-schemas')
             ->setDescription('Updates the repository schemas to match those of the registered models')
             ->addArgument('schema', InputArgument::OPTIONAL, 'The name of the schema to update');
     }
