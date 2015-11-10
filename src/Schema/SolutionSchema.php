@@ -371,7 +371,7 @@ abstract class SolutionSchema
      *        ]
      * ] );
      *
-     * @param Array $relationships
+     * @param array $relationships
      * @throws \Rhubarb\Stem\Exceptions\RelationshipDefinitionException
      */
     public function declareOneToManyRelationships($relationships)
