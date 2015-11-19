@@ -87,6 +87,18 @@ abstract class SolutionSchema
      */
     protected $version = 0;
 
+    /**
+     * The version numbers of each model in the schema.
+     *
+     * @var int[]
+     */
+    protected $versions = [];
+
+    /**
+     * SolutionSchema constructor.
+     *
+     * @param int $version
+     */
     public function __construct($version = 0)
     {
         $this->version = $version;
@@ -334,7 +346,7 @@ abstract class SolutionSchema
         return null;
     }
 
-    protected function addModel($name, $modelClassName)
+    protected function addModel($name, $modelClassName, $version = null)
     {
         // Remove a leading "\" slash if it exists.
         // It will work for most things however in some places where comparisons are
@@ -345,6 +357,10 @@ abstract class SolutionSchema
 
         $this->models[$name] = $modelClassName;
         $this->modelClassNames[$modelClassName] = $name;
+
+        if ($version !== null) {
+            $this->versions[$name] = $version;
+        }
     }
 
     protected function addRelationship($modelName, $navigationPropertyName, Relationship $relationship)
@@ -649,18 +665,24 @@ abstract class SolutionSchema
             $fileVersion = file_get_contents($versionFile);
         }
 
-        if ($fileVersion < $this->version) {
+        $currentVersion = $this->calculateVersion();
+
+        if ($fileVersion != $currentVersion) {
             $this->checkModelSchemas($fileVersion);
 
-            file_put_contents($versionFile, $this->version);
+            file_put_contents($versionFile, $currentVersion);
         }
     }
 
     /**
      * Asks all registered models to check if the back end schema needs corrected.
+     *
+     * @param null|int|string $oldVersion This may be a schema version number int or a sha1 hash if per-model versioning is in use
      */
     public function checkModelSchemas($oldVersion = null)
     {
+        /** @var Model $class */
+        /** @var Model $object */
         foreach ($this->models as $class) {
             $object = new $class();
 
@@ -670,5 +692,13 @@ abstract class SolutionSchema
 
             $class::checkRecords($oldVersion, $this->version);
         }
+    }
+
+    protected function calculateVersion()
+    {
+        if (count($this->versions)) {
+            return sha1(serialize($this->versions));
+        }
+        return $this->version;
     }
 }
