@@ -40,6 +40,7 @@ trait WithEncryptedText
 
     public function createStorageColumns()
     {
-        return [new String($this->columnName, $this->maximumLength, $this->defaultValue)];
+        $column = clone $this;
+        return [$column];
     }
 }
