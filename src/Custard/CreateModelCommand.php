@@ -19,10 +19,14 @@ use Rhubarb\Stem\Schema\Columns\Money;
 use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\Columns\Time;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Symfony\Component\Console\Helper\Helper;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
+use WeAreVertigo\LoginProviders\AdminLoginProvider;
 
 class CreateModelCommand extends CustardCommand
 {
@@ -40,104 +44,189 @@ class CreateModelCommand extends CustardCommand
         "LongString" => LongString::class,
     ];
 
+    /** @var QuestionHelper */
+    protected $questionHelper;
+
+    /** @var InputInterface */
+    protected $input;
+    /** @var OutputInterface */
+    protected $output;
+
     protected function configure()
     {
         $this->setName('stem:create-model')
-            ->setDescription('Create a model class and add it to the schema')
-            ->addArgument('schema', InputArgument::OPTIONAL, 'The name of the schema to create the model in');
+            ->setDescription('Create a model class and add it to the schema');
     }
 
-    const SETTINGS_PATH = "default-schema.txt";
+    const SETTINGS_PATH = "settings/default-schema.txt";
 
     public function interact(InputInterface $input, OutputInterface $output)
     {
-        $schemaName = $input->getArgument('schema');
+        $this->input = $input;
+        $this->output = $output;
 
-        // All schemas have to be looked up before getting 1, so that they are in the correct override order
-        $schemaNames = array_keys(SolutionSchema::getAllSchemas());
-
-        $helper = $this->getHelper('question');
-
-        if (!$schemaName) {
-            // Ask for schema name if it wasn't provided in arguments
-
-            if (file_exists(self::SETTINGS_PATH)) {
-                $schemaName = file_get_contents(self::SETTINGS_PATH);
-            }
-
-            $default = $schemaName ? '(' . $schemaName . ') ' : '';
-            $question = new Question("<question>What schema do you want to add this model to? (" . implode(", ", $schemaNames) . ")</question> $default", $schemaName);
-
-            $schemaName = $helper->ask($input, $output, $question);
-        }
-
-        if (!in_array($schemaName, $schemaNames)) {
-            $this->writeNormal("<error>Couldn't find schema named '$schemaName'</error>");
-            throw new \Exception("No schema selected");
-        }
-
-        $context = new Context();
-
-        if ($context->DeveloperMode) {
-            $output->writeln("Storing default schema in " . realpath(self::SETTINGS_PATH));
-
-            // Store default schema to make it faster next time
-            file_put_contents(self::SETTINGS_PATH, $schemaName);
-        }
-
-        try {
-            $schema = SolutionSchema::getSchema($schemaName);
-        } catch (SchemaNotFoundException $ex) {
-            $output->writeln("<error>Couldn't find schema named '$schemaName'</error>");
-            throw new \Exception("No schema selected");
-        } catch (SchemaRegistrationException $ex) {
-            $output->writeln("<error>Schema registered as '$schemaName' is not a SolutionSchema</error>");
-            throw new \Exception("No schema selected");
-        }
+        $schema = $this->getSchema();
 
         $reflector = new \ReflectionClass($schema);
 
         $namespaceBase = $reflector->getNamespaceName().'\\';
 
-        $question = new Question("<question>What namespace should this model be in?</question> $namespaceBase", "");
-        $subNamespace = $helper->ask($input, $output, $question);
+        $subNamespace = $this->askQuestion("<question>What namespace should this model be in?</question> $namespaceBase", null, false);
         $namespace = trim($namespaceBase . $subNamespace, '\\');
 
-        $question = new Question("<question>What name should this model have?</question> ");
-        $modelName = $helper->ask($input, $output, $question);
+        $modelName = $this->askQuestion('What name should this model have?');
 
-        $question = new Question("<question>What class name should this model have?</question> ($modelName) ", $modelName);
-        $className = $helper->ask($input, $output, $question);
+        $className = $this->askQuestion('What class name should this model have?', $modelName);
 
-        $tableName = "tbl".$modelName;
-        $question = new Question("<question>What repository name should this model have?</question> ($tableName) ", $tableName);
-        $tableName = $helper->ask($input, $output, $question);
+        $tableName = $this->askQuestion('What repository name should this model have?', 'tbl' . $modelName);
 
-        $uniqueIdentifierName = $modelName."ID";
-        $question = new Question("<question>What name should the model's unique identifier field?</question> ($uniqueIdentifierName) ", $uniqueIdentifierName);
-        $uniqueIdentifierName = $helper->ask($input, $output, $question);
-
-        $fieldNameQuestion = new Question("<question>Enter the name of a field to add, or leave blank to finish adding fields</question> ");
-        $fieldTypeQuestion = new Question("<question>What type should the field have? (" . implode(", ", array_keys(self::$columnTypes)) . "</question> ");
+        $uniqueIdentifier = $this->askQuestion('What name should the model\'s unique identifier field have?', $modelName . 'ID');
 
         $fields = [];
+        $columnTypeNames = array_keys(self::$columnTypes);
         while (true) {
-            $fieldName = $helper->ask($input, $output, $fieldNameQuestion);
+            $fieldName = $this->askQuestion('Enter the name of a field to add, or leave blank to finish adding fields:', null, false);
 
             if (!$fieldName) {
                 break;
             }
 
-            $fieldType = null;
-            while (!in_array($fieldType, self::$columnTypes)) {
-                $fieldType = $helper->ask($input, $output, $fieldTypeQuestion);
-            }
-
-            $fields[$fieldName] = $fieldType;
+            $fields[$fieldName] = $this->askChoiceQuestion('What type should the field have?', $columnTypeNames);
         }
 
         $schemaFileName = $reflector->getFileName();
         // todo: write model class file to correct directory (relative to $schemaFileName and the $subNamespace
         // todo: add model into SolutionSchema
+    }
+
+    /**
+     * @param string|Question $question Question text or a Question object
+     * @param null|string $default The default answer
+     * @param bool|\Closure $requireAnswer True for not-empty validation, or a closure for custom validation
+     * @return string User's answer
+     */
+    private function askQuestion($question, $default = null, $requireAnswer = true)
+    {
+        if (!$this->questionHelper) {
+            $this->questionHelper = $this->getHelper("question");
+        }
+
+        if (!($question instanceof Question)) {
+            if (strpos($question, '<question>') === false) {
+                $question = '<question>'.$question.'</question> ';
+            }
+            if ($default !== null) {
+                $question .= "($default) ";
+            }
+            $question = new Question($question, $default);
+        }
+
+        if (is_callable($requireAnswer)) {
+            $question->setValidator($requireAnswer);
+        } elseif ($requireAnswer) {
+            $question->setValidator(function ($answer) {
+                if (trim($answer) == '') {
+                    throw new \Exception(
+                        'You must provide an answer to this question'
+                    );
+                }
+                return $answer;
+            });
+        }
+
+        return $this->questionHelper->ask($this->input, $this->output, $question);
+    }
+
+    /**
+     * @param string $question Question text
+     * @param array $choices An array of choices which are acceptable answers
+     * @param null|int $default The array index in $choices of the default answer
+     * @param bool|\Closure $requireAnswer True for not-empty validation, or a closure for custom validation
+     * @return string User's answer
+     */
+    private function askChoiceQuestion($question, array $choices, $default = null, $requireAnswer = true)
+    {
+        if (!($question instanceof Question)) {
+            if (strpos($question, '<question>') === false) {
+                $question = '<question>' . $question . '</question> ';
+            }
+            if ($default !== null) {
+                $question .= "($choices[$default]) ";
+            }
+            $question = new ChoiceQuestion($question, $choices, $default);
+        }
+
+        if ($requireAnswer && !is_callable($requireAnswer)) {
+            $requireAnswer = function ($answer) use ($choices) {
+                if (trim($answer) == '') {
+                    throw new \Exception(
+                        'You must provide an answer to this question'
+                    );
+                }
+
+                if (is_numeric($answer)) {
+                    if (!isset($choices[$answer])) {
+                        throw new \Exception("\"$answer\" is not a supported option index");
+                    }
+                    $answer = $choices[$answer];
+                } elseif (!in_array($answer, $choices)) {
+                    throw new \Exception("\"$answer\" is not a supported option");
+                }
+
+                return $answer;
+            };
+        }
+
+        return $this->askQuestion($question, null, $requireAnswer);
+    }
+
+    /**
+     * @return SolutionSchema
+     */
+    private function getSchema()
+    {
+        // All schemas have to be looked up before getting 1, so that they are in the correct override order
+        $schemaNames = array_keys(SolutionSchema::getAllSchemas());
+
+        $validator = function ($answer) use ($schemaNames) {
+            if (is_numeric($answer)) {
+                if (!isset($schemaNames[$answer])) {
+                    throw new \Exception("Couldn't find schema at index \"$answer\"");
+                }
+                $schemaName = $schemaNames[$answer];
+            } else {
+                if (!in_array($answer, $schemaNames)) {
+                    throw new \Exception("Couldn't find schema named \"$answer\"");
+                }
+                $schemaName = $answer;
+            }
+
+            try {
+                $schema = SolutionSchema::getSchema($schemaName);
+            } catch (SchemaNotFoundException $ex) {
+                throw new \Exception("Couldn't find schema named \"$schemaName\"");
+            } catch (SchemaRegistrationException $ex) {
+                throw new \Exception("Schema registered as  \"$schemaName\" is not a SolutionSchema");
+            }
+
+            $context = new Context();
+
+            if ($context->DeveloperMode) {
+                // Store default schema to make it faster next time
+                file_put_contents(self::SETTINGS_PATH, $schemaName);
+                $this->output->writeln("Stored default schema \"$schemaName\" in " . realpath(self::SETTINGS_PATH));
+            }
+
+            return $schema;
+        };
+
+        if (file_exists(self::SETTINGS_PATH)) {
+            $schemaName = file_get_contents(self::SETTINGS_PATH);
+            $defaultSchemaIndex = array_search($schemaName, $schemaNames) ?: null;
+        } else {
+            $defaultSchemaIndex = null;
+        }
+
+        return $this->askChoiceQuestion('What schema do you want to add this model to?', $schemaNames, $defaultSchemaIndex, $validator);
     }
 }
