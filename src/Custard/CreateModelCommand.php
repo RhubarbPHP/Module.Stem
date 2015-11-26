@@ -39,9 +39,11 @@ class CreateModelCommand extends CustardCommand
         "Money" => Money::class,
         "Date" => Date::class,
         "DateTime" => DateTime::class,
-        "Time" => Time::class,
+        "Time" => Time::class
+    ];
+    protected static $columnTypesWithMaxLength = [
         "String" => String::class,
-        "LongString" => LongString::class,
+        "LongString" => LongString::class
     ];
 
     /** @var QuestionHelper */
@@ -85,7 +87,8 @@ class CreateModelCommand extends CustardCommand
         $uniqueIdentifierName = $this->askQuestion('What name should the model\'s unique identifier column have?', $modelName . 'ID');
 
         $columns = [];
-        $columnTypeNames = array_keys(self::$columnTypes);
+        $maxLengths = [];
+        $columnTypeNames = array_merge(array_keys(self::$columnTypes), array_keys(self::$columnTypesWithMaxLength));
         while (true) {
             $columnName = $this->askQuestion('Enter the name of a column to add, or leave blank to finish adding columns:', null, false);
 
@@ -94,14 +97,18 @@ class CreateModelCommand extends CustardCommand
             }
 
             $columns[$columnName] = $this->askChoiceQuestion('What type should the column have?', $columnTypeNames);
+
+            if (isset(self::$columnTypesWithMaxLength[$columns[$columnName]])) {
+                $maxLengths[$columnName] = $this->askQuestion('What maximum length should the column have?', 50);
+            }
         }
 
         $schemaFileName = $reflector->getFileName();
         $fileName = dirname($schemaFileName) . '/' . str_replace('\\', '/', $subNamespace) . '/' . $className . '.php';
 
-        self::writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns);
+        self::writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns, $maxLengths);
 
-        $this->writeNormal("Model created.");
+        $this->writeNormal("Model created.", true);
         // todo: add model into SolutionSchema
     }
 
@@ -236,9 +243,9 @@ class CreateModelCommand extends CustardCommand
         return $this->askChoiceQuestion('What schema do you want to add this model to?', $schemaNames, $defaultSchemaIndex, $validator);
     }
 
-    private static function writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns)
+    private static function writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns, $maxLengths)
     {
-        $columnTypes = self::$columnTypes;
+        $columnTypes = array_merge(self::$columnTypes, self::$columnTypesWithMaxLength);
         $columnTypes["AutoIncrement"] = AutoIncrement::class;
 
         $description = trim($modelName . " model. " . $description);
@@ -258,13 +265,19 @@ class CreateModelCommand extends CustardCommand
         $columns = [];
         $properties = [];
         foreach ($columnDefinitions as $columnName => $columnShortClass) {
-            /** @var Column $column */
             $columnFullClass = $columnTypes[$columnShortClass];
-            $column = new $columnFullClass($columnName);
-            $column = $column->getRepositorySpecificColumn($repositoryClass);
-
             $imports[] = "use $columnFullClass;";
-            $columns[] = "new $columnShortClass('$columnName')";
+
+            if (isset($maxLengths[$columnName])) {
+                $column = new $columnFullClass($columnName, $maxLengths[$columnName]);
+                $columns[] = "new $columnShortClass('$columnName', $maxLengths[$columnName])";
+            } else {
+                $column = new $columnFullClass($columnName);
+                $columns[] = "new $columnShortClass('$columnName')";
+            }
+
+            /** @var Column $column */
+            $column = $column->getRepositorySpecificColumn($repositoryClass);
             $properties[] = ' * @property ' . $column->getPhpType() . ' $' . $columnName;
         }
 
