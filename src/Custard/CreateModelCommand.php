@@ -7,7 +7,10 @@ use Rhubarb\Crown\Context;
 use Rhubarb\Custard\Command\CustardCommand;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
+use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Columns\Boolean;
+use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Date;
 use Rhubarb\Stem\Schema\Columns\DateTime;
 use Rhubarb\Stem\Schema\Columns\Decimal;
@@ -19,14 +22,11 @@ use Rhubarb\Stem\Schema\Columns\Money;
 use Rhubarb\Stem\Schema\Columns\String;
 use Rhubarb\Stem\Schema\Columns\Time;
 use Rhubarb\Stem\Schema\SolutionSchema;
-use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Helper\QuestionHelper;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
-use WeAreVertigo\LoginProviders\AdminLoginProvider;
 
 class CreateModelCommand extends CustardCommand
 {
@@ -69,33 +69,39 @@ class CreateModelCommand extends CustardCommand
 
         $reflector = new \ReflectionClass($schema);
 
-        $namespaceBase = $reflector->getNamespaceName().'\\';
+        $namespaceBase = $reflector->getNamespaceName() . '\\';
 
         $subNamespace = $this->askQuestion("<question>What namespace should this model be in?</question> $namespaceBase", null, false);
         $namespace = trim($namespaceBase . $subNamespace, '\\');
 
         $modelName = $this->askQuestion('What name should this model have?');
 
+        $description = $this->askQuestion('Give a brief description of the model', "", false);
+
         $className = $this->askQuestion('What class name should this model have?', $modelName);
 
-        $tableName = $this->askQuestion('What repository name should this model have?', 'tbl' . $modelName);
+        $repositoryName = $this->askQuestion('What repository name should this model have?', 'tbl' . $modelName);
 
-        $uniqueIdentifier = $this->askQuestion('What name should the model\'s unique identifier field have?', $modelName . 'ID');
+        $uniqueIdentifierName = $this->askQuestion('What name should the model\'s unique identifier column have?', $modelName . 'ID');
 
-        $fields = [];
+        $columns = [];
         $columnTypeNames = array_keys(self::$columnTypes);
         while (true) {
-            $fieldName = $this->askQuestion('Enter the name of a field to add, or leave blank to finish adding fields:', null, false);
+            $columnName = $this->askQuestion('Enter the name of a column to add, or leave blank to finish adding columns:', null, false);
 
-            if (!$fieldName) {
+            if (!$columnName) {
                 break;
             }
 
-            $fields[$fieldName] = $this->askChoiceQuestion('What type should the field have?', $columnTypeNames);
+            $columns[$columnName] = $this->askChoiceQuestion('What type should the column have?', $columnTypeNames);
         }
 
         $schemaFileName = $reflector->getFileName();
-        // todo: write model class file to correct directory (relative to $schemaFileName and the $subNamespace
+        $fileName = dirname($schemaFileName) . '/' . str_replace('\\', '/', $subNamespace) . '/' . $className . '.php';
+
+        self::writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns);
+
+        $this->writeNormal("Model created.");
         // todo: add model into SolutionSchema
     }
 
@@ -113,7 +119,7 @@ class CreateModelCommand extends CustardCommand
 
         if (!($question instanceof Question)) {
             if (strpos($question, '<question>') === false) {
-                $question = '<question>'.$question.'</question> ';
+                $question = '<question>' . $question . '</question> ';
             }
             if ($default !== null) {
                 $question .= "($default) ";
@@ -228,5 +234,85 @@ class CreateModelCommand extends CustardCommand
         }
 
         return $this->askChoiceQuestion('What schema do you want to add this model to?', $schemaNames, $defaultSchemaIndex, $validator);
+    }
+
+    private static function writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns)
+    {
+        $columnTypes = self::$columnTypes;
+        $columnTypes["AutoIncrement"] = AutoIncrement::class;
+
+        $description = trim($modelName . " model. " . $description);
+        $description = str_replace("\n", "\n * ", wordwrap($description));
+
+        $repositoryClass = Repository::getDefaultRepositoryClassName();
+
+        // Assume the label column is the 2nd column
+        next($columns);
+        $labelColumnName = key($columns);
+
+        // Add an AutoIncrement column with the UniqueIdentifierName at the start of the columns
+        $columnDefinitions = array_merge([$uniqueIdentifierName => "AutoIncrement"], $columns);
+
+        // Build up imports, @property definitions, and column instance creation
+        $imports = [];
+        $columns = [];
+        $properties = [];
+        foreach ($columnDefinitions as $columnName => $columnShortClass) {
+            /** @var Column $column */
+            $columnFullClass = $columnTypes[$columnShortClass];
+            $column = new $columnFullClass($columnName);
+            $column = $column->getRepositorySpecificColumn($repositoryClass);
+
+            $imports[] = "use $columnFullClass;";
+            $columns[] = "new $columnShortClass('$columnName')";
+            $properties[] = ' * @property ' . $column->getPhpType() . ' $' . $columnName;
+        }
+
+        $imports = implode("\n", array_unique($imports));
+        $columns = implode(",\n            ", $columns);
+        $properties = implode("\n", $properties);
+
+        $dirName = dirname($fileName);
+        if (!file_exists($dirName)) {
+            mkdir($dirName, 0777, true);
+        }
+
+        file_put_contents(
+            $fileName,
+            <<<PHP
+<?php
+
+namespace $namespace;
+
+use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Schema\ModelSchema;
+$imports
+
+/**
+ * $description
+ *
+$properties
+ */
+class $className extends Model
+{
+    /**
+     * Returns the schema for this data object.
+     *
+     * @return \Rhubarb\Stem\Schema\ModelSchema
+     */
+    protected function createSchema()
+    {
+        \$schema = new ModelSchema('$repositoryName');
+        \$schema->addColumn(
+            $columns
+        );
+
+        \$schema->labelColumnName = '$labelColumnName';
+
+        return \$schema;
+    }
+}
+PHP
+        );
     }
 }
