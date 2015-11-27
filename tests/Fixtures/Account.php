@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\Fixtures;
 
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 /**
@@ -23,8 +23,8 @@ class Account extends Model
     {
         $schema = new ModelSchema('tblAccount');
         $schema->addColumn(
-            new String('AccountID', 50),
-            new String('AccountName', 50)
+            new StringColumn('AccountID', 50),
+            new StringColumn('AccountName', 50)
         );
         $schema->uniqueIdentifierColumnName = 'AccountID';
 

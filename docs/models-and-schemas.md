@@ -90,8 +90,8 @@ class Customer extends ModelObject
 		$schema->addColumn(
 			new AutoIncrement( "CustomerID" ),
 			new ForeignKey( "CustomerID" ),
-			new String( "Forename", 200 ),
-			new String( "Surname", 200 ),
+			new StringColumn( "Forename", 200 ),
+			new StringColumn( "Surname", 200 ),
 			new Integer( "LastOrderID" )
 		);
 

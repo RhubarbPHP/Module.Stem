@@ -21,7 +21,7 @@ namespace Rhubarb\Stem\Schema\Columns;
 /**
  * Provides functionality to encode an array of items (normally ids) as a comma separated list
  */
-class CommaSeparatedList extends String
+class CommaSeparatedList extends StringColumn
 {
     public function __construct($columnName, $maximumLength = 200, $defaultValue = [])
     {
@@ -56,6 +56,6 @@ class CommaSeparatedList extends String
 
     public function createStorageColumns()
     {
-        return [new String($this->columnName, $this->maximumLength, "")];
+        return [new StringColumn($this->columnName, $this->maximumLength, "")];
     }
 }
