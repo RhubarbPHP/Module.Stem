@@ -45,7 +45,10 @@ abstract class Model extends ModelState
 {
     private $eventsToRaiseAfterSave = [];
 
-    public final function __construct($uniqueIdentifier = null)
+    /** @var callable[] */
+    private $callbacksToRunAfterSave = [];
+
+    final public function __construct($uniqueIdentifier = null)
     {
         $this->modelName = SolutionSchema::getModelNameFromClass(get_class($this));
 
@@ -113,7 +116,8 @@ abstract class Model extends ModelState
 
         $this->uniqueIdentifier = $this[$this->uniqueIdentifierColumnName];
     }
-    function __toString()
+
+    public function __toString()
     {
         return $this->getLabel();
     }
@@ -155,7 +159,7 @@ abstract class Model extends ModelState
         // Raise a class level dispatch which allows global listeners like the solution schema to
         // co-ordinate inter model activities.
 
-        call_user_func_array("Rhubarb\Stem\Models\ModelEventManager::dispatchModelEvent", $args);
+        call_user_func_array('Rhubarb\Stem\Models\ModelEventManager::dispatchModelEvent', $args);
     }
 
     /**
@@ -164,6 +168,9 @@ abstract class Model extends ModelState
      * In addition to $event you can pass any number of other events which are passed through
      * to the event handling delegate.
      *
+     * @deprecated Use performAfterSave to run a callback directly instead
+     * @see performAfterSave()
+     *
      * @param string $event The name of the event
      * @return mixed|null
      */
@@ -171,6 +178,16 @@ abstract class Model extends ModelState
     {
         $args = func_get_args();
         $this->eventsToRaiseAfterSave[] = $args;
+    }
+
+    /**
+     * Allows a callback function to be run when the model is saved.
+     *
+     * @param callable $callback Callback to run when the model is saved
+     */
+    protected function performAfterSave(callable $callback)
+    {
+        $this->callbacksToRunAfterSave[] = $callback;
     }
 
     /**
@@ -267,7 +284,7 @@ abstract class Model extends ModelState
      * @see DataObject::CreateRepository()
      * @return \Rhubarb\Stem\Repositories\Repository
      */
-    public final function getRepository()
+    final public function getRepository()
     {
         if (!isset(self::$repositories[$this->modelName])) {
             self::$repositories[$this->modelName] = $this->createRepository();
@@ -349,8 +366,8 @@ abstract class Model extends ModelState
         $schema = $this->getSchema();
         $columns = $schema->getColumns();
 
-        foreach( $columns as $column ){
-            if ( $column instanceof ModelValueInitialiserInterface ) {
+        foreach ($columns as $column) {
+            if ($column instanceof ModelValueInitialiserInterface) {
                 $column->onNewModelInitialising($this);
             }
         }
@@ -369,6 +386,7 @@ abstract class Model extends ModelState
     {
         $results = static::find($filter);
         $modelClass = get_called_class();
+        /** @var Model $model */
         $model = new $modelClass();
         $results->addSort($model->getUniqueIdentifierColumnName(), false);
 
@@ -410,7 +428,7 @@ abstract class Model extends ModelState
 
     }
 
-    public final function generateSchema()
+    final public function generateSchema()
     {
         $schema = $this->createSchema();
         $this->extendSchema($schema);
@@ -423,7 +441,7 @@ abstract class Model extends ModelState
      *
      * @return \Rhubarb\Stem\Schema\ModelSchema
      */
-    public final function getSchema()
+    final public function getSchema()
     {
         return $this->getRepository()->getSchema();
     }
@@ -460,8 +478,13 @@ abstract class Model extends ModelState
      * Persists the model data associated with this data object with the relevant repository.
      *
      * Calls beforeSave() and afterSave() as appropriate.
+     *
+     * @param bool $forceSaveRegardlessOfState If set, the repository save will be forced even if hasChanged() returns false
+     * @return mixed
+     * @throws ModelConsistencyValidationException
+     * @throws \Rhubarb\Stem\Exceptions\ModelException
      */
-    public final function save($forceSaveRegardlessOfState = false)
+    final public function save($forceSaveRegardlessOfState = false)
     {
         try {
             $this->isConsistent();
@@ -482,7 +505,7 @@ abstract class Model extends ModelState
 
         $this->newRecord = false;
 
-        $this->raiseAfterSaveEvents();
+        $this->callAfterSaveCallbacks();
 
         $this->afterSave();
         $this->raiseEvent("AfterSave");
@@ -492,13 +515,17 @@ abstract class Model extends ModelState
         return $this->uniqueIdentifier;
     }
 
-    private function raiseAfterSaveEvents()
+    private function callAfterSaveCallbacks()
     {
         $eventsToRaiseAfterSave = $this->eventsToRaiseAfterSave;
         $this->eventsToRaiseAfterSave = [];
 
         foreach ($eventsToRaiseAfterSave as $eventArgs) {
             call_user_func_array([$this, "raiseEvent"], $eventArgs);
+        }
+
+        foreach ($this->callbacksToRunAfterSave as $callback) {
+            $callback();
         }
     }
 
@@ -736,7 +763,7 @@ abstract class Model extends ModelState
                 $columns = $this->getSchema()->getColumns();
                 if (isset($columns[$propertyName])) {
                     $defaultValue = $columns[$propertyName]->getDefaultValue();
-                    if (is_object($defaultValue)){
+                    if (is_object($defaultValue)) {
                         $defaultValue = clone $defaultValue;
                     }
                     // We actually have to set the default value on the model - to ensure this value
@@ -744,7 +771,7 @@ abstract class Model extends ModelState
                     // First we disable change events - this is to stop infinite loops and really would
                     // you expect those to fire for the setting of defaults anyway?
                     $this->propertyChangeEventsDisabled = true;
-                    if ( $defaultValue !== null ) {
+                    if ($defaultValue !== null) {
                         $this[$propertyName] = $defaultValue;
                     }
                     $this->propertyChangeEventsDisabled = false;
@@ -827,7 +854,7 @@ abstract class Model extends ModelState
      * @throws \Rhubarb\Stem\Exceptions\ModelConsistencyValidationException
      * @return bool
      */
-    public final function isConsistent($throwException = true)
+    final public function isConsistent($throwException = true)
     {
         $errors = $this->getConsistencyValidationErrors();
 
@@ -844,6 +871,9 @@ abstract class Model extends ModelState
 
     /**
      * Override this method to check for/create specific initial records
+     *
+     * @param int $oldVersion Version number upgrading from
+     * @param int $newVersion Version number upgrading to
      */
     public static function checkRecords($oldVersion, $newVersion)
     {
