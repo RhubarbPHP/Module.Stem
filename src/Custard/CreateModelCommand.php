@@ -325,6 +325,7 @@ class $className extends Model
         return \$schema;
     }
 }
+
 PHP
         );
     }
