@@ -40,14 +40,6 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 
             $this->updateSchema($schema);
         } else {
-
-            $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion("<question>No schema name was provided. Proceed by processing all schemas?</question> ", true );
-
-            if ( !$helper->ask($input, $output, $question)){
-                return;
-            }
-
             $schemas = SolutionSchema::getAllSchemas();
 
             $progress = new ProgressBar($output, sizeof($schemas));
