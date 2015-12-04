@@ -26,7 +26,7 @@ use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Offline\Offline;
 use Rhubarb\Stem\Schema\Columns\Date;
-use Rhubarb\Stem\Schema\Columns\Float;
+use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\Integer;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -319,7 +319,7 @@ abstract class Repository
             if (isset($columns[$columnName])) {
                 $column = $columns[$columnName];
 
-                if ($column instanceof Integer || $column instanceof Float ) {
+                if ($column instanceof Integer || $column instanceof FloatColumn ) {
                     $type = SORT_NUMERIC;
                 } elseif ( $column instanceof Date ){
                     $type = SORT_REGULAR;

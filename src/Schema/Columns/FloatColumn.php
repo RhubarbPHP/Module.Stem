@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Schema\Columns;
 
 require_once __DIR__ . "/Column.php";
 
-class Float extends Column
+class FloatColumn extends Column
 {
     public function getPhpType()
     {

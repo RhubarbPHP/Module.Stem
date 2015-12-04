@@ -9,7 +9,7 @@ use Rhubarb\Stem\Schema\Columns\Date;
 use Rhubarb\Stem\Schema\Columns\DateTime;
 use Rhubarb\Stem\Schema\Columns\Decimal;
 use Rhubarb\Stem\Schema\Columns\Integer;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Columns\Time;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -35,8 +35,8 @@ class Example extends Model
             new Integer("CompanyID", 0),
             new Date("DateOfBirth"),
             new DateTime("CreatedDate"),
-            new String("Forename", 100),
-            new String("Surname", 100),
+            new StringColumn("Forename", 100),
+            new StringColumn("Surname", 100),
             new Boolean("KeyContact"),
             new Time("CoffeeTime"),
             new Decimal("CreditLimit", 10, 2),

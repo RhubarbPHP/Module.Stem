@@ -11,7 +11,7 @@ use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Columns\Boolean;
 use Rhubarb\Stem\Schema\Columns\Decimal;
 use Rhubarb\Stem\Schema\Columns\ForeignKey;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 /**
@@ -38,10 +38,10 @@ class User extends Model
             new AutoIncrement("UserID"),
             new ForeignKey("CompanyID"),
             new MySqlEnum("UserType", "Staff", ["Staff", "Administrator"]),
-            new String("Username", 40),
-            new String("Forename", 40),
-            new String("Surname", 40),
-            new String("Password", 120),
+            new StringColumn("Username", 40),
+            new StringColumn("Forename", 40),
+            new StringColumn("Surname", 40),
+            new StringColumn("Password", 120),
             new Boolean("Active", false),
             new Decimal("Wage")
         );

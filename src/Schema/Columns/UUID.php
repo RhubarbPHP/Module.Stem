@@ -11,7 +11,7 @@ namespace Rhubarb\Stem\Schema\Columns;
 
 use Rhubarb\Stem\Models\Model;
 
-class UUID extends String implements ModelValueInitialiserInterface
+class UUID extends StringColumn implements ModelValueInitialiserInterface
 {
     public function __construct($columnName = 'UUID')
     {
@@ -33,7 +33,7 @@ class UUID extends String implements ModelValueInitialiserInterface
      */
     public function createStorageColumns()
     {
-        return [ new String($this->columnName, 100, $this->defaultValue) ];
+        return [ new StringColumn($this->columnName, 100, $this->defaultValue) ];
     }
 
     private function generateUUID()

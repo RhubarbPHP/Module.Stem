@@ -23,7 +23,7 @@ require_once __DIR__ . "/Column.php";
 /**
  * A string column
  */
-class String extends Column
+class StringColumn extends Column
 {
     public $maximumLength;
 

@@ -23,7 +23,7 @@ use Rhubarb\Stem\Schema\Columns\DateTime;
 use Rhubarb\Stem\Schema\Columns\Integer;
 use Rhubarb\Stem\Schema\Columns\Json;
 use Rhubarb\Stem\Schema\Columns\Money;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Columns\Time;
 use Rhubarb\Stem\Schema\Columns\UUID;
 
@@ -42,7 +42,7 @@ class Company extends Model
 
         $schema->addColumn(
             new AutoIncrement("CompanyID"),
-            new String("CompanyName", 200),
+            new StringColumn("CompanyName", 200),
             new Money("Balance"),
             new Date("InceptionDate"),
             new DateTime("LastUpdatedDate"),

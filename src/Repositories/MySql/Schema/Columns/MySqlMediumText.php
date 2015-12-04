@@ -18,12 +18,12 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/../../../../Schema/Columns/String.php";
+require_once __DIR__ . "/../../../../Schema/Columns/StringColumn.php";
 require_once __DIR__ . "/MySqlColumn.php";
 
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 
-class MySqlMediumText extends String
+class MySqlMediumText extends StringColumn
 {
     use MySqlColumn;
 
