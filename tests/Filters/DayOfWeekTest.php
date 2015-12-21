@@ -1,14 +1,13 @@
 <?php
 
-
 namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Stem\Filters\DayOfWeek;
 use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-
-class DayOfWeekTest extends RhubarbTestCase
+class DayOfWeekTest extends ModelUnitTestCase
 {
     public function testFilter()
     {

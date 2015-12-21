@@ -18,16 +18,13 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
+use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
  * Adds a method used to determine if the filter requires auto hydration of navigation properties.
- *
- * @package Rhubarb\Stem\Repositories\MySql\Filters
- * @author      acuthbert
- * @copyright   2013 GCD Technologies Ltd.
  */
 trait MySqlFilterTrait
 {
@@ -41,9 +38,10 @@ trait MySqlFilterTrait
      * communication back to the repository which properties require auto hydration (if supported).
      *
      * @param Repository $repository
-     * @param $columnName
-     * @param $propertiesToAutoHydrate
-     * @return bool True if the MySql Repository can add this filter to it's where clause.
+     * @param string $columnName
+     * @param string[] $propertiesToAutoHydrate
+     * @return bool True if the MySql Repository can add this filter to its where clause.
+     * @throws FilterNotSupportedException
      */
     protected static function canFilter(Repository $repository, $columnName, &$propertiesToAutoHydrate)
     {
@@ -59,9 +57,15 @@ trait MySqlFilterTrait
 
                     $relationships = SolutionSchema::getAllRelationshipsForModel($repository->getModelClass());
 
-                    if (isset($relationships[$relationship]) && ($relationships[$relationship] instanceof OneToOne)) {
-                        // This is a foreign field and as the __isset() returned true there must be a relationship for this
-                        $propertiesToAutoHydrate[] = $relationship;
+                    if (isset($relationships[$relationship])) {
+                        if ($relationships[$relationship] instanceof OneToOne) {
+                            // This is a foreign field and as the __isset() returned true there must be a relationship for this
+                            $propertiesToAutoHydrate[] = $relationship;
+                        } else {
+                            throw new FilterNotSupportedException("Only OneToOne relationships are supported for Repository filtering, $relationship is not OneToOne");
+                        }
+                    } else {
+                        return false;
                     }
                 } else {
                     return false;
@@ -74,11 +78,7 @@ trait MySqlFilterTrait
         return true;
     }
 
-    protected final static function getTransformedComparisonValueForRepository(
-        $columnName,
-        $rawComparisonValue,
-        Repository $repository
-    )
+    protected final static function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository)
     {
         $exampleObject = SolutionSchema::getModel($repository->getModelClass());
 
@@ -96,7 +96,7 @@ trait MySqlFilterTrait
             $closure = $columnSchema->getTransformIntoRepository();
 
             if ($closure !== null) {
-                $rawComparisonValue = $closure($rawComparisonValue);
+                $rawComparisonValue = $closure([$columnSchema->columnName => $rawComparisonValue]);
             }
         }
 

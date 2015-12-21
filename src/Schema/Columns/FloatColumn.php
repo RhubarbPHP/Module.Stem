@@ -16,26 +16,14 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
+namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__ . '/MySqlInteger.php';
+require_once __DIR__ . "/Column.php";
 
-/**
- * A MySQL smallint
- */
-class MySqlSmallMySqlInteger extends MySqlInteger
+class FloatColumn extends Column
 {
-    use MySqlColumn;
-
-    /**
-     * @return string The SMALLINT columns definition string
-     */
-    public function getDefinition()
+    public function getPhpType()
     {
-        $sql = '`' . $this->columnName . '` SMALLINT(6) ' .
-            (!$this->signed ? 'UNSIGNED ' : '') .
-            $this->getDefaultDefinition();
-
-        return $sql;
+        return "float";
     }
 }

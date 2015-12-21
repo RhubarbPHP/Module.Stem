@@ -22,8 +22,11 @@ BeforeSave
 AfterSave
 :   Called after the model has been committed to the repository
 
-OnDeleted
-:   Called after the model has been deleted
+BeforeDelete
+:   Called before the model is deleted from the repository by a delete() call
+
+AfterDelete
+:   Called after the model has been deleted from the repository
 
 ## 2. Property Change Notifications
 

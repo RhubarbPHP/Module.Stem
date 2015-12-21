@@ -18,17 +18,18 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/../../../../Schema/Columns/String.php";
+require_once __DIR__ . "/../../../../Schema/Columns/StringColumn.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 
-class MySqlMediumText extends String
+class MySqlMediumText extends StringColumn
 {
     use MySqlColumn;
 
     public function __construct($columnName)
     {
-        parent::__construct($columnName, 0, false);
+        parent::__construct($columnName, 0, null);
     }
 
     public function getDefaultDefinition()
@@ -39,8 +40,6 @@ class MySqlMediumText extends String
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` mediumtext " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` mediumtext " . $this->getDefaultDefinition();
     }
 }

@@ -1,21 +1,23 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Models;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Models\ModelEventManager;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDate;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
+use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Tests\Fixtures\Account;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
+use Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema;
 use Rhubarb\Stem\Tests\Fixtures\User;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 class ModelTest extends ModelUnitTestCase
 {
     public function testModelLabelReturnedInToString()
@@ -32,7 +34,7 @@ class ModelTest extends ModelUnitTestCase
         $schema = $example->generateSchema();
 
         // Make sure we have a schema
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\ModelSchema", $schema);
+        $this->assertInstanceOf(ModelSchema::class, $schema);
 
         // Make sure the unique identifier exists
         $this->assertEquals("ContactID", $schema->uniqueIdentifierColumnName);
@@ -114,14 +116,14 @@ class ModelTest extends ModelUnitTestCase
 
     public function testLoadingMissingRecordThrowsException()
     {
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\RecordNotFoundException");
+        $this->setExpectedException(RecordNotFoundException::class);
 
         new Example(55);
     }
 
     public function testLoadingZeroRecordThrowException()
     {
-        $this->setExpectedException('Rhubarb\Stem\Exceptions\RecordNotFoundException');
+        $this->setExpectedException(RecordNotFoundException::class);
 
         new Example(0);
     }
@@ -154,7 +156,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testRelationships()
     {
-        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+        SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
         $company = new Company();
         $company->CompanyName = "Test Company";
@@ -176,7 +178,7 @@ class ModelTest extends ModelUnitTestCase
 
         $company = $user->Company;
 
-        $this->assertInstanceOf("\Rhubarb\Stem\Tests\Fixtures\Company", $company);
+        $this->assertInstanceOf(Company::class, $company);
         $this->assertEquals("Test Company", $company->CompanyName);
 
         $users = $company->Users;
@@ -245,21 +247,24 @@ class ModelTest extends ModelUnitTestCase
     {
         $user = new User();
         $user->Username = "abc";
+        $user->Active = true;
         $user->save();
 
         $user = new User();
         $user->Username = "def";
+        $user->Active = true;
         $user->save();
 
         $user = new User();
         $user->Username = "ghi";
+        $user->Active = true;
         $user->save();
 
         $user = User::FromUsername("def");
 
         $this->assertEquals("def", $user->Username);
 
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\RecordNotFoundException");
+        $this->setExpectedException(RecordNotFoundException::class);
 
         User::FromUsername("123");
     }
@@ -296,7 +301,7 @@ class ModelTest extends ModelUnitTestCase
 
         // Test that deleting a new model throws an exception.
 
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\DeleteModelException");
+        $this->setExpectedException(DeleteModelException::class);
 
         $example = new Example();
         $example->delete();
@@ -305,20 +310,6 @@ class ModelTest extends ModelUnitTestCase
     public function testModelEventing()
     {
         $example = new Example();
-
-        $d = 0;
-        $e = 0;
-        $f = 0;
-
-        $example->attachEventHandler("Test", function ($a, $b, $c) use (&$d, &$e, &$f) {
-            $d = $a;
-            $e = $b;
-            $f = $c;
-        });
-
-        $example->SimulateRaiseEvent("Test", 1, 2, 3);
-
-        $this->assertEquals(6, $d + $e + $f);
 
         $product = 0;
 
@@ -355,7 +346,7 @@ class ModelTest extends ModelUnitTestCase
 
         $saved = false;
 
-        $example->attachEventHandler("afterSave", function () use (&$saved) {
+        ModelEventManager::attachEventHandler('Example', 'AfterSave', function () use (&$saved) {
             $saved = true;
         });
 
@@ -372,7 +363,7 @@ class ModelTest extends ModelUnitTestCase
 
         $saved = false;
 
-        $example->attachEventHandler("afterSave", function () use (&$saved) {
+        ModelEventManager::attachEventHandler('Example', 'AfterSave', function () use (&$saved) {
             $saved = true;
         });
 
@@ -387,11 +378,11 @@ class ModelTest extends ModelUnitTestCase
 
         $schema = $example->getColumnSchemaForColumnReference("Forename");
 
-        $this->assertInstanceOf("\Rhubarb\Stem\Repositories\MySql\Schema\Columns\Varchar", $schema);
+        $this->assertInstanceOf(StringColumn::class, $schema);
         $this->assertEquals("Forename", $schema->columnName);
 
         $schema = $example->getColumnSchemaForColumnReference("ExampleRelationshipName.InceptionDate");
-        $this->assertInstanceOf("\Rhubarb\Stem\Repositories\MySql\Schema\Columns\Date", $schema);
+        $this->assertInstanceOf(MySqlDate::class, $schema);
         $this->assertEquals("InceptionDate", $schema->columnName);
     }
 
@@ -406,6 +397,8 @@ class ModelTest extends ModelUnitTestCase
         $example = new Example($example->UniqueIdentifier);
         $this->assertTrue($example->loaded);
 
+
+        // This is the old, bad pattern. Unless this can be justified - importing into a new record is NOT loading.
         $example = new Example();
         $example->importRawData(["a" => "b"]);
 
@@ -413,7 +406,7 @@ class ModelTest extends ModelUnitTestCase
 
         $example->importRawData([$example->UniqueIdentifierColumnName => 2]);
 
-        $this->assertTrue($example->loaded);
+        $this->assertFalse($example->loaded);
     }
 
     public function testModelGetsDefaultValues()
@@ -432,4 +425,32 @@ class ModelTest extends ModelUnitTestCase
 
         $this->assertTrue($newContact->isNewRecord());
     }
+
+    public function testIsNewRecordFlagWithNonAutoIncrementID()
+    {
+        $account = new Account();
+        $account->AccountID = 'test1';
+        $account->AccountName = 'test 1';
+
+        $this->assertTrue($account->isNewRecord());
+        $account->save();
+        $this->assertFalse($account->isNewRecord());
+
+        $accountReload = new Account('test1');
+        $this->assertFalse($accountReload->isNewRecord());
+        $accountReload->AccountName = 'test 1-1';
+        $accountReload->save();
+        $this->assertFalse($accountReload->isNewRecord());
+
+        $accountImport = new Account();
+        $this->assertTrue( $accountImport->isNewRecord() );
+        $accountImport->importRawData( [
+            'AccountName' => 'Account 2',
+            'AccountID' => 'Account2',
+        ] );
+        $this->assertTrue( $accountImport->isNewRecord() );
+        $accountImport->save();
+        $this->assertFalse( $accountImport->isNewRecord() );
+    }
+
 }

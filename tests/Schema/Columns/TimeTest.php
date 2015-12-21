@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Rhubarb\Stem\Tests\Schema\Columns;
 
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Tests\Fixtures\Example;
-
 
 class TimeTest extends RhubarbTestCase
 {

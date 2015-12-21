@@ -24,6 +24,11 @@ require_once __DIR__ . "/Column.php";
 
 class Date extends Column
 {
+    public function getPhpType()
+    {
+        return '\\' . RhubarbDate::class;
+    }
+
     public function getTransformIntoModelData()
     {
         return function ($data) {

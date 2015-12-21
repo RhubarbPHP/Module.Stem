@@ -24,6 +24,7 @@ use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Date;
 
 require_once __DIR__ . "/../../../../Schema/Columns/Date.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlDate extends Date
 {
@@ -41,14 +42,13 @@ class MySqlDate extends Date
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` date " . $this->getDefaultDefinition();
-        return $sql;
+        return "`" . $this->columnName . "` date " . $this->getDefaultDefinition();
     }
 
     public function getTransformIntoRepository()
     {
         return function ($data) {
-            $data = new RhubarbDateTime($data);
+            $data = new RhubarbDateTime($data[$this->columnName]);
 
             if ($data->isValidDateTime()) {
                 $date = $data->format("Y-m-d");
@@ -63,9 +63,7 @@ class MySqlDate extends Date
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbDate($data);
-
-            return $date;
+            return new RhubarbDate($data[$this->columnName]);
         };
     }
 }

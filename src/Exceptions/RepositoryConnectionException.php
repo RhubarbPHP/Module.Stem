@@ -24,8 +24,8 @@ use Rhubarb\Crown\Exceptions\RhubarbException;
  */
 class RepositoryConnectionException extends RhubarbException
 {
-    public function __construct($repositoryName)
+    public function __construct($repositoryName, \Exception $exception = null)
     {
-        parent::__construct("The repository $repositoryName could not connect to it's back end data store");
+        parent::__construct("The repository $repositoryName could not connect to it's back end data store", $exception);
     }
 }

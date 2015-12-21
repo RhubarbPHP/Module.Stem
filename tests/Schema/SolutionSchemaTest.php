@@ -1,16 +1,15 @@
 <?php
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
- */
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Schema;
 
-
+use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
+use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\ModelSchema;
+use Rhubarb\Stem\Schema\Relationships\OneToMany;
+use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\StemModule;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 use Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema;
@@ -20,25 +19,25 @@ class SolutionSchemaTest extends ModelUnitTestCase
 {
     public function testSchemaMustBeRegistered()
     {
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\SchemaNotFoundException");
+        $this->setExpectedException(SchemaNotFoundException::class);
 
         SolutionSchema::getSchema("UnRegisteredSchema");
     }
 
     public function testSchemaRegistration()
     {
-        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+        SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
         $schema = SolutionSchema::getSchema("MySchema");
 
-        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema", $schema);
+        $this->assertInstanceOf(UnitTestingSolutionSchema::class, $schema);
     }
 
     public function testInvalidSchemaType()
     {
-        SolutionSchema::registerSchema("MyBadSchema", "Rhubarb\Stem\ModellingModule");
+        SolutionSchema::registerSchema("MyBadSchema", StemModule::class);
 
-        $this->setExpectedException("Rhubarb\Stem\Exceptions\SchemaRegistrationException");
+        $this->setExpectedException(SchemaRegistrationException::class);
 
         SolutionSchema::getSchema("MyBadSchema");
     }
@@ -46,7 +45,7 @@ class SolutionSchemaTest extends ModelUnitTestCase
     public function testSchemaCache()
     {
         SolutionSchema::clearSchemas();
-        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+        SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
         $schema = SolutionSchema::getSchema("MySchema");
         $schema->test = true;
@@ -67,7 +66,7 @@ class SolutionSchemaTest extends ModelUnitTestCase
     public function testRelationships()
     {
         SolutionSchema::clearSchemas();
-        SolutionSchema::registerSchema("MySchema", "Rhubarb\Stem\Tests\Fixtures\UnitTestingSolutionSchema");
+        SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
         error_reporting(E_ALL);
         ini_set("display_errors", "on");
@@ -77,12 +76,12 @@ class SolutionSchemaTest extends ModelUnitTestCase
 
         $relationship = $schema->getRelationship("UnitTestUser", "Company");
 
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\Relationships\OneToOne", $relationship);
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\Relationships\OneToMany", $relationship->getOtherSide());
+        $this->assertInstanceOf(OneToOne::class, $relationship);
+        $this->assertInstanceOf(OneToMany::class, $relationship->getOtherSide());
 
         $relationship = $schema->getRelationship("Company", "Users");
 
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\Relationships\OneToMany", $relationship);
+        $this->assertInstanceOf(OneToMany::class, $relationship);
 
         $relationship = $schema->getRelationship("Company", "Unknown");
 
@@ -90,12 +89,12 @@ class SolutionSchemaTest extends ModelUnitTestCase
 
         $relationship = $schema->getRelationship("Example", "ExampleRelationshipName");
 
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\Relationships\OneToOne", $relationship);
+        $this->assertInstanceOf(OneToOne::class, $relationship);
 
         $columnRelationships = SolutionSchema::getAllOneToOneRelationshipsForModelBySourceColumnName("UnitTestUser");
 
         $this->assertArrayHasKey("CompanyID", $columnRelationships);
-        $this->assertInstanceOf("Rhubarb\Stem\Schema\Relationships\OneToOne", $columnRelationships["CompanyID"]);
+        $this->assertInstanceOf(OneToOne::class, $columnRelationships["CompanyID"]);
 
         $company = new Company();
         $company->CompanyName = "GCD";
@@ -139,7 +138,7 @@ class SolutionSchemaTest extends ModelUnitTestCase
     {
         $company = SolutionSchema::getModel("Company");
 
-        $this->assertInstanceOf("Rhubarb\Stem\Tests\Fixtures\Company", $company);
+        $this->assertInstanceOf(Company::class, $company);
         $this->assertTrue($company->isNewRecord());
 
         $company->CompanyName = "Boyo";

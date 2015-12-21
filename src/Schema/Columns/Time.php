@@ -22,15 +22,13 @@ require_once __DIR__ . '/Column.php';
 
 use Rhubarb\Crown\DateTime\RhubarbTime;
 
-/**
- *
- *
- * @package Rhubarb\Stem\Schema\Columns
- * @author      acuthbert
- * @copyright   2013 GCD Technologies Ltd.
- */
 class Time extends Column
 {
+    public function getPhpType()
+    {
+        return '\\' . RhubarbTime::class;
+    }
+
     public function getTransformIntoModelData()
     {
         return function ($data) {

@@ -41,14 +41,14 @@ class Between extends Group
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "min" ] = $this->min;
-        $settings[ "max" ] = $this->max;
+        $settings["min"] = $this->min;
+        $settings["max"] = $this->max;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["min"], $settings["max"] );
+        return new self($settings["columnName"], $settings["min"], $settings["max"]);
     }
 
 }

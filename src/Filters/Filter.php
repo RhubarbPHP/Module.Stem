@@ -30,9 +30,6 @@ use Rhubarb\Stem\Repositories\Repository;
  * preferred to using raw SQL when loading lists as it is much easier to unit test. There are
  * also occasions where offline filtering is actually faster (where the list size is below a
  * certain threshold and a super set of data has already been fetched.
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
  */
 abstract class Filter
 {

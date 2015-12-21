@@ -74,10 +74,10 @@ class ModelSchema
     /**
      * Adds a column to the column collection.
      *
-     * @param \Rhubarb\Stem\Schema\Columns\Column $column
-     * @param \Rhubarb\Stem\Schema\Columns\Column $column,... any number of columns to add
+     * @param Column $column
+     * @param Column $column,... any number of columns to add
      */
-    public function addColumn(\Rhubarb\Stem\Schema\Columns\Column $column)
+    public function addColumn(Column $column)
     {
         $columns = func_get_args();
 

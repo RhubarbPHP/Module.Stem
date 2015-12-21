@@ -49,14 +49,14 @@ class OneOf extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "oneOf" ] = $this->oneOf;
+        $settings["oneOf"] = $this->oneOf;
 
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["oneOf"] );
+        return new self($settings["columnName"], $settings["oneOf"]);
     }
 
     public function doGetUniqueIdentifiersToFilter(Collection $list)

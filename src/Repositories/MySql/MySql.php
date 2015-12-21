@@ -21,10 +21,12 @@ namespace Rhubarb\Stem\Repositories\MySql;
 require_once __DIR__ . "/../PdoRepository.php";
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -137,7 +139,9 @@ class MySql extends PdoRepository
 
         $params[$schema->uniqueIdentifierColumnName] = $object->UniqueIdentifier;
 
-        $this->executeStatement($sql, $params);
+        $statement = $this->executeStatement($sql, $params);
+
+        return $statement->rowCount();
     }
 
     /**
@@ -199,7 +203,9 @@ class MySql extends PdoRepository
 
         $id = self::executeInsertStatement($sql, $params);
 
-        $object[$object->getUniqueIdentifierColumnName()] = $id;
+        if ($id > 0) {
+            $object[$object->getUniqueIdentifierColumnName()] = $id;
+        }
     }
 
     public function getFiltersNamespace()
@@ -207,8 +213,49 @@ class MySql extends PdoRepository
         return 'Rhubarb\Stem\Repositories\MySql\Filters';
     }
 
+    public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
+    {
+        $filter = $collection->getFilter();
+
+        $namedParams = [];
+        $propertiesToAutoHydrate = [];
+        $whereClause = "";
+
+        $filteredExclusivelyByRepository = true;
+
+        if ($filter !== null) {
+            $filterSql = $filter->filterWithRepository($this, $namedParams, $propertiesToAutoHydrate);
+
+            if ($filterSql != "") {
+                $whereClause .= " WHERE " . $filterSql;
+            }
+
+            $filteredExclusivelyByRepository = $filter->wasFilteredByRepository();
+        }
+
+        if (!$filteredExclusivelyByRepository || sizeof($propertiesToAutoHydrate)) {
+            throw new BatchUpdateNotPossibleException();
+        }
+
+        $schema = $this->schema;
+        $table = $schema->schemaName;
+        $sets = [];
+
+        foreach ($propertyPairs as $key => $value) {
+            $paramName = "Update" . $key;
+
+            $namedParams[$paramName] = $value;
+            $sets[] = "`" . $key . "` = :" . $paramName;
+
+        }
+
+        $sql = "UPDATE `{$table}` SET " . implode(",", $sets) . $whereClause;
+
+        MySql::executeStatement($sql, $namedParams);
+    }
+
     /**
-     * Get's the unique identifiers required for the matching filters and loads the data into
+     * Gets the unique identifiers required for the matching filters and loads the data into
      * the cache for performance reasons.
      *
      * @param Collection $list
@@ -216,20 +263,88 @@ class MySql extends PdoRepository
      * @param array $relationshipNavigationPropertiesToAutoHydrate
      * @return array
      */
-    public function getUniqueIdentifiersForDataList(
-        Collection $list,
-        &$unfetchedRowCount = 0,
-        $relationshipNavigationPropertiesToAutoHydrate = []
-    )
+    public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
     {
         $this->lastSortsUsed = [];
 
+        $schema = $this->schema;
+
+        $sql = $this->getRepositoryFetchCommandForDataList($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
+
+        $statement = self::executeStatement($sql, $namedParams);
+
+        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $uniqueIdentifiers = [];
+
+        if (sizeof($joinColumns)) {
+            foreach ($joinColumnsByModel as $joinModel => $modelJoinedColumns) {
+                $model = SolutionSchema::getModel($joinModel);
+                $repository = $model->getRepository();
+
+                foreach ($results as &$result) {
+                    $aliasedUniqueIdentifierColumnName = $joinOriginalToAliasLookup[$joinModel . "." . $model->UniqueIdentifierColumnName];
+
+                    if (isset($result[$aliasedUniqueIdentifierColumnName]) && !isset($repository->cachedObjectData[$result[$aliasedUniqueIdentifierColumnName]])) {
+                        $joinedData = array_intersect_key($result, $modelJoinedColumns);
+
+                        $modelData = array_combine($modelJoinedColumns, $joinedData);
+
+                        $repository->cachedObjectData[$modelData[$model->UniqueIdentifierColumnName]] = $modelData;
+                    }
+
+                    $result = array_diff_key($result, $modelJoinedColumns);
+                }
+                unset($result);
+            }
+        }
+
+        foreach ($results as $result) {
+            $uniqueIdentifier = $result[$schema->uniqueIdentifierColumnName];
+
+            $result = $this->transformDataFromRepository($result);
+
+            // Store the data in the cache and add the unique identifier to our list.
+            $this->cachedObjectData[$uniqueIdentifier] = $result;
+
+            $uniqueIdentifiers[] = $uniqueIdentifier;
+        }
+
+        if ($ranged) {
+            $foundRows = Mysql::returnSingleValue("SELECT FOUND_ROWS()");
+
+            $unfetchedRowCount = $foundRows - sizeof($uniqueIdentifiers);
+        }
+
+        return $uniqueIdentifiers;
+    }
+
+    /**
+	 * Returns the repository-specific command so it can be used externally for other operations.
+	 * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
+	 *
+	 * @param Collection $collection
+	 * @param array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
+	 *                                                                  try to auto hydrate (if supported)
+	 * @param array      $namedParams Named parameters to be used in execution of the command
+	 *
+	 * Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more
+	 * than just the SQL command to be returned from this method.
+	 *
+	 * @param array      $joinColumns
+	 * @param array      $joinOriginalToAliasLookup
+	 * @param array      $joinColumnsByModel
+	 * @param bool       $ranged
+	 *
+	 * @return string The SQL command to be executed
+ 	 */
+    public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams = null, &$joinColumns = null, &$joinOriginalToAliasLookup = null, &$joinColumnsByModel = null, &$ranged = null)
+    {
         $schema = $this->schema;
         $table = $schema->schemaName;
 
         $whereClause = "";
 
-        $filter = $list->getFilter();
+        $filter = $collection->getFilter();
 
         $namedParams = [];
         $propertiesToAutoHydrate = $relationshipNavigationPropertiesToAutoHydrate;
@@ -254,7 +369,7 @@ class MySql extends PdoRepository
 
         $aggregateRelationshipPropertiesToAutoHydrate = [];
 
-        foreach ($list->getAggregates() as $aggregate) {
+        foreach ($collection->getAggregates() as $aggregate) {
             $clause = $aggregate->aggregateWithRepository($this, $aggregateRelationshipPropertiesToAutoHydrate);
 
             if ($clause != "") {
@@ -295,7 +410,7 @@ class MySql extends PdoRepository
         $joinOriginalToAliasLookup = [];
         $joinColumnsByModel = [];
 
-        $sorts = $list->getSorts();
+        $sorts = $collection->getSorts();
         $possibleSorts = [];
         $columns = $schema->getColumns();
 
@@ -389,7 +504,7 @@ class MySql extends PdoRepository
         $ranged = false;
 
         if ($filteredExclusivelyByRepository && (sizeof($possibleSorts) == sizeof($sorts))) {
-            $range = $list->getRange();
+            $range = $collection->getRange();
 
             if ($range != false) {
                 $ranged = true;
@@ -398,51 +513,7 @@ class MySql extends PdoRepository
             }
         }
 
-        $statement = self::executeStatement($sql, $namedParams);
-
-        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $uniqueIdentifiers = [];
-
-        if (sizeof($joinColumns)) {
-            foreach ($joinColumnsByModel as $joinModel => $modelJoinedColumns) {
-                $model = SolutionSchema::getModel($joinModel);
-                $repository = $model->getRepository();
-
-                foreach ($results as &$result) {
-                    $aliasedUniqueIdentifierColumnName = $joinOriginalToAliasLookup[$joinModel . "." . $model->UniqueIdentifierColumnName];
-
-                    if (isset($result[$aliasedUniqueIdentifierColumnName]) && !isset($repository->cachedObjectData[$result[$aliasedUniqueIdentifierColumnName]])) {
-                        $joinedData = array_intersect_key($result, $modelJoinedColumns);
-
-                        $modelData = array_combine($modelJoinedColumns, $joinedData);
-
-                        $repository->cachedObjectData[$modelData[$model->UniqueIdentifierColumnName]] = $modelData;
-                    }
-
-                    $result = array_diff_key($result, $modelJoinedColumns);
-                }
-                unset($result);
-            }
-        }
-
-        foreach ($results as $result) {
-            $uniqueIdentifier = $result[$schema->uniqueIdentifierColumnName];
-
-            $result = $this->transformDataFromRepository($result);
-
-            // Store the data in the cache and add the unique identifier to our list.
-            $this->cachedObjectData[$uniqueIdentifier] = $result;
-
-            $uniqueIdentifiers[] = $uniqueIdentifier;
-        }
-
-        if ($ranged) {
-            $foundRows = Mysql::returnSingleValue("SELECT FOUND_ROWS()");
-
-            $unfetchedRowCount = $foundRows - sizeof($uniqueIdentifiers);
-        }
-
-        return $uniqueIdentifiers;
+        return $sql;
     }
 
     /**
@@ -527,7 +598,7 @@ class MySql extends PdoRepository
 
             if ($clause != "") {
                 $c++;
-                $clauses[] = str_replace('.', '`.`', $clause);
+                $clauses[] = $clause;
                 $clausePositions[$c] = $i;
             } else {
                 $results[$i] = null;
@@ -558,10 +629,11 @@ class MySql extends PdoRepository
 
             $sql .= $groupClause;
 
-            $row = array_values(self::returnFirstRow($sql, $namedParams));
+            $firstRow = self::ReturnFirstRow($sql, $namedParams);
+            $row = is_array($firstRow) ? array_values($firstRow) : null;
 
             foreach ($clausePositions as $rowPosition => $resultPosition) {
-                $results[$resultPosition] = $row[$rowPosition];
+                $results[$resultPosition] = $row === null ? null : $row[$rowPosition];
             }
         }
 
@@ -589,7 +661,7 @@ class MySql extends PdoRepository
                 $pdo = new \PDO("mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
                     $settings->Username, $settings->Password, [\PDO::ERRMODE_EXCEPTION => true]);
             } catch (\PDOException $er) {
-                throw new RepositoryConnectionException("MySql");
+                throw new RepositoryConnectionException("MySql", $er);
             }
 
             PdoRepository::$connections[$connectionHash] = $pdo;
@@ -613,5 +685,12 @@ class MySql extends PdoRepository
         } catch (\PDOException $er) {
             throw new RepositoryConnectionException("MySql");
         }
+    }
+
+    public function clearRepositoryData()
+    {
+        $schema = $this->getSchema();
+
+        self::executeStatement("TRUNCATE TABLE `".$schema->schemaName."`");
     }
 }

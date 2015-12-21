@@ -28,22 +28,17 @@ class MySqlSum extends Sum
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(
-        Repository $repository,
-        Aggregate $originalAggregate,
-        &$relationshipsToAutoHydrate
-    )
+    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, &$relationshipsToAutoHydrate)
     {
         $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
 
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName,
-            $relationshipsToAutoHydrate)
-        ) {
+        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName, $relationshipsToAutoHydrate)) {
             $aliasName = $originalAggregate->getAlias();
 
             $originalAggregate->aggregatedByRepository = true;
+            $prefix = ( strpos( $columnName, '.') === false ) ? "`{$repository->getSchema()->schemaName}`." : "";
 
-            return "SUM( `{$columnName}` ) AS `{$aliasName}`";
+            return "SUM( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
         }
 
         return "";

@@ -33,6 +33,11 @@ abstract class CompositeColumn extends Column
         parent::__construct($columnName, $this->getNewContainerObject());
     }
 
+    public function getPhpType()
+    {
+        return "string[]";
+    }
+
     /**
      * Returns an array of strings; the names of the composite columns being used.
      *
@@ -71,10 +76,17 @@ abstract class CompositeColumn extends Column
     public function getTransformIntoRepository()
     {
         return function ($data) {
+            $compositeData = $data[$this->columnName];
+
+            // Handle occasions when the data value is an object (usually stdClass) rather than an array
+            if ( is_object($compositeData)){
+                $compositeData = get_object_vars($compositeData);
+            }
+
             $exportData = [];
 
             foreach ($this->getCompositeColumnsNames() as $column) {
-                $exportData[$this->columnName . $column] = isset($data[$column]) ? $data[$column] : "";
+                $exportData[$this->columnName . $column] = isset($compositeData[$column]) ? $compositeData[$column] : "";
             }
 
             return $exportData;

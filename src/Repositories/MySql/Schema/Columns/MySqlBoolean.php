@@ -22,6 +22,7 @@ use Rhubarb\Stem\Schema\Columns\Boolean;
 use Rhubarb\Stem\Schema\Columns\Column;
 
 require_once __DIR__ . '/../../../../Schema/Columns/Boolean.php';
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlBoolean extends Boolean
 {
@@ -34,13 +35,13 @@ class MySqlBoolean extends Boolean
 
     public function getTransformIntoRepository()
     {
-        return function ($value) {
-            return ($value) ? 1 : 0;
+        return function ($data) {
+            return ($data[$this->columnName]) ? 1 : 0;
         };
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new MySqlBoolean( $genericColumn->columnName );
+        return new MySqlBoolean( $genericColumn->columnName, $genericColumn->defaultValue );
     }
 }

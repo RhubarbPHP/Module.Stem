@@ -1,22 +1,19 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Schema;
 
+use Rhubarb\Stem\Schema\Columns\StringColumn;
+use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
- */
 class ModelSchemaTest extends ModelUnitTestCase
 {
     public function testMultipleColumnsCanBeAdded()
     {
-        $schema = new \Rhubarb\Stem\Schema\ModelSchema("test");
+        $schema = new ModelSchema("test");
         $schema->addColumn(
-            new \Rhubarb\Stem\Schema\Columns\String("Bob", 100),
-            new \Rhubarb\Stem\Schema\Columns\String("Alice", 100)
+            new StringColumn("Bob", 100),
+            new StringColumn("Alice", 100)
         );
 
         $columns = $schema->getColumns();

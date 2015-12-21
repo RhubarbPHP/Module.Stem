@@ -85,7 +85,7 @@ class Index
      */
     public function getDefinition()
     {
-        $columnNames = " (`" . implode("`, `", $this->columnNames) . "`)";
+        $columnNames = " (`" . implode("`,`", $this->columnNames) . "`)";
         switch ($this->indexType) {
             case Index::PRIMARY:
                 return "PRIMARY KEY" . $columnNames;
@@ -97,7 +97,7 @@ class Index
                 return "UNIQUE `" . $this->indexName . "`" . $columnNames;
                 break;
             case Index::FULLTEXT:
-                return "FULLTEXT INDEX `" . $this->indexName . "`" . $columnNames;
+                return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
                 break;
         }
 

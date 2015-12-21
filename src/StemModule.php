@@ -17,6 +17,10 @@
  */
 
 namespace Rhubarb\Stem;
+use Rhubarb\Stem\Custard\DocumentModelsCommand;
+use Rhubarb\Stem\Custard\SeedDemoDataCommand;
+use Rhubarb\Stem\Custard\UpdateRepositorySchemasCommand;
+use Symfony\Component\Console\Command\Command;
 
 /**
  * The Data module provides Active Record objects for PHP.
@@ -25,5 +29,23 @@ namespace Rhubarb\Stem;
  */
 class StemModule extends \Rhubarb\Crown\Module
 {
+    /**
+     * An opportunity for the module to return a list custard command line commands to register.
+     *
+     * Note that modules are asked for commands in the same order in which the modules themselves
+     * were registered. This allows extending modules or scaffolds to superseed a command with an
+     * improved version by simply reregistering a command with the same name.
+     *
+     * @return Command[]
+     */
+    public function getCustardCommands()
+    {
+        return
+        [
+            new DocumentModelsCommand(),
+            new UpdateRepositorySchemasCommand(),
+            new SeedDemoDataCommand()
+        ];
+    }
 
 }

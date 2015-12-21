@@ -61,11 +61,11 @@ class Contains extends ColumnFilter
     {
         $ids = [];
 
+        $searchMethod = $this->caseSensitive ? 'strpos' : 'stripos';
         foreach ($list as $item) {
             if (
-                (strlen($item[$this->columnName]) < strlen($item[$this->contains])) ||
-                ($this->caseSensitive && !strstr($item[$this->columnName], $this->contains)) ||
-                (!$this->caseSensitive && !stristr($item[$this->columnName], $this->contains))
+                strlen($item[$this->columnName]) < strlen($this->contains)
+                || $searchMethod($item[$this->columnName], $this->contains) === false
             ) {
                 $ids[] = $item->UniqueIdentifier;
             }
@@ -77,13 +77,13 @@ class Contains extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "contains" ] = $this->contains;
-        $settings[ "caseSensitive" ] = $this->caseSensitive;
+        $settings["contains"] = $this->contains;
+        $settings["caseSensitive"] = $this->caseSensitive;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["contains"], $settings["caseSensitive"] );
+        return new self($settings["columnName"], $settings["contains"], $settings["caseSensitive"]);
     }
 }

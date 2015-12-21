@@ -1,15 +1,13 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\LessThan;
+use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-/**
- *
- * @author    rkilfedder
- * @copyright GCD Technologies 2012
- */
-class LessThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class LessThanTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -22,35 +20,35 @@ class LessThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Clancy";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Clifford";
         $example->Surname = "Morris";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testFiltersDate()
     {
-        $filter = new \Rhubarb\Stem\Filters\LessThan("DateOfBirth", "1979-01-01");
+        $filter = new LessThan("DateOfBirth", "1979-01-01");
 
         $this->list->filter($filter);
         $this->assertCount(2, $this->list);
@@ -59,12 +57,12 @@ class LessThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     public function testFiltersAlpha()
     {
-        $filter = new \Rhubarb\Stem\Filters\LessThan("Forename", "Mary", true);
+        $filter = new LessThan("Forename", "Mary", true);
 
         $this->list->filter($filter);
         $this->assertCount(3, $this->list);
 
-        $filter = new \Rhubarb\Stem\Filters\LessThan("Forename", "Mary", false);
+        $filter = new LessThan("Forename", "Mary", false);
         $this->list->filter($filter);
         $this->assertCount(2, $this->list);
         $this->assertContains("John", $this->list[0]->Forename);
@@ -72,7 +70,7 @@ class LessThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     public function testFiltersOnOtherColumn()
     {
-        $filter = new \Rhubarb\Stem\Filters\LessThan("Forename", "@{Surname}", true);
+        $filter = new LessThan("Forename", "@{Surname}", true);
 
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);

@@ -76,13 +76,13 @@ class EndsWith extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "endsWith" ] = $this->endsWith;
-        $settings[ "caseSensitive" ] = $this->caseSensitive;
+        $settings["endsWith"] = $this->endsWith;
+        $settings["caseSensitive"] = $this->caseSensitive;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings[ "columnName" ], $settings["endsWith"], $settings["caseSensitive"] );
+        return new self($settings["columnName"], $settings["endsWith"], $settings["caseSensitive"]);
     }
 }

@@ -2,12 +2,11 @@
 
 namespace Rhubarb\Stem\Tests\Repositories\MySql\Aggregates;
 
+use Rhubarb\Stem\Aggregates\CountDistinct;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
-
-//use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
 class CountDistinctTest extends MySqlTestCase
 {
@@ -45,8 +44,7 @@ class CountDistinctTest extends MySqlTestCase
     {
         $examples = new Collection("Company");
 
-        list($sumTotal) = $examples->calculateAggregates(
-            [new MySqlCountDistinct("CompanyName")]);
+        list($sumTotal) = $examples->calculateAggregates(new CountDistinct("CompanyName"));
 
         $this->assertEquals(2, $sumTotal);
 

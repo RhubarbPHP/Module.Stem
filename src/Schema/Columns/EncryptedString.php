@@ -18,10 +18,10 @@
 
 namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__ . '/String.php';
+require_once __DIR__ . '/StringColumn.php';
 require_once __DIR__ . '/WithEncryptedText.php';
 
-class EncryptedString extends String
+class EncryptedString extends StringColumn
 {
     use WithEncryptedText;
 }

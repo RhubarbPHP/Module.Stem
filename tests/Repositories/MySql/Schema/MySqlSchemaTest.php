@@ -10,15 +10,10 @@ use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrement;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 class MySqlSchemaTest extends MySqlTestCase
 {
     public function testEnumRequiresDefault()
@@ -37,7 +32,7 @@ class MySqlSchemaTest extends MySqlTestCase
         $schema = new MysqlModelSchema("tblExample");
 
         $schema->addColumn(new AutoIncrement("ID"));
-        $schema->addColumn(new String("Name", 40, "StrangeDefault"));
+        $schema->addColumn(new StringColumn("Name", 40, "StrangeDefault"));
         $schema->addColumn(new MySqlEnum("Type", "A", ["A", "B", "C"]));
 
         $schema->addIndex(new Index("ID", Index::PRIMARY));
@@ -62,10 +57,10 @@ class MySqlSchemaTest extends MySqlTestCase
         $schema = new MySqlModelSchema("tblExample");
 
         $schema->addColumn(new AutoIncrement("ID"));
-        $schema->addColumn(new String("Name", 40, "StrangeDefault"));
+        $schema->addColumn(new StringColumn("Name", 40, "StrangeDefault"));
         $schema->addColumn(new MySqlEnum("Type", "A", ["A", "B", "C"]));
         $schema->addColumn(new MySqlEnum("Type", "B", ["A", "B", "C", "D"]));
-        $schema->addColumn(new String("Town", 60, null));
+        $schema->addColumn(new StringColumn("Town", 60, null));
 
         $schema->addIndex(new Index("ID", Index::PRIMARY));
 

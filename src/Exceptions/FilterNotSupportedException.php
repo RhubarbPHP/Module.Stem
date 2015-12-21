@@ -16,25 +16,13 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Schema\Columns;
+namespace Rhubarb\Stem\Exceptions;
 
-require_once __DIR__ . "/Column.php";
+use Rhubarb\Crown\Exceptions\RhubarbException;
 
 /**
- * A string column
  */
-class String extends Column
+class FilterNotSupportedException extends RhubarbException
 {
-    public $maximumLength;
 
-    public function __construct($columnName, $maximumLength, $defaultValue = "")
-    {
-        parent::__construct($columnName, $defaultValue);
-
-        if (!is_numeric($maximumLength)) {
-            throw new \InvalidArgumentException("maximumLength must be numeric");
-        }
-
-        $this->maximumLength = $maximumLength;
-    }
 }

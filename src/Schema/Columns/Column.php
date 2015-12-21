@@ -45,6 +45,11 @@ class Column
         $this->defaultValue = $defaultValue;
     }
 
+    public function getPhpType()
+    {
+        return "string";
+    }
+
     /**
      * Return the definition string needed to update the back end storage schema to match.
      *
@@ -140,7 +145,7 @@ class Column
      * we don't have to call these methods for every set and get on the model - only where the column has
      * defined these values.
      *
-     * @return null
+     * @return null|callable
      */
     public function getTransformIntoModelData()
     {
@@ -151,7 +156,7 @@ class Column
      * Optionally returns a Closure that can transform model data as it is returned to the user of the model.
      *
      * @see getTransformIntoModelData()
-     * @return null
+     * @return null|callable
      */
     public function getTransformFromModelData()
     {
@@ -162,7 +167,7 @@ class Column
      * Optionally returns a Closure that can transform model data as it is received from the repository
      *
      * @see getTransformIntoModelData()
-     * @return null
+     * @return null|callable
      */
     public function getTransformFromRepository()
     {
@@ -173,10 +178,18 @@ class Column
      * Optionally returns a Closure that can transform model data as it is sent to the repository
      *
      * @see getTransformIntoModelData()
-     * @return null
+     * @return null|callable
      */
     public function getTransformIntoRepository()
     {
         return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultValue()
+    {
+        return $this->defaultValue;
     }
 }

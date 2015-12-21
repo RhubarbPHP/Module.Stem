@@ -22,10 +22,29 @@ require_once __DIR__ . '/LongString.php';
 
 class Json extends LongString
 {
+    private $decodeAsArrays;
+
+    /**
+     * @param $columnName
+     * @param null $defaultValue
+     * @param bool $decodeAsArrays True if the decoded JSON values should be returned as arrays instead of objects.
+     */
+    public function __construct($columnName, $defaultValue = null, $decodeAsArrays = false )
+    {
+        parent::__construct($columnName, $defaultValue);
+
+        $this->decodeAsArrays = $decodeAsArrays;
+    }
+
+    public function getPhpType()
+    {
+        return \stdClass::class;
+    }
+
     public function getTransformFromRepository()
     {
         return function ($data) {
-            return json_decode($data);
+            return json_decode($data[$this->columnName], $this->decodeAsArrays);
         };
     }
 

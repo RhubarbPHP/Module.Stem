@@ -22,6 +22,11 @@ require_once __DIR__ . "/Column.php";
 
 class Boolean extends Column
 {
+    public function getPhpType()
+    {
+        return "bool";
+    }
+
     public function getTransformIntoModelData()
     {
         return function ($value) {
@@ -31,8 +36,8 @@ class Boolean extends Column
 
     public function getTransformFromRepository()
     {
-        return function ($value) {
-            return (bool)$value;
+        return function ($data) {
+            return (bool)$data[$this->columnName];
         };
     }
 }

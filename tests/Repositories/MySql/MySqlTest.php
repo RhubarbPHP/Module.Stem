@@ -1,35 +1,32 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Repositories\MySql;
 
 use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
+use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Group;
-use Rhubarb\Stem\Repositories\MySql\Filters\MySqlInArray;
+use Rhubarb\Stem\Filters\OneOf;
 use Rhubarb\Stem\Repositories\MySql\MySql;
+use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Tests\Fixtures\Category;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\CompanyCategory;
 use Rhubarb\Stem\Tests\Fixtures\User;
-use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
- */
 class MySqlTest extends MySqlTestCase
 {
     public function testInvalidSettingsThrowsException()
     {
         MySql::resetDefaultConnection();
 
-        $settings = new \Rhubarb\Stem\StemSettings();
+        $settings = new StemSettings();
         $settings->Username = "bad-user";
 
-        $this->setExpectedException("\Rhubarb\Stem\Exceptions\RepositoryConnectionException");
+        $this->setExpectedException(RepositoryConnectionException::class);
 
         MySql::getDefaultConnection();
     }
@@ -41,7 +38,7 @@ class MySqlTest extends MySqlTestCase
 
         $defaultConnection = MySql::getDefaultConnection();
 
-        $this->assertInstanceOf("\PDO", $defaultConnection);
+        $this->assertInstanceOf(\PDO::class, $defaultConnection);
     }
 
     public function testStatementsCanBeExecuted()
@@ -49,7 +46,7 @@ class MySqlTest extends MySqlTestCase
         // No exception should be thrown as the statement should execute.
         MySql::executeStatement("SELECT 5");
 
-        $this->setExpectedException("\Rhubarb\Stem\Exceptions\RepositoryStatementException");
+        $this->setExpectedException(RepositoryStatementException::class);
 
         // This should throw an exception
         MySql::executeStatement("BOSELECTA 5");
@@ -65,7 +62,7 @@ class MySqlTest extends MySqlTestCase
             $company->save();
         }
 
-        $collection = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $collection = new Collection(Company::class);
         $collection->setRange(10, 4);
 
         $size = sizeof($collection);
@@ -105,7 +102,7 @@ class MySqlTest extends MySqlTestCase
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-        $company = new \Rhubarb\Stem\Tests\Fixtures\Company();
+        $company = new Company();
         $company->CompanyName = "GCD";
         $company->save();
 
@@ -170,7 +167,7 @@ class MySqlTest extends MySqlTestCase
         $group = new Group();
         $group->addFilters(new Equals("CompanyName", "GCD"));
 
-        $list = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->filter($group);
 
         sizeof($list);
@@ -182,7 +179,7 @@ class MySqlTest extends MySqlTestCase
         $group->addFilters(new Equals("CompanyName", "GCD"));
         $group->addFilters(new Equals("Test", "GCD"));
 
-        $list = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->filter($group);
 
         sizeof($list);
@@ -195,7 +192,7 @@ class MySqlTest extends MySqlTestCase
         $group = new Group();
         $group->addFilters(new Contains("CompanyName", "GCD"));
 
-        $list = new Collection("Rhubarb\Stem\Tests\Fixtures\Company");
+        $list = new Collection(Company::class);
         $list->filter($group);
 
         sizeof($list);
@@ -220,7 +217,7 @@ class MySqlTest extends MySqlTestCase
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
 
-        $users = new Collection("Rhubarb\Stem\Tests\Fixtures\User");
+        $users = new Collection(User::class);
         $users->filter(new Equals("Company.CompanyName", "GCD"));
 
         count($users);
@@ -230,7 +227,7 @@ class MySqlTest extends MySqlTestCase
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
 
-        $users = new Collection("Rhubarb\Stem\Tests\Fixtures\User");
+        $users = new Collection(User::class);
         $users->replaceSort("Company.CompanyName", true);
 
         count($users);
@@ -304,7 +301,7 @@ class MySqlTest extends MySqlTestCase
 
     public function testManualAutoHydration()
     {
-        $users = new Collection("Rhubarb\Stem\Tests\Fixtures\User");
+        $users = new Collection(User::class);
         $users->autoHydrate("Company");
 
         count($users);
@@ -313,7 +310,7 @@ class MySqlTest extends MySqlTestCase
     }
 
 
-    public function testMySqlInArray()
+    public function testOneOf()
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
         MySql::executeStatement("TRUNCATE TABLE tblUser");
@@ -339,8 +336,8 @@ class MySqlTest extends MySqlTestCase
         $company4->CompanyName = "5";
         $company4->save();
 
-        $companies = new Collection("Company");
-        $companies->filter(new MySqlInArray("CompanyName", ["1", "3", "5"]));
+        $companies = new Collection(Company::class);
+        $companies->filter(new OneOf("CompanyName", ["1", "3", "5"]));
 
         $this->assertCount(3, $companies);
     }
@@ -375,7 +372,7 @@ class MySqlTest extends MySqlTestCase
         $user4->Wage = 400;
         $company2->Users->Append($user4);
 
-        $companies = new Collection("Company");
+        $companies = new Collection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.Wage"));
 
         $results = [];
@@ -390,7 +387,7 @@ class MySqlTest extends MySqlTestCase
 
         $this->assertEquals("SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`", $sql);
 
-        $companies = new Collection("Company");
+        $companies = new Collection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.BigWage"));
 
         $results = [];
@@ -406,16 +403,16 @@ class MySqlTest extends MySqlTestCase
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
 
-        $company = new \Rhubarb\Stem\Tests\Fixtures\Company();
+        $company = new Company();
         $company->CompanyName = "GCD";
         $company->save();
 
-        $companies = new Collection('Rhubarb\Stem\Tests\Fixtures\Company');
+        $companies = new Collection(Company::class);
         $companies->filter(new Equals("CompanyName", null));
 
         $this->assertEquals(0, $companies->count());
 
-        $companies = new Collection('Rhubarb\Stem\Tests\Fixtures\Company');
+        $companies = new Collection(Company::class);
         $companies->filter(new Equals("ProjectCount", null));
 
         $this->assertEquals(1, $companies->count());

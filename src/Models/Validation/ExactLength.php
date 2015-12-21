@@ -16,11 +16,28 @@
  *  limitations under the License.
  */
 
-namespace Rhubarb\Stem\Schema\Columns;
+namespace Rhubarb\Stem\Models\Validation;
 
-require_once __DIR__ . "/Column.php";
-
-class Float extends Column
+class ExactLength extends Validation
 {
+    protected $exactLength;
 
+    public function __construct($name, $exactLength = 0)
+    {
+        parent::__construct($name);
+
+        if($exactLength > 0) {
+            $this->exactLength = $exactLength;
+        }
+    }
+
+    public function test($value, $model = null)
+    {
+        return strlen($value) == $this->exactLength;
+    }
+
+    public function getDefaultFailedMessage()
+    {
+        return $this->label . ' must be of length ' . $this->exactLength;
+    }
 }

@@ -19,7 +19,9 @@
 namespace Rhubarb\Stem\Decorators;
 
 use Rhubarb\Crown\Exceptions\ImplementationException;
+use Rhubarb\Stem\Decorators\Formatters\TypeFormatter;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
@@ -227,7 +229,13 @@ abstract class DataDecorator implements \ArrayAccess
             foreach ($this->typeFormatters as $type => $formatter) {
                 foreach ($columns as $columnName => $column) {
                     if ($column instanceof $type) {
-                        self::$columnTypeFormatters[$this->modelClass][$columnName] = $formatter;
+                        /** @var Column $column */
+
+                        if ($formatter instanceof TypeFormatter) {
+                            self::$columnTypeFormatters[$this->modelClass][$columnName] = $formatter->getFormatter($column);
+                        } else {
+                            self::$columnTypeFormatters[$this->modelClass][$columnName] = $formatter;
+                        }
                     }
                 }
             }
@@ -325,7 +333,7 @@ abstract class DataDecorator implements \ArrayAccess
      */
     public function offsetExists($offset)
     {
-        return isset($this->$offset);
+        return (isset($this->model[$offset]) || isset($this->columnDecorators[$offset]));
     }
 
     /**

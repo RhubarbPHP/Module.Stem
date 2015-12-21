@@ -45,13 +45,13 @@ class Equals extends ColumnFilter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "equalTo" ] = $this->equalTo;
+        $settings["equalTo"] = $this->equalTo;
         return $settings;
     }
 
     public static function fromSettingsArray($settings)
     {
-        return new self( $settings["columnName"], $settings["equalsTo"] );
+        return new self($settings["columnName"], $settings["equalsTo"]);
     }
 
     public function doGetUniqueIdentifiersToFilter(Collection $list)

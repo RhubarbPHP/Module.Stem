@@ -20,11 +20,13 @@ namespace Rhubarb\Stem\LoginProviders;
 
 use Rhubarb\Crown\Encryption\HashProvider;
 use Rhubarb\Crown\Exceptions\ImplementationException;
+use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
 use Rhubarb\Crown\LoginProviders\LoginProvider;
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -33,10 +35,10 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class ModelLoginProvider extends LoginProvider
 {
-    private $usernameColumnName = "";
-    private $passwordColumnName = "";
-    private $activeColumnName = "";
-    private $modelClassName = "";
+    protected $usernameColumnName = "";
+    protected $passwordColumnName = "";
+    protected $activeColumnName = "";
+    protected $modelClassName = "";
 
     public function __construct($modelClassName, $usernameColumnName, $passwordColumnName, $activeColumnName = "")
     {
@@ -67,6 +69,7 @@ class ModelLoginProvider extends LoginProvider
         $list->filter(new Equals($this->usernameColumnName, $username));
 
         if (!sizeof($list)) {
+            Log::debug( "Login failed for {$username} - the username didn't match a user", "LOGIN" );
             throw new LoginFailedException();
         }
 
@@ -76,9 +79,11 @@ class ModelLoginProvider extends LoginProvider
         // unique *combinations* of username and password but it's a potential security issue and
         // could trip us up when supporting the project.
         if (sizeof($list) > 1) {
+            Log::debug( "Login failed for {$username} - the username wasn't unique", "LOGIN" );
             throw new LoginFailedException();
         }
 
+        /** @var Model $user */
         $user = $list[0];
 
         $this->checkUserIsPermitted($user);
@@ -96,9 +101,12 @@ class ModelLoginProvider extends LoginProvider
 
                 return true;
             } else {
+                Log::debug( "Login failed for {$username} - the user is disabled.", "LOGIN" );
                 throw new LoginDisabledException();
             }
         }
+
+        Log::debug( "Login failed for {$username} - the password hash $userPasswordHash didn't match the stored hash.", "LOGIN" );
 
         throw new LoginFailedException();
     }
@@ -153,7 +161,7 @@ class ModelLoginProvider extends LoginProvider
         if (isset($this->LoggedInUserIdentifier)) {
             try {
                 return SolutionSchema::getModel($this->modelClassName, $this->LoggedInUserIdentifier);
-            } catch (\Rhubarb\Stem\Exceptions\RecordNotFoundException $er) {
+            } catch (RecordNotFoundException $er) {
                 throw new NotLoggedInException();
             }
         }
@@ -168,4 +176,10 @@ class ModelLoginProvider extends LoginProvider
 
         parent::onLogOut();
     }
+
+	protected function getUsername()
+	{
+		$user = $this->getModel();
+		return $user->{$this->usernameColumnName};
+	}
 }

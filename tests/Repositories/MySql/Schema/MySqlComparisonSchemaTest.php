@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Tests\Repositories\MySql\Schema;
 
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\User;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
@@ -87,11 +87,10 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
 
         $this->assertFalse($compareTo->createAlterTableStatementFor($comparisonSchema));
 
-        $schema->addColumn(new String("Town", 60, null));
+        $schema->addColumn(new StringColumn("Town", 60, null));
 
         $compareTo = MySqlComparisonSchema::fromMySqlSchema($schema);
 
         $this->assertContains("ADD COLUMN `Town` varchar(60) DEFAULT NULL", $compareTo->createAlterTableStatementFor($comparisonSchema));
-
     }
 }

@@ -22,7 +22,8 @@ use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateTime;
 
-require_once __DIR__ . "/MySqlDate.php";
+require_once __DIR__ . "/../../../../Schema/Columns/DateTime.php";
+require_once __DIR__ . "/MySqlColumn.php";
 
 class MySqlDateTime extends DateTime
 {
@@ -40,8 +41,7 @@ class MySqlDateTime extends DateTime
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` datetime " . $this->getDefaultDefinition();
-        return $sql;
+        return "`" . $this->columnName . "` datetime " . $this->getDefaultDefinition();
     }
 
     public function getTransformIntoModelData()
@@ -69,9 +69,7 @@ class MySqlDateTime extends DateTime
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbDateTime($data[$this->columnName]);
-
-            return $date;
+            return new RhubarbDateTime($data[$this->columnName]);
         };
     }
 }

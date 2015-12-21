@@ -2,12 +2,12 @@
 
 namespace Rhubarb\Stem\Tests\Filters;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Tests\Fixtures\Category;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Fixtures\CompanyCategory;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-class CollectionPropertyMatchesTest extends RhubarbTestCase
+class CollectionPropertyMatchesTest extends ModelUnitTestCase
 {
     public function testAppendingCreatesRowInModel()
     {
@@ -28,6 +28,5 @@ class CollectionPropertyMatchesTest extends RhubarbTestCase
 
         $this->assertEquals($company->CompanyID, $companyCategory->getRepository()->cachedObjectData[1]["CompanyID"]);
         $this->assertEquals($category->CategoryID, $companyCategory->getRepository()->cachedObjectData[1]["CategoryID"]);
-
     }
 }

@@ -22,6 +22,7 @@ require_once __DIR__ . "/../Repository.php";
 
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 
 class Offline extends Repository
 {
@@ -30,10 +31,14 @@ class Offline extends Repository
     protected function onObjectSaved(Model $object)
     {
         if ($object->isNewRecord()) {
-            // Assign an auto number as a unique identifier.
-            $this->autoNumberCount++;
 
-            $object->UniqueIdentifier = $this->autoNumberCount;
+            $columnName = $object->UniqueIdentifierColumnName;
+            if($object->getSchema()->getColumns()[$columnName] instanceof AutoIncrement)
+            {
+                // Assign an auto number as a unique identifier.
+                $this->autoNumberCount++;
+                $object->UniqueIdentifier = $this->autoNumberCount;
+            }
         }
 
         parent::onObjectSaved($object);
@@ -44,5 +49,10 @@ class Offline extends Repository
         parent::clearObjectCache();
 
         $this->autoNumberCount = 0;
+    }
+
+    public function clearRepositoryData()
+    {
+        $this->clearObjectCache();
     }
 }

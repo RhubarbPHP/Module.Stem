@@ -1,17 +1,12 @@
 <?php
 
 namespace Rhubarb\Stem\Tests\Fixtures;
+use Rhubarb\Stem\LoginProviders\ModelLoginProvider;
 
-/**
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
- */
-class TestLoginProvider extends \Rhubarb\Stem\LoginProviders\ModelLoginProvider
+class TestLoginProvider extends ModelLoginProvider
 {
     public function __construct()
     {
-        parent::__construct("Rhubarb\Stem\Tests\Fixtures\User", "Username", "Password", "Active");
+        parent::__construct(User::class, "Username", "Password", "Active");
     }
-
 }

@@ -1,15 +1,12 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\Contains;
+use Rhubarb\Stem\Tests\Fixtures\Example;
 use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-/**
- *
- * @author    rkilfedder
- * @copyright GCD Technologies 2012
- */
 class ContainsTest extends ModelUnitTestCase
 {
     /**
@@ -23,39 +20,38 @@ class ContainsTest extends ModelUnitTestCase
 
         parent::setUp();
 
-
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testFiltersCaseInsensitive()
     {
-        $filter = new \Rhubarb\Stem\Filters\Contains("Forename", "jo", false);
+        $filter = new Contains("Forename", "jo", false);
 
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);
         $this->assertContains("John", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\Contains("Forename", "Jo", false);
+        $filter = new Contains("Forename", "Jo", false);
 
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);
         $this->assertContains("John", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\Contains("Forename", "oh", false);
+        $filter = new Contains("Forename", "oh", false);
 
         $this->list->filter($filter);
 
@@ -66,14 +62,14 @@ class ContainsTest extends ModelUnitTestCase
     public function testFiltersCaseSensitive()
     {
 
-        $filter = new \Rhubarb\Stem\Filters\Contains("Forename", "Jo", true);
+        $filter = new Contains("Forename", "Jo", true);
 
         $this->list->filter($filter);
 
         $this->assertCount(1, $this->list);
         $this->assertContains("John", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\Contains("Forename", "oH", true);
+        $filter = new Contains("Forename", "oH", true);
 
         $this->list->filter($filter);
         $this->assertCount(0, $this->list);

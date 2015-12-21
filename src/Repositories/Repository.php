@@ -20,10 +20,13 @@ namespace Rhubarb\Stem\Repositories;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Exceptions\ModelException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Schema\Columns\Float;
+use Rhubarb\Stem\Repositories\Offline\Offline;
+use Rhubarb\Stem\Schema\Columns\Date;
+use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\Integer;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -59,7 +62,7 @@ abstract class Repository
      * @see Repository::setDefaultRepositoryClassName();
      * @var string
      */
-    private static $defaultRepositoryClassName = "\Rhubarb\Stem\Repositories\Offline\Offline";
+    private static $defaultRepositoryClassName = Offline::class;
 
     /**
      * A collection of closures allowing data to processed in and out of the repository at a column level.
@@ -95,11 +98,17 @@ abstract class Repository
             $storageColumns = $column->createStorageColumns();
 
             foreach ($storageColumns as $storageColumn) {
-                $this->columnTransforms[$storageColumn->columnName] =
-                    [
-                        $storageColumn->getTransformFromRepository(),
-                        $storageColumn->getTransformIntoRepository()
-                    ];
+                if (!isset($this->columnTransforms[$storageColumn->columnName]) ) {
+                    $this->columnTransforms[$storageColumn->columnName] = [null,null];
+                }
+
+                $this->columnTransforms[$storageColumn->columnName][0] =
+                    ( $this->columnTransforms[$storageColumn->columnName][0] == null ) ?
+                        $storageColumn->getTransformFromRepository() : $this->columnTransforms[$storageColumn->columnName][0];
+
+                $this->columnTransforms[$storageColumn->columnName][1] =
+                    ( $this->columnTransforms[$storageColumn->columnName][1] == null ) ?
+                        $storageColumn->getTransformIntoRepository() : $this->columnTransforms[$storageColumn->columnName][1];
             }
         }
     }
@@ -201,14 +210,40 @@ abstract class Repository
      *                                                             try to auto hydrate (if supported)
      * @return array
      */
-    public function getUniqueIdentifiersForDataList(
-        Collection $list,
-        &$unfetchedRowCount = 0,
-        $relationshipNavigationPropertiesToAutoHydrate = []
-    )
+    public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
     {
         // For now just returning all items in the collection.
         return array_keys($this->cachedObjectData);
+    }
+
+    /**
+     * Commits changes to the repository in batch against a collection.
+     *
+     * @param Collection $collection
+     * @param $propertyPairs
+     */
+    public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
+    {
+        foreach ($collection as $item) {
+            $item->mergeRawData($propertyPairs);
+            $item->save();
+        }
+    }
+
+    /**
+     * Returns the repository-specific command so it can be used externally for other operations.
+     * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
+     *
+     * @param Collection $collection
+     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
+     *                                                                  try to auto hydrate (if supported)
+     * @param array $namedParams Named parameters to be used in execution of the command
+     *
+     * @return string|null
+     */
+    public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams)
+    {
+        return null;
     }
 
     /**
@@ -284,8 +319,10 @@ abstract class Repository
             if (isset($columns[$columnName])) {
                 $column = $columns[$columnName];
 
-                if ($column instanceof Integer || $column instanceof Float) {
+                if ($column instanceof Integer || $column instanceof FloatColumn ) {
                     $type = SORT_NUMERIC;
+                } elseif ( $column instanceof Date ){
+                    $type = SORT_REGULAR;
                 }
             } else {
                 $type = SORT_REGULAR;
@@ -342,6 +379,8 @@ abstract class Repository
     {
         $this->cachedObjectData = [];
     }
+
+    public abstract function clearRepositoryData();
 
     /**
      * Returns a new default repository of the current default repository type.
@@ -430,6 +469,7 @@ abstract class Repository
      * @param array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
+     * @return array
      * @throws RecordNotFoundException
      */
     protected function fetchMissingObjectData(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
@@ -472,7 +512,7 @@ abstract class Repository
      * back end data store.
      *
      * @see Repository::onObjectSaved()
-     * @throws \Rhubarb\Stem\Exceptions\ModelException When the object has no unique identifier.
+     * @throws ModelException When the object has no unique identifier.
      * @param \Rhubarb\Stem\Models\Model $object
      */
     public final function saveObject(Model $object)
@@ -480,8 +520,7 @@ abstract class Repository
         $this->onObjectSaved($object);
 
         if ($object->getUniqueIdentifier() === null) {
-            throw new \Rhubarb\Stem\Exceptions\ModelException("The object could not be saved as it has no unique identifier.",
-                $object);
+            throw new ModelException("The object could not be saved as it has no unique identifier.", $object);
         }
 
         $this->cacheObjectData($object);
@@ -541,14 +580,13 @@ abstract class Repository
      * Changes the default class name for new repositories.
      *
      * @see Repository::getNewDefaultRepository();
-     * @throws \Rhubarb\Stem\Exceptions\ModelException When the class name doesn't exist.
+     * @throws ModelException When the class name doesn't exist.
      * @param $repositoryClassName
      */
     public static function setDefaultRepositoryClassName($repositoryClassName)
     {
         if (!class_exists($repositoryClassName)) {
-            throw new \Rhubarb\Stem\Exceptions\ModelException("Sorry the class name '$repositoryClassName' does not exist and so cannot be used as a default repository class name.",
-                null);
+            throw new ModelException("Sorry the class name '$repositoryClassName' does not exist and so cannot be used as a default repository class name.", null);
         }
 
         self::$defaultRepositoryClassName = $repositoryClassName;

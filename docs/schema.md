@@ -18,7 +18,7 @@ class CoalBucket extends ModelObject
 
 		$schema->AddColumns(
 			new AutoIncrement( "CoalBucketID" ),
-			new String( "BucketName", 200 ),
+			new StringColumn( "BucketName", 200 ),
 			new Integer( "Capacity" )
 		);
 
@@ -60,13 +60,13 @@ schema definition in the back end is up to date.
 These classes are extended by repository specific versions of columns and set out some basic
 behaviours for various data types.
 
-String
+StringColumn
 :   Text columns
 
 Integer
 :   Integer number columns
 
-Float
+FloatColumn
 :   Floating precision number columns
 
 Boolean
@@ -316,9 +316,6 @@ use Gcd\Core\Modelling\Schema\SolutionSchema;
 
 /**
  * A simple script to trigger schema versioning
- *
- * @author acuthbert
- * @copyright GCD Technologies 2013
  */
 class UpdateSchema implements IGeneratesResponse
 {

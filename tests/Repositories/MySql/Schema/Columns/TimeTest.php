@@ -6,13 +6,6 @@ use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\Fixtures\Company;
 use Rhubarb\Stem\Tests\Repositories\MySql\MySqlTestCase;
 
-/**
- *
- *
- * @package Rhubarb\Stem\Repositories\MySql\Schema\Columns
- * @author      acuthbert
- * @copyright   2013 GCD Technologies Ltd.
- */
 class TimeTest extends MySqlTestCase
 {
     public function testRepositoryGetsTimeFormat()

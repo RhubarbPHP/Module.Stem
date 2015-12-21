@@ -29,6 +29,7 @@ use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\ModelValueInitialiserInterface;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -44,14 +45,10 @@ abstract class Model extends ModelState
 {
     private $eventsToRaiseAfterSave = [];
 
-    /**
-     * Tracks if default values have been set yet.
-     *
-     * @var bool
-     */
-    private $defaultsSet = false;
+    /** @var callable[] */
+    private $callbacksToRunAfterSave = [];
 
-    public final function __construct($uniqueIdentifier = null)
+    final public function __construct($uniqueIdentifier = null)
     {
         $this->modelName = SolutionSchema::getModelNameFromClass(get_class($this));
 
@@ -82,10 +79,12 @@ abstract class Model extends ModelState
             }
         }
 
+        $this->uniqueIdentifier = $uniqueIdentifier;
+
         if ($uniqueIdentifier !== null) {
-            $this->defaultsSet = true;
-            $repository = $this->getRepository();
-            $repository->hydrateObject($this, $uniqueIdentifier);
+            $this->loadFromUniqueIdentifier($uniqueIdentifier);
+        } else {
+            $this->onNewModelInitialised();
         }
 
         parent::__construct();
@@ -108,50 +107,17 @@ abstract class Model extends ModelState
 
     protected function setDefaultValues()
     {
-        if ($this->defaultsSet) {
-            return;
-        }
 
-        $this->defaultsSet = true;
-
-        $columns = $this->getSchema()->getColumns();
-
-        foreach ($columns as $column) {
-            if ($column->columnName == $this->UniqueIdentifierColumnName) {
-                continue;
-            }
-
-            if ($column->defaultValue !== null) {
-                $defaultValue = $column->defaultValue;
-
-                if (is_object($defaultValue)) {
-                    $defaultValue = clone $defaultValue;
-                }
-
-                $this[$column->columnName] = $defaultValue;
-            }
-        }
     }
 
     public function importRawData($data)
     {
-        $wasNewRecord = $this->isNewRecord();
-
         parent::importRawData($data);
 
-        $this->captureUniqueIdentifier();
-
-        if ($wasNewRecord && !$this->isNewRecord()) {
-            $this->onLoaded();
-        }
-    }
-
-    private function captureUniqueIdentifier()
-    {
         $this->uniqueIdentifier = $this[$this->uniqueIdentifierColumnName];
     }
 
-    function __toString()
+    public function __toString()
     {
         return $this->getLabel();
     }
@@ -188,14 +154,12 @@ abstract class Model extends ModelState
     {
         $args = func_get_args();
 
-        call_user_func_array([$this, "TraitRaiseEvent"], $args);
-
         array_splice($args, 1, 0, [$this]);
 
-        // In addition to the standard object level event dispatch we raise a class level dispatch
-        // This allows global listeners like the solution schema to co-ordinate inter model activities
+        // Raise a class level dispatch which allows global listeners like the solution schema to
+        // co-ordinate inter model activities.
 
-        call_user_func_array("Rhubarb\Stem\Models\ModelEventManager::dispatchModelEvent", $args);
+        call_user_func_array('Rhubarb\Stem\Models\ModelEventManager::dispatchModelEvent', $args);
     }
 
     /**
@@ -204,6 +168,9 @@ abstract class Model extends ModelState
      * In addition to $event you can pass any number of other events which are passed through
      * to the event handling delegate.
      *
+     * @deprecated Use performAfterSave to run a callback directly instead
+     * @see performAfterSave()
+     *
      * @param string $event The name of the event
      * @return mixed|null
      */
@@ -211,6 +178,16 @@ abstract class Model extends ModelState
     {
         $args = func_get_args();
         $this->eventsToRaiseAfterSave[] = $args;
+    }
+
+    /**
+     * Allows a callback function to be run when the model is saved.
+     *
+     * @param callable $callback Callback to run when the model is saved
+     */
+    protected function performAfterSave(callable $callback)
+    {
+        $this->callbacksToRunAfterSave[] = $callback;
     }
 
     /**
@@ -307,7 +284,7 @@ abstract class Model extends ModelState
      * @see DataObject::CreateRepository()
      * @return \Rhubarb\Stem\Repositories\Repository
      */
-    public final function getRepository()
+    final public function getRepository()
     {
         if (!isset(self::$repositories[$this->modelName])) {
             self::$repositories[$this->modelName] = $this->createRepository();
@@ -370,11 +347,11 @@ abstract class Model extends ModelState
      *
      * @param Filter $filter
      * @throws RecordNotFoundException
-     * @return Model
+     * @return Model|static
      */
     public static function findFirst(Filter $filter = null)
     {
-        $results = self::find($filter);
+        $results = static::find($filter);
 
         if (sizeof($results) == 0) {
             throw new RecordNotFoundException(get_called_class(), 0);
@@ -383,17 +360,33 @@ abstract class Model extends ModelState
         return $results[0];
     }
 
+    private function onNewModelInitialised()
+    {
+        $this->newRecord = true;
+        $schema = $this->getSchema();
+        $columns = $schema->getColumns();
+
+        foreach ($columns as $column) {
+            if ($column instanceof ModelValueInitialiserInterface) {
+                $column->onNewModelInitialising($this);
+            }
+        }
+
+        $this->setDefaultValues();
+    }
+
     /**
      * Finds the last model matching the given filters.
      *
      * @param Filter $filter
      * @throws RecordNotFoundException
-     * @return Model
+     * @return Model|static
      */
     public static function findLast(Filter $filter = null)
     {
-        $results = self::find($filter);
+        $results = static::find($filter);
         $modelClass = get_called_class();
+        /** @var Model $model */
         $model = new $modelClass();
         $results->addSort($model->getUniqueIdentifierColumnName(), false);
 
@@ -408,7 +401,7 @@ abstract class Model extends ModelState
      * Returns the Collection of models matching the given filter.
      *
      * @param Filter $filter
-     * @return Collection
+     * @return Collection|static[]
      */
     public static function find(Filter $filter = null)
     {
@@ -435,7 +428,7 @@ abstract class Model extends ModelState
 
     }
 
-    public final function generateSchema()
+    final public function generateSchema()
     {
         $schema = $this->createSchema();
         $this->extendSchema($schema);
@@ -448,7 +441,7 @@ abstract class Model extends ModelState
      *
      * @return \Rhubarb\Stem\Schema\ModelSchema
      */
-    public final function getSchema()
+    final public function getSchema()
     {
         return $this->getRepository()->getSchema();
     }
@@ -485,8 +478,13 @@ abstract class Model extends ModelState
      * Persists the model data associated with this data object with the relevant repository.
      *
      * Calls beforeSave() and afterSave() as appropriate.
+     *
+     * @param bool $forceSaveRegardlessOfState If set, the repository save will be forced even if hasChanged() returns false
+     * @return mixed
+     * @throws ModelConsistencyValidationException
+     * @throws \Rhubarb\Stem\Exceptions\ModelException
      */
-    public final function save($forceSaveRegardlessOfState = false)
+    final public function save($forceSaveRegardlessOfState = false)
     {
         try {
             $this->isConsistent();
@@ -505,7 +503,9 @@ abstract class Model extends ModelState
         $repository = $this->getRepository();
         $repository->saveObject($this);
 
-        $this->raiseAfterSaveEvents();
+        $this->newRecord = false;
+
+        $this->callAfterSaveCallbacks();
 
         $this->afterSave();
         $this->raiseEvent("AfterSave");
@@ -515,12 +515,18 @@ abstract class Model extends ModelState
         return $this->uniqueIdentifier;
     }
 
-    private function raiseAfterSaveEvents()
+    private function callAfterSaveCallbacks()
     {
-        foreach ($this->eventsToRaiseAfterSave as $eventArgs) {
+        $eventsToRaiseAfterSave = $this->eventsToRaiseAfterSave;
+        $this->eventsToRaiseAfterSave = [];
+
+        foreach ($eventsToRaiseAfterSave as $eventArgs) {
             call_user_func_array([$this, "raiseEvent"], $eventArgs);
         }
-        $this->eventsToRaiseAfterSave = [];
+
+        foreach ($this->callbacksToRunAfterSave as $callback) {
+            $callback();
+        }
     }
 
     /**
@@ -615,31 +621,28 @@ abstract class Model extends ModelState
      */
     public function setUniqueIdentifier($value)
     {
+        $this->newRecord = $value === null;
+        $this->uniqueIdentifier = $value;
         $this[$this->uniqueIdentifierColumnName] = $value;
     }
 
     /**
-     * Returns true if the record is new, by virtue of not having a unique identifier.
+     * @var bool Flag used to control the result of calls to isNewRecord
+     */
+    private $newRecord = true;
+
+    /**
+     * Returns true if the record is new, using a flag set on the object when it is saved/loaded with an ID
      *
      * @return bool
      */
     public function isNewRecord()
     {
-        $identifier = $this->uniqueIdentifier;
-
-        return ($identifier === null);
+        return $this->newRecord;
     }
 
     public function __set($propertyName, $value)
     {
-        if (!$this->defaultsSet) {
-            $this->setDefaultValues();
-        }
-
-        if ($propertyName == $this->uniqueIdentifierColumnName) {
-            $this->uniqueIdentifier = $value;
-        }
-
         if (isset(self::$modelDataTransforms[$this->modelName][$propertyName][1])) {
             $closure = self::$modelDataTransforms[$this->modelName][$propertyName][1];
             $value = $closure($value);
@@ -663,6 +666,10 @@ abstract class Model extends ModelState
             if (isset($this->propertyCache[$propertyName])) {
                 $this->propertyCache[$propertyName] = $propertyName;
             }
+        }
+
+        if ($propertyName == $this->uniqueIdentifierColumnName) {
+            $this->uniqueIdentifier = $value;
         }
     }
 
@@ -713,10 +720,6 @@ abstract class Model extends ModelState
 
     public function __get($propertyName)
     {
-        if (!$this->defaultsSet) {
-            $this->setDefaultValues();
-        }
-
         // Should any type of magical getter below require that the value is cached for performance
         // this boolean will be set to true. At the end of the function we pick up on this and do the
         // caching - instead of having the caching line repeated all over the place.
@@ -752,6 +755,28 @@ abstract class Model extends ModelState
 
                 if ($value instanceof Model) {
                     $addToPropertyCache = true;
+                }
+            }
+
+            if ($propertyName != $this->UniqueIdentifierColumnName) {
+                // See if the column has a default
+                $columns = $this->getSchema()->getColumns();
+                if (isset($columns[$propertyName])) {
+                    $defaultValue = $columns[$propertyName]->getDefaultValue();
+                    if (is_object($defaultValue)) {
+                        $defaultValue = clone $defaultValue;
+                    }
+                    // We actually have to set the default value on the model - to ensure this value
+                    // goes through the normal setting pathway.
+                    // First we disable change events - this is to stop infinite loops and really would
+                    // you expect those to fire for the setting of defaults anyway?
+                    $this->propertyChangeEventsDisabled = true;
+                    if ($defaultValue !== null) {
+                        $this[$propertyName] = $defaultValue;
+                    }
+                    $this->propertyChangeEventsDisabled = false;
+
+                    $value = parent::__get($propertyName);
                 }
             }
         }
@@ -829,7 +854,7 @@ abstract class Model extends ModelState
      * @throws \Rhubarb\Stem\Exceptions\ModelConsistencyValidationException
      * @return bool
      */
-    public final function isConsistent($throwException = true)
+    final public function isConsistent($throwException = true)
     {
         $errors = $this->getConsistencyValidationErrors();
 
@@ -846,8 +871,24 @@ abstract class Model extends ModelState
 
     /**
      * Override this method to check for/create specific initial records
+     *
+     * @param int $oldVersion Version number upgrading from
+     * @param int $newVersion Version number upgrading to
      */
     public static function checkRecords($oldVersion, $newVersion)
     {
+    }
+
+    /**
+     * Loads a record using the unique identifier.
+     *
+     * @param $uniqueIdentifier
+     */
+    protected function loadFromUniqueIdentifier($uniqueIdentifier)
+    {
+        $this->newRecord = false;
+        $repository = $this->getRepository();
+        $repository->hydrateObject($this, $uniqueIdentifier);
+        $this->onLoaded();
     }
 }

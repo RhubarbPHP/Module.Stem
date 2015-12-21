@@ -18,6 +18,9 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
+require_once __DIR__ . "/../../../../Schema/Columns/Time.php";
+require_once __DIR__ . "/MySqlColumn.php";
+
 use Rhubarb\Crown\DateTime\RhubarbTime;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\Time;
@@ -33,14 +36,13 @@ class MySqlTime extends Time
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` time " . $this->getDefaultDefinition();
-        return $sql;
+        return "`" . $this->columnName . "` time " . $this->getDefaultDefinition();
     }
 
     public function getTransformIntoRepository()
     {
         return function ($data) {
-            $data = new RhubarbTime($data);
+            $data = new RhubarbTime($data[$this->columnName]);
 
             if ($data->isValidDateTime()) {
                 $date = $data->format("H:i:s");
@@ -55,9 +57,7 @@ class MySqlTime extends Time
     public function getTransformFromRepository()
     {
         return function ($data) {
-            $date = new RhubarbTime($data);
-
-            return $date;
+            return new RhubarbTime($data[$this->columnName]);
         };
     }
 

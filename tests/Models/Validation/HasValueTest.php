@@ -1,10 +1,11 @@
 <?php
 
-namespace Rhubarb\Stem\Models\Validation;
+namespace Rhubarb\Stem\Tests\Models\Validation;
 
-use Gcd\Core\UnitTesting\CoreTestCase;
+use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Stem\Models\Validation\HasValue;
 
-class HasValueTest extends CoreTestCase
+class HasValueTest extends RhubarbTestCase
 {
     public function testValidation()
     {

@@ -46,7 +46,7 @@ abstract class ColumnFilter extends Filter
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
-        $settings[ "columnName" ] = $this->columnName;
+        $settings["columnName"] = $this->columnName;
 
         return $settings;
     }

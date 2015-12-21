@@ -1,15 +1,13 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\GreaterThan;
+use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-/**
- *
- * @author    rkilfedder
- * @copyright GCD Technologies 2012
- */
-class GreaterThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class GreaterThanTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -22,30 +20,29 @@ class GreaterThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testFiltersDate()
     {
-
-        $filter = new \Rhubarb\Stem\Filters\GreaterThan("DateOfBirth", "1979-01-01");
+        $filter = new GreaterThan("DateOfBirth", "1979-01-01");
 
         $this->list->filter($filter);
         $this->assertCount(2, $this->list);
@@ -54,13 +51,12 @@ class GreaterThanTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
     public function testFiltersAlpha()
     {
-
-        $filter = new \Rhubarb\Stem\Filters\GreaterThan("Forename", "Mary", true);
+        $filter = new GreaterThan("Forename", "Mary", true);
 
         $this->list->filter($filter);
         $this->assertCount(2, $this->list);
 
-        $filter = new \Rhubarb\Stem\Filters\GreaterThan("Forename", "Mary", false);
+        $filter = new GreaterThan("Forename", "Mary", false);
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);
         $this->assertContains("Tom", $this->list[0]->Forename);

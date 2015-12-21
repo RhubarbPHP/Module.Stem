@@ -1,15 +1,13 @@
 <?php
 
-
 namespace Rhubarb\Stem\Tests\Filters;
 
-
-use Rhubarb\Crown\Tests\RhubarbTestCase;
-use Rhubarb\Scaffolds\Login\User;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Between;
+use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-class BetweenTest extends RhubarbTestCase
+class BetweenTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -22,34 +20,34 @@ class BetweenTest extends RhubarbTestCase
 
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->FavouriteNumber = 10;
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->FavouriteNumber = 15;
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->FavouriteNumber = 30;
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Jimmy";
         $example->Surname = "Joe";
         $example->FavouriteNumber = 5;
         $example->DateOfBirth = "1976-05-10";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testBetweenNumbers()

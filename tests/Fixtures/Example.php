@@ -3,11 +3,13 @@
 namespace Rhubarb\Stem\Tests\Fixtures;
 
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
 use Rhubarb\Stem\Schema\Columns\Boolean;
 use Rhubarb\Stem\Schema\Columns\Date;
 use Rhubarb\Stem\Schema\Columns\DateTime;
+use Rhubarb\Stem\Schema\Columns\Decimal;
 use Rhubarb\Stem\Schema\Columns\Integer;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Columns\Time;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -19,9 +21,6 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $Forename
  * @property string $Surname
  * @property \Date $DateOfBirth
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
  */
 class Example extends Model
 {
@@ -32,14 +31,16 @@ class Example extends Model
         $schema = new ModelSchema("tblContact");
 
         $schema->addColumn(
-            new Integer("ContactID", 0),
+            new AutoIncrement("ContactID"),
             new Integer("CompanyID", 0),
             new Date("DateOfBirth"),
             new DateTime("CreatedDate"),
-            new String("Forename", 100),
-            new String("Surname", 100),
+            new StringColumn("Forename", 100),
+            new StringColumn("Surname", 100),
             new Boolean("KeyContact"),
-            new Time("CoffeeTime")
+            new Time("CoffeeTime"),
+            new Decimal("CreditLimit", 10, 2),
+            new Decimal("Balance", 8, 4)
         );
 
         $schema->uniqueIdentifierColumnName = "ContactID";

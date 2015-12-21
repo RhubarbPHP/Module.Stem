@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\Repositories\MySql\Aggregates;
 
+use Rhubarb\Stem\Aggregates\Average;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\Fixtures\Company;
@@ -38,8 +39,7 @@ class AverageTest extends MySqlTestCase
     {
         $examples = new Collection("Company");
 
-        list($sumTotal) = $examples->calculateAggregates(
-            [new MySqlAverage("Balance")]);
+        list($sumTotal) = $examples->calculateAggregates(new Average("Balance"));
 
         $this->assertEquals(3, $sumTotal);
 

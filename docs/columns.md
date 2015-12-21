@@ -41,10 +41,10 @@ understood.
 Column              | Description
 --------------------|------------
 Integer             |Stores whole numbers
-Float               |Stores floating point numbers
+FloatColumn               |Stores floating point numbers
 Decimal             |Stores decimal numbers with a fixed range of decimal places
 Money               |A Decimal column hard coded to 2 decimal places
-String              |Stores text data with a configurable maximum length
+StringColumn              |Stores text data with a configurable maximum length
 EncryptedString     |Stores encrypted text data
 LongString          |Stores text data with an unlimited length
 DateTime            |Stores date time data
@@ -176,10 +176,10 @@ getStorageColumns()
     {
         return
         [
-            new String("AddressLine1",50),
-            new String("City",50),
-            new String("Region",50),
-            new String("Country",50)
+            new StringColumn("AddressLine1",50),
+            new StringColumn("City",50),
+            new StringColumn("Region",50),
+            new StringColumn("Country",50)
         ];
     }
     ```
@@ -194,10 +194,10 @@ getStorageColumns()
     {
         return
         [
-            new String($this->columnName."Line1",50),
-            new String($this->columnName."City",50),
-            new String($this->columnName."Region",50),
-            new String($this->columnName."Country",50)
+            new StringColumn($this->columnName."Line1",50),
+            new StringColumn($this->columnName."City",50),
+            new StringColumn($this->columnName."Region",50),
+            new StringColumn($this->columnName."Country",50)
         ];
     }
     ```

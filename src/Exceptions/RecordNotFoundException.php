@@ -6,9 +6,6 @@ use Rhubarb\Crown\Exceptions\RhubarbException;
 
 /**
  * Thrown when a record could not be loaded.
- *
- * @author acuthbert
- * @copyright GCD Technologies 2012
  */
 class RecordNotFoundException extends RhubarbException
 {

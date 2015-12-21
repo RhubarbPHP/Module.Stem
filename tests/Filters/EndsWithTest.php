@@ -1,15 +1,13 @@
 <?php
 
-namespace Gcd\Tests;
+namespace Rhubarb\Stem\Tests\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Filters\EndsWith;
+use Rhubarb\Stem\Tests\Fixtures\Example;
+use Rhubarb\Stem\Tests\Fixtures\ModelUnitTestCase;
 
-/**
- *
- * @author    rkilfedder
- * @copyright GCD Technologies 2012
- */
-class EndsWithTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
+class EndsWithTest extends ModelUnitTestCase
 {
     /**
      * @var Collection
@@ -22,51 +20,49 @@ class EndsWithTest extends \Rhubarb\Crown\Tests\RhubarbTestCase
 
         parent::setUp();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Mary";
         $example->save();
 
-        $example = new \Rhubarb\Stem\Tests\Fixtures\Example();
+        $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->save();
 
-        $this->list = new Collection("\Rhubarb\Stem\Tests\Fixtures\Example");
+        $this->list = new Collection(Example::class);
     }
 
     public function testFiltersCaseInsensitive()
     {
-
-        $filter = new \Rhubarb\Stem\Filters\EndsWith("Forename", "ry", false);
+        $filter = new EndsWith("Forename", "ry", false);
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);
         $this->assertContains("Mary", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\EndsWith("Forename", "RY", false);
+        $filter = new EndsWith("Forename", "RY", false);
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);
         $this->assertContains("Mary", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\EndsWith("Forename", "Ma", false);
+        $filter = new EndsWith("Forename", "Ma", false);
         $this->list->filter($filter);
         $this->assertCount(0, $this->list);
     }
 
     public function testFiltersCaseSensitive()
     {
-
-        $filter = new \Rhubarb\Stem\Filters\EndsWith("Forename", "ry", true);
+        $filter = new EndsWith("Forename", "ry", true);
 
         $this->list->filter($filter);
         $this->assertCount(1, $this->list);
         $this->assertContains("Mary", $this->list[0]->Forename);
 
-        $filter = new \Rhubarb\Stem\Filters\EndsWith("Forename", "RY", true);
+        $filter = new EndsWith("Forename", "RY", true);
 
         $this->list->filter($filter);
         $this->assertCount(0, $this->list);

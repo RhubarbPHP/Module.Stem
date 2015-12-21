@@ -71,6 +71,15 @@ class OneToMany extends Relationship
     }
 
     /**
+     * @return mixed
+     */
+    public function getSourceModelName()
+    {
+        return $this->sourceModelName;
+    }
+
+
+    /**
      * @return string
      */
     public function getTargetColumnName()

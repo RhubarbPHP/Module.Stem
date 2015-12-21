@@ -26,15 +26,11 @@ class MySqlBigInt extends MySqlInteger
 {
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` bigint(20) " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` bigint(20) " . $this->getDefaultDefinition();
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
         return new self($genericColumn->columnName, $genericColumn->defaultValue);
     }
-
-
 }

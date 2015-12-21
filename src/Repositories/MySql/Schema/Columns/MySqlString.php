@@ -18,13 +18,13 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-require_once __DIR__ . "/../../../../Schema/Columns/String.php";
+require_once __DIR__ . "/../../../../Schema/Columns/StringColumn.php";
 require_once __DIR__ . "/MySqlColumn.php";
 
 use Rhubarb\Stem\Schema\Columns\Column;
-use Rhubarb\Stem\Schema\Columns\String;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 
-class MySqlString extends String
+class MySqlString extends StringColumn
 {
     use MySqlColumn;
 
@@ -35,9 +35,7 @@ class MySqlString extends String
 
     public function getDefinition()
     {
-        $sql = "`" . $this->columnName . "` varchar(" . $this->maximumLength . ") " . $this->getDefaultDefinition();
-
-        return $sql;
+        return "`" . $this->columnName . "` varchar(" . $this->maximumLength . ") " . $this->getDefaultDefinition();
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)
