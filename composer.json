@@ -24,6 +24,15 @@
     "rhubarbphp/rhubarb": "^0.9"
   },
   "require-dev": {
-    "codeception/codeception": "^2.0"
+    "rhubarbphp/custard" : "1.0.3",
+    "codeception/codeception": "^2.0",
+    "rhubarbphp/module-build-status-updater": "dev-debug as 1.0.3",
+    "tan-tan-kanarek/github-php-client": "dev-master as 1.0",
+    "phploc/phploc": "*",
+    "theseer/phpdox": "*",
+    "phpmd/phpmd": "*",
+    "squizlabs/php_codesniffer": "*",
+    "sebastian/phpcpd": "*",
+    "pdepend/pdepend": "*"
   }
 }
