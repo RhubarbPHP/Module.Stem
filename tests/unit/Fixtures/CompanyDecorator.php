@@ -28,7 +28,7 @@ class CompanyDecorator extends DataDecorator
                 return "";
             }
 
-            return "&pound;" . $formattedValue;
+            return "&pound;" . number_format($formattedValue,2);
         });
 
         $this->addColumnFormatter("CompanyID", function (Company $model, $formattedValue) {

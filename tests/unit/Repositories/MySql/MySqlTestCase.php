@@ -18,7 +18,7 @@ class MySqlTestCase extends ModelUnitTestCase
 
         Repository::setDefaultRepositoryClassName(MySql::class);
 
-        self::SetDefaultConnectionSettings();
+        self::setDefaultConnectionSettings();
 
         Log::DisableLogging();
 
@@ -29,7 +29,7 @@ class MySqlTestCase extends ModelUnitTestCase
         Model::deleteRepositories();
     }
 
-    protected static function SetDefaultConnectionSettings()
+    protected static function setDefaultConnectionSettings()
     {
         // Setup the data settings to make sure we get a connection to the unit testing database.
         $settings = new StemSettings();

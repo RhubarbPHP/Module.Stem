@@ -31,33 +31,30 @@ class NotTest extends ModelUnitTestCase
         $example->Forename = "John";
         $example->Surname = "Joe";
         $example->DateOfBirth = "1990-01-01";
-        $example->ContactID = 1;
         $example->save();
 
+        $example = new Example();
         $example->Forename = "John";
         $example->Surname = "Johnson";
         $example->DateOfBirth = "1988-01-01";
-        $example->ContactID = 2;
         $example->save();
 
+        $example = new Example();
         $example->Forename = "John";
         $example->Surname = "Luc";
         $example->DateOfBirth = "1990-01-01";
-        $example->ContactID = 3;
         $example->save();
 
         $example = new Example();
         $example->Forename = "Mary";
         $example->Surname = "Smithe";
         $example->DateOfBirth = "1980-06-09";
-        $example->ContactID = 4;
         $example->save();
 
         $example = new Example();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
-        $example->ContactID = 5;
         $example->save();
 
         $example = new Example();
@@ -71,7 +68,6 @@ class NotTest extends ModelUnitTestCase
         $example->Forename = "John";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
-        $example->ContactID = 7;
         $example->save();
 
         $this->list = new Collection(Example::class);

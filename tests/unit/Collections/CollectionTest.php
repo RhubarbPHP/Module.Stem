@@ -2,10 +2,10 @@
 
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
+use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
-class CollectionTest extends RhubarbTestCase
+class CollectionTest extends ModelUnitTestCase
 {
     public function testBatchUpdate()
     {

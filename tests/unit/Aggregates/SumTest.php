@@ -34,7 +34,7 @@ class SumTest extends RhubarbTestCase
 
     public function testSum()
     {
-        $examples = new Collection("Example");
+        $examples = Example::find();
 
         list($sumTotal) = $examples->calculateAggregates(
             [new Sum("CompanyID")]);

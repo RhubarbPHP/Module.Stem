@@ -154,13 +154,13 @@ class SolutionSchemaTest extends ModelUnitTestCase
 
         $class = SolutionSchema::getModelClass(__NAMESPACE__ . "\\ModelA");
 
-        $this->assertEquals(__NAMESPACE__ . "\\ModelA", $class);
+        $this->assertEquals('\\'.__NAMESPACE__ . "\\ModelA", $class);
 
         SolutionSchema::registerSchema("SchemaB", __NAMESPACE__ . "\\SchemaB");
 
         $class = SolutionSchema::getModelClass(__NAMESPACE__ . "\\ModelA");
 
-        $this->assertEquals(__NAMESPACE__ . "\\ModelB", $class);
+        $this->assertEquals('\\'.__NAMESPACE__ . "\\ModelB", $class);
     }
 }
 

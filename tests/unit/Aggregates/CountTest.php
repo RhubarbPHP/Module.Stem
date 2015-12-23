@@ -8,6 +8,13 @@ use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 
 class CountTest extends RhubarbTestCase
 {
+    protected function setUp()
+    {
+        parent::setUp();
+
+        Company::clearObjectCache();
+    }
+
     public function testCount()
     {
         $company = new Company();
