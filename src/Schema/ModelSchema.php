@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Schema;
 
 use Rhubarb\Stem\Exceptions\SchemaException;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\Column;
 
 /**
@@ -84,7 +84,7 @@ class ModelSchema
         foreach ($columns as $column) {
             $this->columns[$column->columnName] = $column;
 
-            if ($column instanceof AutoIncrement) {
+            if ($column instanceof AutoIncrementColumn) {
                 $this->uniqueIdentifierColumnName = $column->columnName;
             }
         }

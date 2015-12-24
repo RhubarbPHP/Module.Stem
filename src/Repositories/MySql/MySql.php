@@ -26,7 +26,7 @@ use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;

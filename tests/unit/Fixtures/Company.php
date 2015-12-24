@@ -16,16 +16,16 @@ use Rhubarb\Stem\Models\Validation\HasValue;
 use Rhubarb\Stem\Models\Validation\Validator;
 use Rhubarb\Stem\Repositories\MySql\Schema\Index;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
-use Rhubarb\Stem\Schema\Columns\Boolean;
-use Rhubarb\Stem\Schema\Columns\Date;
-use Rhubarb\Stem\Schema\Columns\DateTime;
-use Rhubarb\Stem\Schema\Columns\Integer;
-use Rhubarb\Stem\Schema\Columns\Json;
-use Rhubarb\Stem\Schema\Columns\Money;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
+use Rhubarb\Stem\Schema\Columns\BooleanColumn;
+use Rhubarb\Stem\Schema\Columns\DateColumn;
+use Rhubarb\Stem\Schema\Columns\DateTimeColumn;
+use Rhubarb\Stem\Schema\Columns\IntegerColumn;
+use Rhubarb\Stem\Schema\Columns\JsonColumn;
+use Rhubarb\Stem\Schema\Columns\MoneyColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
-use Rhubarb\Stem\Schema\Columns\Time;
-use Rhubarb\Stem\Schema\Columns\UUID;
+use Rhubarb\Stem\Schema\Columns\TimeColumn;
+use Rhubarb\Stem\Schema\Columns\UUIDColumn;
 
 class Company extends Model
 {
@@ -41,17 +41,17 @@ class Company extends Model
         $schema->uniqueIdentifierColumnName = "CompanyID";
 
         $schema->addColumn(
-            new AutoIncrement("CompanyID"),
+            new AutoIncrementColumn("CompanyID"),
             new StringColumn("CompanyName", 200),
-            new Money("Balance"),
-            new Date("InceptionDate"),
-            new DateTime("LastUpdatedDate"),
-            new Time("KnockOffTime"),
-            new Boolean("BlueChip", false),
-            new Integer("ProjectCount"),
-            new Json("CompanyData"),
-            new Boolean("Active", true),
-            new UUID()
+            new MoneyColumn("Balance"),
+            new DateColumn("InceptionDate"),
+            new DateTimeColumn("LastUpdatedDate"),
+            new TimeColumn("KnockOffTime"),
+            new BooleanColumn("BlueChip", false),
+            new IntegerColumn("ProjectCount"),
+            new JsonColumn("CompanyData"),
+            new BooleanColumn("Active", true),
+            new UUIDColumn()
         );
 
         $schema->addIndex(new Index("CompanyID", Index::PRIMARY));

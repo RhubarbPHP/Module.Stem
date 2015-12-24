@@ -7,7 +7,7 @@ use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Models\ModelEventManager;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDate;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDateColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -382,7 +382,7 @@ class ModelTest extends ModelUnitTestCase
         $this->assertEquals("Forename", $schema->columnName);
 
         $schema = $example->getColumnSchemaForColumnReference("ExampleRelationshipName.InceptionDate");
-        $this->assertInstanceOf(MySqlDate::class, $schema);
+        $this->assertInstanceOf(MySqlDateColumn::class, $schema);
         $this->assertEquals("InceptionDate", $schema->columnName);
     }
 

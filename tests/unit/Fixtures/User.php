@@ -6,11 +6,11 @@ use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnum;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
-use Rhubarb\Stem\Schema\Columns\Boolean;
-use Rhubarb\Stem\Schema\Columns\Decimal;
-use Rhubarb\Stem\Schema\Columns\ForeignKey;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnumColumn;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
+use Rhubarb\Stem\Schema\Columns\BooleanColumn;
+use Rhubarb\Stem\Schema\Columns\DecimalColumn;
+use Rhubarb\Stem\Schema\Columns\ForeignKeyColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -35,15 +35,15 @@ class User extends Model
         $schema = new ModelSchema("tblUser");
 
         $schema->addColumn(
-            new AutoIncrement("UserID"),
-            new ForeignKey("CompanyID"),
-            new MySqlEnum("UserType", "Staff", ["Staff", "Administrator"]),
+            new AutoIncrementColumn("UserID"),
+            new ForeignKeyColumn("CompanyID"),
+            new MySqlEnumColumn("UserType", "Staff", ["Staff", "Administrator"]),
             new StringColumn("Username", 40),
             new StringColumn("Forename", 40),
             new StringColumn("Surname", 40),
             new StringColumn("Password", 120),
-            new Boolean("Active", false),
-            new Decimal("Wage")
+            new BooleanColumn("Active", false),
+            new DecimalColumn("Wage")
         );
 
         $schema->uniqueIdentifierColumnName = "UserID";

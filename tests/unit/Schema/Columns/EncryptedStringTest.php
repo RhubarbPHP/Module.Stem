@@ -6,7 +6,7 @@ use Rhubarb\Crown\Encryption\EncryptionProvider;
 use Rhubarb\Crown\Tests\Encryption\UnitTestingAes256EncryptionProvider;
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Schema\Columns\EncryptedString;
+use Rhubarb\Stem\Schema\Columns\EncryptedStringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 class EncryptedStringTest extends RhubarbTestCase
@@ -49,7 +49,7 @@ class TestModel extends Model
     protected function createSchema()
     {
         $schema = new ModelSchema("Test");
-        $schema->addColumn(new EncryptedString("SecureColumn", 100));
+        $schema->addColumn(new EncryptedStringColumn("SecureColumn", 100));
 
         return $schema;
     }

@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Schema\Columns;
 
 use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
-use Rhubarb\Stem\Schema\Columns\ForeignKey;
+use Rhubarb\Stem\Schema\Columns\ForeignKeyColumn;
 
 class ForeignKeyTest extends RhubarbTestCase
 {
@@ -13,7 +13,7 @@ class ForeignKeyTest extends RhubarbTestCase
         $schema = new MySqlModelSchema("tblTest");
 
         $schema->addColumn(
-            new ForeignKey("CompanyID")
+            new ForeignKeyColumn("CompanyID")
         );
 
         $this->assertCount(1, $schema->indexes);

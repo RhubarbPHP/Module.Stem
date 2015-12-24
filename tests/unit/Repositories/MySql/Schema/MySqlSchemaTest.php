@@ -4,12 +4,12 @@ namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Schema;
 
 use Rhubarb\Stem\Exceptions\SchemaException;
 use Rhubarb\Stem\Repositories\MySql\MySql;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnum;
+use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnumColumn;
 use Rhubarb\Stem\Repositories\MySql\Schema\Index;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
@@ -18,7 +18,7 @@ class MySqlSchemaTest extends MySqlTestCase
 {
     public function testEnumRequiresDefault()
     {
-        $enum = new MySqlEnum("Test", "A", ["A"]);
+        $enum = new MySqlEnumColumn("Test", "A", ["A"]);
 
         $this->assertEquals("A", $enum->defaultValue);
 
@@ -31,9 +31,9 @@ class MySqlSchemaTest extends MySqlTestCase
 
         $schema = new MysqlModelSchema("tblExample");
 
-        $schema->addColumn(new AutoIncrement("ID"));
+        $schema->addColumn(new AutoIncrementColumn("ID"));
         $schema->addColumn(new StringColumn("Name", 40, "StrangeDefault"));
-        $schema->addColumn(new MySqlEnum("Type", "A", ["A", "B", "C"]));
+        $schema->addColumn(new MySqlEnumColumn("Type", "A", ["A", "B", "C"]));
 
         $schema->addIndex(new Index("ID", Index::PRIMARY));
 
@@ -56,10 +56,10 @@ class MySqlSchemaTest extends MySqlTestCase
 
         $schema = new MySqlModelSchema("tblExample");
 
-        $schema->addColumn(new AutoIncrement("ID"));
+        $schema->addColumn(new AutoIncrementColumn("ID"));
         $schema->addColumn(new StringColumn("Name", 40, "StrangeDefault"));
-        $schema->addColumn(new MySqlEnum("Type", "A", ["A", "B", "C"]));
-        $schema->addColumn(new MySqlEnum("Type", "B", ["A", "B", "C", "D"]));
+        $schema->addColumn(new MySqlEnumColumn("Type", "A", ["A", "B", "C"]));
+        $schema->addColumn(new MySqlEnumColumn("Type", "B", ["A", "B", "C", "D"]));
         $schema->addColumn(new StringColumn("Town", 60, null));
 
         $schema->addIndex(new Index("ID", Index::PRIMARY));
@@ -79,7 +79,7 @@ class MySqlSchemaTest extends MySqlTestCase
     {
         $schema = new MySqlModelSchema("tblTest");
 
-        $schema->addColumn(new AutoIncrement("TestID"));
+        $schema->addColumn(new AutoIncrementColumn("TestID"));
 
         $this->assertEquals("TestID", $schema->uniqueIdentifierColumnName);
         $this->assertEquals(Index::PRIMARY, $schema->indexes["Primary"]->indexType);

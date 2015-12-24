@@ -22,7 +22,7 @@ require_once __DIR__ . "/../Repository.php";
 
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 
 class Offline extends Repository
 {
@@ -33,7 +33,7 @@ class Offline extends Repository
         if ($object->isNewRecord()) {
 
             $columnName = $object->UniqueIdentifierColumnName;
-            if($object->getSchema()->getColumns()[$columnName] instanceof AutoIncrement)
+            if($object->getSchema()->getColumns()[$columnName] instanceof AutoIncrementColumn)
             {
                 // Assign an auto number as a unique identifier.
                 $this->autoNumberCount++;

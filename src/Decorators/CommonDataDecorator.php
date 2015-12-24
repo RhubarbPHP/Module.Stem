@@ -23,9 +23,9 @@ require_once __DIR__ . '/DataDecorator.php';
 use Rhubarb\Leaf\Presenters\Controls\DateTime\Date;
 use Rhubarb\Stem\Decorators\Formatters\DecimalFormatter;
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Schema\Columns\Boolean;
-use Rhubarb\Stem\Schema\Columns\Decimal;
-use Rhubarb\Stem\Schema\Columns\Money;
+use Rhubarb\Stem\Schema\Columns\BooleanColumn;
+use Rhubarb\Stem\Schema\Columns\DecimalColumn;
+use Rhubarb\Stem\Schema\Columns\MoneyColumn;
 
 /**
  * Provides the most common of decorations to ensure basic conversions are implemented.
@@ -34,15 +34,15 @@ class CommonDataDecorator extends DataDecorator
 {
     protected function registerTypeDefinitions()
     {
-        $this->addTypeFormatter(Boolean::class, function (Model $model, $booleanValue) {
+        $this->addTypeFormatter(BooleanColumn::class, function (Model $model, $booleanValue) {
             return $booleanValue ? "Yes" : "No";
         });
 
-        $this->addTypeFormatter(Money::class, function (Model $model, $value) {
+        $this->addTypeFormatter(MoneyColumn::class, function (Model $model, $value) {
             return number_format($value, 2);
         });
 
-        $this->addTypeFormatter(Decimal::class, new DecimalFormatter());
+        $this->addTypeFormatter(DecimalColumn::class, new DecimalFormatter());
 
         $this->addTypeFormatter(Date::class, function (Model $model, \DateTime $value) {
             return $value->format("d-M-Y");

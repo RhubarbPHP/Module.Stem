@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Decorators\Formatters;
 
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\Column;
-use Rhubarb\Stem\Schema\Columns\Decimal;
+use Rhubarb\Stem\Schema\Columns\DecimalColumn;
 
 class DecimalFormatter extends TypeFormatter
 {
@@ -12,7 +12,7 @@ class DecimalFormatter extends TypeFormatter
      * This method will be called with a column definition, and should return a closure
      * which takes 2 properties - a Model and a value - and returns a formatted value.
      *
-     * @param Decimal|Column $column
+     * @param DecimalColumn|Column $column
      * @return \Closure
      */
     public function getFormatter(Column $column)

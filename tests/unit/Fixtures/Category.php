@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\unit\Fixtures;
 
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -19,7 +19,7 @@ class Category extends Model
         $schema = new ModelSchema("tblCategory");
 
         $schema->addColumn(
-            new AutoIncrement("CategoryID"),
+            new AutoIncrementColumn("CategoryID"),
             new StringColumn("CategoryName", 50)
         );
 
