@@ -12,14 +12,14 @@ class DecimalFormatter extends TypeFormatter
      * This method will be called with a column definition, and should return a closure
      * which takes 2 properties - a Model and a value - and returns a formatted value.
      *
-     * @param DecimalColumn|Column $column
+     * @param  DecimalColumn|Column $column
      * @return \Closure
      */
     public function getFormatter(Column $column)
     {
         $decimalDigits = $column->getDecimalDigits();
 
-        return function(Model $model, $value) use($decimalDigits) {
+        return function (Model $model, $value) use ($decimalDigits) {
             return number_format($value, $decimalDigits);
         };
     }

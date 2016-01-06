@@ -43,7 +43,7 @@ abstract class Filter
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      *
-     * @param Collection $list The data list to filter.
+     * @param  Collection $list The data list to filter.
      * @return array
      */
     abstract public function doGetUniqueIdentifiersToFilter(Collection $list);
@@ -53,7 +53,7 @@ abstract class Filter
      *
      * This will be an empty array if a repository has used this filter to do it's filtering.
      *
-     * @param Collection $list The data list to filter.
+     * @param  Collection $list The data list to filter.
      * @return array
      */
     public final function getUniqueIdentifiersToFilter(Collection $list)
@@ -95,26 +95,26 @@ abstract class Filter
      * Rhubarb\Stem\Repositories\MySql\Filters\Equals
      *
      * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param Filter $originalFilter The base filter containing the settings we need.
-     * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param                                             $propertiesToAutoHydrate
+     * @param Filter                                $originalFilter The base filter containing the settings we need.
+     * @param array                                 $params         An array of output parameters that might be need by the repository, named parameters for PDO for example.
+     * @param $propertiesToAutoHydrate
      */
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
         &$params,
         &$propertiesToAutoHydrate
-    )
-    {
+    ) {
+    
 
     }
 
     /**
      * Returns A string containing information needed for a repository to use a filter directly.
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param array $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  array                                 $params                  An array of output parameters that might be need by the repository, named parameters for PDO for example.
+     * @param  array                                 $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
      * @return string
      */
     public final function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
@@ -131,8 +131,10 @@ abstract class Filter
         $className = rtrim($namespace, '\\') . '\\' . $parts[count($parts) - 2] . basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
-            return call_user_func_array($className . "::doFilterWithRepository",
-                [$repository, $this, &$params, &$propertiesToAutoHydrate]);
+            return call_user_func_array(
+                $className . "::doFilterWithRepository",
+                [$repository, $this, &$params, &$propertiesToAutoHydrate]
+            );
         }
 
         return "";
@@ -151,7 +153,7 @@ abstract class Filter
     /**
      * If appropriate, set's the value on the model object such that it is matched by this model.
      *
-     * @param \Rhubarb\Stem\Models\Model $model
+     * @param  \Rhubarb\Stem\Models\Model $model
      * @return null|Model
      */
     public function setFilterValuesOnModel(Model $model)

@@ -24,15 +24,15 @@ require_once __DIR__ . "/MySqlMediumTextColumn.php";
 
 class MySqlLongTextColumnColumn extends MySqlMediumTextColumn
 {
-	use MySqlColumn;
+    use MySqlColumn;
 
-	public function getDefinition()
-	{
-		return "`".$this->columnName."` longtext ".$this->getDefaultDefinition();
-	}
+    public function getDefinition()
+    {
+        return "`".$this->columnName."` longtext ".$this->getDefaultDefinition();
+    }
 
-	protected static function fromGenericColumnType(Column $genericColumn)
-	{
-		return new self($genericColumn->columnName);
-	}
+    protected static function fromGenericColumnType(Column $genericColumn)
+    {
+        return new self($genericColumn->columnName);
+    }
 }

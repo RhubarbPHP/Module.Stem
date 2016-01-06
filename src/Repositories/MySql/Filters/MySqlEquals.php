@@ -31,10 +31,10 @@ class MySqlEquals extends Equals
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param Equals|Filter $originalFilter
-     * @param array $params
-     * @param array $relationshipsToAutoHydrate
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  Equals|Filter                         $originalFilter
+     * @param  array                                 $params
+     * @param  array                                 $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
@@ -42,8 +42,8 @@ class MySqlEquals extends Equals
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    )
-    {
+    ) {
+    
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
@@ -66,8 +66,10 @@ class MySqlEquals extends Equals
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->equalTo);
 
             if (!$placeHolder) {
-                $params[$paramName] = $params[$paramName] = self::getTransformedComparisonValueForRepository($columnName,
-                    $originalFilter->equalTo, $repository);;
+                $params[$paramName] = $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                    $columnName,
+                    $originalFilter->equalTo, $repository
+                );;
                 $paramName = ":" . $paramName;
             } else {
                 $paramName = $placeHolder;

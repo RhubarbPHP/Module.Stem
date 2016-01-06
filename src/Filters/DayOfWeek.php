@@ -29,7 +29,7 @@ class DayOfWeek extends ColumnFilter
 
     /**
      * @param $columnName
-     * @param array $validDays The days to filter for. 0 based starting with monday e.g. 0 = Monday, 1 = Tuesday...
+     * @param array      $validDays The days to filter for. 0 based starting with monday e.g. 0 = Monday, 1 = Tuesday...
      */
     public function __construct($columnName, $validDays = [])
     {
@@ -41,7 +41,7 @@ class DayOfWeek extends ColumnFilter
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      *
-     * @param Collection $list The data list to filter.
+     * @param  Collection $list The data list to filter.
      * @return array
      */
     public function doGetUniqueIdentifiersToFilter(Collection $list)

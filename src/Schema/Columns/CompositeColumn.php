@@ -79,7 +79,7 @@ abstract class CompositeColumn extends Column
             $compositeData = $data[$this->columnName];
 
             // Handle occasions when the data value is an object (usually stdClass) rather than an array
-            if ( is_object($compositeData)){
+            if (is_object($compositeData)) {
                 $compositeData = get_object_vars($compositeData);
             }
 

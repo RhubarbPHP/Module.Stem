@@ -55,7 +55,7 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 
     private function updateSchema(SolutionSchema $schema)
     {
-        $this->writeNormal( " Processing schema ".get_class($schema), true);
+        $this->writeNormal(" Processing schema ".get_class($schema), true);
         $schema->checkModelSchemas();
     }
 }

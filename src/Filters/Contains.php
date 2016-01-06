@@ -63,8 +63,7 @@ class Contains extends ColumnFilter
 
         $searchMethod = $this->caseSensitive ? 'strpos' : 'stripos';
         foreach ($list as $item) {
-            if (
-                strlen($item[$this->columnName]) < strlen($this->contains)
+            if (strlen($item[$this->columnName]) < strlen($this->contains)
                 || $searchMethod($item[$this->columnName], $this->contains) === false
             ) {
                 $ids[] = $item->UniqueIdentifier;

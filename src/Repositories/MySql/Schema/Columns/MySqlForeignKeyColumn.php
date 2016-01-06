@@ -32,7 +32,7 @@ class MySqlForeignKeyColumn extends MySqlIntegerColumn
         $this->signed = false;
     }
 
-    public function GetIndex()
+    public function getIndex()
     {
         return new Index($this->columnName, Index::INDEX);
     }

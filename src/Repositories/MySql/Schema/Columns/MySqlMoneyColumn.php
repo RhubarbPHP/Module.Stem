@@ -31,8 +31,8 @@ class MySqlMoneyColumn extends MySqlDecimalColumn
 {
     /**
      * @param string $columnName
-     * @param int $totalDigits
-     * @param int $defaultValue
+     * @param int    $totalDigits
+     * @param int    $defaultValue
      */
     public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
     {

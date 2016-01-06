@@ -34,10 +34,10 @@ class MySqlGreaterThan extends GreaterThan
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
-     * @param array $params
-     * @param array $relationshipsToAutoHydrate
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  \Rhubarb\Stem\Filters\Equals|Filter   $originalFilter
+     * @param  array                                 $params
+     * @param  array                                 $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
@@ -45,8 +45,8 @@ class MySqlGreaterThan extends GreaterThan
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    )
-    {
+    ) {
+    
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
@@ -57,8 +57,10 @@ class MySqlGreaterThan extends GreaterThan
             $originalFilter->filteredByRepository = true;
 
             if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository($columnName,
-                    $originalFilter->greaterThan, $repository);
+                $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                    $columnName,
+                    $originalFilter->greaterThan, $repository
+                );
                 $paramName = ":" . $paramName;
             } else {
                 $paramName = $placeHolder;

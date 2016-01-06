@@ -22,9 +22,9 @@ use Rhubarb\Stem\Tests\unit\Fixtures\User;
 
 class DataDecoratorTest extends RhubarbTestCase
 {
-    public static function setUpBeforeClass()
+    protected function setUp()
     {
-        parent::setUpBeforeClass();
+        parent::setUp();
 
         DataDecorator::clearDecoratorClasses();
         DataDecorator::registerDecoratorClass(ExampleDecorator::class, Example::class);

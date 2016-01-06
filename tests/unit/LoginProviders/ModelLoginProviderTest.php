@@ -13,9 +13,11 @@ use Rhubarb\Stem\Tests\unit\Fixtures\User;
 
 class ModelLoginProviderTest extends RhubarbTestCase
 {
-    public static function setUpBeforeClass()
+    protected function setUp()
     {
-        parent::setUpBeforeClass();
+        parent::setUp();
+
+        User::clearObjectCache();
 
         HashProvider::SetHashProviderClassName(Sha512HashProvider::class);
 

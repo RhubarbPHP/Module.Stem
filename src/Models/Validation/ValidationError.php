@@ -70,7 +70,7 @@ class ValidationError
      *
      * Searches within sub errors as well.
      *
-     * @param $name
+     * @param  $name
      * @return array
      */
     public function getValidationErrorsByName($name)

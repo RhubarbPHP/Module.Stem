@@ -91,9 +91,8 @@ class GreaterThan extends ColumnFilter
                 $valueToTest = strtolower($valueToTest);
             }
 
-            if (
-                ($valueToTest < $greaterThan) ||
-                ($this->inclusive == false && $valueToTest == $greaterThan)
+            if (($valueToTest < $greaterThan) 
+                || ($this->inclusive == false && $valueToTest == $greaterThan)
             ) {
                 $ids[] = $item->UniqueIdentifier;
             }

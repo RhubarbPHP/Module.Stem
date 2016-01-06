@@ -48,8 +48,10 @@ class MySql extends PdoRepository
     {
         $schema = $object->getSchema();
 
-        self::executeStatement("DELETE FROM `{$schema->schemaName}` WHERE `{$schema->uniqueIdentifierColumnName}` = :primary",
-            ["primary" => $object->UniqueIdentifier]);
+        self::executeStatement(
+            "DELETE FROM `{$schema->schemaName}` WHERE `{$schema->uniqueIdentifierColumnName}` = :primary",
+            ["primary" => $object->UniqueIdentifier]
+        );
     }
 
     /**
@@ -69,8 +71,10 @@ class MySql extends PdoRepository
         $schema = $this->getRepositorySchema();
         $table = $schema->schemaName;
 
-        $data = self::returnFirstRow("SELECT * FROM `" . $table . "` WHERE `{$schema->uniqueIdentifierColumnName}` = :id",
-            ["id" => $uniqueIdentifier]);
+        $data = self::returnFirstRow(
+            "SELECT * FROM `" . $table . "` WHERE `{$schema->uniqueIdentifierColumnName}` = :id",
+            ["id" => $uniqueIdentifier]
+        );
 
         if ($data != null) {
             return $this->transformDataFromRepository($data);
@@ -201,10 +205,10 @@ class MySql extends PdoRepository
             $sql .= " VALUES ()";
         }
 
-        $id = self::executeInsertStatement($sql, $params);
+        $insertId = self::executeInsertStatement($sql, $params);
 
-        if ($id > 0) {
-            $object[$object->getUniqueIdentifierColumnName()] = $id;
+        if ($insertId > 0) {
+            $object[$object->getUniqueIdentifierColumnName()] = $insertId;
         }
     }
 
@@ -258,9 +262,9 @@ class MySql extends PdoRepository
      * Gets the unique identifiers required for the matching filters and loads the data into
      * the cache for performance reasons.
      *
-     * @param Collection $list
-     * @param int $unfetchedRowCount
-     * @param array $relationshipNavigationPropertiesToAutoHydrate
+     * @param  Collection $list
+     * @param  int        $unfetchedRowCount
+     * @param  array      $relationshipNavigationPropertiesToAutoHydrate
      * @return array
      */
     public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
@@ -319,24 +323,24 @@ class MySql extends PdoRepository
     }
 
     /**
-	 * Returns the repository-specific command so it can be used externally for other operations.
-	 * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
-	 *
-	 * @param Collection $collection
-	 * @param array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
-	 *                                                                  try to auto hydrate (if supported)
-	 * @param array      $namedParams Named parameters to be used in execution of the command
-	 *
-	 * Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more
-	 * than just the SQL command to be returned from this method.
-	 *
-	 * @param array      $joinColumns
-	 * @param array      $joinOriginalToAliasLookup
-	 * @param array      $joinColumnsByModel
-	 * @param bool       $ranged
-	 *
-	 * @return string The SQL command to be executed
- 	 */
+     * Returns the repository-specific command so it can be used externally for other operations.
+     * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
+     *
+     * @param Collection $collection
+     * @param array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
+     *                                                                  try to auto hydrate (if supported)
+     * @param array      $namedParams                                   Named parameters to be used in execution of the command Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more than just the SQL command to be returned from this method.
+     *
+     * Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more
+     * than just the SQL command to be returned from this method.
+     *
+     * @param array      $joinColumns
+     * @param array      $joinOriginalToAliasLookup
+     * @param array      $joinColumnsByModel
+     * @param bool       $ranged
+     *
+     * @return string The SQL command to be executed
+      */
     public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams = null, &$joinColumns = null, &$joinOriginalToAliasLookup = null, &$joinColumnsByModel = null, &$ranged = null)
     {
         $schema = $this->reposSchema;
@@ -586,22 +590,22 @@ class MySql extends PdoRepository
         $clausePositions = [];
         $results = [];
 
-        $i = -1;
-        $c = -1;
+        $index = -1;
+        $count = -1;
 
         $relationships = [];
 
         foreach ($aggregates as $aggregate) {
-            $i++;
+            $index++;
 
             $clause = $aggregate->aggregateWithRepository($this, $relationships);
 
             if ($clause != "") {
-                $c++;
+                $count++;
                 $clauses[] = $clause;
-                $clausePositions[$c] = $i;
+                $clausePositions[$count] = $index;
             } else {
-                $results[$i] = null;
+                $results[$index] = null;
             }
         }
 
@@ -637,13 +641,13 @@ class MySql extends PdoRepository
     /**
      * Gets a PDO connection.
      *
-     * @param \Rhubarb\Stem\StemSettings $settings
-     * @throws \Rhubarb\Stem\Exceptions\RepositoryConnectionException Thrown if the connection could not be established
+     * @param    \Rhubarb\Stem\StemSettings $settings
+     * @throws   \Rhubarb\Stem\Exceptions\RepositoryConnectionException Thrown if the connection could not be established
      * @internal param $host
      * @internal param $username
      * @internal param $password
      * @internal param $database
-     * @return mixed /PDO
+     * @return   mixed /PDO
      */
     public static function getConnection(StemSettings $settings)
     {
@@ -651,8 +655,10 @@ class MySql extends PdoRepository
 
         if (!isset(PdoRepository::$connections[$connectionHash])) {
             try {
-                $pdo = new \PDO("mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
-                    $settings->Username, $settings->Password, [\PDO::ERRMODE_EXCEPTION => true]);
+                $pdo = new \PDO(
+                    "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
+                    $settings->Username, $settings->Password, [\PDO::ERRMODE_EXCEPTION => true]
+                );
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MySql", $er);
             }

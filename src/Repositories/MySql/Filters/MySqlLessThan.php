@@ -33,10 +33,10 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
-     * @param array $params
-     * @param $relationshipsToAutoHydrate
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  \Rhubarb\Stem\Filters\Equals|Filter   $originalFilter
+     * @param  array                                 $params
+     * @param  $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
@@ -44,8 +44,8 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    )
-    {
+    ) {
+    
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
@@ -56,8 +56,10 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
             $originalFilter->filteredByRepository = true;
 
             if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository($columnName,
-                    $originalFilter->lessThan, $repository);
+                $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                    $columnName,
+                    $originalFilter->lessThan, $repository
+                );
                 $paramName = ":" . $paramName;
             } else {
                 $paramName = $placeHolder;

@@ -79,7 +79,7 @@ class MySqlComparisonSchema
     /**
      * Returns a MySqlComparisonSchema reflecting the schema of a database table.
      *
-     * @param $tableName
+     * @param  $tableName
      * @return MySqlComparisonSchema
      */
     public static function fromTable($tableName)

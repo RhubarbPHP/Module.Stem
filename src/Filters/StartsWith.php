@@ -42,7 +42,7 @@ class StartsWith extends ColumnFilter
     /**
      * @param string $columnName
      * @param string $startsWith
-     * @param bool $caseSensitive
+     * @param bool   $caseSensitive
      */
     public function __construct($columnName, $startsWith, $caseSensitive = false)
     {

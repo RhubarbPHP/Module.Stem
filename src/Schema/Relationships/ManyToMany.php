@@ -42,8 +42,8 @@ class ManyToMany extends Relationship
         $joiningRightColumnName,
         $rightModelName,
         $rightColumnName
-    )
-    {
+    ) {
+    
         parent::__construct($navigationPropertyName);
 
         $this->leftColumnName = $leftColumnName;

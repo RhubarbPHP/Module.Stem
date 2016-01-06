@@ -31,10 +31,10 @@ class MySqlOneOf extends OneOf
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
-     * @param array $params
-     * @param $relationshipsToAutoHydrate
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  \Rhubarb\Stem\Filters\Equals|Filter   $originalFilter
+     * @param  array                                 $params
+     * @param  $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
@@ -42,8 +42,8 @@ class MySqlOneOf extends OneOf
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    )
-    {
+    ) {
+    
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {

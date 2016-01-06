@@ -56,8 +56,8 @@ abstract class ColumnFilter extends Filter
      * Converts the comparison value used in the constructor to one which can be compared against that returned
      * by the relevant model.
      *
-     * @param $rawComparisonValue
-     * @param Collection $list
+     * @param  $rawComparisonValue
+     * @param  Collection         $list
      * @return mixed
      */
     protected final function getTransformedComparisonValue($rawComparisonValue, Collection $list)

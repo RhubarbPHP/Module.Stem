@@ -30,7 +30,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         $modelSchemas = [];
 
         foreach( $schemas as $schema ){
-            $modelSchemas = array_merge($modelSchemas,$schema->getAllModels());
+            $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
         }
 
         $progressBar = new ProgressBar($output, sizeof($modelSchemas));
@@ -41,7 +41,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             $model = new $modelClass();
             $repository = $model->getRepository();
 
-            $this->writeNormal(" Truncating ".str_pad(basename($repository->getSchema()->schemaName), 50, ' ', STR_PAD_RIGHT ));
+            $this->writeNormal(" Truncating ".str_pad(basename($repository->getSchema()->schemaName), 50, ' ', STR_PAD_RIGHT));
 
             $repository->clearRepositoryData();
         }
@@ -58,7 +58,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         foreach(self::$seeders as $seeder){
             $progressBar->advance();
 
-            $this->writeNormal(" Processing ".str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT ));
+            $this->writeNormal(" Processing ".str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
 
             $seeder->seedData($output);
         }

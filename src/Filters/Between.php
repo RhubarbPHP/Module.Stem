@@ -31,11 +31,13 @@ class Between extends Group
         $this->min = $min;
         $this->max = $max;
 
-        parent::__construct("And",
+        parent::__construct(
+            "And",
             [
                 new GreaterThan($columnName, $min, true),
                 new LessThan($columnName, $max, true)
-            ]);
+            ]
+        );
     }
 
     public function getSettingsArray()

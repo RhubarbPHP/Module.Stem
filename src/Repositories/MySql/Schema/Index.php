@@ -54,9 +54,9 @@ class Index
     /**
      * Creates an index.
      *
-     * @param string $indexName If the type is INDEX::PRIMARY then this will be force to PRIMARY
-     * @param int $indexType One of Index::INDEX, Index::PRIMARY, Index::UNIQUE or Index::FULLTEXT
-     * @param null $columnNames If null, then an array with just the index name is assumed.
+     * @param string $indexName   If the type is INDEX::PRIMARY then this will be force to PRIMARY
+     * @param int    $indexType   One of Index::INDEX, Index::PRIMARY, Index::UNIQUE or Index::FULLTEXT
+     * @param null   $columnNames If null, then an array with just the index name is assumed.
      */
     public function __construct($indexName, $indexType, $columnNames = null)
     {
@@ -87,17 +87,17 @@ class Index
     {
         $columnNames = " (`" . implode("`,`", $this->columnNames) . "`)";
         switch ($this->indexType) {
-            case Index::PRIMARY:
-                return "PRIMARY KEY" . $columnNames;
+        case Index::PRIMARY:
+            return "PRIMARY KEY" . $columnNames;
                 break;
-            case Index::INDEX:
-                return "KEY `" . $this->indexName . "`" . $columnNames;
+        case Index::INDEX:
+            return "KEY `" . $this->indexName . "`" . $columnNames;
                 break;
-            case Index::UNIQUE:
-                return "UNIQUE `" . $this->indexName . "`" . $columnNames;
+        case Index::UNIQUE:
+            return "UNIQUE `" . $this->indexName . "`" . $columnNames;
                 break;
-            case Index::FULLTEXT:
-                return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
+        case Index::FULLTEXT:
+            return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
                 break;
         }
 

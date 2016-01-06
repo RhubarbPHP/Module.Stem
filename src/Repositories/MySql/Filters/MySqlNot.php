@@ -31,9 +31,11 @@ class MySqlNot extends Not
         Filter $originalFilter,
         &$params,
         &$propertiesToAutoHydrate
-    )
-    {
-        /** @var MySqlNot $not */
+    ) {
+    
+        /**
+ * @var MySqlNot $not 
+*/
         $not = $originalFilter;
 
         $internalSql = $not->filter->filterWithRepository($repository, $params, $propertiesToAutoHydrate);

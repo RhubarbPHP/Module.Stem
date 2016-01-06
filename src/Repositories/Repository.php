@@ -122,7 +122,7 @@ abstract class Repository
     /**
      * Checks if raw repository data needs transformed before passing to the model.
      *
-     * @param $modelData
+     * @param  $modelData
      * @return mixed
      */
     protected function transformDataFromRepository($modelData)
@@ -141,7 +141,7 @@ abstract class Repository
     /**
      * Checks if model data needs transformed into raw model data before passing it for storage.
      *
-     * @param $modelData array  An array of model data to transform.
+     * @param  $modelData array  An array of model data to transform.
      * @return mixed            The transformed data
      */
     protected function transformDataForRepository($modelData)
@@ -177,8 +177,10 @@ abstract class Repository
         $superType = $genericSchema;
 
         if (class_exists($className)) {
-            $superType = call_user_func_array($className . "::fromGenericSchema",
-                [$genericSchema]);
+            $superType = call_user_func_array(
+                $className . "::fromGenericSchema",
+                [$genericSchema]
+            );
 
             // getRepositorySpecificSchema could return false if it doesn't supply any schema details.
             if ($superType === false) {
@@ -222,9 +224,9 @@ abstract class Repository
      *
      * Used normally to hydrate data lists with their data.
      *
-     * @param Collection $list
-     * @param int $unfetchedRowCount An output parameter containing the number of rows left unfetched (if ranging)
-     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
+     * @param  Collection $list
+     * @param  int        $unfetchedRowCount                             An output parameter containing the number of rows left unfetched (if ranging)
+     * @param  array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
      *                                                             try to auto hydrate (if supported)
      * @return array
      */
@@ -237,7 +239,7 @@ abstract class Repository
     /**
      * Commits changes to the repository in batch against a collection.
      *
-     * @param Collection $collection
+     * @param Collection    $collection
      * @param $propertyPairs
      */
     public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
@@ -253,9 +255,9 @@ abstract class Repository
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
      * @param Collection $collection
-     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
+     * @param array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
      *                                                                  try to auto hydrate (if supported)
-     * @param array $namedParams Named parameters to be used in execution of the command
+     * @param array      $namedParams                                   Named parameters to be used in execution of the command
      *
      * @return string|null
      */
@@ -269,8 +271,8 @@ abstract class Repository
      *
      * An answer will be null if the repository is unable to answer it.
      *
-     * @param Aggregate[] $aggregates
-     * @param Collection $collection
+     * @param  Aggregate[] $aggregates
+     * @param  Collection  $collection
      * @return array
      */
     public function calculateAggregates($aggregates, Collection $collection)
@@ -286,7 +288,7 @@ abstract class Repository
     /**
      * Returns the sorts needed for manual sorting.
      *
-     * @param Collection $list
+     * @param  Collection $list
      * @return array
      */
     protected function getManualSortsRequiredForList(Collection $list)
@@ -297,7 +299,7 @@ abstract class Repository
     /**
      * Get's a sorted list of unique identifiers for the supplied list.
      *
-     * @param Collection $list
+     * @param  Collection $list
      * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
      * @return array
      */
@@ -318,13 +320,13 @@ abstract class Repository
 
         $ids = [];
 
-        $x = 0;
+        $count = 0;
 
         $list->disableRanging();
 
         foreach ($list as $item) {
-            $ids[$x] = $item->getUniqueIdentifier();
-            $x++;
+            $ids[$count] = $item->getUniqueIdentifier();
+            $count++;
         }
 
         foreach ($sorts as $columnName => $ascending) {
@@ -339,7 +341,7 @@ abstract class Repository
 
                 if ($column instanceof IntegerColumn || $column instanceof FloatColumn ) {
                     $type = SORT_NUMERIC;
-                } elseif ( $column instanceof DateColumn ){
+                } elseif ($column instanceof DateColumn ) {
                     $type = SORT_REGULAR;
                 }
             } else {
@@ -349,7 +351,7 @@ abstract class Repository
             $types[$columnName] = $type;
             $directions[$columnName] = ($ascending) ? SORT_ASC : SORT_DESC;
 
-            $x = 0;
+            $count = 0;
 
             foreach ($list as $item) {
                 if (!isset($item[$columnName])) {
@@ -366,8 +368,8 @@ abstract class Repository
                     $itemValue = $item[$columnName];
                 }
 
-                $arrays[$columnName][$x] = $itemValue;
-                $x++;
+                $arrays[$columnName][$count] = $itemValue;
+                $count++;
             }
         }
 
@@ -403,8 +405,8 @@ abstract class Repository
     /**
      * Returns a new default repository of the current default repository type.
      *
-     * @see Repository::setDefaultRepositoryClassName()
-     * @param \Rhubarb\Stem\Models\Model $forModel
+     * @see    Repository::setDefaultRepositoryClassName()
+     * @param  \Rhubarb\Stem\Models\Model $forModel
      * @return mixed
      */
     public static function getNewDefaultRepository(Model $forModel)
@@ -430,8 +432,10 @@ abstract class Repository
         if (!isset($this->cachedObjectData[$uniqueIdentifier])) {
             $this->cachedObjectData[$uniqueIdentifier] = $object->exportRawData();
         } else {
-            $this->cachedObjectData[$uniqueIdentifier] = array_merge($this->cachedObjectData[$uniqueIdentifier],
-                $object->exportRawData());
+            $this->cachedObjectData[$uniqueIdentifier] = array_merge(
+                $this->cachedObjectData[$uniqueIdentifier],
+                $object->exportRawData()
+            );
         }
     }
 
@@ -458,10 +462,10 @@ abstract class Repository
      *
      * Uses cached data if it exists and if not will request that the object is hydrated.
      *
-     * @see Repository::fetchMissingObjectData()
-     * @param \Rhubarb\Stem\Models\Model $object
-     * @param $uniqueIdentifier
-     * @param array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated
+     * @see    Repository::fetchMissingObjectData()
+     * @param  \Rhubarb\Stem\Models\Model $object
+     * @param  $uniqueIdentifier
+     * @param  array                      $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      * @return mixed
@@ -469,8 +473,10 @@ abstract class Repository
     protected final function fetchObjectData(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
     {
         if (!isset($this->cachedObjectData[$uniqueIdentifier])) {
-            $this->cachedObjectData[$uniqueIdentifier] = $this->fetchMissingObjectData($object, $uniqueIdentifier,
-                $relationshipsToAutoHydrate);
+            $this->cachedObjectData[$uniqueIdentifier] = $this->fetchMissingObjectData(
+                $object, $uniqueIdentifier,
+                $relationshipsToAutoHydrate
+            );
         }
 
         return $this->cachedObjectData[$uniqueIdentifier];
@@ -482,9 +488,9 @@ abstract class Repository
      * This function should be overriden by Repository implementations to fetch the data
      * from it's back end data store.
      *
-     * @param \Rhubarb\Stem\Models\Model $object
-     * @param $uniqueIdentifier
-     * @param array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated
+     * @param  \Rhubarb\Stem\Models\Model $object
+     * @param  $uniqueIdentifier
+     * @param  array                      $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      * @return array
@@ -500,7 +506,7 @@ abstract class Repository
      *
      * @param \Rhubarb\Stem\Models\Model $object
      * @param $uniqueIdentifier
-     * @param array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated
+     * @param array                      $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      */
@@ -514,7 +520,7 @@ abstract class Repository
     /**
      * Rehydrates the model fresh from the back end data store.
      *
-     * @param Model $object
+     * @param Model            $object
      * @param $uniqueIdentifier
      */
     public function reHydrateObject(Model $object, $uniqueIdentifier)
@@ -529,9 +535,9 @@ abstract class Repository
      * calls onObjectSaved() to allow extenders to store the object permanently in a
      * back end data store.
      *
-     * @see Repository::onObjectSaved()
+     * @see    Repository::onObjectSaved()
      * @throws ModelException When the object has no unique identifier.
-     * @param \Rhubarb\Stem\Models\Model $object
+     * @param  \Rhubarb\Stem\Models\Model $object
      */
     public final function saveObject(Model $object)
     {
@@ -573,7 +579,7 @@ abstract class Repository
      * Normally used to perform the actual deletion in the back end
      *
      * @param Repository ::deleteObject()
-     * @param \Rhubarb\Stem\Models\Model $object
+     * @param \Rhubarb\Stem\Models\Model  $object
      */
     protected function onObjectDeleted(Model $object)
     {
@@ -597,9 +603,9 @@ abstract class Repository
     /**
      * Changes the default class name for new repositories.
      *
-     * @see Repository::getNewDefaultRepository();
+     * @see    Repository::getNewDefaultRepository();
      * @throws ModelException When the class name doesn't exist.
-     * @param $repositoryClassName
+     * @param  $repositoryClassName
      */
     public static function setDefaultRepositoryClassName($repositoryClassName)
     {

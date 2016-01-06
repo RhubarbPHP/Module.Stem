@@ -50,9 +50,9 @@ abstract class PdoRepository extends Repository
     public static function getDefaultConnection()
     {
         if (self::$defaultConnection === null) {
-            $db = new StemSettings();
+            $databaseSettings = new StemSettings();
 
-            self::$defaultConnection = static::getConnection($db);
+            self::$defaultConnection = static::getConnection($databaseSettings);
         }
 
         return self::$defaultConnection;

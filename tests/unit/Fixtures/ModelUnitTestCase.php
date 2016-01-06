@@ -10,9 +10,9 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 
 class ModelUnitTestCase extends RhubarbTestCase
 {
-    public static function setUpBeforeClass()
+    protected function setUp()
     {
-        parent::setUpBeforeClass();
+        parent::setUp();
 
         Repository::setDefaultRepositoryClassName(Offline::class);
         Model::deleteRepositories();

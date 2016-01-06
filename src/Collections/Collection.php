@@ -238,7 +238,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->uniqueIdentifiers = $repository->getUniqueIdentifiersForDataList(
             $this,
             $this->unfetchedRowCount,
-            $this->relationshipNavigationPropertiesToAutoHydrate);
+            $this->relationshipNavigationPropertiesToAutoHydrate
+        );
         $this->iterator = 0;
 
         if ($this->filter !== null) {
@@ -328,7 +329,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      * It is good practice to use this method instead of instantiating models directly to ensure
      * users don't manipulate URLs to reveal objects they shouldn't be able to access.
      *
-     * @param $uniqueIdentifier
+     * @param  $uniqueIdentifier
      * @return bool
      * @throws \Rhubarb\Stem\Exceptions\RecordNotFoundException
      */
@@ -376,7 +377,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * filter the existing list using the supplied DataFilter.
      *
-     * @param Filter $filter
+     * @param  Filter $filter
      * @return $this
      */
     public function filter(Filter $filter)
@@ -398,8 +399,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      * Where repository specific optimisation is available this will be leveraged to run the batch
      * update at the data source rather than iterating over the items.
      *
-     * @param Array $propertyPairs An associative array of key value pairs to update
-     * @param bool $fallBackToIteration If the repository can't perform the action directly, perform the update by
+     * @param  Array $propertyPairs       An associative array of key value pairs to update
+     * @param  bool  $fallBackToIteration If the repository can't perform the action directly, perform the update by iterating over all the models in the collection. You should only pass true if you know that the collection doesn't meet the criteria for an optimised update and the iteration of items won't cause problems
      *                                  iterating over all the models in the collection. You should only pass true
      *                                  if you know that the collection doesn't meet the criteria for an optimised
      *                                  update and the iteration of items won't cause problems
@@ -425,7 +426,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
-    public function ReplaceFilter(Filter $filter)
+    public function replaceFilter(Filter $filter)
     {
         $this->filter = $filter;
 
@@ -440,7 +441,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @param Filter $filter
      */
-    public function Not(Filter $filter)
+    public function not(Filter $filter)
     {
         $this->filter = new \Rhubarb\Stem\Filters\Not($filter);
 
@@ -461,7 +462,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * append a model to the list and correctly set any fields required to make this re-fetchable through the same list.
      *
-     * @param \Rhubarb\Stem\Models\Model $model
+     * @param  \Rhubarb\Stem\Models\Model $model
      * @return \Rhubarb\Stem\Models\Model|null
      */
     public function append(Model $model)
@@ -535,8 +536,10 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
         $rangeEnd = $count = $this->count();
 
         if (!$this->rangingDisabled) {
-            $rangeEnd = ($this->rangeEndIndex !== null) ? min($this->rangeEndIndex + 1,
-                    $count) - $this->rangeStartIndex : $count;
+            $rangeEnd = ($this->rangeEndIndex !== null) ? min(
+                $this->rangeEndIndex + 1,
+                $count
+            ) - $this->rangeStartIndex : $count;
         }
 
         return ($offset >= 0 && $offset < $rangeEnd);
@@ -590,8 +593,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Adds a new column to the sort list.
      *
-     * @param $columnName
-     * @param bool $ascending
+     * @param  $columnName
+     * @param  bool       $ascending
      * @return $this
      */
     public function addSort($columnName, $ascending = true)
@@ -609,8 +612,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      * This should be an associative array of column name to bool (true = ASC, false = DESC) pairs OR
      * for a single sort a column name and direction as two separate params
      *
-     * @param string|array $sortDetails
-     * @param null|bool $sortDirection
+     * @param  string|array $sortDetails
+     * @param  null|bool    $sortDirection
      * @return $this
      */
     public function replaceSort($sortDetails, $sortDirection = null)
@@ -647,8 +650,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * This can be used by the repository to employ limits but generally allows for easy paging of a list.
      *
-     * @param int $startIndex
-     * @param int $maxItems
+     * @param  int $startIndex
+     * @param  int $maxItems
      * @return $this
      */
     public function setRange($startIndex, $maxItems)

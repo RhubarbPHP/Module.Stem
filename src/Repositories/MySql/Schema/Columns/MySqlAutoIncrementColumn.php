@@ -34,7 +34,7 @@ class MySqlAutoIncrementColumn extends AutoIncrementColumn
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new MySqlAutoIncrementColumn( $genericColumn->columnName );
+        return new MySqlAutoIncrementColumn($genericColumn->columnName);
     }
 
     public function getDefinition()

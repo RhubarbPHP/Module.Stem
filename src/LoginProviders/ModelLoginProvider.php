@@ -69,7 +69,7 @@ class ModelLoginProvider extends LoginProvider
         $list->filter(new Equals($this->usernameColumnName, $username));
 
         if (!sizeof($list)) {
-            Log::debug( "Login failed for {$username} - the username didn't match a user", "LOGIN" );
+            Log::debug("Login failed for {$username} - the username didn't match a user", "LOGIN");
             throw new LoginFailedException();
         }
 
@@ -79,11 +79,13 @@ class ModelLoginProvider extends LoginProvider
         // unique *combinations* of username and password but it's a potential security issue and
         // could trip us up when supporting the project.
         if (sizeof($list) > 1) {
-            Log::debug( "Login failed for {$username} - the username wasn't unique", "LOGIN" );
+            Log::debug("Login failed for {$username} - the username wasn't unique", "LOGIN");
             throw new LoginFailedException();
         }
 
-        /** @var Model $user */
+        /**
+ * @var Model $user 
+*/
         $user = $list[0];
 
         $this->checkUserIsPermitted($user);
@@ -101,12 +103,12 @@ class ModelLoginProvider extends LoginProvider
 
                 return true;
             } else {
-                Log::debug( "Login failed for {$username} - the user is disabled.", "LOGIN" );
+                Log::debug("Login failed for {$username} - the user is disabled.", "LOGIN");
                 throw new LoginDisabledException();
             }
         }
 
-        Log::debug( "Login failed for {$username} - the password hash $userPasswordHash didn't match the stored hash.", "LOGIN" );
+        Log::debug("Login failed for {$username} - the password hash $userPasswordHash didn't match the stored hash.", "LOGIN");
 
         throw new LoginFailedException();
     }
@@ -117,7 +119,7 @@ class ModelLoginProvider extends LoginProvider
      * This is used by things like Api Authentication and makes sure that the means by which permissions are
      * determined is exactly the same as for any other part of the solution.
      *
-     * @param Model $user Required
+     * @param  Model $user Required
      * @throws ImplementationException
      */
     public function forceLogin(Model $user = null)
@@ -177,9 +179,9 @@ class ModelLoginProvider extends LoginProvider
         parent::onLogOut();
     }
 
-	protected function getUsername()
-	{
-		$user = $this->getModel();
-		return $user->{$this->usernameColumnName};
-	}
+    protected function getUsername()
+    {
+        $user = $this->getModel();
+        return $user->{$this->usernameColumnName};
+    }
 }

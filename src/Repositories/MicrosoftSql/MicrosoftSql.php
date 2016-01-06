@@ -41,7 +41,8 @@ class MicrosoftSql extends PdoRepository
                     "sqlsrv:server=" . $settings->Host . ";Database=" . $settings->Database,
                     $settings->Username,
                     $settings->Password,
-                    [\PDO::ERRMODE_EXCEPTION => true]);
+                    [\PDO::ERRMODE_EXCEPTION => true]
+                );
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MicrosoftSql");
             }

@@ -74,8 +74,8 @@ abstract class Aggregate
         Repository $repository,
         Aggregate $originalAggregate,
         &$relationshipsToAutoHydrate
-    )
-    {
+    ) {
+    
 
     }
 
@@ -85,8 +85,8 @@ abstract class Aggregate
      * If no repository support is available an empty string will be returned. Otherwise a string of data understandable
      * to the repository will be returned.
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param $relationshipsToAutoHydrate
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  $relationshipsToAutoHydrate
      * @return mixed|string
      */
     public final function aggregateWithRepository(Repository $repository, &$relationshipsToAutoHydrate)
@@ -97,8 +97,10 @@ abstract class Aggregate
         $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Aggregates\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
-            return call_user_func_array($className . "::calculateByRepository",
-                [$repository, $this, &$relationshipsToAutoHydrate]);
+            return call_user_func_array(
+                $className . "::calculateByRepository",
+                [$repository, $this, &$relationshipsToAutoHydrate]
+            );
         }
 
         return "";

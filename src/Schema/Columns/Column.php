@@ -81,7 +81,7 @@ class Column
     /**
      * Returns an array of named columns needed for storage.
      *
-     * @see createStorageColumns()
+     * @see    createStorageColumns()
      * @return Column[]
      */
     public function getStorageColumns()
@@ -102,7 +102,7 @@ class Column
      *
      * If no repository specific version is available $this is passed back.
      *
-     * @param string $repositoryClassName
+     * @param  string $repositoryClassName
      * @return Column
      */
     public final function getRepositorySpecificColumn($repositoryClassName)
@@ -129,7 +129,7 @@ class Column
      *
      * You should override this if your column is a repository specific implementation.
      *
-     * @param Column $genericColumn
+     * @param  Column $genericColumn
      * @return bool|Column Returns the repository specific column or false if the column doesn't support that.
      */
     protected static function fromGenericColumnType(Column $genericColumn)
@@ -155,7 +155,7 @@ class Column
     /**
      * Optionally returns a Closure that can transform model data as it is returned to the user of the model.
      *
-     * @see getTransformIntoModelData()
+     * @see    getTransformIntoModelData()
      * @return null|callable
      */
     public function getTransformFromModelData()
@@ -166,7 +166,7 @@ class Column
     /**
      * Optionally returns a Closure that can transform model data as it is received from the repository
      *
-     * @see getTransformIntoModelData()
+     * @see    getTransformIntoModelData()
      * @return null|callable
      */
     public function getTransformFromRepository()
@@ -177,7 +177,7 @@ class Column
     /**
      * Optionally returns a Closure that can transform model data as it is sent to the repository
      *
-     * @see getTransformIntoModelData()
+     * @see    getTransformIntoModelData()
      * @return null|callable
      */
     public function getTransformIntoRepository()

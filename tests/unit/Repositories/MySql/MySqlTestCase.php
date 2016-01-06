@@ -12,9 +12,13 @@ use Rhubarb\Stem\Tests\unit\Fixtures\UnitTestingSolutionSchema;
 
 class MySqlTestCase extends ModelUnitTestCase
 {
-    public static function setUpBeforeClass()
+
+    protected function setUp()
     {
-        parent::setUpBeforeClass();
+        parent::setUp();
+
+        // Make sure the test model objects have the any other repository disconnected.
+        Model::deleteRepositories();
 
         Repository::setDefaultRepositoryClassName(MySql::class);
 
@@ -24,9 +28,6 @@ class MySqlTestCase extends ModelUnitTestCase
 
         $unitTestingSolutionSchema = new UnitTestingSolutionSchema();
         $unitTestingSolutionSchema->checkModelSchemas();
-
-        // Make sure the test model objects have the any other repository disconnected.
-        Model::deleteRepositories();
     }
 
     protected static function setDefaultConnectionSettings()

@@ -32,9 +32,9 @@ class MySqlInArray extends InArray
     use MySqlFilterTrait;
 
     /**
-     * @param Repository $repository
-     * @param Filter|InArray $originalFilter
-     * @param array $params
+     * @param Repository                 $repository
+     * @param Filter|InArray             $originalFilter
+     * @param array                      $params
      * @param                                            $relationshipsToAutoHydrate
      *
      * @return string|void
@@ -44,8 +44,8 @@ class MySqlInArray extends InArray
         Filter $originalFilter,
         &$params,
         &$relationshipsToAutoHydrate
-    )
-    {
+    ) {
+    
         $columnName = $originalFilter->columnName;
 
         if (count($originalFilter->candidates) == 0) {
@@ -60,8 +60,10 @@ class MySqlInArray extends InArray
                 $paramName = uniqid() . str_replace(".", "", $columnName);
 
                 for ($i = 0; $i < $count; $i++) {
-                    $params[$paramName . $i] = self::getTransformedComparisonValueForRepository($columnName,
-                        $originalFilter->candidates[$i], $repository);
+                    $params[$paramName . $i] = self::getTransformedComparisonValueForRepository(
+                        $columnName,
+                        $originalFilter->candidates[$i], $repository
+                    );
                 }
 
                 if (strpos($columnName, ".") === false) {

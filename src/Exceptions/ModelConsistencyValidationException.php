@@ -31,8 +31,12 @@ class ModelConsistencyValidationException extends RhubarbException
     {
         $this->errors = $errors;
 
-        parent::__construct("The model contains " . sizeof($errors) . " consistency errors: \r\n\r\n" . implode("\r\n",
-                $this->getErrors()));
+        parent::__construct(
+            "The model contains " . sizeof($errors) . " consistency errors: \r\n\r\n" . implode(
+                "\r\n",
+                $this->getErrors()
+            )
+        );
     }
 
     /**

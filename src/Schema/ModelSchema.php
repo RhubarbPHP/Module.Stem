@@ -36,6 +36,7 @@ class ModelSchema
 {
     /**
      * The name of the schema, e.g. tblCompany
+     *
      * @var
      */
     public $schemaName;

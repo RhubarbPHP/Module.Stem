@@ -155,8 +155,8 @@ abstract class SolutionSchema
     /**
      * Gets an empty model of the appropriate type for a given model name.
      *
-     * @param      $modelName
-     * @param null $uniqueIdentifier Optionally a unique identifier to load.
+     * @param $modelName
+     * @param null      $uniqueIdentifier Optionally a unique identifier to load.
      *
      * @return Model
      */
@@ -171,7 +171,7 @@ abstract class SolutionSchema
     /**
      * Get's the schema for a particular model by name or class.
      *
-     * @param string $modelName The name or class name of the model
+     * @param  string $modelName The name or class name of the model
      * @return ModelSchema
      */
     public static function getModelSchema($modelName)
@@ -184,7 +184,7 @@ abstract class SolutionSchema
     /**
      * Instantiates (if necessary) and returns an instance of a schema object matched by its name.
      *
-     * @param $schemaName
+     * @param  $schemaName
      * @throws \Rhubarb\Stem\Exceptions\SchemaNotFoundException
      * @throws \Rhubarb\Stem\Exceptions\SchemaRegistrationException
      * @return SolutionSchema
@@ -230,7 +230,7 @@ abstract class SolutionSchema
     /**
      * Returns all registered relationships for a given model from all registered schemas.
      *
-     * @param $modelClassName
+     * @param  $modelClassName
      * @return Relationship[]
      */
     public static function getAllRelationshipsForModel($modelClassName)
@@ -256,7 +256,7 @@ abstract class SolutionSchema
     /**
      * Gets all the one to one relationships for a model in an array keyed by the column name in the source model.
      *
-     * @param $modelClassName
+     * @param  $modelClassName
      * @return OneToOne[]
      */
     public static function getAllOneToOneRelationshipsForModelBySourceColumnName($modelClassName)
@@ -281,7 +281,7 @@ abstract class SolutionSchema
     /**
      * Gets the full class name of a model using it's model name.
      *
-     * @param $name
+     * @param  $name
      * @return null
      */
     public static function getModelClass($name)
@@ -387,7 +387,7 @@ abstract class SolutionSchema
      *        ]
      * ] );
      *
-     * @param array $relationships
+     * @param  array $relationships
      * @throws \Rhubarb\Stem\Exceptions\RelationshipDefinitionException
      */
     public function declareOneToManyRelationships($relationships)
@@ -420,8 +420,10 @@ abstract class SolutionSchema
                     $manyNavigationName = $oneModel;
                 }
 
-                $this->declareOneToManyRelationship($oneModel, $oneModelColumnName, $oneNavigationName, $manyModelName,
-                    $manyColumnName, $manyNavigationName);
+                $this->declareOneToManyRelationship(
+                    $oneModel, $oneModelColumnName, $oneNavigationName, $manyModelName,
+                    $manyColumnName, $manyNavigationName
+                );
             }
         }
     }
@@ -456,10 +458,14 @@ abstract class SolutionSchema
                     $manyNavigationName = $oneModel;
                 }
 
-                $this->declareOneToOneRelationship($oneModel, $manyModelName, $oneModelColumnName, $manyColumnName,
-                    $oneNavigationName);
-                $this->declareOneToOneRelationship($manyModelName, $oneModel, $manyColumnName, $oneModelColumnName,
-                    $manyNavigationName);
+                $this->declareOneToOneRelationship(
+                    $oneModel, $manyModelName, $oneModelColumnName, $manyColumnName,
+                    $oneNavigationName
+                );
+                $this->declareOneToOneRelationship(
+                    $manyModelName, $oneModel, $manyColumnName, $oneModelColumnName,
+                    $manyNavigationName
+                );
             }
         }
     }
@@ -538,11 +544,11 @@ abstract class SolutionSchema
     /**
      * Defines a one to one relationship from the source to the target model.
      *
-     * @param string $sourceModelName
-     * @param string $targetModelName
-     * @param string $sourceColumnName
-     * @param string $navigationPropertyName
-     * @param string $targetColumnName
+     * @param  string $sourceModelName
+     * @param  string $targetModelName
+     * @param  string $sourceColumnName
+     * @param  string $navigationPropertyName
+     * @param  string $targetColumnName
      * @return \Rhubarb\Stem\Schema\Relationships\OneToOne
      */
     private function declareOneToOneRelationship(
@@ -551,10 +557,12 @@ abstract class SolutionSchema
         $sourceColumnName,
         $targetColumnName,
         $navigationPropertyName = ""
-    )
-    {
-        $oneToOne = new OneToOne($navigationPropertyName, $sourceModelName, $sourceColumnName, $targetModelName,
-            $targetColumnName);
+    ) {
+    
+        $oneToOne = new OneToOne(
+            $navigationPropertyName, $sourceModelName, $sourceColumnName, $targetModelName,
+            $targetColumnName
+        );
 
         $navigationPropertyName = ($navigationPropertyName) ? $navigationPropertyName : $targetModelName;
 
@@ -570,13 +578,13 @@ abstract class SolutionSchema
     /**
      * Defines a one to many relationship and a one to one reverse relationship.
      *
-     * @param $oneModelName
-     * @param $oneColumnName
-     * @param $oneNavigationName
-     * @param $manyModelName
-     * @param $manyColumnName
-     * @param $manyNavigationName
-     * @return \Rhubarb\Stem\Schema\Relationships\OneToMany
+     * @param    $oneModelName
+     * @param    $oneColumnName
+     * @param    $oneNavigationName
+     * @param    $manyModelName
+     * @param    $manyColumnName
+     * @param    $manyNavigationName
+     * @return   \Rhubarb\Stem\Schema\Relationships\OneToMany
      * @internal param $sourceModelName
      * @internal param $targetModelName
      * @internal param $sourceColumnName
@@ -589,8 +597,8 @@ abstract class SolutionSchema
         $manyModelName,
         $manyColumnName = "",
         $manyNavigationName = ""
-    )
-    {
+    ) {
+    
         $oneToMany = new OneToMany($oneNavigationName, $oneModelName, $oneColumnName, $manyModelName, $manyColumnName);
 
         $this->addRelationship(
@@ -603,8 +611,10 @@ abstract class SolutionSchema
             $manyColumnName = $oneColumnName;
         }
 
-        $oneToOne = $this->declareOneToOneRelationship($manyModelName, $oneModelName, $manyColumnName, $oneColumnName,
-            $manyNavigationName);
+        $oneToOne = $this->declareOneToOneRelationship(
+            $manyModelName, $oneModelName, $manyColumnName, $oneColumnName,
+            $manyNavigationName
+        );
         $oneToOne->setOtherSide($oneToMany);
         $oneToMany->setOtherSide($oneToOne);
 
@@ -617,8 +627,8 @@ abstract class SolutionSchema
      *
      * If no such relationship can be found null is returned.
      *
-     * @param $modelName
-     * @param $navigationName
+     * @param  $modelName
+     * @param  $navigationName
      * @return null|Relationship
      */
     public function getRelationship($modelName, $navigationName)
@@ -681,8 +691,12 @@ abstract class SolutionSchema
      */
     public function checkModelSchemas($oldVersion = null)
     {
-        /** @var Model $class */
-        /** @var Model $object */
+        /**
+ * @var Model $class 
+*/
+        /**
+ * @var Model $object 
+*/
         foreach ($this->models as $class) {
             $object = new $class();
 

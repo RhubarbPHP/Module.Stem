@@ -60,7 +60,7 @@ class CollectionPropertyMatches extends Equals
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      *
-     * @param Collection $list The data list to filter.
+     * @param  Collection $list The data list to filter.
      * @return array
      */
     public function doGetUniqueIdentifiersToFilter(Collection $list)
@@ -73,7 +73,8 @@ class CollectionPropertyMatches extends Equals
             $filter = new Group("AND");
             $filter->addFilters(
                 $collection->getFilter(),
-                new Equals($this->columnName, $this->equalTo));
+                new Equals($this->columnName, $this->equalTo)
+            );
 
             $collection->filter($filter);
 

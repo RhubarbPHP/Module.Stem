@@ -35,7 +35,6 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  *
  * Decorators are designed to be reused and so a factory pattern is used to instantiate the
  * correct decorator and then apply the current model for decoration.
- *
  */
 abstract class DataDecorator implements \ArrayAccess
 {
@@ -230,7 +229,9 @@ abstract class DataDecorator implements \ArrayAccess
             foreach ($this->typeFormatters as $type => $formatter) {
                 foreach ($columns as $columnName => $column) {
                     if ($column instanceof $type) {
-                        /** @var Column $column */
+                        /**
+                         * @var Column $column
+                        */
 
                         if ($formatter instanceof TypeFormatter) {
                             self::$columnTypeFormatters[$this->modelClass][$columnName] = $formatter->getFormatter($column);
@@ -321,6 +322,7 @@ abstract class DataDecorator implements \ArrayAccess
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Whether a offset exists
+     *
      * @link http://php.net/manual/en/arrayaccess.offsetexists.php
      *
      * @param mixed $offset <p>
@@ -358,7 +360,7 @@ abstract class DataDecorator implements \ArrayAccess
      * @param mixed $offset <p>
      *                      The offset to assign the value to.
      * </p>
-     * @param mixed $value <p>
+     * @param mixed $value  <p> The value to set. </p>
      *                      The value to set.
      * </p>
      * @throws \Rhubarb\Crown\Exceptions\ImplementationException

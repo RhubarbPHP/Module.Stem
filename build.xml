@@ -45,7 +45,7 @@
     <target name="build" depends="set-build-status-pending,prepare,static-analysis-cli,codecept,-check-tests,-check-quality,-fail" />
 
     <!-- Top level targets for developers to test their build against the build failure conditions -->
-    <target name="check" depends="static-analysis-cli,codecept,-check-tests,-check-quality,-fail" />
+    <target name="check" depends="static-analysis-cli,codecept,-check-tests,-fail" />
     <target name="check-tests" depends="codecept,-check-tests,-fail" />
 
     <!-- Chains of build commands used by top level targets -->
@@ -368,12 +368,6 @@
     </target>
 
     <target name="-check-tests">
-        <condition property="error" value="Behat did not finish successfully">
-            <and>
-                <not><equals arg1="${result.behat}" arg2="0" /></not>
-                <isset property="behat.enabled"/>
-            </and>
-        </condition>
         <condition property="error" value="Codeception did not finish successfully">
             <not><equals arg1="${result.codecept}" arg2="0" /></not>
         </condition>
