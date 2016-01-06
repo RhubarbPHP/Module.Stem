@@ -28,7 +28,7 @@ abstract class Relationship
         $this->navigationPropertyName = $navigationPropertyName;
     }
 
-    public abstract function fetchFor(Model $relatedTo);
+    abstract public function fetchFor(Model $relatedTo);
 
     private $otherSide;
 

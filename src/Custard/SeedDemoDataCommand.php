@@ -29,13 +29,13 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         $schemas = SolutionSchema::getAllSchemas();
         $modelSchemas = [];
 
-        foreach( $schemas as $schema ){
+        foreach ($schemas as $schema) {
             $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
         }
 
         $progressBar = new ProgressBar($output, sizeof($modelSchemas));
 
-        foreach($modelSchemas as $alias => $modelClass ){
+        foreach ($modelSchemas as $alias => $modelClass) {
             $progressBar->advance();
 
             $model = new $modelClass();
@@ -55,7 +55,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
         $progressBar = new ProgressBar($output, sizeof($modelSchemas));
 
-        foreach(self::$seeders as $seeder){
+        foreach (self::$seeders as $seeder) {
             $progressBar->advance();
 
             $this->writeNormal(" Processing ".str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));

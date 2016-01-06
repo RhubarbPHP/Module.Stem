@@ -92,7 +92,7 @@ class LessThan extends ColumnFilter
                 $valueToTest = strtolower($valueToTest);
             }
 
-            if (($valueToTest > $lessThan) 
+            if (($valueToTest > $lessThan)
                 || ($this->inclusive == false && $valueToTest == $lessThan)
             ) {
                 $ids[] = $item->UniqueIdentifier;

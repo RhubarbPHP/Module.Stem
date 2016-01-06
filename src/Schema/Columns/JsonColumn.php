@@ -29,7 +29,7 @@ class JsonColumn extends LongStringColumn
      * @param null       $defaultValue
      * @param bool       $decodeAsArrays True if the decoded JSON values should be returned as arrays instead of objects.
      */
-    public function __construct($columnName, $defaultValue = null, $decodeAsArrays = false )
+    public function __construct($columnName, $defaultValue = null, $decodeAsArrays = false)
     {
         parent::__construct($columnName, $defaultValue);
 

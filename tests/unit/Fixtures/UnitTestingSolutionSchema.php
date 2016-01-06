@@ -30,8 +30,7 @@ class UnitTestingSolutionSchema extends SolutionSchema
             ]
         );
 
-        $this->declareManyToManyRelationships
-        (
+        $this->declareManyToManyRelationships(
             [
                 "Company" =>
                     [

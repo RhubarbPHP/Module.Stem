@@ -25,4 +25,4 @@ use Rhubarb\Crown\Exceptions\RhubarbException;
 class DeleteModelException extends RhubarbException
 {
 
-} 
+}

@@ -62,7 +62,8 @@ class MySqlInArray extends InArray
                 for ($i = 0; $i < $count; $i++) {
                     $params[$paramName . $i] = self::getTransformedComparisonValueForRepository(
                         $columnName,
-                        $originalFilter->candidates[$i], $repository
+                        $originalFilter->candidates[$i],
+                        $repository
                     );
                 }
 

@@ -162,7 +162,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @return string
      */
-    public final function getModelClassName()
+    final public function getModelClassName()
     {
         return $this->modelClassName;
     }
@@ -172,7 +172,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @return Filter
      */
-    public final function getFilter()
+    final public function getFilter()
     {
         return $this->filter;
     }
@@ -182,7 +182,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @return array
      */
-    public final function getSorts()
+    final public function getSorts()
     {
         return $this->sorts;
     }
@@ -192,7 +192,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @return \Rhubarb\Stem\Schema\ModelSchema
      */
-    public final function getModelSchema()
+    final public function getModelSchema()
     {
         $repository = $this->getRepository();
         $schema = $repository->getRepositorySchema();
@@ -274,7 +274,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param Aggregate|Aggregate[] $aggregates
      * @return array
      */
-    public final function calculateAggregates($aggregates)
+    final public function calculateAggregates($aggregates)
     {
         $args = func_get_args();
 

@@ -44,19 +44,25 @@ class CollectionMySqlTest extends MySqlTestCase
         $this->assertEquals(3, $count);
 
         try {
-            Company::find(new GreaterThan("CompanyIDSquared", 0,
-                true))->batchUpdate(["CompanyName" => "Test Company 2"]);
+            Company::find(new GreaterThan(
+                "CompanyIDSquared",
+                0,
+                true
+            ))->batchUpdate(["CompanyName" => "Test Company 2"]);
 
-            $this->fail("Batch update shouldn't have been allowed if not filtered by the repository.");
+                $this->fail("Batch update shouldn't have been allowed if not filtered by the repository.");
         } catch (BatchUpdateNotPossibleException $er) {
         }
 
-        Company::find(new GreaterThan("CompanyIDSquared", 0,
-            true))->batchUpdate(["CompanyName" => "Test Company 2"], true);
+        Company::find(new GreaterThan(
+            "CompanyIDSquared",
+            0,
+            true
+        ))->batchUpdate(["CompanyName" => "Test Company 2"], true);
 
-        $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company 2'");
+            $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company 2'");
 
-        $this->assertEquals(3, $count);
+            $this->assertEquals(3, $count);
     }
 
     public function testDataListFetchesObjects()

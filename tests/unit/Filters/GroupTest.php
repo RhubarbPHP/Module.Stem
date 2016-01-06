@@ -112,23 +112,20 @@ class GroupTest extends ModelUnitTestCase
     public function testFilterSetsModelValues()
     {
         $subGroup = new Group("And");
-        $subGroup->addFilters
-        (
+        $subGroup->addFilters(
             new Equals("Forename", "Andrew"),
             new GreaterThan("DateOfBirth", 18)
         );
 
         $andGroup = new Group("And");
-        $andGroup->addFilters
-        (
+        $andGroup->addFilters(
             new Equals("CompanyID", 1),
             new Equals("Surname", "Cuthbert"),
             $subGroup
         );
 
         $orGroup = new Group("Or");
-        $orGroup->addFilters
-        (
+        $orGroup->addFilters(
             new Equals("CompanyID", 1),
             new Equals("Surname", "Cuthbert"),
             $subGroup

@@ -37,7 +37,8 @@ class SumTest extends RhubarbTestCase
         $examples = Example::find();
 
         list($sumTotal) = $examples->calculateAggregates(
-            [new Sum("CompanyID")]);
+            [new Sum("CompanyID")]
+        );
 
         $this->assertEquals(6, $sumTotal);
     }

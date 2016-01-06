@@ -59,7 +59,8 @@ class MySqlGreaterThan extends GreaterThan
             if (!$placeHolder) {
                 $params[$paramName] = self::getTransformedComparisonValueForRepository(
                     $columnName,
-                    $originalFilter->greaterThan, $repository
+                    $originalFilter->greaterThan,
+                    $repository
                 );
                 $paramName = ":" . $paramName;
             } else {

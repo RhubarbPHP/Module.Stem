@@ -17,6 +17,7 @@
  */
 
 namespace Rhubarb\Stem;
+
 use Rhubarb\Stem\Custard\DocumentModelsCommand;
 use Rhubarb\Stem\Custard\SeedDemoDataCommand;
 use Rhubarb\Stem\Custard\UpdateRepositorySchemasCommand;
@@ -47,5 +48,4 @@ class StemModule extends \Rhubarb\Crown\Module
             new SeedDemoDataCommand()
         ];
     }
-
 }

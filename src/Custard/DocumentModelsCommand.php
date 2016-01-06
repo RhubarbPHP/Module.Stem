@@ -52,7 +52,7 @@ class DocumentModelsCommand extends CustardCommand
         foreach ($schema->getAllModels() as $modelName => $modelClass) {
             $this->writeVerbose("Processing $modelName... ");
             /**
- * @var Model $model 
+ * @var Model $model
 */
             $model = new $modelClass();
 
@@ -60,11 +60,11 @@ class DocumentModelsCommand extends CustardCommand
             $doc = new DocBlock($reflectionClass);
 
             /**
- * @var DocBlock\Tag\PropertyTag[] $properties 
+ * @var DocBlock\Tag\PropertyTag[] $properties
 */
             $properties = $doc->getTagsByName('property');
             /**
- * @var DocBlock\Tag\PropertyTag[] $namedProperties 
+ * @var DocBlock\Tag\PropertyTag[] $namedProperties
 */
             $namedProperties = [];
             foreach ($properties as $property) {

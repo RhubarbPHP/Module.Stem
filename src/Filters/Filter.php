@@ -56,7 +56,7 @@ abstract class Filter
      * @param  Collection $list The data list to filter.
      * @return array
      */
-    public final function getUniqueIdentifiersToFilter(Collection $list)
+    final public function getUniqueIdentifiersToFilter(Collection $list)
     {
         if ($this->wasFilteredByRepository()) {
             return [];
@@ -117,7 +117,7 @@ abstract class Filter
      * @param  array                                 $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
      * @return string
      */
-    public final function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
+    final public function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
     {
         $namespace = $repository->getFiltersNamespace();
 
@@ -145,7 +145,7 @@ abstract class Filter
      *
      * @return Not
      */
-    public final function getInvertedFilter()
+    final public function getInvertedFilter()
     {
         return new Not($this);
     }
@@ -199,7 +199,7 @@ abstract class Filter
      *
      * @param $settings
      */
-    public static final function speciateFromSettingsArray($settings)
+    final public static function speciateFromSettingsArray($settings)
     {
         $type = $settings["class"];
         $filter = $type::fromSettingsArray($settings);

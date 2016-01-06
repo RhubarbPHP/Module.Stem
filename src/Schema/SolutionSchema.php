@@ -421,8 +421,12 @@ abstract class SolutionSchema
                 }
 
                 $this->declareOneToManyRelationship(
-                    $oneModel, $oneModelColumnName, $oneNavigationName, $manyModelName,
-                    $manyColumnName, $manyNavigationName
+                    $oneModel,
+                    $oneModelColumnName,
+                    $oneNavigationName,
+                    $manyModelName,
+                    $manyColumnName,
+                    $manyNavigationName
                 );
             }
         }
@@ -459,11 +463,17 @@ abstract class SolutionSchema
                 }
 
                 $this->declareOneToOneRelationship(
-                    $oneModel, $manyModelName, $oneModelColumnName, $manyColumnName,
+                    $oneModel,
+                    $manyModelName,
+                    $oneModelColumnName,
+                    $manyColumnName,
                     $oneNavigationName
                 );
                 $this->declareOneToOneRelationship(
-                    $manyModelName, $oneModel, $manyColumnName, $oneModelColumnName,
+                    $manyModelName,
+                    $oneModel,
+                    $manyColumnName,
+                    $oneModelColumnName,
                     $manyNavigationName
                 );
             }
@@ -560,7 +570,10 @@ abstract class SolutionSchema
     ) {
     
         $oneToOne = new OneToOne(
-            $navigationPropertyName, $sourceModelName, $sourceColumnName, $targetModelName,
+            $navigationPropertyName,
+            $sourceModelName,
+            $sourceColumnName,
+            $targetModelName,
             $targetColumnName
         );
 
@@ -612,7 +625,10 @@ abstract class SolutionSchema
         }
 
         $oneToOne = $this->declareOneToOneRelationship(
-            $manyModelName, $oneModelName, $manyColumnName, $oneColumnName,
+            $manyModelName,
+            $oneModelName,
+            $manyColumnName,
+            $oneColumnName,
             $manyNavigationName
         );
         $oneToOne->setOtherSide($oneToMany);
@@ -692,10 +708,10 @@ abstract class SolutionSchema
     public function checkModelSchemas($oldVersion = null)
     {
         /**
- * @var Model $class 
+ * @var Model $class
 */
         /**
- * @var Model $object 
+ * @var Model $object
 */
         foreach ($this->models as $class) {
             $object = new $class();

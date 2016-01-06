@@ -51,7 +51,7 @@ abstract class Validation
      *
      * @return Validation
      */
-    public final function invert()
+    final public function invert()
     {
         $clone = clone $this;
         $clone->inverted = true;
@@ -73,7 +73,7 @@ abstract class Validation
         return $this->label . " is not valid";
     }
 
-    public final function getFailedMessage()
+    final public function getFailedMessage()
     {
         return ($this->failedMessageOverride != "") ? $this->failedMessageOverride : $this->getDefaultFailedMessage();
     }

@@ -657,7 +657,9 @@ class MySql extends PdoRepository
             try {
                 $pdo = new \PDO(
                     "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
-                    $settings->Username, $settings->Password, [\PDO::ERRMODE_EXCEPTION => true]
+                    $settings->Username,
+                    $settings->Password,
+                    [\PDO::ERRMODE_EXCEPTION => true]
                 );
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MySql", $er);

@@ -42,7 +42,7 @@ class FilterSettingsColumn extends JsonColumn
         return function ($data) {
             $value = $data[$this->columnName];
 
-            if ($value == "" ) {
+            if ($value == "") {
                 return [];
             }
 

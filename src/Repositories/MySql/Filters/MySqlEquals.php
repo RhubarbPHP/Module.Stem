@@ -68,8 +68,10 @@ class MySqlEquals extends Equals
             if (!$placeHolder) {
                 $params[$paramName] = $params[$paramName] = self::getTransformedComparisonValueForRepository(
                     $columnName,
-                    $originalFilter->equalTo, $repository
-                );;
+                    $originalFilter->equalTo,
+                    $repository
+                );
+                ;
                 $paramName = ":" . $paramName;
             } else {
                 $paramName = $placeHolder;

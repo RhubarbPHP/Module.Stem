@@ -60,7 +60,7 @@ abstract class ColumnFilter extends Filter
      * @param  Collection         $list
      * @return mixed
      */
-    protected final function getTransformedComparisonValue($rawComparisonValue, Collection $list)
+    final protected function getTransformedComparisonValue($rawComparisonValue, Collection $list)
     {
         $exampleObject = SolutionSchema::getModel($list->getModelClassName());
 

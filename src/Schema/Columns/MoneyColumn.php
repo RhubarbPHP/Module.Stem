@@ -31,4 +31,4 @@ class MoneyColumn extends DecimalColumn
     {
         parent::__construct($columnName, $totalDigits, 2, $defaultValue);
     }
-} 
+}

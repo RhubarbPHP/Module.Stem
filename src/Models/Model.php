@@ -46,7 +46,7 @@ abstract class Model extends ModelState
     private $eventsToRaiseAfterSave = [];
 
     /**
- * @var callable[] 
+ * @var callable[]
 */
     private $callbacksToRunAfterSave = [];
 
@@ -389,7 +389,7 @@ abstract class Model extends ModelState
         $results = static::find($filter);
         $modelClass = get_called_class();
         /**
- * @var Model $model 
+ * @var Model $model
 */
         $model = new $modelClass();
         $results->addSort($model->getUniqueIdentifierColumnName(), false);

@@ -43,7 +43,8 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
             [
                 "PRIMARY KEY (`ID`)",
                 "KEY `Name` (`Name`)"
-            ], $comparisonSchema->indexes
+            ],
+            $comparisonSchema->indexes
         );
     }
 
@@ -74,7 +75,8 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
             [
                 "PRIMARY KEY (`UserID`)",
                 "KEY `CompanyID` (`CompanyID`)"
-            ], $comparisonSchema->indexes
+            ],
+            $comparisonSchema->indexes
         );
     }
 

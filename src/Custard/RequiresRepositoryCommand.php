@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class RequiresRepositoryCommand extends CustardCommand
 {
     /**
- * @var OutputInterface 
+ * @var OutputInterface
 */
     protected $output;
 

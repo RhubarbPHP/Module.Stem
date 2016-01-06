@@ -60,12 +60,12 @@ abstract class Aggregate
     }
 
 
-    public final function getAggregateColumnName()
+    final public function getAggregateColumnName()
     {
         return $this->aggregatedColumnName;
     }
 
-    public final function wasAggregatedByRepository()
+    final public function wasAggregatedByRepository()
     {
         return $this->aggregatedByRepository;
     }
@@ -89,7 +89,7 @@ abstract class Aggregate
      * @param  $relationshipsToAutoHydrate
      * @return mixed|string
      */
-    public final function aggregateWithRepository(Repository $repository, &$relationshipsToAutoHydrate)
+    final public function aggregateWithRepository(Repository $repository, &$relationshipsToAutoHydrate)
     {
         $reposName = basename(str_replace("\\", "/", get_class($repository)));
 
@@ -106,7 +106,7 @@ abstract class Aggregate
         return "";
     }
 
-    public abstract function getAlias();
+    abstract public function getAlias();
 
     public function calculateByIteration(Collection $collection)
     {

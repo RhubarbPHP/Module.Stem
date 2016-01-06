@@ -127,18 +127,18 @@ abstract class DataDecorator implements \ArrayAccess
      * @param $decoratorClassName
      * @param $modelClassName
      */
-    public static final function registerDecoratorClass($decoratorClassName, $modelClassName)
+    final public static function registerDecoratorClass($decoratorClassName, $modelClassName)
     {
         self::$decoratorClasses[ltrim($modelClassName, '\\')] = $decoratorClassName;
     }
 
-    public static final function clearDecoratorClasses()
+    final public static function clearDecoratorClasses()
     {
         self::$decoratorClasses = [];
         self::$decorators = [];
     }
 
-    public static final function getDecoratorForModel(Model $model)
+    final public static function getDecoratorForModel(Model $model)
     {
         $class = get_class($model);
 

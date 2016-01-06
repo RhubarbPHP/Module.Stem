@@ -87,17 +87,17 @@ class Index
     {
         $columnNames = " (`" . implode("`,`", $this->columnNames) . "`)";
         switch ($this->indexType) {
-        case Index::PRIMARY:
-            return "PRIMARY KEY" . $columnNames;
+            case Index::PRIMARY:
+                return "PRIMARY KEY" . $columnNames;
                 break;
-        case Index::INDEX:
-            return "KEY `" . $this->indexName . "`" . $columnNames;
+            case Index::INDEX:
+                return "KEY `" . $this->indexName . "`" . $columnNames;
                 break;
-        case Index::UNIQUE:
-            return "UNIQUE `" . $this->indexName . "`" . $columnNames;
+            case Index::UNIQUE:
+                return "UNIQUE `" . $this->indexName . "`" . $columnNames;
                 break;
-        case Index::FULLTEXT:
-            return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
+            case Index::FULLTEXT:
+                return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
                 break;
         }
 

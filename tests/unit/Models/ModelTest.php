@@ -444,14 +444,13 @@ class ModelTest extends ModelUnitTestCase
         $this->assertFalse($accountReload->isNewRecord());
 
         $accountImport = new Account();
-        $this->assertTrue( $accountImport->isNewRecord() );
-        $accountImport->importRawData( [
+        $this->assertTrue($accountImport->isNewRecord());
+        $accountImport->importRawData([
             'AccountName' => 'Account 2',
             'AccountID' => 'Account2',
-        ] );
-        $this->assertTrue( $accountImport->isNewRecord() );
+        ]);
+        $this->assertTrue($accountImport->isNewRecord());
         $accountImport->save();
-        $this->assertFalse( $accountImport->isNewRecord() );
+        $this->assertFalse($accountImport->isNewRecord());
     }
-
 }

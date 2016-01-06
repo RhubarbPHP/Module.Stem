@@ -33,7 +33,7 @@ class Offline extends Repository
         if ($object->isNewRecord()) {
 
             $columnName = $object->UniqueIdentifierColumnName;
-            if($object->getSchema()->getColumns()[$columnName] instanceof AutoIncrementColumn) {
+            if ($object->getSchema()->getColumns()[$columnName] instanceof AutoIncrementColumn) {
                 // Assign an auto number as a unique identifier.
                 $this->autoNumberCount++;
                 $object->UniqueIdentifier = $this->autoNumberCount;

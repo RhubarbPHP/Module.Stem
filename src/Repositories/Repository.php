@@ -104,7 +104,7 @@ abstract class Repository
             $storageColumns = $column->createStorageColumns();
 
             foreach ($storageColumns as $storageColumn) {
-                if (!isset($this->columnTransforms[$storageColumn->columnName]) ) {
+                if (!isset($this->columnTransforms[$storageColumn->columnName])) {
                     $this->columnTransforms[$storageColumn->columnName] = [null,null];
                 }
 
@@ -339,9 +339,9 @@ abstract class Repository
             if (isset($columns[$columnName])) {
                 $column = $columns[$columnName];
 
-                if ($column instanceof IntegerColumn || $column instanceof FloatColumn ) {
+                if ($column instanceof IntegerColumn || $column instanceof FloatColumn) {
                     $type = SORT_NUMERIC;
-                } elseif ($column instanceof DateColumn ) {
+                } elseif ($column instanceof DateColumn) {
                     $type = SORT_REGULAR;
                 }
             } else {
@@ -400,7 +400,7 @@ abstract class Repository
         $this->cachedObjectData = [];
     }
 
-    public abstract function clearRepositoryData();
+    abstract public function clearRepositoryData();
 
     /**
      * Returns a new default repository of the current default repository type.
@@ -421,7 +421,7 @@ abstract class Repository
      *
      * @param \Rhubarb\Stem\Models\Model $object
      */
-    protected final function cacheObjectData(Model $object)
+    final protected function cacheObjectData(Model $object)
     {
         $uniqueIdentifier = $object->UniqueIdentifier;
 
@@ -444,7 +444,7 @@ abstract class Repository
      *
      * @param \Rhubarb\Stem\Models\Model $object
      */
-    protected final function deleteObjectFromCache(Model $object)
+    final protected function deleteObjectFromCache(Model $object)
     {
         $uniqueIdentifier = $object->UniqueIdentifier;
 
@@ -470,11 +470,12 @@ abstract class Repository
      *                                            Repositories.
      * @return mixed
      */
-    protected final function fetchObjectData(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
+    final protected function fetchObjectData(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
     {
         if (!isset($this->cachedObjectData[$uniqueIdentifier])) {
             $this->cachedObjectData[$uniqueIdentifier] = $this->fetchMissingObjectData(
-                $object, $uniqueIdentifier,
+                $object,
+                $uniqueIdentifier,
                 $relationshipsToAutoHydrate
             );
         }
@@ -510,7 +511,7 @@ abstract class Repository
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      */
-    public final function hydrateObject(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
+    final public function hydrateObject(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
     {
         $objectData = $this->fetchObjectData($object, $uniqueIdentifier, $relationshipsToAutoHydrate);
 
@@ -539,7 +540,7 @@ abstract class Repository
      * @throws ModelException When the object has no unique identifier.
      * @param  \Rhubarb\Stem\Models\Model $object
      */
-    public final function saveObject(Model $object)
+    final public function saveObject(Model $object)
     {
         $this->onObjectSaved($object);
 
@@ -562,7 +563,7 @@ abstract class Repository
         return false;
     }
 
-    public final function deleteObject(Model $object)
+    final public function deleteObject(Model $object)
     {
         if ($object->isNewRecord()) {
             return;

@@ -105,7 +105,7 @@ class Column
      * @param  string $repositoryClassName
      * @return Column
      */
-    public final function getRepositorySpecificColumn($repositoryClassName)
+    final public function getRepositorySpecificColumn($repositoryClassName)
     {
         $reposName = basename(str_replace("\\", "/", $repositoryClassName));
 

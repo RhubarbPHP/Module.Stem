@@ -26,7 +26,7 @@ class ExactLength extends Validation
     {
         parent::__construct($name);
 
-        if($exactLength > 0) {
+        if ($exactLength > 0) {
             $this->exactLength = $exactLength;
         }
     }

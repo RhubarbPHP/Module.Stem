@@ -52,5 +52,4 @@ class Between extends Group
     {
         return new self($settings["columnName"], $settings["min"], $settings["max"]);
     }
-
 }

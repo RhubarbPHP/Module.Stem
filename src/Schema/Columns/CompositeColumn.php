@@ -45,7 +45,7 @@ abstract class CompositeColumn extends Column
      *
      * @return array
      */
-    protected abstract function getCompositeColumnsNames();
+    abstract protected function getCompositeColumnsNames();
 
     /**
      * Returns the container object used to represent the collated data.

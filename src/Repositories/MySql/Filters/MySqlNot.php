@@ -34,7 +34,7 @@ class MySqlNot extends Not
     ) {
     
         /**
- * @var MySqlNot $not 
+ * @var MySqlNot $not
 */
         $not = $originalFilter;
 

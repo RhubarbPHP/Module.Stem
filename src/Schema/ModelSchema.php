@@ -120,7 +120,7 @@ class ModelSchema
      *
      * @param Repository $inRepository The repository in which to check the schema
      */
-    public function checkSchema( Repository $inRepository )
+    public function checkSchema(Repository $inRepository)
     {
 
     }

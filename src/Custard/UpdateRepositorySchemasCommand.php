@@ -44,7 +44,7 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 
             $progress = new ProgressBar($output, sizeof($schemas));
 
-            foreach($schemas as $schema){
+            foreach ($schemas as $schema) {
                 $progress->advance();
                 $this->updateSchema($schema);
             }

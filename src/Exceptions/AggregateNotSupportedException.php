@@ -25,4 +25,4 @@ use Rhubarb\Crown\Exceptions\RhubarbException;
 class AggregateNotSupportedException extends RhubarbException
 {
 
-} 
+}

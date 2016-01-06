@@ -1,6 +1,7 @@
 <?php
 
 namespace Rhubarb\Stem\Tests\unit\Fixtures;
+
 use Rhubarb\Stem\LoginProviders\ModelLoginProvider;
 
 class TestLoginProvider extends ModelLoginProvider

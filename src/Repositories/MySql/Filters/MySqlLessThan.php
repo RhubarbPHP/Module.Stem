@@ -58,7 +58,8 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
             if (!$placeHolder) {
                 $params[$paramName] = self::getTransformedComparisonValueForRepository(
                     $columnName,
-                    $originalFilter->lessThan, $repository
+                    $originalFilter->lessThan,
+                    $repository
                 );
                 $paramName = ":" . $paramName;
             } else {
