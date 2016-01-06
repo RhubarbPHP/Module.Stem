@@ -7,7 +7,7 @@
 
     <property name="git.provider" value="github"/>
     <property name="git.owner" value="rhubarbphp"/>
-    <property name="git.repos" value="rhubarb"/>
+    <property name="git.repos" value="module.stem"/>
 
     <!-- Locations of important commands -->
 
@@ -42,7 +42,7 @@
     <property environment="env"/>
 
     <!-- Top level targets for jenkins -->
-    <target name="build" depends="set-build-status-pending,prepare,static-analysis-cli,codecept,-check-tests,-check-quality,-fail" />
+    <target name="build" depends="set-build-status-pending,prepare,static-analysis-cli,codecept,-check-tests,-fail" />
 
     <!-- Top level targets for developers to test their build against the build failure conditions -->
     <target name="check" depends="static-analysis-cli,codecept,-check-tests,-fail" />
