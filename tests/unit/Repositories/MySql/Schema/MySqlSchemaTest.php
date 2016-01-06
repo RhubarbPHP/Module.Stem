@@ -23,6 +23,8 @@ class MySqlSchemaTest extends MySqlTestCase
         $this->assertEquals("A", $enum->defaultValue);
 
         $this->setExpectedException(SchemaException::class);
+
+        new MySqlEnumColumn("Test", null, ["A","B"] );
     }
 
     public function testSchemaIsCreated()
@@ -80,6 +82,8 @@ class MySqlSchemaTest extends MySqlTestCase
         $schema = new MySqlModelSchema("tblTest");
 
         $schema->addColumn(new AutoIncrementColumn("TestID"));
+
+        $schema = MySqlModelSchema::fromGenericSchema($schema);
 
         $this->assertEquals("TestID", $schema->uniqueIdentifierColumnName);
         $this->assertEquals(Index::PRIMARY, $schema->indexes["Primary"]->indexType);

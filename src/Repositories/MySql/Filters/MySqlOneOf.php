@@ -52,7 +52,7 @@ class MySqlOneOf extends OneOf
             $paramName = uniqid() . str_replace(".", "", $columnName);
 
             if (strpos($columnName, ".") === false) {
-                $schema = $repository->getSchema();
+                $schema = $repository->getRepositorySchema();
                 $columnName = $schema->schemaName . "`.`" . $columnName;
             } else {
                 $columnName = str_replace('.', '`.`', $columnName);

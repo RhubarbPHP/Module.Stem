@@ -223,7 +223,8 @@ abstract class DataDecorator implements \ArrayAccess
             self::$columnTypeFormatters[$this->modelClass] = [];
             self::$columnTypeDecorators[$this->modelClass] = [];
 
-            $schema = SolutionSchema::getModelSchema($this->modelClass);
+            $model = SolutionSchema::getModel($this->modelClass);
+            $schema = $model->getSchema();
             $columns = $schema->getColumns();
 
             foreach ($this->typeFormatters as $type => $formatter) {

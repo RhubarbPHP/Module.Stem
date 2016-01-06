@@ -142,28 +142,37 @@ class CollectionMySqlTest extends MySqlTestCase
         $list = new Collection(Company::class);
         $list->addSort("CompanyName", true);
 
-        // Trigger list fetching.
+        // Trigger list fetching by count.
         sizeof($list);
 
         $sql = Mysql::getPreviousStatement();
 
-        $this->assertContains("ORDER BY CompanyName ASC", $sql);
+        $this->assertNotContains("ORDER BY `CompanyName` ASC", $sql);
+
+        $list->invalidateList();
+
+        // Trigger list fetching by item.
+        $list->fetchList();
+
+        $sql = Mysql::getPreviousStatement();
+
+        $this->assertContains("ORDER BY `CompanyName` ASC", $sql);
 
         $list->addSort("Balance", false);
 
         // Trigger list fetching.
-        sizeof($list);
+        $list->fetchList();
 
         $sql = Mysql::getPreviousStatement();
 
-        $this->assertContains("ORDER BY CompanyName ASC, Balance DESC", $sql);
+        $this->assertContains("ORDER BY `CompanyName` ASC, `Balance` DESC", $sql);
 
         // this should not affect our order by clause as this column isn't in our schema.
         $list->addSort("NonExistant", false);
 
         try {
             // Trigger list fetching.
-            sizeof($list);
+            $list->fetchList();
         } catch (SortNotValidException $er) {
         }
 
@@ -178,7 +187,7 @@ class CollectionMySqlTest extends MySqlTestCase
         );
 
         // Trigger list fetching.
-        sizeof($list);
+        $list->fetchList();
 
         $this->assertEquals("D", $list[0]->CompanyName);
         $this->assertEquals("C", $list[1]->CompanyName);
@@ -196,7 +205,7 @@ class CollectionMySqlTest extends MySqlTestCase
         );
 
         // Trigger list fetching.
-        sizeof($list);
+        $list->fetchList();
 
         $this->assertEquals(3, $list[2]->Balance);
         $this->assertEquals(4, $list[3]->Balance);

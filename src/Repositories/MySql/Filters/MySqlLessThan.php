@@ -64,7 +64,7 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
             }
 
             if (strpos($columnName, ".") === false) {
-                $schema = $repository->getSchema();
+                $schema = $repository->getRepositorySchema();
                 $columnName = $schema->schemaName . "`.`" . $columnName;
             } else {
                 $columnName = str_replace('.', '`.`', $columnName);

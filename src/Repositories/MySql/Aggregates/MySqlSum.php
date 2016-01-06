@@ -36,7 +36,7 @@ class MySqlSum extends Sum
             $aliasName = $originalAggregate->getAlias();
 
             $originalAggregate->aggregatedByRepository = true;
-            $prefix = ( strpos( $columnName, '.') === false ) ? "`{$repository->getSchema()->schemaName}`." : "";
+            $prefix = ( strpos( $columnName, '.') === false ) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
 
             return "SUM( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
         }

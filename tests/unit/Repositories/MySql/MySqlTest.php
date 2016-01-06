@@ -65,6 +65,10 @@ class MySqlTest extends MySqlTestCase
         $collection = new Collection(Company::class);
         $collection->setRange(10, 4);
 
+        // Need to trigger a normal population of the list otherwise count is optimised
+        // which is not what we're testing here.
+        $collection[0];
+
         $size = sizeof($collection);
 
         $this->assertEquals(20, $size);
@@ -170,7 +174,7 @@ class MySqlTest extends MySqlTestCase
         $list = new Collection(Company::class);
         $list->filter($group);
 
-        sizeof($list);
+        $list->fetchList();
 
         $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", MySql::getPreviousStatement());
         $this->assertTrue($group->wasFilteredByRepository());
@@ -182,7 +186,7 @@ class MySqlTest extends MySqlTestCase
         $list = new Collection(Company::class);
         $list->filter($group);
 
-        sizeof($list);
+        $list->fetchList();
 
         $statement = MySql::getPreviousStatement();
 
@@ -195,7 +199,7 @@ class MySqlTest extends MySqlTestCase
         $list = new Collection(Company::class);
         $list->filter($group);
 
-        sizeof($list);
+        $list->fetchList();
 
         $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` LIKE :", MySql::getPreviousStatement());
     }
@@ -220,9 +224,9 @@ class MySqlTest extends MySqlTestCase
         $users = new Collection(User::class);
         $users->filter(new Equals("Company.CompanyName", "GCD"));
 
-        count($users);
+        $users->fetchList();
 
-        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :", MySql::getPreviousStatement());
+        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :", MySql::getPreviousStatement());
 
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
@@ -230,16 +234,16 @@ class MySqlTest extends MySqlTestCase
         $users = new Collection(User::class);
         $users->replaceSort("Company.CompanyName", true);
 
-        count($users);
+        $users->fetchList();
 
-        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` ORDER BY `Company`.`CompanyName` ASC", MySql::getPreviousStatement());
+        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` ORDER BY `Company`.`CompanyName` ASC", MySql::getPreviousStatement());
 
         $user = $users[0];
 
         $this->assertCount(9, $user->ExportRawData(), "The user model should only have 9 columns. More means that the joined tables aren't being removed after the join.");
 
         $this->assertArrayHasKey($company->CompanyID, $company->getRepository()->cachedObjectData, "After an auto hydrated fetch the auto hydrated relationship should now be cached and ready for use in the repository");
-        $this->assertCount(9, $company->getRepository()->cachedObjectData[$company->CompanyID], "The company model should only have 9 columns. More means that the joined tables aren't properly being broken up into their respective models.");
+        $this->assertCount(11, $company->getRepository()->cachedObjectData[$company->CompanyID], "The company model should only have 9 columns. More means that the joined tables aren't properly being broken up into their respective models.");
     }
 
     public function testManyToManyRelationships()
@@ -296,7 +300,7 @@ class MySqlTest extends MySqlTestCase
 
         $this->assertEquals("UTV", $category2->Companies[0]->CompanyName);
 
-        $this->assertStringStartsWith("SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE `CategoriesRaw`.`CategoryID` = :", MySql::getPreviousStatement());
+        $this->assertStringStartsWith("SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE ( `CategoriesRaw`.`CategoryID` = :", MySql::getPreviousStatement());
     }
 
     public function testManualAutoHydration()
@@ -304,9 +308,9 @@ class MySqlTest extends MySqlTestCase
         $users = new Collection(User::class);
         $users->autoHydrate("Company");
 
-        count($users);
+        $users->fetchList();
 
-        $this->assertEquals("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID`", MySql::getPreviousStatement());
+        $this->assertEquals("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID`", MySql::getPreviousStatement());
     }
 
 

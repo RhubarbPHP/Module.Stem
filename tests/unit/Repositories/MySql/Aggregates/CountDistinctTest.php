@@ -50,6 +50,6 @@ class CountDistinctTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement(false);
 
-        $this->assertContains("COUNT( DISTINCT `CompanyName` ) AS `DistinctCountOfCompanyName`", $lastStatement);
+        $this->assertContains("COUNT( DISTINCT `tblCompany`.`CompanyName` ) AS `DistinctCountOfCompanyName`", $lastStatement);
     }
 }

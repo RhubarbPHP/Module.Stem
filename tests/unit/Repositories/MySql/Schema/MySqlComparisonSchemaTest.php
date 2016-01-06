@@ -4,6 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Schema;
 
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
+use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;
@@ -50,6 +51,7 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
     {
         $user = new User();
         $schema = $user->getSchema();
+        $schema = MySqlModelSchema::fromGenericSchema($schema);
 
         $comparisonSchema = MySqlComparisonSchema::fromMySqlSchema($schema);
 
@@ -62,7 +64,7 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
                 "Forename" => "`Forename` varchar(40) NOT NULL DEFAULT ''",
                 "Surname" => "`Surname` varchar(40) NOT NULL DEFAULT ''",
                 "Password" => "`Password` varchar(120) NOT NULL DEFAULT ''",
-                "Active" => "`Active` tinyint(3) NOT NULL DEFAULT '0'",
+                "Active" => "`Active` tinyint(1) NOT NULL DEFAULT '0'",
                 "Wage" => "`Wage` decimal(8,2) NOT NULL DEFAULT '0.00'"
             ],
             $comparisonSchema->columns

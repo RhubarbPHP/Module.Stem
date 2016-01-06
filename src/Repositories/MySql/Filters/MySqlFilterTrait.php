@@ -45,7 +45,7 @@ trait MySqlFilterTrait
      */
     protected static function canFilter(Repository $repository, $columnName, &$propertiesToAutoHydrate)
     {
-        $schema = $repository->getSchema();
+        $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
 
         if (!isset($columns[$columnName])) {

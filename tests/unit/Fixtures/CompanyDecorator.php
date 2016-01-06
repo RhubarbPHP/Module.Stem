@@ -10,6 +10,8 @@
 namespace Rhubarb\Stem\Tests\unit\Fixtures;
 
 use Rhubarb\Stem\Decorators\DataDecorator;
+use Rhubarb\Stem\Schema\Columns\DateColumn;
+use Rhubarb\Stem\Schema\Columns\MoneyColumn;
 
 class CompanyDecorator extends DataDecorator
 {
@@ -40,11 +42,11 @@ class CompanyDecorator extends DataDecorator
     {
         parent::registerTypeDefinitions();
 
-        $this->addTypeFormatter("\Rhubarb\Stem\Schema\Columns\Money", function (Company $model, $value) {
+        $this->addTypeFormatter(MoneyColumn::class, function (Company $model, $value) {
             return number_format($value, 2);
         });
 
-        $this->addTypeDecorator("\Rhubarb\Stem\Schema\Columns\Date", function (Company $model, $value) {
+        $this->addTypeDecorator(DateColumn::class, function (Company $model, $value) {
             return $value->format("jS F Y");
         });
     }

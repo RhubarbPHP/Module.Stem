@@ -63,7 +63,7 @@ class MySqlComparisonSchema
             foreach ($storageColumns as $storageColumn) {
                 // And if so that column will be a generic column type - we need to upgrade it.
                 $storageColumn = $storageColumn->getRepositorySpecificColumn("MySql");
-                $comparisonSchema->columns[$storageColumn->columnName] = $storageColumn->getDefinition();
+                $comparisonSchema->columns[$storageColumn->columnName] = trim($storageColumn->getDefinition());
             }
         }
 

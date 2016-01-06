@@ -195,7 +195,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     public final function getModelSchema()
     {
         $repository = $this->getRepository();
-        $schema = $repository->getSchema();
+        $schema = $repository->getRepositorySchema();
 
         return $schema;
     }

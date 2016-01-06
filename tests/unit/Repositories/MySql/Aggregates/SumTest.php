@@ -46,7 +46,7 @@ class SumTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement(false);
 
-        $this->assertContains("SUM( `Balance` ) AS `SumOfBalance`", $lastStatement);
+        $this->assertContains("SUM( `tblCompany`.`Balance` ) AS `SumOfBalance`", $lastStatement);
 
         $examples = new Collection("Company");
         $examples->filter(new GreaterThan("Balance", 1));
@@ -57,7 +57,7 @@ class SumTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement(false);
 
-        $this->assertContains("SUM( `Balance` ) AS `SumOfBalance`", $lastStatement);
+        $this->assertContains("SUM( `tblCompany`.`Balance` ) AS `SumOfBalance`", $lastStatement);
         $this->assertContains("WHERE `tblCompany`.`Balance` > ", $lastStatement);
     }
 }

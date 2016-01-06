@@ -443,7 +443,7 @@ abstract class Model extends ModelState
      */
     final public function getSchema()
     {
-        return $this->getRepository()->getSchema();
+        return $this->getRepository()->getModelSchema();
     }
 
     /**

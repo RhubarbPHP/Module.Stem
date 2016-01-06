@@ -66,7 +66,7 @@ class MySql extends PdoRepository
      */
     protected function fetchMissingObjectData(Model $object, $uniqueIdentifier, $relationshipsToAutoHydrate = [])
     {
-        $schema = $this->getSchema();
+        $schema = $this->getRepositorySchema();
         $table = $schema->schemaName;
 
         $data = self::returnFirstRow("SELECT * FROM `" . $table . "` WHERE `{$schema->uniqueIdentifierColumnName}` = :id",
@@ -86,7 +86,7 @@ class MySql extends PdoRepository
      */
     private function updateObject(Model $object)
     {
-        $schema = $this->schema;
+        $schema = $this->reposSchema;
         $changes = $object->getModelChanges();
         $schemaColumns = $schema->getColumns();
 
@@ -151,7 +151,7 @@ class MySql extends PdoRepository
      */
     private function insertObject(Model $object)
     {
-        $schema = $this->schema;
+        $schema = $this->reposSchema;
         $changes = $object->takeChangeSnapshot();
 
         $params = [];
@@ -237,7 +237,7 @@ class MySql extends PdoRepository
             throw new BatchUpdateNotPossibleException();
         }
 
-        $schema = $this->schema;
+        $schema = $this->reposSchema;
         $table = $schema->schemaName;
         $sets = [];
 
@@ -267,7 +267,7 @@ class MySql extends PdoRepository
     {
         $this->lastSortsUsed = [];
 
-        $schema = $this->schema;
+        $schema = $this->reposSchema;
 
         $sql = $this->getRepositoryFetchCommandForDataList($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
 
@@ -339,7 +339,7 @@ class MySql extends PdoRepository
  	 */
     public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams = null, &$joinColumns = null, &$joinOriginalToAliasLookup = null, &$joinColumnsByModel = null, &$ranged = null)
     {
-        $schema = $this->schema;
+        $schema = $this->reposSchema;
         $table = $schema->schemaName;
 
         $whereClause = "";
@@ -402,7 +402,7 @@ class MySql extends PdoRepository
             $targetModel = new $targetModelClass();
             $targetSchema = $targetModel->getSchema();
 
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->schema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
+            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
             $groups[] = "`{$table}`.`" . $relationship->getSourceColumnName() . '`';
         }
 
@@ -468,7 +468,7 @@ class MySql extends PdoRepository
                 $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
             }
 
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->schema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
+            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
         }
 
         $joinString = "";
@@ -567,7 +567,7 @@ class MySql extends PdoRepository
                 $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
             }
 
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->schema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
+            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
         }
 
         $joinString = "";
@@ -606,14 +606,9 @@ class MySql extends PdoRepository
         }
 
         if (sizeof($clauses)) {
-            $schema = $this->getSchema();
+            $schema = $this->getRepositorySchema();
             $namedParams = [];
             $propertiesToAutoHydrate = [];
-
-            $groupClause = "";
-            if ($joinString) {
-                $groupClause = " GROUP BY `{$schema->schemaName}`.`{$schema->uniqueIdentifierColumnName}`";
-            }
 
             $sql = "SELECT " . implode(", ", $clauses) . " FROM `{$schema->schemaName}`" . $joinString;
 
@@ -626,8 +621,6 @@ class MySql extends PdoRepository
                     $sql .= " WHERE " . $filterSql;
                 }
             }
-
-            $sql .= $groupClause;
 
             $firstRow = self::ReturnFirstRow($sql, $namedParams);
             $row = is_array($firstRow) ? array_values($firstRow) : null;
@@ -689,7 +682,7 @@ class MySql extends PdoRepository
 
     public function clearRepositoryData()
     {
-        $schema = $this->getSchema();
+        $schema = $this->getRepositorySchema();
 
         self::executeStatement("TRUNCATE TABLE `".$schema->schemaName."`");
     }

@@ -687,7 +687,7 @@ abstract class SolutionSchema
             $object = new $class();
 
             $repository = $object->getRepository();
-            $schema = $repository->getSchema();
+            $schema = $repository->getRepositorySchema();
             $schema->checkSchema($repository);
 
             $class::checkRecords($oldVersion, $this->version);

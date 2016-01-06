@@ -35,7 +35,7 @@ class MySqlMediumTextColumn extends StringColumn
     public function getDefaultDefinition()
     {
         // MediumText fields can't have a default.
-        return "NOT NULL";
+        return "";
     }
 
     public function getDefinition()

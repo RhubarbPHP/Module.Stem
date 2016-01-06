@@ -88,7 +88,7 @@ class MySqlModelSchema extends ModelSchema
         }
     }
 
-    public function addColumn(Column $column)
+    private function addFromGenericColumn(Column $column)
     {
         $columns = func_get_args();
         $specificColumns = [];
@@ -143,7 +143,7 @@ class MySqlModelSchema extends ModelSchema
         $repos::executeStatement($sql);
     }
 
-    public static function fromGenericSchema(ModelSchema $genericSchema, Repository $repository)
+    public static function fromGenericSchema(ModelSchema $genericSchema)
     {
         $schema = new MySqlModelSchema($genericSchema->schemaName);
         $schema->labelColumnName = $genericSchema->labelColumnName;
@@ -152,7 +152,7 @@ class MySqlModelSchema extends ModelSchema
 
         // By simply adding the columns to the specific repository versioned schema, the columns
         // should be 'upgraded' automatically.
-        call_user_func_array([$schema, "addColumn"], $columns);
+        call_user_func_array([$schema, "addFromGenericColumn"], $columns);
 
         $schema->uniqueIdentifierColumnName = $genericSchema->uniqueIdentifierColumnName;
 

@@ -65,7 +65,7 @@ class MySqlInArray extends InArray
                 }
 
                 if (strpos($columnName, ".") === false) {
-                    $schema = $repository->getSchema();
+                    $schema = $repository->getRepositorySchema();
                     $columnName = $schema->schemaName . "`.`" . $columnName;
                 } else {
                     $columnName = str_replace('.', '`.`', $columnName);

@@ -49,7 +49,7 @@ class MySqlEquals extends Equals
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
             $queryColumnName = $columnName;
             if (strpos($queryColumnName, ".") === false) {
-                $schema = $repository->getSchema();
+                $schema = $repository->getRepositorySchema();
                 $queryColumnName = $schema->schemaName . "`.`" . $queryColumnName;
             } else {
                 $queryColumnName = str_replace('.', '`.`', $queryColumnName);

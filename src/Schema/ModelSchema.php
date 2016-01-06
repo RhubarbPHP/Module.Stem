@@ -132,7 +132,7 @@ class ModelSchema
 
     }
 
-    public static function fromGenericSchema(ModelSchema $genericSchema, Repository $repository)
+    public static function fromGenericSchema(ModelSchema $genericSchema)
     {
         throw new SchemaException("The schema class " . get_called_class() . " does not implement fromGenericSchema().");
     }

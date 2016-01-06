@@ -43,7 +43,7 @@ class User extends Model
             new StringColumn("Surname", 40),
             new StringColumn("Password", 120),
             new BooleanColumn("Active", false),
-            new DecimalColumn("Wage")
+            new DecimalColumn("Wage", 8, 2, 0)
         );
 
         $schema->uniqueIdentifierColumnName = "UserID";

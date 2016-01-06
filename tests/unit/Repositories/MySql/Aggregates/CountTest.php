@@ -45,6 +45,6 @@ class CountTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement(false);
 
-        $this->assertContains("COUNT( `Balance` ) AS `CountOfBalance`", $lastStatement);
+        $this->assertContains("COUNT( `tblCompany`.`Balance` ) AS `CountOfBalance`", $lastStatement);
     }
 }

@@ -57,6 +57,6 @@ class JsonColumn extends LongStringColumn
 
     public function createStorageColumns()
     {
-        return [new LongStringColumn($this->columnName)];
+        return [new LongStringColumn($this->columnName, $this->defaultValue)];
     }
 }

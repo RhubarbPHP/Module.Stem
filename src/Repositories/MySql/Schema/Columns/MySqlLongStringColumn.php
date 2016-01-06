@@ -22,17 +22,8 @@ use Rhubarb\Stem\Schema\Columns\Column;
 
 require_once __DIR__ . "/MySqlMediumTextColumn.php";
 
-class MySqlLongStringColumnColumn extends MySqlMediumTextColumn
+class MySqlLongStringColumn extends MySqlMediumTextColumn
 {
-    public function getDefaultDefinition()
-    {
-        if ($this->defaultValue === "") {
-            return "NOT NULL";
-        }
-
-        return ($this->defaultValue === null) ? "DEFAULT NULL" : "NOT NULL DEFAULT '" . $this->defaultValue . "'";
-    }
-
     public function getDefinition()
     {
         return "`" . $this->columnName . "` text " . $this->getDefaultDefinition();

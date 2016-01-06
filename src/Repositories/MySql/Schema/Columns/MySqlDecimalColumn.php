@@ -59,6 +59,6 @@ class MySqlDecimalColumn extends DecimalColumn
      */
     public function getDefinition()
     {
-        return "`" . $this->columnName . "` DECIMAL(" . $this->totalDigits . "," . $this->decimalDigits . ") " . $this->getDefaultDefinition();
+        return "`" . $this->columnName . "` decimal(" . $this->totalDigits . "," . $this->decimalDigits . ") " . $this->getDefaultDefinition();
     }
 }

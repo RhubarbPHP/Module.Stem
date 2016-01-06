@@ -76,16 +76,22 @@ abstract class Repository
     /**
      * @var \Rhubarb\Stem\Schema\ModelSchema;
      */
-    protected $schema;
+    protected $reposSchema;
+
+    /**
+     * @var \Rhubarb\Stem\Schema\ModelSchema;
+     */
+    protected $modelSchema;
 
     protected $modelClassName;
 
     public function __construct(Model $model)
     {
         $this->modelClassName = get_class($model);
-        $this->schema = $this->getRepositorySpecificSchema($model->generateSchema());
+        $this->modelSchema = $model->generateSchema();
+        $this->reposSchema = $this->getRepositorySpecificSchema($this->modelSchema);
 
-        $columns = $this->schema->getColumns();
+        $columns = $this->reposSchema->getColumns();
 
         foreach ($columns as $column) {
 
@@ -166,14 +172,13 @@ abstract class Repository
         $reposName = basename(str_replace("\\", "/", get_class($this)));
 
         // Get the provider specific implementation of the column.
-        $className = "\\" . str_replace("/", "\\", dirname(str_replace("\\", "/", get_class($this)))) . "\\Schema\\" . $reposName . basename(str_replace("\\",
-                "/", get_class($genericSchema)));
+        $className = "\\" . str_replace("/", "\\", dirname(str_replace("\\", "/", get_class($this)))) . "\\Schema\\" . $reposName . "ModelSchema";
 
         $superType = $genericSchema;
 
         if (class_exists($className)) {
             $superType = call_user_func_array($className . "::fromGenericSchema",
-                [$genericSchema, $this]);
+                [$genericSchema]);
 
             // getRepositorySpecificSchema could return false if it doesn't supply any schema details.
             if ($superType === false) {
@@ -194,9 +199,22 @@ abstract class Repository
      *
      * @return \Rhubarb\Stem\Schema\ModelSchema
      */
-    public function getSchema()
+    public function getRepositorySchema()
     {
-        return $this->schema;
+        return $this->reposSchema;
+    }
+
+    /**
+     * Gets the schema object for the underlying model.
+     *
+     * Differs from getRepositorySchema in that this will be the original column types,
+     * not the repository specific column types.
+     *
+     * @return \Rhubarb\Stem\Schema\ModelSchema
+     */
+    public function getModelSchema()
+    {
+        return $this->modelSchema;
     }
 
     /**

@@ -26,7 +26,7 @@ trait MySqlAggregateTrait
 {
     protected static function canAggregateInMySql(Repository $repository, $columnName, &$relationshipsToAutoHydrate)
     {
-        $schema = $repository->getSchema();
+        $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
 
         if (isset($columns[$columnName])) {
