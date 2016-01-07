@@ -23,24 +23,41 @@ namespace Rhubarb\Stem\Schema\Columns;
  */
 class CommaSeparatedList extends String
 {
-    public function __construct($columnName, $maximumLength = 200, $defaultValue = [])
+    protected $encloseWithCommas;
+
+    /**
+     * CommaSeparatedList constructor.
+     * @param string $columnName
+     * @param int $maximumLength
+     * @param array $defaultValue
+     * @param bool $encloseWithCommas If true, extra commas will be put at the start and end of the value in the repository.
+     *                                This allows for easy wildcard searches for a single value in the field using SQL.
+     */
+    public function __construct($columnName, $maximumLength = 200, $defaultValue = [], $encloseWithCommas = false)
     {
         parent::__construct($columnName, $maximumLength, $defaultValue);
+
+        $this->encloseWithCommas = $encloseWithCommas;
     }
 
     public function getPhpType()
     {
-        return "string[]";
+        return 'string[]';
     }
 
     public function getTransformIntoRepository()
     {
         return function ($data) {
             if (!is_array($data[$this->columnName])) {
-                return "";
+                return '';
             }
 
-            return implode(",", $data[$this->columnName]);
+            $string = implode(',', $data[$this->columnName]);
+
+            if ($this->encloseWithCommas && strlen($string) > 0) {
+                return ',' . $string . ',';
+            }
+            return $string;
         };
     }
 
@@ -50,12 +67,18 @@ class CommaSeparatedList extends String
             if (empty($data[$this->columnName])) {
                 return [];
             }
-            return explode(",", $data[$this->columnName]);
+
+            $values = $data[$this->columnName];
+
+            if ($this->encloseWithCommas) {
+                $values = trim($values, ',');
+            }
+            return explode(',', $values);
         };
     }
 
     public function createStorageColumns()
     {
-        return [new String($this->columnName, $this->maximumLength, "")];
+        return [new String($this->columnName, $this->maximumLength, '')];
     }
 }
