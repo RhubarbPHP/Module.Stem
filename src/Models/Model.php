@@ -184,10 +184,15 @@ abstract class Model extends ModelState
      * Allows a callback function to be run when the model is saved.
      *
      * @param callable $callback Callback to run when the model is saved
+     * @param null|string $key Set a key to be able to override this callback with another to prevent multiple callbacks for the same purpose
      */
-    protected function performAfterSave(callable $callback)
+    protected function performAfterSave(callable $callback, $key = null)
     {
-        $this->callbacksToRunAfterSave[] = $callback;
+        if ($key) {
+            $this->callbacksToRunAfterSave[$key] = $callback;
+        } else {
+            $this->callbacksToRunAfterSave[] = $callback;
+        }
     }
 
     /**
