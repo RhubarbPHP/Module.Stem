@@ -561,7 +561,7 @@ abstract class SolutionSchema
      * @param  string $targetColumnName
      * @return \Rhubarb\Stem\Schema\Relationships\OneToOne
      */
-    private function declareOneToOneRelationship(
+    protected function declareOneToOneRelationship(
         $sourceModelName,
         $targetModelName,
         $sourceColumnName,
@@ -603,7 +603,7 @@ abstract class SolutionSchema
      * @internal param $sourceColumnName
      * @internal param $navigationName
      */
-    private function declareOneToManyRelationship(
+    protected function declareOneToManyRelationship(
         $oneModelName,
         $oneColumnName,
         $oneNavigationName,

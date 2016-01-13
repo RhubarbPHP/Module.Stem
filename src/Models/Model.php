@@ -45,9 +45,7 @@ abstract class Model extends ModelState
 {
     private $eventsToRaiseAfterSave = [];
 
-    /**
- * @var callable[]
-*/
+    /** @var callable[] */
     private $callbacksToRunAfterSave = [];
 
     final public function __construct($uniqueIdentifier = null)
@@ -149,7 +147,7 @@ abstract class Model extends ModelState
      * In addition to $event you can pass any number of other events which are passed through
      * to the event handling delegate.
      *
-     * @param  string $event The name of the event
+     * @param string $event The name of the event
      * @return mixed|null
      */
     protected function raiseEvent($event)
@@ -171,9 +169,9 @@ abstract class Model extends ModelState
      * to the event handling delegate.
      *
      * @deprecated Use performAfterSave to run a callback directly instead
-     * @see        performAfterSave()
+     * @see performAfterSave()
      *
-     * @param  string $event The name of the event
+     * @param string $event The name of the event
      * @return mixed|null
      */
     protected function raiseEventAfterSave($event)
@@ -186,10 +184,15 @@ abstract class Model extends ModelState
      * Allows a callback function to be run when the model is saved.
      *
      * @param callable $callback Callback to run when the model is saved
+     * @param null|string $key Set a key to be able to override this callback with another to prevent multiple callbacks for the same purpose
      */
-    protected function performAfterSave(callable $callback)
+    protected function performAfterSave(callable $callback, $key = null)
     {
-        $this->callbacksToRunAfterSave[] = $callback;
+        if ($key) {
+            $this->callbacksToRunAfterSave[$key] = $callback;
+        } else {
+            $this->callbacksToRunAfterSave[] = $callback;
+        }
     }
 
     /**
@@ -283,7 +286,7 @@ abstract class Model extends ModelState
     /**
      * Returns the cached repository and generates one if it doesn't exist.
      *
-     * @see    DataObject::CreateRepository()
+     * @see DataObject::CreateRepository()
      * @return \Rhubarb\Stem\Repositories\Repository
      */
     final public function getRepository()
@@ -347,7 +350,7 @@ abstract class Model extends ModelState
     /**
      * Finds the first model matching the given filters.
      *
-     * @param  Filter $filter
+     * @param Filter $filter
      * @throws RecordNotFoundException
      * @return Model|static
      */
@@ -380,7 +383,7 @@ abstract class Model extends ModelState
     /**
      * Finds the last model matching the given filters.
      *
-     * @param  Filter $filter
+     * @param Filter $filter
      * @throws RecordNotFoundException
      * @return Model|static
      */
@@ -388,9 +391,7 @@ abstract class Model extends ModelState
     {
         $results = static::find($filter);
         $modelClass = get_called_class();
-        /**
- * @var Model $model
-*/
+        /** @var Model $model */
         $model = new $modelClass();
         $results->addSort($model->getUniqueIdentifierColumnName(), false);
 
@@ -404,7 +405,7 @@ abstract class Model extends ModelState
     /**
      * Returns the Collection of models matching the given filter.
      *
-     * @param  Filter $filter
+     * @param Filter $filter
      * @return Collection|static[]
      */
     public static function find(Filter $filter = null)
@@ -483,7 +484,7 @@ abstract class Model extends ModelState
      *
      * Calls beforeSave() and afterSave() as appropriate.
      *
-     * @param  bool $forceSaveRegardlessOfState If set, the repository save will be forced even if hasChanged() returns false
+     * @param bool $forceSaveRegardlessOfState If set, the repository save will be forced even if hasChanged() returns false
      * @return mixed
      * @throws ModelConsistencyValidationException
      * @throws \Rhubarb\Stem\Exceptions\ModelException
@@ -802,7 +803,7 @@ abstract class Model extends ModelState
      *
      * A column reference might be a column name or a Relationship.ColumnName expressions.
      *
-     * @param  $columnReference
+     * @param $columnReference
      * @return null|\Rhubarb\Stem\Schema\Columns\Column
      */
     public function getColumnSchemaForColumnReference($columnReference)
@@ -853,7 +854,7 @@ abstract class Model extends ModelState
      *
      * To implement your validation rules overide the getConsistencyValidationErrors()
      *
-     * @param  bool $throwException Set to false to stop an exception being thrown if the models is inconsistent
+     * @param bool $throwException Set to false to stop an exception being thrown if the models is inconsistent
      * @throws \Exception
      * @throws \Rhubarb\Stem\Exceptions\ModelConsistencyValidationException
      * @return bool
