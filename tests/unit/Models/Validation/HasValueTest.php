@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Models\Validation;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Models\Validation\HasValue;
 
 class HasValueTest extends RhubarbTestCase

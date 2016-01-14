@@ -8,7 +8,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Models\Validation;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Models\Validation\GreaterThan;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;

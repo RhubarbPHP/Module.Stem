@@ -14,8 +14,8 @@ use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Models\Validation\HasValue;
 use Rhubarb\Stem\Models\Validation\Validator;
-use Rhubarb\Stem\Repositories\MySql\Schema\Index;
-use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
+use Rhubarb\Stem\Repositories\MySql\Schema\MySqlIndex;
+use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\BooleanColumn;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
@@ -26,6 +26,7 @@ use Rhubarb\Stem\Schema\Columns\MoneyColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Columns\TimeColumn;
 use Rhubarb\Stem\Schema\Columns\UUIDColumn;
+use Rhubarb\Stem\Schema\ModelSchema;
 
 class Company extends Model
 {
@@ -36,7 +37,7 @@ class Company extends Model
      */
     protected function createSchema()
     {
-        $schema = new MySqlModelSchema("tblCompany");
+        $schema = new ModelSchema("tblCompany");
 
         $schema->uniqueIdentifierColumnName = "CompanyID";
 
@@ -54,7 +55,7 @@ class Company extends Model
             new UUIDColumn()
         );
 
-        $schema->addIndex(new Index("CompanyID", Index::PRIMARY));
+        $schema->addIndex(new Index("CompanyID", MySqlIndex::PRIMARY));
 
         $schema->labelColumnName = "CompanyName";
 

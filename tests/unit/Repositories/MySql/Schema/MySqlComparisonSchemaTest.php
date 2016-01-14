@@ -85,7 +85,7 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
         $comparisonSchema = MySqlComparisonSchema::fromTable("tblCompany");
 
         $example = new Company();
-        $schema = $example->getSchema();
+        $schema = $example->getRepository()->getRepositorySchema();
 
         $compareTo = MySqlComparisonSchema::fromMySqlSchema($schema);
 

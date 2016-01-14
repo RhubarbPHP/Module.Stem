@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Schema\Columns;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Schema\Columns\Column;
 
 class ColumnTest extends RhubarbTestCase

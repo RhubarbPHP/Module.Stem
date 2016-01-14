@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Aggregates;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;

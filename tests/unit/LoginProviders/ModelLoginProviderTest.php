@@ -7,7 +7,7 @@ use Rhubarb\Crown\Encryption\Sha512HashProvider;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestLoginProvider;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;
 

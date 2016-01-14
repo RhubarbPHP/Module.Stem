@@ -2,7 +2,6 @@
 
 namespace Rhubarb\Stem\Tests\unit\Aggregates;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
 use Rhubarb\Stem\Aggregates\CountDistinct;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;

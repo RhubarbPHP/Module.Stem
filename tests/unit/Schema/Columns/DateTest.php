@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Schema\Columns;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 
 class DateTest extends RhubarbTestCase

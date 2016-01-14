@@ -5,12 +5,14 @@ namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Schema;
 use Rhubarb\Stem\Exceptions\SchemaException;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnumColumn;
-use Rhubarb\Stem\Repositories\MySql\Schema\Index;
+use Rhubarb\Stem\Repositories\MySql\Schema\MySqlIndex;
+use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
+use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
 
@@ -31,13 +33,15 @@ class MySqlSchemaTest extends MySqlTestCase
     {
         MySql::executeStatement("DROP TABLE IF EXISTS tblExample");
 
-        $schema = new MysqlModelSchema("tblExample");
+        $schema = new ModelSchema("tblExample");
 
         $schema->addColumn(new AutoIncrementColumn("ID"));
         $schema->addColumn(new StringColumn("Name", 40, "StrangeDefault"));
         $schema->addColumn(new MySqlEnumColumn("Type", "A", ["A", "B", "C"]));
 
-        $schema->addIndex(new Index("ID", Index::PRIMARY));
+        $schema->addIndex(new Index("ID", MySqlIndex::PRIMARY));
+
+        $schema = MySqlModelSchema::fromGenericSchema($schema);
 
         $schema->checkSchema(Repository::getNewDefaultRepository(new Example()));
 
@@ -56,7 +60,7 @@ class MySqlSchemaTest extends MySqlTestCase
     {
         // Note this test relies on the previous test to leave tblExample behind.
 
-        $schema = new MySqlModelSchema("tblExample");
+        $schema = new ModelSchema("tblExample");
 
         $schema->addColumn(new AutoIncrementColumn("ID"));
         $schema->addColumn(new StringColumn("Name", 40, "StrangeDefault"));
@@ -64,7 +68,9 @@ class MySqlSchemaTest extends MySqlTestCase
         $schema->addColumn(new MySqlEnumColumn("Type", "B", ["A", "B", "C", "D"]));
         $schema->addColumn(new StringColumn("Town", 60, null));
 
-        $schema->addIndex(new Index("ID", Index::PRIMARY));
+        $schema->addIndex(new Index("ID", MySqlIndex::PRIMARY));
+
+        $schema = MySqlModelSchema::fromGenericSchema($schema);
 
         $schema->checkSchema(Repository::getNewDefaultRepository(new Example()));
 
@@ -79,13 +85,13 @@ class MySqlSchemaTest extends MySqlTestCase
 
     public function testSchemaSetsIndexAndIdentifierWhenAutoIncrementAdded()
     {
-        $schema = new MySqlModelSchema("tblTest");
+        $schema = new ModelSchema("tblTest");
 
         $schema->addColumn(new AutoIncrementColumn("TestID"));
 
         $schema = MySqlModelSchema::fromGenericSchema($schema);
 
         $this->assertEquals("TestID", $schema->uniqueIdentifierColumnName);
-        $this->assertEquals(Index::PRIMARY, $schema->indexes["Primary"]->indexType);
+        $this->assertEquals(MySqlIndex::PRIMARY, $schema->getIndex("Primary")->indexType);
     }
 }

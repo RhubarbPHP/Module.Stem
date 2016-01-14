@@ -3,8 +3,8 @@
 namespace Rhubarb\Stem\Tests\unit\Schema\Columns;
 
 use Rhubarb\Crown\Encryption\EncryptionProvider;
-use Rhubarb\Crown\Tests\Encryption\UnitTestingAes256EncryptionProvider;
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
+use Rhubarb\Crown\Tests\unit\Encryption\UnitTestingAes256EncryptionProvider;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\EncryptedStringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;

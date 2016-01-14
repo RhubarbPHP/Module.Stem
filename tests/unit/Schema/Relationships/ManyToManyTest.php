@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Schema\Relationships;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\Category;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\CompanyCategory;

@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Fixtures;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Offline\Offline;
 use Rhubarb\Stem\Repositories\Repository;

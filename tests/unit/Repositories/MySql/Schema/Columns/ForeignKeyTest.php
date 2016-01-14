@@ -2,23 +2,23 @@
 
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Schema\Columns;
 
-use Rhubarb\Crown\Tests\RhubarbTestCase;
-use Rhubarb\Stem\Repositories\MySql\MySql;
+use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
 use Rhubarb\Stem\Schema\Columns\ForeignKeyColumn;
+use Rhubarb\Stem\Schema\ModelSchema;
 
 class ForeignKeyTest extends RhubarbTestCase
 {
     public function testColumnSetsIndex()
     {
-        $schema = new MySqlModelSchema("tblTest");
+        $schema = new ModelSchema("tblTest");
 
         $schema->addColumn(
             new ForeignKeyColumn("CompanyID")
         );
 
         $schema = MySqlModelSchema::fromGenericSchema($schema);
-        $this->assertCount(1, $schema->indexes);
-        $this->assertArrayHasKey("CompanyID", $schema->indexes);
+        $this->assertCount(1, $schema->getIndexes());
+        $this->assertArrayHasKey("CompanyID", $schema->getIndexes());
     }
 }

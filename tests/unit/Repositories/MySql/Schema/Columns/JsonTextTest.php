@@ -39,7 +39,7 @@ class JsonTextTest extends MySqlTestCase
 
         $this->assertEquals($this->constraint, $params["CompanyData"]);
 
-        Model::clearAllRepositories();
+        //Model::clearAllRepositories();
 
         $company = new Company($company->UniqueIdentifier);
         $this->assertEquals($this->data, $company->CompanyData);
