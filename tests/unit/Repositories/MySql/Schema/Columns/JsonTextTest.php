@@ -20,6 +20,8 @@ class JsonTextTest extends MySqlTestCase
 
     public function setUp()
     {
+        parent::setUp();
+
         $this->constraint = '{"a":1,"b":2,"c":3}';
 
         $this->data = new \stdClass();
@@ -39,9 +41,11 @@ class JsonTextTest extends MySqlTestCase
 
         $this->assertEquals($this->constraint, $params["CompanyData"]);
 
-        //Model::clearAllRepositories();
+        $uniqueIdentifier = $company->UniqueIdentifier;
 
-        $company = new Company($company->UniqueIdentifier);
+        Model::clearAllRepositories();
+
+        $company = new Company($uniqueIdentifier);
         $this->assertEquals($this->data, $company->CompanyData);
     }
 }
