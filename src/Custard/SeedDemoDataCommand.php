@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Custard;
 
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,10 +39,12 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         foreach ($modelSchemas as $alias => $modelClass) {
             $progressBar->advance();
 
+            /** @var Model $model */
             $model = new $modelClass();
+            $schema = $model->getSchema();
             $repository = $model->getRepository();
 
-            $this->writeNormal(" Truncating ".str_pad(basename($repository->getSchema()->schemaName), 50, ' ', STR_PAD_RIGHT));
+            $this->writeNormal(" Truncating ".str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
 
             $repository->clearRepositoryData();
         }
