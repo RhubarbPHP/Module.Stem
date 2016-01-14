@@ -52,6 +52,16 @@ class ModelSchema
     protected $columns = [];
 
     /**
+     * A collection of Index objects
+     *
+     * Don't add directly to this collection, use addIndex() instead.
+     *
+     * @see ModelSchema::addIndex()
+     * @var Index[]
+     */
+    protected $indexes = [];
+
+    /**
      * The name of the column providing the unique identifier for records in this schema.
      *
      * @var string
@@ -136,5 +146,42 @@ class ModelSchema
     public static function fromGenericSchema(ModelSchema $genericSchema)
     {
         throw new SchemaException("The schema class " . get_called_class() . " does not implement fromGenericSchema().");
+    }
+
+    /**
+     * Adds an index to the indexes collection.
+     *
+     * Currently this does nothing in the base implementation, and should be overwritten by schemas
+     * for specific databases which provide for indexes (e.g. MySqlModelSchema).
+     *
+     * @param $index
+     */
+    public function addIndex($index)
+    {
+        $this->indexes[$index->indexName] = $index;
+    }
+
+    /**
+     * Returns an array of indexes contained in the schema.
+     *
+     * @return Index[]
+     */
+    public function getIndexes()
+    {
+        return $this->indexes;
+    }
+
+    /**
+     * Returns a index contained in the schema matching the specified name.
+     *
+     * @param string $indexName
+     * @return Index
+     */
+    public function getIndex($indexName)
+    {
+        if (isset($this->indexes[$indexName])) {
+            return $this->indexes[$indexName];
+        }
+        return null;
     }
 }

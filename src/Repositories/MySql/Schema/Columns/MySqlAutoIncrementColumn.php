@@ -18,9 +18,10 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
-use Rhubarb\Stem\Repositories\MySql\Schema\Index;
+use Rhubarb\Stem\Repositories\MySql\Schema\MySqlIndex;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Index;
 
 require_once __DIR__ . "/../../../../Schema/Columns/AutoIncrementColumn.php";
 require_once __DIR__ . "/MySqlColumn.php";
@@ -44,6 +45,6 @@ class MySqlAutoIncrementColumn extends AutoIncrementColumn
 
     public function getIndex()
     {
-        return new Index($this->columnName, Index::PRIMARY);
+        return new Index($this->columnName, MySqlIndex::PRIMARY);
     }
 }

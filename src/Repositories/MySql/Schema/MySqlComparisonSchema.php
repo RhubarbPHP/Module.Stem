@@ -67,7 +67,7 @@ class MySqlComparisonSchema
             }
         }
 
-        $indexes = $schema->indexes;
+        $indexes = $schema->getIndexes();
 
         foreach ($indexes as $index) {
             $comparisonSchema->indexes[] = $index->getDefinition();

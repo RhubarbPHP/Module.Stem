@@ -18,65 +18,31 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Schema;
 
+use Rhubarb\Stem\Schema\Index;
+
 /**
  * Schema details for an index
  */
-class Index
+class MySqlIndex extends Index
 {
-    const INDEX = 0;
     const PRIMARY = 1;
     const UNIQUE = 2;
     const FULLTEXT = 3;
 
     /**
-     * The name of the index
-     *
-     * @var
-     */
-    public $indexName;
-
-    /**
-     * The type of index
-     *
-     * One of Index::Index, Index::Primary, Index::Unique
-     *
-     * @var
-     */
-    public $indexType = Index::INDEX;
-
-    /**
-     * A collection of column names included in the index.
-     *
-     * @var array
-     */
-    public $columnNames = [];
-
-    /**
      * Creates an index.
      *
-     * @param string $indexName   If the type is INDEX::PRIMARY then this will be force to PRIMARY
-     * @param int    $indexType   One of Index::INDEX, Index::PRIMARY, Index::UNIQUE or Index::FULLTEXT
-     * @param null   $columnNames If null, then an array with just the index name is assumed.
+     * @param string $indexName If the type is INDEX::PRIMARY then this will be force to PRIMARY
+     * @param int $indexType One of Index::INDEX, MySqlIndex::PRIMARY, MySqlIndex::UNIQUE or MySqlIndex::FULLTEXT
+     * @param null $columnNames If null, then an array with just the index name is assumed.
      */
-    public function __construct($indexName, $indexType, $columnNames = null)
+    public function __construct($indexName, $indexType = self::INDEX, $columnNames = null)
     {
-        $this->indexType = $indexType;
+        parent::__construct($indexName, $indexType, $columnNames);
 
-        if ($columnNames === null) {
-            $columnNames = [$indexName];
+        if ($this->indexType == self::PRIMARY) {
+            $this->indexName = "Primary";
         }
-
-        if (!is_array($columnNames)) {
-            $columnNames = [$columnNames];
-        }
-
-        $this->columnNames = $columnNames;
-
-        if ($this->indexType == Index::PRIMARY) {
-            $indexName = "Primary";
-        }
-
-        $this->indexName = $indexName;
     }
 
     /**
@@ -87,20 +53,25 @@ class Index
     {
         $columnNames = " (`" . implode("`,`", $this->columnNames) . "`)";
         switch ($this->indexType) {
-            case Index::PRIMARY:
+            case self::PRIMARY:
                 return "PRIMARY KEY" . $columnNames;
                 break;
-            case Index::INDEX:
+            case self::INDEX:
                 return "KEY `" . $this->indexName . "`" . $columnNames;
                 break;
-            case Index::UNIQUE:
+            case self::UNIQUE:
                 return "UNIQUE `" . $this->indexName . "`" . $columnNames;
                 break;
-            case Index::FULLTEXT:
+            case self::FULLTEXT:
                 return "FULLTEXT KEY `" . $this->indexName . "`" . $columnNames;
                 break;
         }
 
         return "";
+    }
+
+    protected static function fromGenericIndexType(Index $genericIndex)
+    {
+        return new self($genericIndex->indexName, $genericIndex->indexType, $genericIndex->columnNames);
     }
 }

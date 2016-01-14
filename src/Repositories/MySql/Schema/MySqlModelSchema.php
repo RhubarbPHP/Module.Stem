@@ -22,8 +22,10 @@ require_once __DIR__ . "/../../../Schema/ModelSchema.php";
 
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 /**
@@ -32,26 +34,6 @@ use Rhubarb\Stem\Schema\ModelSchema;
 class MySqlModelSchema extends ModelSchema
 {
     /**
-     * A collection of Index objects
-     *
-     * Don't add directly to this collection, use addIndex() instead.
-     *
-     * @see MySqlSchema::addIndex()
-     * @var Index[]
-     */
-    public $indexes = [];
-
-    /**
-     * Adds an index to the indexes collection.
-     *
-     * @param Index $index
-     */
-    public function addIndex(Index $index)
-    {
-        $this->indexes[$index->indexName] = $index;
-    }
-
-    /**
      * Check to see if the back end schema is up to date - if not update it.
      *
      * @param Repository $inRepository The repository in which to check the schema
@@ -59,6 +41,7 @@ class MySqlModelSchema extends ModelSchema
     public function checkSchema(Repository $inRepository)
     {
         try {
+            /** @var MySql $repos */
             $repos = get_class($inRepository);
 
             if (stripos($repos, "MySql") === false) {
@@ -74,7 +57,7 @@ class MySqlModelSchema extends ModelSchema
             $alterStatement = $testSchema->createAlterTableStatementFor($existingSchema);
 
             if ($alterStatement != false) {
-                $alterStatement = "ALTER TABLE " . $this->schemaName . "\r\n" . $alterStatement;
+                $alterStatement = "ALTER TABLE `" . $this->schemaName . "` " . $alterStatement;
 
                 try {
                     $repos::executeStatement($alterStatement);
@@ -90,6 +73,7 @@ class MySqlModelSchema extends ModelSchema
 
     private function addFromGenericColumn(Column $column)
     {
+        /** @var Column[] $columns */
         $columns = func_get_args();
         $specificColumns = [];
 
@@ -105,10 +89,23 @@ class MySqlModelSchema extends ModelSchema
                 $index = $column->getIndex();
 
                 if ($index !== false) {
-                    $this->addIndex($index);
+                    $this->addFromGenericIndex($index);
                 }
             }
         }
+    }
+
+    private function addFromGenericIndex(Index $index)
+    {
+        /** @var Index[] $indexes */
+        $indexes = func_get_args();
+        $specificIndexes = [];
+
+        foreach ($indexes as $index) {
+            $specificIndexes[] = $index->getRepositorySpecificIndex("MySql");
+        }
+
+        call_user_func_array("parent::addIndex", $specificIndexes);
     }
 
     /**
@@ -116,7 +113,7 @@ class MySqlModelSchema extends ModelSchema
      */
     private function createTable()
     {
-        $sql = "CREATE TABLE " . $this->schemaName . " (";
+        $sql = "CREATE TABLE `" . $this->schemaName . "` (";
 
         $definitions = [];
 
@@ -132,13 +129,17 @@ class MySqlModelSchema extends ModelSchema
         }
 
         foreach ($this->indexes as $indexName => $index) {
-            $definitions[] = $index->getDefinition();
+            $indexDefinition = $index->getDefinition();
+            if ($indexDefinition) {
+                $definitions[] = $indexDefinition;
+            }
         }
 
         $sql .= implode(",", $definitions);
         $sql .= "
 			)";
 
+        /** @var MySql $repos */
         $repos = Repository::getDefaultRepositoryClassName();
         $repos::executeStatement($sql);
     }
@@ -155,6 +156,10 @@ class MySqlModelSchema extends ModelSchema
         call_user_func_array([$schema, "addFromGenericColumn"], $columns);
 
         $schema->uniqueIdentifierColumnName = $genericSchema->uniqueIdentifierColumnName;
+
+        if (count($genericSchema->indexes)) {
+            call_user_func_array([$schema, "addFromGenericIndex"], $genericSchema->indexes);
+        }
 
         return $schema;
     }
