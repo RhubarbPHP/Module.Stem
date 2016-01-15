@@ -64,7 +64,7 @@ abstract class ColumnFilter extends Filter
     {
         $exampleObject = SolutionSchema::getModel($list->getModelClassName());
 
-        $columnSchema = $exampleObject->getColumnSchemaForColumnReference($this->columnName);
+        $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($this->columnName);
 
         if ($columnSchema != null) {
             $closure = $columnSchema->getTransformIntoModelData();

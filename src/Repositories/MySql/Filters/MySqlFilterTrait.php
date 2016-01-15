@@ -82,7 +82,7 @@ trait MySqlFilterTrait
     {
         $exampleObject = SolutionSchema::getModel($repository->getModelClass());
 
-        $columnSchema = $exampleObject->getColumnSchemaForColumnReference($columnName);
+        $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($columnName);
 
         if ($columnSchema != null) {
             // Transform the value first into model data. This function should sanitise the value as

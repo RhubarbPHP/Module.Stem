@@ -803,10 +803,11 @@ abstract class Model extends ModelState
      *
      * A column reference might be a column name or a Relationship.ColumnName expressions.
      *
-     * @param $columnReference
+     * @param string $columnReference
+     * @param bool $fromModelSchema True to use model schema, false to use repository schema
      * @return null|\Rhubarb\Stem\Schema\Columns\Column
      */
-    public function getColumnSchemaForColumnReference($columnReference)
+    private function getColumnSchemaForColumnReference($columnReference, $fromModelSchema)
     {
         if (strpos($columnReference, ".") !== false) {
             $parts = explode(".", $columnReference);
@@ -819,11 +820,11 @@ abstract class Model extends ModelState
                 $relationship = self::$relationships[$this->modelName][$relationshipName];
                 $relatedModel = SolutionSchema::getModel($relationship->getTargetModelName());
 
-                return $relatedModel->getColumnSchemaForColumnReference($parts[1]);
+                return $relatedModel->getColumnSchemaForColumnReference($parts[1], $fromModelSchema);
             }
         }
 
-        $schema = $this->getSchema();
+        $schema = $fromModelSchema ? $this->getSchema() : $this->getRepository()->getRepositorySchema();
         $columns = $schema->getColumns();
 
         if (isset($columns[$columnReference])) {
@@ -831,6 +832,32 @@ abstract class Model extends ModelState
         }
 
         return null;
+    }
+
+    /**
+     * Returns the generic repository schema Column object for the matching column reference.
+     *
+     * A column reference might be a column name or a Relationship.ColumnName expressions.
+     *
+     * @param string $columnReference
+     * @return null|\Rhubarb\Stem\Schema\Columns\Column
+     */
+    public function getModelColumnSchemaForColumnReference($columnReference)
+    {
+        return $this->getColumnSchemaForColumnReference($columnReference, true);
+    }
+
+    /**
+     * Returns the repository specific schema Column object for the matching column reference.
+     *
+     * A column reference might be a column name or a Relationship.ColumnName expressions.
+     *
+     * @param string $columnReference
+     * @return null|\Rhubarb\Stem\Schema\Columns\Column
+     */
+    public function getRepositoryColumnSchemaForColumnReference($columnReference)
+    {
+        return $this->getColumnSchemaForColumnReference($columnReference, false);
     }
 
     /**

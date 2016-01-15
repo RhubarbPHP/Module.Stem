@@ -377,12 +377,12 @@ class ModelTest extends ModelUnitTestCase
     {
         $example = new Example();
 
-        $schema = $example->getColumnSchemaForColumnReference("Forename");
+        $schema = $example->getModelColumnSchemaForColumnReference("Forename");
 
         $this->assertInstanceOf(StringColumn::class, $schema);
         $this->assertEquals("Forename", $schema->columnName);
 
-        $schema = $example->getColumnSchemaForColumnReference("ExampleRelationshipName.InceptionDate");
+        $schema = $example->getModelColumnSchemaForColumnReference("ExampleRelationshipName.InceptionDate");
         $this->assertInstanceOf(DateColumn::class, $schema);
         $this->assertEquals("InceptionDate", $schema->columnName);
     }
