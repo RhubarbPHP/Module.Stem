@@ -51,21 +51,15 @@ class DocumentModelsCommand extends CustardCommand
 
         foreach ($schema->getAllModels() as $modelName => $modelClass) {
             $this->writeVerbose("Processing $modelName... ");
-            /**
- * @var Model $model
-*/
+            /** @var Model $model */
             $model = new $modelClass();
 
             $reflectionClass = new \ReflectionClass($model);
             $doc = new DocBlock($reflectionClass);
 
-            /**
- * @var DocBlock\Tag\PropertyTag[] $properties
-*/
+            /** @var DocBlock\Tag\PropertyTag[] $properties */
             $properties = $doc->getTagsByName('property');
-            /**
- * @var DocBlock\Tag\PropertyTag[] $namedProperties
-*/
+            /** @var DocBlock\Tag\PropertyTag[] $namedProperties */
             $namedProperties = [];
             foreach ($properties as $property) {
                 $namedProperties[$property->getVariableName()] = $property;
@@ -113,10 +107,10 @@ class DocumentModelsCommand extends CustardCommand
         $collectionType = false;
         if ($relationship instanceof OneToOne) {
             $modelName = $relationship->getTargetModelName();
-        } else if ($relationship instanceof OneToMany) {
+        } elseif ($relationship instanceof OneToMany) {
             $modelName = $relationship->getTargetModelName();
             $collectionType = true;
-        } else if ($relationship instanceof ManyToMany) {
+        } elseif ($relationship instanceof ManyToMany) {
             $modelName = $relationship->getRightModelName();
             $collectionType = true;
         } else {
@@ -137,9 +131,9 @@ class DocumentModelsCommand extends CustardCommand
     }
 
     /**
-     * @param Model                      $model
+     * @param Model $model
      * @param DocBlock\Tag\PropertyTag[] $existingProperties
-     * @param DocBlock                   $docBlock
+     * @param DocBlock $docBlock
      * @return bool True if any properties have been added/changed
      */
     private static function addPropertiesForColumns($model, $existingProperties, $docBlock)
@@ -165,9 +159,9 @@ class DocumentModelsCommand extends CustardCommand
     }
 
     /**
-     * @param Relationship[]             $relationships
+     * @param Relationship[] $relationships
      * @param DocBlock\Tag\PropertyTag[] $existingProperties
-     * @param DocBlock                   $docBlock
+     * @param DocBlock $docBlock
      * @return bool True if any properties have been added/changed
      */
     private static function addPropertiesForRelationships($relationships, $existingProperties, $docBlock)
