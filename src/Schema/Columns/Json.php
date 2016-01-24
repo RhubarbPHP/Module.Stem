@@ -38,7 +38,7 @@ class Json extends LongString
 
     public function getPhpType()
     {
-        return \stdClass::class;
+        return '\stdClass';
     }
 
     public function getTransformFromRepository()

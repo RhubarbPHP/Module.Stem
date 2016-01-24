@@ -17,6 +17,9 @@
  */
 
 namespace Rhubarb\Stem;
+
+use Rhubarb\Crown\Module;
+use Rhubarb\Stem\Custard\CreateModelCommand;
 use Rhubarb\Stem\Custard\DocumentModelsCommand;
 use Rhubarb\Stem\Custard\SeedDemoDataCommand;
 use Rhubarb\Stem\Custard\UpdateRepositorySchemasCommand;
@@ -27,25 +30,24 @@ use Symfony\Component\Console\Command\Command;
  *
  * It provides a database agnostic layer with our own particular cherry picks of ORM.
  */
-class StemModule extends \Rhubarb\Crown\Module
+class StemModule extends Module
 {
     /**
      * An opportunity for the module to return a list custard command line commands to register.
      *
      * Note that modules are asked for commands in the same order in which the modules themselves
-     * were registered. This allows extending modules or scaffolds to superseed a command with an
-     * improved version by simply reregistering a command with the same name.
+     * were registered. This allows extending modules or scaffolds to supersede a command with an
+     * improved version by simply re-registering a command with the same name.
      *
      * @return Command[]
      */
     public function getCustardCommands()
     {
-        return
-        [
+        return [
             new DocumentModelsCommand(),
             new UpdateRepositorySchemasCommand(),
-            new SeedDemoDataCommand()
+            new SeedDemoDataCommand(),
+            new CreateModelCommand()
         ];
     }
-
 }
