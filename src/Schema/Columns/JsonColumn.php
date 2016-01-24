@@ -38,7 +38,7 @@ class JsonColumn extends LongStringColumn
 
     public function getPhpType()
     {
-        return \stdClass::class;
+        return '\stdClass';
     }
 
     public function getTransformFromRepository()
