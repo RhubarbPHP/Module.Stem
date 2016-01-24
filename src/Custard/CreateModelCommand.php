@@ -8,19 +8,19 @@ use Rhubarb\Custard\Command\CustardCommand;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\Columns\AutoIncrement;
-use Rhubarb\Stem\Schema\Columns\Boolean;
+use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
+use Rhubarb\Stem\Schema\Columns\BooleanColumn;
 use Rhubarb\Stem\Schema\Columns\Column;
-use Rhubarb\Stem\Schema\Columns\Date;
-use Rhubarb\Stem\Schema\Columns\DateTime;
-use Rhubarb\Stem\Schema\Columns\Decimal;
-use Rhubarb\Stem\Schema\Columns\Float;
-use Rhubarb\Stem\Schema\Columns\ForeignKey;
-use Rhubarb\Stem\Schema\Columns\Integer;
-use Rhubarb\Stem\Schema\Columns\LongString;
-use Rhubarb\Stem\Schema\Columns\Money;
-use Rhubarb\Stem\Schema\Columns\String;
-use Rhubarb\Stem\Schema\Columns\Time;
+use Rhubarb\Stem\Schema\Columns\DateColumn;
+use Rhubarb\Stem\Schema\Columns\DateTimeColumn;
+use Rhubarb\Stem\Schema\Columns\DecimalColumn;
+use Rhubarb\Stem\Schema\Columns\FloatColumn;
+use Rhubarb\Stem\Schema\Columns\ForeignKeyColumn;
+use Rhubarb\Stem\Schema\Columns\IntegerColumn;
+use Rhubarb\Stem\Schema\Columns\LongStringColumn;
+use Rhubarb\Stem\Schema\Columns\MoneyColumn;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
+use Rhubarb\Stem\Schema\Columns\TimeColumn;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,19 +31,19 @@ use Symfony\Component\Console\Question\Question;
 class CreateModelCommand extends CustardCommand
 {
     protected static $columnTypes = [
-        "Boolean" => Boolean::class,
-        "Integer" => Integer::class,
-        "ForeignKey" => ForeignKey::class,
-        "Float" => Float::class,
-        "Decimal" => Decimal::class,
-        "Money" => Money::class,
-        "Date" => Date::class,
-        "DateTime" => DateTime::class,
-        "Time" => Time::class
+        "Boolean" => BooleanColumn::class,
+        "Integer" => IntegerColumn::class,
+        "ForeignKey" => ForeignKeyColumn::class,
+        "Float" => FloatColumn::class,
+        "Decimal" => DecimalColumn::class,
+        "Money" => MoneyColumn::class,
+        "Date" => DateColumn::class,
+        "DateTime" => DateTimeColumn::class,
+        "Time" => TimeColumn::class
     ];
     protected static $columnTypesWithMaxLength = [
-        "String" => String::class,
-        "LongString" => LongString::class
+        "String" => StringColumn::class,
+        "LongString" => LongStringColumn::class
     ];
 
     /** @var QuestionHelper */
@@ -246,7 +246,7 @@ class CreateModelCommand extends CustardCommand
     private static function writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns, $maxLengths)
     {
         $columnTypes = array_merge(self::$columnTypes, self::$columnTypesWithMaxLength);
-        $columnTypes["AutoIncrement"] = AutoIncrement::class;
+        $columnTypes["AutoIncrement"] = AutoIncrementColumn::class;
 
         $description = trim($modelName . " model. " . $description);
         $description = str_replace("\n", "\n * ", wordwrap($description));
