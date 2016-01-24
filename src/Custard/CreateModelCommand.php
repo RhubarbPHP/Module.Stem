@@ -3,10 +3,8 @@
 namespace Rhubarb\Stem\Custard;
 
 use phpDocumentor\Reflection\DocBlock;
-use Rhubarb\Crown\Context;
 use Rhubarb\Custard\Command\CustardCommand;
-use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
-use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
+use Rhubarb\Stem\Custard\CommandHelpers\SchemaCommandTrait;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\BooleanColumn;
@@ -21,15 +19,13 @@ use Rhubarb\Stem\Schema\Columns\LongStringColumn;
 use Rhubarb\Stem\Schema\Columns\MoneyColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Columns\TimeColumn;
-use Rhubarb\Stem\Schema\SolutionSchema;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\Question;
 
 class CreateModelCommand extends CustardCommand
 {
+    use SchemaCommandTrait;
+
     protected static $columnTypes = [
         "Boolean" => BooleanColumn::class,
         "Integer" => IntegerColumn::class,
@@ -46,28 +42,17 @@ class CreateModelCommand extends CustardCommand
         "LongString" => LongStringColumn::class
     ];
 
-    /** @var QuestionHelper */
-    protected $questionHelper;
-
-    /** @var InputInterface */
-    protected $input;
-    /** @var OutputInterface */
-    protected $output;
-
     protected function configure()
     {
         $this->setName('stem:create-model')
             ->setDescription('Create a model class and add it to the schema');
     }
 
-    const SETTINGS_PATH = "settings/default-schema.txt";
-
     public function interact(InputInterface $input, OutputInterface $output)
     {
-        $this->input = $input;
-        $this->output = $output;
+        parent::interact($input, $output);
 
-        $schema = $this->getSchema();
+        $schema = $this->getSchema('What schema do you want to add this model to?');
 
         $reflector = new \ReflectionClass($schema);
 
@@ -110,137 +95,6 @@ class CreateModelCommand extends CustardCommand
 
         $this->writeNormal("Model created.", true);
         // todo: add model into SolutionSchema
-    }
-
-    /**
-     * @param string|Question $question Question text or a Question object
-     * @param null|string $default The default answer
-     * @param bool|\Closure $requireAnswer True for not-empty validation, or a closure for custom validation
-     * @return string User's answer
-     */
-    private function askQuestion($question, $default = null, $requireAnswer = true)
-    {
-        if (!$this->questionHelper) {
-            $this->questionHelper = $this->getHelper("question");
-        }
-
-        if (!($question instanceof Question)) {
-            if (strpos($question, '<question>') === false) {
-                $question = '<question>' . $question . '</question> ';
-            }
-            if ($default !== null) {
-                $question .= "($default) ";
-            }
-            $question = new Question($question, $default);
-        }
-
-        if (is_callable($requireAnswer)) {
-            $question->setValidator($requireAnswer);
-        } elseif ($requireAnswer) {
-            $question->setValidator(function ($answer) {
-                if (trim($answer) == '') {
-                    throw new \Exception(
-                        'You must provide an answer to this question'
-                    );
-                }
-                return $answer;
-            });
-        }
-
-        return $this->questionHelper->ask($this->input, $this->output, $question);
-    }
-
-    /**
-     * @param string $question Question text
-     * @param array $choices An array of choices which are acceptable answers
-     * @param null|int $default The array index in $choices of the default answer
-     * @param bool|\Closure $requireAnswer True for not-empty validation, or a closure for custom validation
-     * @return string User's answer
-     */
-    private function askChoiceQuestion($question, array $choices, $default = null, $requireAnswer = true)
-    {
-        if (!($question instanceof Question)) {
-            if (strpos($question, '<question>') === false) {
-                $question = '<question>' . $question . '</question> ';
-            }
-            if ($default !== null) {
-                $question .= "($choices[$default]) ";
-            }
-            $question = new ChoiceQuestion($question, $choices, $default);
-        }
-
-        if ($requireAnswer && !is_callable($requireAnswer)) {
-            $requireAnswer = function ($answer) use ($choices) {
-                if (trim($answer) == '') {
-                    throw new \Exception(
-                        'You must provide an answer to this question'
-                    );
-                }
-
-                if (is_numeric($answer)) {
-                    if (!isset($choices[$answer])) {
-                        throw new \Exception("\"$answer\" is not a supported option index");
-                    }
-                    $answer = $choices[$answer];
-                } elseif (!in_array($answer, $choices)) {
-                    throw new \Exception("\"$answer\" is not a supported option");
-                }
-
-                return $answer;
-            };
-        }
-
-        return $this->askQuestion($question, null, $requireAnswer);
-    }
-
-    /**
-     * @return SolutionSchema
-     */
-    private function getSchema()
-    {
-        // All schemas have to be looked up before getting 1, so that they are in the correct override order
-        $schemaNames = array_keys(SolutionSchema::getAllSchemas());
-
-        $validator = function ($answer) use ($schemaNames) {
-            if (is_numeric($answer)) {
-                if (!isset($schemaNames[$answer])) {
-                    throw new \Exception("Couldn't find schema at index \"$answer\"");
-                }
-                $schemaName = $schemaNames[$answer];
-            } else {
-                if (!in_array($answer, $schemaNames)) {
-                    throw new \Exception("Couldn't find schema named \"$answer\"");
-                }
-                $schemaName = $answer;
-            }
-
-            try {
-                $schema = SolutionSchema::getSchema($schemaName);
-            } catch (SchemaNotFoundException $ex) {
-                throw new \Exception("Couldn't find schema named \"$schemaName\"");
-            } catch (SchemaRegistrationException $ex) {
-                throw new \Exception("Schema registered as  \"$schemaName\" is not a SolutionSchema");
-            }
-
-            $context = new Context();
-
-            if ($context->DeveloperMode) {
-                // Store default schema to make it faster next time
-                file_put_contents(self::SETTINGS_PATH, $schemaName);
-                $this->output->writeln("Stored default schema \"$schemaName\" in " . realpath(self::SETTINGS_PATH));
-            }
-
-            return $schema;
-        };
-
-        if (file_exists(self::SETTINGS_PATH)) {
-            $schemaName = file_get_contents(self::SETTINGS_PATH);
-            $defaultSchemaIndex = array_search($schemaName, $schemaNames) ?: null;
-        } else {
-            $defaultSchemaIndex = null;
-        }
-
-        return $this->askChoiceQuestion('What schema do you want to add this model to?', $schemaNames, $defaultSchemaIndex, $validator);
     }
 
     private static function writeClassContent($modelName, $description, $className, $namespace, $fileName, $repositoryName, $uniqueIdentifierName, $columns, $maxLengths)
