@@ -65,7 +65,7 @@ class EndsWith extends ColumnFilter
                 $endsWith = $this->endsWith;
             }
 
-            if (substr($columnValue, strlen($columnValue - strlen($endsWith))) != $endsWith) {
+            if (substr($columnValue, strlen($columnValue) - strlen($endsWith)) != $endsWith) {
                 $ids[] = $item->UniqueIdentifier;
             }
         }
