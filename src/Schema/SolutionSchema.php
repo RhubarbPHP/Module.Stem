@@ -24,6 +24,7 @@ use Rhubarb\Stem\Exceptions\RelationshipDefinitionException;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\ManyToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
@@ -707,6 +708,8 @@ abstract class SolutionSchema
      */
     public function checkModelSchemas($oldVersion = null)
     {
+        Model::clearAllRepositories();
+
         /**
  * @var Model $class
 */
