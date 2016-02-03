@@ -9,14 +9,30 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class RequiresRepositoryCommand extends CustardCommand
 {
     /**
- * @var OutputInterface
-*/
+     * @var OutputInterface
+    */
     protected $output;
 
     /**
      * @var RepositoryConnectorInterface
      */
     private static $repositoryConnector;
+
+    protected final function execute(InputInterface $input, OutputInterface $output)
+    {
+        parent::execute($input, $output);
+
+        if (self::$repositoryConnector) {
+            self::$repositoryConnector->connect($input, $output);
+        }
+
+        $this->executeWithConnection($input, $output);
+    }
+
+    protected function executeWithConnection(InputInterface $input, OutputInterface $output)
+    {
+
+    }
 
     /**
      * Sets a repository connector
@@ -49,5 +65,17 @@ abstract class RequiresRepositoryCommand extends CustardCommand
         if (self::$repositoryConnector) {
             self::$repositoryConnector->interact($input, $output, $helper);
         }
+    }
+
+    /**
+     * Configures the current command.
+     */
+    protected function configure()
+    {
+        if ( self::$repositoryConnector) {
+            self::$repositoryConnector->configure($this);
+        }
+
+        parent::configure();
     }
 }

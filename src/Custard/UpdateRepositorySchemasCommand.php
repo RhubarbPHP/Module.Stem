@@ -21,9 +21,9 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
             ->addArgument('schema', InputArgument::OPTIONAL, 'The name of the schema to update');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
-        parent::execute($input, $output);
+        parent::executeWithConnection($input, $output);
 
         $schemaName = $input->getArgument('schema');
 

@@ -14,6 +14,8 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
     {
         $this->setName('stem:seed-data')
             ->setDescription('Seeds the repositories with demo data');
+
+        parent::configure();
     }
 
     /**
@@ -21,9 +23,9 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
      */
     private static $seeders = [];
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
-        parent::execute($input, $output);
+        parent::executeWithConnection($input, $output);
 
         $this->writeNormal("Clearing existing data.", true);
 
