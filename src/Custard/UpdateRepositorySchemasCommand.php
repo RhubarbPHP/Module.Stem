@@ -19,6 +19,8 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
         $this->setName('stem:update-schemas')
             ->setDescription('Updates the repository schemas to match those of the registered models')
             ->addArgument('schema', InputArgument::OPTIONAL, 'The name of the schema to update');
+
+        parent::configure();
     }
 
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
