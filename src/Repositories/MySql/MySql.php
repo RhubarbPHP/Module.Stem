@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql;
 
 require_once __DIR__ . "/../PdoRepository.php";
 
+use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
@@ -319,6 +320,10 @@ class MySql extends PdoRepository
             $unfetchedRowCount = $foundRows - sizeof($uniqueIdentifiers);
         }
 
+        if ($list->getFilter() && !$list->getFilter()->wasFilteredByRepository()) {
+            Log::warning("A query wasn't completely filtered by the repository", "STEM", $sql);
+            }
+
         return $uniqueIdentifiers;
     }
 
@@ -457,19 +462,25 @@ class MySql extends PdoRepository
              * @var Model $targetModel
              */
             $targetModel = new $targetModelClass();
-            $targetSchema = $targetModel->getSchema();
+            $targetSchema = $targetModel->getRepository()->getRepositorySchema();
 
             $columns = $targetSchema->getColumns();
 
-            foreach ($columns as $columnName => $column) {
-                $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
-                $joinOriginalToAliasLookup[$targetModelName . "." . $columnName] = $targetModelName . $columnName;
+            foreach ($columns as $column) {
+                $storageColumns = $column->getStorageColumns();
 
-                if (!isset($joinColumnsByModel[$targetModelName])) {
-                    $joinColumnsByModel[$targetModelName] = [];
+                foreach($storageColumns as $storageColumn) {
+                    $columnName = $storageColumn->columnName;
+
+                    $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
+                    $joinOriginalToAliasLookup[$targetModelName . "." . $columnName] = $targetModelName . $columnName;
+
+                    if (!isset($joinColumnsByModel[$targetModelName])) {
+                        $joinColumnsByModel[$targetModelName] = [];
+                    }
+
+                    $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
                 }
-
-                $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
             }
 
             $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";

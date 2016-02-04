@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Collections;
 
 require_once __DIR__ . "/../Schema/SolutionSchema.php";
 
+use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Exceptions\AggregateNotSupportedException;
@@ -195,7 +196,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
     final public function getModelSchema()
     {
         $repository = $this->getRepository();
-        $schema = $repository->getRepositorySchema();
+        $schema = $repository->getModelSchema();
 
         return $schema;
     }

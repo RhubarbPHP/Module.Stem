@@ -12,7 +12,7 @@ use Rhubarb\Stem\Repositories\Repository;
  */
 class NumberEquals extends Equals
 {
-    private $isNumeric = false;
+    protected $isNumeric = false;
 
     public function __construct($columnName, $equalTo)
     {
