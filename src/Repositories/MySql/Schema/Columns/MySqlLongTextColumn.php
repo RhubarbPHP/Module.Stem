@@ -22,7 +22,7 @@ use Rhubarb\Stem\Schema\Columns\Column;
 
 require_once __DIR__ . "/MySqlMediumTextColumn.php";
 
-class MySqlLongTextColumnColumn extends MySqlMediumTextColumn
+class MySqlLongTextColumn extends MySqlMediumTextColumn
 {
     use MySqlColumn;
 
