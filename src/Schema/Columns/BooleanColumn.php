@@ -22,6 +22,11 @@ require_once __DIR__ . "/Column.php";
 
 class BooleanColumn extends Column
 {
+    public function __construct($columnName, $defaultValue = false)
+    {
+        parent::__construct($columnName, $defaultValue);
+    }
+
     public function getPhpType()
     {
         return "bool";
