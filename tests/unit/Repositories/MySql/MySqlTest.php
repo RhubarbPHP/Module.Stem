@@ -24,7 +24,7 @@ class MySqlTest extends MySqlTestCase
         MySql::resetDefaultConnection();
 
         $settings = StemSettings::singleton();
-        $settings->Username = "bad-user";
+        $settings->username = "bad-user";
 
         $this->setExpectedException(RepositoryConnectionException::class);
 

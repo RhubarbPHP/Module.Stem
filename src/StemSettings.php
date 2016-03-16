@@ -18,21 +18,17 @@
 
 namespace Rhubarb\Stem;
 
+use Rhubarb\Crown\Settings;
+
 /**
  * Common settings needed for modelling.
  *
- * @property string $Host
- * @property string $Port
- * @property string $Username
- * @property string $Password
- * @property string $Database
  */
-class StemSettings extends \Rhubarb\Crown\Settings
+class StemSettings extends Settings
 {
-    protected function initialiseDefaultValues()
-    {
-        parent::initialiseDefaultValues();
-
-        $this->Port = 3306;
-    }
+    public $host = "";
+    public $port = 3306;
+    public $username = "";
+    public $password = "";
+    public $database = "";
 }

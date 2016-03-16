@@ -35,10 +35,10 @@ class MySqlTestCase extends ModelUnitTestCase
         // Setup the data settings to make sure we get a connection to the unit testing database.
         $settings = StemSettings::singleton();
 
-        $settings->Host = "127.0.0.1";
-        $settings->Port = 3306;
-        $settings->Username = "unit-testing";
-        $settings->Password = "unit-testing";
-        $settings->Database = "unit-testing";
+        $settings->host = "127.0.0.1";
+        $settings->port = 3306;
+        $settings->username = "unit-testing";
+        $settings->password = "unit-testing";
+        $settings->database = "unit-testing";
     }
 }

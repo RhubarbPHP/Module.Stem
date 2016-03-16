@@ -662,14 +662,14 @@ class MySql extends PdoRepository
      */
     public static function getConnection(StemSettings $settings)
     {
-        $connectionHash = $settings->Host . $settings->Port . $settings->Username . $settings->Database;
+        $connectionHash = $settings->host . $settings->port . $settings->username . $settings->database;
 
         if (!isset(PdoRepository::$connections[$connectionHash])) {
             try {
                 $pdo = new \PDO(
-                    "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
-                    $settings->Username,
-                    $settings->Password,
+                    "mysql:host=" . $settings->host . ";port=" . $settings->port . ";dbname=" . $settings->database . ";charset=utf8",
+                    $settings->username,
+                    $settings->password,
                     [\PDO::ERRMODE_EXCEPTION => true]
                 );
             } catch (\PDOException $er) {
