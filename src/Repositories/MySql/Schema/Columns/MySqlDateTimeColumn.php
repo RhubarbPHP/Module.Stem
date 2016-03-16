@@ -57,7 +57,11 @@ class MySqlDateTimeColumn extends DateTimeColumn
             $data = new RhubarbDateTime($data[$this->columnName]);
 
             if ($data->IsValidDateTime()) {
-                $date = $data->format("Y-m-d H:i:s");
+                $date = clone $data;
+                // Normalise timezones to default system timezone when stored in DB
+                $date->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+
+                $date = $date->format("Y-m-d H:i:s");
             } else {
                 $date = "0000-00-00 00:00:00";
             }
