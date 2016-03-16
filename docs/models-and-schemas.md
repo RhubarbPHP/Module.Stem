@@ -1,13 +1,11 @@
 Models And Schemas
 ===
 
-A model class allows us to model the data of a single record found in a real world data store. The most
-common data store is a database such as MySQL. Models let us create, load, modify and delete records.
+A model class allows us to represent the data of a single item found in a data store ([repository](repositories)). The most
+common repository is a database such as MySQL. Models let us create, load, modify and delete records and
+navigate through the relationships between them.
 
-As a PHP object they provide an excellent container for any business logic relating to that type of data.
-
-This introduction is a guide to creating and using your first model class which will teach some of the key
-concepts along the way.
+They provide an excellent container for any business logic relating to that type of data.
 
 ## Creating a Model object
 
@@ -21,18 +19,18 @@ class Customer extends Model
 ```
 
 > Note it's normal practice for model objects to be in a folder called Models in your src folder. If you
-> have a lot of models you should try and organise them into relevant sub folders.
+> have a lot of models you should try and organise them into folders.
 
-Model objects put data they need to keep in the data store in a special array called `$modelData`. This is
-because some model operations (for example change detection) must manipulate or consider the full set of
-stored data and having that data in an array is a great advantage.
+Model objects store data internally in a special array called `$modelData`. This is because some model operations
+(for example change detection) must manipulate or consider the full set of stored data. Having the complete set
+of stored model data in an array sets these properties apart from any other fields created on the class.
 
 The array is not public however so access must be provided by creating getter and setter functions.
 
-Some model classes can have many dozens of columns stored in the data store. Creating getters and setters for
-all of these is tedious and clutters the class with a large volumn of 'plumbing' code. Models therefore provide
-your class with a [magical getter and setter](http://uk.php.net/manual/en/language.oop5.magic.php) which assumes
-any unknown property will be accessed in the `$modelData` array.
+Some model classes can have dozens of columns in the repository. Creating getters and setters for all of these
+is tedious and clutters the class with a large volume of plumbing code. The Model base class therefore provides
+your class with [magical getters and setters](http://uk.php.net/manual/en/language.oop5.magic.php) which automatically
+maps unrecognised properties to the `$modelData` array.
 
 ## Accessing properties
 
@@ -46,8 +44,9 @@ print $customer->Forename;      // Get the Forename property
 ```
 
 A disadvantage of using a magical getter and setter is that your IDE will not be able to autosuggest
-property names as you type. Therefore it is good practice to use a PHPDoc comment to indicate the
-magical properties that you know to be used in your model:
+property names as you type. Therefore it is good practice to use a
+[DocBlock](https://www.phpdoc.org/docs/latest/references/phpdoc/basic-syntax.html) comment to indicate the
+magical properties that you know are used in your model:
 
 ``` php
 /**
@@ -61,24 +60,25 @@ class Customer extends Model
 ```
 
 > Note that the casing of magical properties is important and should match the casing of the actual field
-> in your data store. UpperCamelCase is a good choice as it helps distinguish the magical properties from
-> public properties of the class.
+> in your repository. UpperCamelCase is a good choice for column names as it helps distinguish magical properties
+> from normal public properties of the class.
 
-While your model is an object it also implements the PHP `ArrayAccess` interface so you can also access
-the magical properties using an array syntax:
+Although your model is an object because it implements the PHP `ArrayAccess` interface you can also access the
+magical properties using an array syntax:
 
 ``` php
-print $customer["Forename"];
+print $customer['Forename'];
 ```
 
 ## Defining a Schema
 
-Without a schema your model object cannot move the data in and out of the data store. It doesn't know how
-to reference it's location (e.g. table name in a database) or what type of columns to create.
+Without a schema your model object cannot move the data in and out of the repository. It doesn't know how
+it's location (e.g. connection to server or table name in the database) or what type of columns exist there.
 
 You must define a schema for your model by implementing the `createSchema` function.
 
-> Note that the createSchema function is abstract and so you can't actually create a Model class without it.
+> Note that the createSchema function is abstract and so you can't create a Model class without providing one.
+> The first example in this document is only to illustrate a point and would actually cause an error.
 
 ``` php
 class Customer extends ModelObject
@@ -88,11 +88,11 @@ class Customer extends ModelObject
 		$schema = new ModelSchema( "tblCustomer" );
 
 		$schema->addColumn(
-			new AutoIncrement( "CustomerID" ),
-			new ForeignKey( "CustomerID" ),
+			new AutoIncrementColumn( "CustomerID" ),
+			new ForeignKeyColumn( "CustomerID" ),
 			new StringColumn( "Forename", 200 ),
 			new StringColumn( "Surname", 200 ),
-			new Integer( "LastOrderID" )
+			new IntegerColumn( "LastOrderID" )
 		);
 
 		return $schema;
@@ -102,15 +102,15 @@ class Customer extends ModelObject
 
 Using the `addColumn` method on the ModelSchema object we've registered a range of different columns. The first
 is an auto increment column which will generate a new ID for each new record saved. The next is a ForeignKey
-column which is an integer that in some repositories will generate an index.
+column which is an integer that in some repositories will also be indexed.
 
 The remaining columns are more simple - two string columns and an integer.
 
 Column objects are responsible for generating the correct column type in the data store but they also convert
-the raw repository data into a form more suitable for your application.
+the raw repository data into a form applicable to your application.
 
-A `CommaSeparatedList` column for example creates itself as a string field in the repository put presentes
-the data stored there as an array. The `CommaSeparatedList` column will convert the array to a comma separated
+A `CommaSeparatedListColumn` for example creates itself as a string field in the repository put presents
+the data stored there as an array. The `CommaSeparatedListColumn` will convert the array to a comma separated
 string when saving and restore it to an array when loading data.
 
 View the full list of [available column types](columns)
@@ -118,17 +118,21 @@ View the full list of [available column types](columns)
 ## Registering your model
 
 Models are registered in groups called a "Solution Schema". A solution schema defines a list of models
-needed in the application and gives them a short alias name. We generally have one solution schema per
-application. Let's create a new solution schema and register our model.
+needed in the application and gives them short alias names. It also defines the relationships between the
+models that it contains.
 
-``` php,[7]
+We generally have one solution schema per application or scaffold.
+
+Let's create a new solution schema and register our model.
+
+``` php
 class MyAppSolutionSchema extends SolutionSchema
 {
     public function __construct()
     {
         parent::__construct( 0.1 ); // Version 0.1 of our schema
 
-        $this->addModel( "Customer", __NAMESPACE__ . '\Customer' );
+        $this->addModel('Customer', Customer::class);
     }
 }
 ```
@@ -139,21 +143,21 @@ This will signal to your application that it should refresh the actual data stor
 
 The `addModel` function takes an alias followed by the fully qualified class name of the model you're registering.
 
-Giving models an alias opens up the possibility of importing someone elses project as a module and then
-extending or even replacing the functionality of a model by registering a new model class with the same alias.
+Giving models an alias allows one module to replace an existing model with a new one. This ability is essential
+to making scaffolds.
 
 ## Registering your solution schema
 
 Finally you need to make sure your application is registering this solution schema with Stem. You do this in
-the `initialise()` method of your application's module class in `app.config.php`
+the `initialise()` method of your application's module class.
 
 ``` php
-SolutionSchema::registerSolutionSchema( "myapp", __NAMESPACE__ . '\Models\MyAppSolutionSchema' );
+SolutionSchema::registerSolutionSchema('myapp', MyAppSolutionSchema::class);
 ```
 
 ## Saving and Loading Records
 
-To store ('save') a model into the data store simply call the `save()` function.
+To store ('save') a model into the repository simply call the `save()` function.
 
 ``` php
 $customer = new Customer();
@@ -162,14 +166,15 @@ $customer->Surname = "Doe";
 $customer->save();
 ```
 
-If this is a new model the record will be inserted into the data store. If it is an existing model the record
-will be updated. Note, only properties that have changed will be updated in the data store.
+If this is a new model the record will be inserted into the repository. If it is an existing model the record
+will be updated. Note, only properties that have changed should be updated in the data store to minimise the
+likelihood of conflicts.
 
 If you know the ID of a record you can load it simply by creating the model using the ID as the constructor
 argument.
 
 ``` php
-$customer = new Customer( $customerId );    // Load the customer with the ID in $customerId
+$customer = new Customer($customerId);      // Load the customer with the ID in $customerId
 $customer->Surname = "Smith";
 $customer->save();                          // Update surname to Smith
 ```
@@ -199,14 +204,17 @@ print $customer->Balance;
 ```
 
 Simply drop the `get` and the `()` and you can access that method like it's a normal property of the class.
+
 Why is this useful?
 
 1. Sometimes you need to use these computed values in templates. Any system that can access class properties
    (but not methods) can now access these functions too.
 2. This can be used to override an actual database column with a computed value. Sometimes this is invaluable
-   if you're refactoring your application and need to change a flat column to a live computed value.
+   if you're refactoring your application and need to change a flat column to a run time computed value.
 
-In addition to `get` functions you can also access functions prefixed with `set` in a similar way.
+In addition to defining a `get` function you can also define a `set` function which will be passed the value
+being set as an argument. This is often used to disable modification of particular properties or to validate
+the value being set.
 
 ## Navigating relationships
 
@@ -232,9 +240,9 @@ This will get the CompanyName property of the Company model connected to our `$c
 is this useful?
 
 1. Templates can drill through the relationships simply by using the dot notation in field placeholders
-2. Other sub systems of Stem can make use this feature for example filtering and sorting.
+2. Other features of Stem can make use this feature, for example filtering and sorting.
 
-Performance permitting, there is no limit to how deep you can drill with this pattern.
+Performance permitting, there is no limit to how deep you can drill with this pattern in most cases.
 
 ## Finding a record
 
@@ -254,25 +262,25 @@ Interestingly this will work on computed properties too:
 $customer = Customer::findFirst(new GreaterThan("Balance", 500));
 ```
 
-> Be aware that filtering on computed properties can be slow as all the data must be fetched from the data
-> store and then compared after the computation has been done for every record returned.
+> Be aware that filtering on computed properties can be slow as all records must be selected, return from the
+> repository, the value computed and then evaluated in PHP.
 
 If no matches are found by `findFirst` or `findLast` a RecordNotFoundException is thrown.
 
-Where common searches will be done the best pattern is to create additional static methods to wrap
-the `findFirst()` method:
+Where loading a record using a search value will be a common task in your application you should create and additional
+static methods to wrap the `findFirst()` method:
 
 ``` php
 class User extends Model
 {
     public static function fromEmail($email)
     {
-        return self::findFirst( new Equals("Email", $email));
+        return self::findFirst(new Equals("Email", $email));
     }
 }
 
 // Much faster to read and understand than using findFirst.
-$user = User::fromEmail( $emailAddress );
+$user = User::fromEmail($emailAddress);
 ```
 
 ## Deleting a record
@@ -308,11 +316,11 @@ On occasion you need to move model data in and out of the model in bulk
 
 Often you need a representation of a model that is for public consumption, whether that be an API
 end point or simple serialization (where you can't be sure the data won't be inspected or tampered with).
-Necessarily we need to define which properties should be available for public export. You do this by
-overriding the `getPublicPropertyList()` method and simply return an array of properties names.
+We need to define which properties should be available for public exposure. You do this by
+overriding the `getPublicPropertyList()` method and simply return an array of property names.
 This can include the names of computed properties.
 
-This list of public properties controls two methods:
+This list of public properties is used by two methods:
 
 * `exportPublicData()` exports the values (if they exist) of all public properties
 * `serializeModelDataAsJson()` takes the response from exportPublicData() and encodes it as a json
@@ -347,7 +355,7 @@ class Customer extends Model
 ```
 
 > Implementing validation rules in this way is perhaps one of the most important (and efficient) ways to
-> spend your modelling budget as stopping damaged and invalid data entering your application saves untold
+> spend your modelling budget as stopping damaged and invalid data entering your application saves
 > hours in the support of your application.
 
 Calling `save()` on an inconsistent model will throw a ModelConsistencyValidationException:
@@ -379,10 +387,7 @@ To do this simply override one of two methods: `beforeSave()` or `afterSave()`. 
 called before the repository is given the model to store. `afterSave()` is called after the repository
 has stored the model. If it was a new record it should have a unique identifier at this point.
 
-> Note: Calling `save()` from within these methods will cause an infinite loop!
+> Note: Calling `save()` from within these methods can cause an infinite loop!
 
-## Further Reading
-
-* [Relationships between models](relationships)
-* [Model Events](events)
-* [Columns](columns)
+If your custom save action needs to update other models carefully consider if your model has the [authority
+to do so](inter-model).
