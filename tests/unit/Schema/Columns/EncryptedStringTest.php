@@ -15,7 +15,7 @@ class EncryptedStringTest extends RhubarbTestCase
     {
         parent::setUp();
 
-        EncryptionProvider::SetEncryptionProviderClassName(UnitTestingAes256EncryptionProvider::class);
+        EncryptionProvider::setProviderClassName(UnitTestingAes256EncryptionProvider::class);
     }
 
     public function testEncryption()

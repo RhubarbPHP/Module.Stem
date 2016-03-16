@@ -33,7 +33,7 @@ class MySqlTestCase extends ModelUnitTestCase
     protected static function setDefaultConnectionSettings()
     {
         // Setup the data settings to make sure we get a connection to the unit testing database.
-        $settings = new StemSettings();
+        $settings = StemSettings::singleton();
 
         $settings->Host = "127.0.0.1";
         $settings->Port = 3306;

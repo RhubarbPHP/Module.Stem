@@ -25,7 +25,7 @@ trait WithEncryptedText
     public function getTransformIntoModelData()
     {
         return function ($data) {
-            $encryption = EncryptionProvider::getEncryptionProvider();
+            $encryption = EncryptionProvider::getProvider();
             return $encryption->encrypt($data, $this->columnName);
         };
     }
@@ -33,7 +33,7 @@ trait WithEncryptedText
     public function getTransformFromModelData()
     {
         return function ($data) {
-            $encryption = EncryptionProvider::getEncryptionProvider();
+            $encryption = EncryptionProvider::getProvider();
             return $encryption->decrypt($data, $this->columnName);
         };
     }
