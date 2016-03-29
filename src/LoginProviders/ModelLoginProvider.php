@@ -84,8 +84,8 @@ class ModelLoginProvider extends LoginProvider
         }
 
         /**
- * @var Model $user
-*/
+         * @var Model $user
+         */
         $user = $list[0];
 
         $this->checkUserIsPermitted($user);

@@ -33,7 +33,7 @@ class MySqlSmallIntegerColumn extends MySqlIntegerColumn
     public function getDefinition()
     {
         return '`' . $this->columnName . '` SMALLINT(6) ' .
-            (!$this->signed ? 'UNSIGNED ' : '') .
-            $this->getDefaultDefinition();
+        (!$this->signed ? 'UNSIGNED ' : '') .
+        $this->getDefaultDefinition();
     }
 }

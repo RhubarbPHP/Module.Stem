@@ -15,7 +15,7 @@ class EncryptedStringTest extends RhubarbTestCase
     {
         parent::setUp();
 
-        EncryptionProvider::SetEncryptionProviderClassName(UnitTestingAes256EncryptionProvider::class);
+        EncryptionProvider::setEncryptionProviderClassName(UnitTestingAes256EncryptionProvider::class);
     }
 
     public function testEncryption()
@@ -25,7 +25,7 @@ class EncryptedStringTest extends RhubarbTestCase
 
         $aes = new UnitTestingAes256EncryptionProvider();
 
-        $this->assertEquals($aes->Encrypt("plain text", "SecureColumn"), $model->ExportRawData()["SecureColumn"]);
+        $this->assertEquals($aes->encrypt("plain text", "SecureColumn"), $model->exportRawData()["SecureColumn"]);
     }
 
     public function testDecryption()

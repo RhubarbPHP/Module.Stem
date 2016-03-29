@@ -27,7 +27,6 @@ use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
-use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -264,8 +263,8 @@ class MySql extends PdoRepository
      * the cache for performance reasons.
      *
      * @param  Collection $list
-     * @param  int        $unfetchedRowCount
-     * @param  array      $relationshipNavigationPropertiesToAutoHydrate
+     * @param  int $unfetchedRowCount
+     * @param  array $relationshipNavigationPropertiesToAutoHydrate
      * @return array
      */
     public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
@@ -322,7 +321,7 @@ class MySql extends PdoRepository
 
         if ($list->getFilter() && !$list->getFilter()->wasFilteredByRepository()) {
             Log::warning("A query wasn't completely filtered by the repository", "STEM", $sql);
-            }
+        }
 
         return $uniqueIdentifiers;
     }
@@ -332,22 +331,29 @@ class MySql extends PdoRepository
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
      * @param Collection $collection
-     * @param array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
+     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
      *                                                                  try to auto hydrate (if supported)
-     * @param array      $namedParams                                   Named parameters to be used in execution of the command Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more than just the SQL command to be returned from this method.
+     * @param array $namedParams Named parameters to be used in execution of the command Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more than just the SQL command to be returned from this method.
      *
      * Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more
      * than just the SQL command to be returned from this method.
      *
-     * @param array      $joinColumns
-     * @param array      $joinOriginalToAliasLookup
-     * @param array      $joinColumnsByModel
-     * @param bool       $ranged
+     * @param array $joinColumns
+     * @param array $joinOriginalToAliasLookup
+     * @param array $joinColumnsByModel
+     * @param bool $ranged
      *
      * @return string The SQL command to be executed
-      */
-    public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams = null, &$joinColumns = null, &$joinOriginalToAliasLookup = null, &$joinColumnsByModel = null, &$ranged = null)
-    {
+     */
+    public function getRepositoryFetchCommandForDataList(
+        Collection $collection,
+        $relationshipNavigationPropertiesToAutoHydrate = [],
+        &$namedParams = null,
+        &$joinColumns = null,
+        &$joinOriginalToAliasLookup = null,
+        &$joinColumnsByModel = null,
+        &$ranged = null
+    ) {
         $schema = $this->reposSchema;
         $table = $schema->schemaName;
 
@@ -469,7 +475,7 @@ class MySql extends PdoRepository
             foreach ($columns as $column) {
                 $storageColumns = $column->getStorageColumns();
 
-                foreach($storageColumns as $storageColumn) {
+                foreach ($storageColumns as $storageColumn) {
                     $columnName = $storageColumn->columnName;
 
                     $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
@@ -637,7 +643,7 @@ class MySql extends PdoRepository
                 }
             }
 
-            $firstRow = self::ReturnFirstRow($sql, $namedParams);
+            $firstRow = self::returnFirstRow($sql, $namedParams);
             $row = is_array($firstRow) ? array_values($firstRow) : null;
 
             foreach ($clausePositions as $rowPosition => $resultPosition) {
@@ -703,6 +709,6 @@ class MySql extends PdoRepository
     {
         $schema = $this->getRepositorySchema();
 
-        self::executeStatement("TRUNCATE TABLE `".$schema->schemaName."`");
+        self::executeStatement("TRUNCATE TABLE `" . $schema->schemaName . "`");
     }
 }

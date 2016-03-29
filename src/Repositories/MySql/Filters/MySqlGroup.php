@@ -32,7 +32,7 @@ class MySqlGroup extends Group
         &$params,
         &$propertiesToAutoHydrate
     ) {
-    
+
         $filters = $originalFilter->getFilters();
         $filterSql = [];
 

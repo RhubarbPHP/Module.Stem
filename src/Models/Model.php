@@ -286,7 +286,7 @@ abstract class Model extends ModelState
     /**
      * Returns the cached repository and generates one if it doesn't exist.
      *
-     * @see DataObject::CreateRepository()
+     * @see DataObject::createRepository()
      * @return \Rhubarb\Stem\Repositories\Repository
      */
     final public function getRepository()

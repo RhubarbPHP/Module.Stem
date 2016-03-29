@@ -231,7 +231,7 @@ abstract class DataDecorator implements \ArrayAccess
                     if ($column instanceof $type) {
                         /**
                          * @var Column $column
-                        */
+                         */
 
                         if ($formatter instanceof TypeFormatter) {
                             self::$columnTypeFormatters[$this->modelClass][$columnName] = $formatter->getFormatter($column);
@@ -360,7 +360,7 @@ abstract class DataDecorator implements \ArrayAccess
      * @param mixed $offset <p>
      *                      The offset to assign the value to.
      * </p>
-     * @param mixed $value  <p> The value to set. </p>
+     * @param mixed $value <p> The value to set. </p>
      *                      The value to set.
      * </p>
      * @throws \Rhubarb\Crown\Exceptions\ImplementationException

@@ -31,8 +31,8 @@ class AllWordsGroup extends Group
     private $words;
 
     /**
-     * @param string[]        $fieldNames An array of field names
-     * @param string|string[] $words      An array of words or a string of whitespace or comma separated words
+     * @param string[] $fieldNames An array of field names
+     * @param string|string[] $words An array of words or a string of whitespace or comma separated words
      */
     public function __construct($fieldNames, $words)
     {

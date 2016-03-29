@@ -95,8 +95,8 @@ abstract class Filter
      * Rhubarb\Stem\Repositories\MySql\Filters\Equals
      *
      * @param \Rhubarb\Stem\Repositories\Repository $repository
-     * @param Filter                                $originalFilter The base filter containing the settings we need.
-     * @param array                                 $params         An array of output parameters that might be need by the repository, named parameters for PDO for example.
+     * @param Filter $originalFilter The base filter containing the settings we need.
+     * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
      * @param $propertiesToAutoHydrate
      */
     protected static function doFilterWithRepository(
@@ -105,7 +105,7 @@ abstract class Filter
         &$params,
         &$propertiesToAutoHydrate
     ) {
-    
+
 
     }
 
@@ -113,8 +113,8 @@ abstract class Filter
      * Returns A string containing information needed for a repository to use a filter directly.
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  array                                 $params                  An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param  array                                 $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
+     * @param  array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
+     * @param  array $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
      * @return string
      */
     final public function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)

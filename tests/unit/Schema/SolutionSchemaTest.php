@@ -105,13 +105,13 @@ class SolutionSchemaTest extends ModelUnitTestCase
         $user->Forename = "a";
         $user->save();
 
-        $company->Users->Append($user);
+        $company->Users->append($user);
 
         $b = $user = new User();
         $user->Forename = "b";
         $user->save();
 
-        $company->Users->Append($user);
+        $company->Users->append($user);
 
         // Just to make sure this doesn't get in our relationship!
         $user = new User();
@@ -154,13 +154,13 @@ class SolutionSchemaTest extends ModelUnitTestCase
 
         $class = SolutionSchema::getModelClass(__NAMESPACE__ . "\\ModelA");
 
-        $this->assertEquals('\\'.__NAMESPACE__ . "\\ModelA", $class);
+        $this->assertEquals('\\' . __NAMESPACE__ . "\\ModelA", $class);
 
         SolutionSchema::registerSchema("SchemaB", __NAMESPACE__ . "\\SchemaB");
 
         $class = SolutionSchema::getModelClass(__NAMESPACE__ . "\\ModelA");
 
-        $this->assertEquals('\\'.__NAMESPACE__ . "\\ModelB", $class);
+        $this->assertEquals('\\' . __NAMESPACE__ . "\\ModelB", $class);
     }
 }
 

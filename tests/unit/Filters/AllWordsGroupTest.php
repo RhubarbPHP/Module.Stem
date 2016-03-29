@@ -20,18 +20,18 @@ class AllWordsGroupTest extends ModelUnitTestCase
         $this->assertInstanceOf(OrGroup::class, $filters[0]);
         $this->assertInstanceOf(OrGroup::class, $filters[1]);
 
-        $misterFilters = $filters[0]->GetFilters();
+        $misterFilters = $filters[0]->getFilters();
         $this->assertCount(2, $misterFilters);
         $this->assertInstanceOf(Contains::class, $misterFilters[0]);
-        $this->assertEquals('Forename', $misterFilters[0]->GetColumnName());
+        $this->assertEquals('Forename', $misterFilters[0]->getColumnName());
         $this->assertInstanceOf(Contains::class, $misterFilters[1]);
-        $this->assertEquals('Surname', $misterFilters[1]->GetColumnName());
+        $this->assertEquals('Surname', $misterFilters[1]->getColumnName());
 
-        $blobbyFilters = $filters[1]->GetFilters();
+        $blobbyFilters = $filters[1]->getFilters();
         $this->assertCount(2, $blobbyFilters);
         $this->assertInstanceOf(Contains::class, $blobbyFilters[0]);
-        $this->assertEquals('Forename', $blobbyFilters[0]->GetColumnName());
+        $this->assertEquals('Forename', $blobbyFilters[0]->getColumnName());
         $this->assertInstanceOf(Contains::class, $blobbyFilters[1]);
-        $this->assertEquals('Surname', $blobbyFilters[1]->GetColumnName());
+        $this->assertEquals('Surname', $blobbyFilters[1]->getColumnName());
     }
 }

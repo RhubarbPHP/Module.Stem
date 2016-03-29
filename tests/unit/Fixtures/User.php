@@ -52,17 +52,17 @@ class User extends Model
         return $schema;
     }
 
-    public function GetBigWage()
+    public function getBigWage()
     {
         return $this->Wage * 10;
     }
 
-    public function GetFullName()
+    public function getFullName()
     {
         return $this->Forename . " " . $this->Surname;
     }
 
-    public static function FromUsername($username)
+    public static function fromUsername($username)
     {
         return self::findFirst(new Equals("Username", $username));
     }

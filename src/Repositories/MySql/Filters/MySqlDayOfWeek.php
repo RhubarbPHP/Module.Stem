@@ -34,7 +34,7 @@ class MySqlDayOfWeek extends DayOfWeek
         &$params,
         &$propertiesToAutoHydrate
     ) {
-    
+
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {

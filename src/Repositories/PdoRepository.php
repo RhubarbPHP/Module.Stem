@@ -142,8 +142,8 @@ abstract class PdoRepository extends Repository
      *
      * @param       $statement
      * @param array $namedParameters
-     * @param \PDO  $connection
-     * @param null  $insertedId  Will contain the ID of the last inserted record after statement is executed
+     * @param \PDO $connection
+     * @param null $insertedId Will contain the ID of the last inserted record after statement is executed
      *
      * @return \PDOStatement
      * @throws RepositoryStatementException
@@ -160,7 +160,7 @@ abstract class PdoRepository extends Repository
 
         $pdoStatement = $connection->prepare($statement);
 
-        Log::CreateEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, function () use ($statement, $namedParameters, $connection) {
+        Log::createEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, function () use ($statement, $namedParameters, $connection) {
             $newStatement = $statement;
 
             array_walk($namedParameters, function ($value, $key) use (&$newStatement, &$params, $connection) {
@@ -181,7 +181,7 @@ abstract class PdoRepository extends Repository
 
         $insertedId = $connection->lastInsertId();
 
-        Log::CreateEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, "Statement successful", "PDO");
+        Log::createEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, "Statement successful", "PDO");
 
         return $pdoStatement;
     }

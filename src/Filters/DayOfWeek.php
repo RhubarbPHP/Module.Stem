@@ -29,7 +29,7 @@ class DayOfWeek extends ColumnFilter
 
     /**
      * @param $columnName
-     * @param array      $validDays The days to filter for. 0 based starting with monday e.g. 0 = Monday, 1 = Tuesday...
+     * @param array $validDays The days to filter for. 0 based starting with monday e.g. 0 = Monday, 1 = Tuesday...
      */
     public function __construct($columnName, $validDays = [])
     {

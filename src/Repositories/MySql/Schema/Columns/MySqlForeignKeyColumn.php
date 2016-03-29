@@ -20,8 +20,8 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 require_once __DIR__ . '/MySqlIntegerColumn.php';
 
-use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\Columns\Column;
+use Rhubarb\Stem\Schema\Index;
 
 class MySqlForeignKeyColumn extends MySqlIntegerColumn
 {

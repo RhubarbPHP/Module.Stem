@@ -105,15 +105,15 @@ abstract class Repository
 
             foreach ($storageColumns as $storageColumn) {
                 if (!isset($this->columnTransforms[$storageColumn->columnName])) {
-                    $this->columnTransforms[$storageColumn->columnName] = [null,null];
+                    $this->columnTransforms[$storageColumn->columnName] = [null, null];
                 }
 
                 $this->columnTransforms[$storageColumn->columnName][0] =
-                    ( $this->columnTransforms[$storageColumn->columnName][0] == null ) ?
+                    ($this->columnTransforms[$storageColumn->columnName][0] == null) ?
                         $storageColumn->getTransformFromRepository() : $this->columnTransforms[$storageColumn->columnName][0];
 
                 $this->columnTransforms[$storageColumn->columnName][1] =
-                    ( $this->columnTransforms[$storageColumn->columnName][1] == null ) ?
+                    ($this->columnTransforms[$storageColumn->columnName][1] == null) ?
                         $storageColumn->getTransformIntoRepository() : $this->columnTransforms[$storageColumn->columnName][1];
             }
         }
@@ -225,8 +225,8 @@ abstract class Repository
      * Used normally to hydrate data lists with their data.
      *
      * @param  Collection $list
-     * @param  int        $unfetchedRowCount                             An output parameter containing the number of rows left unfetched (if ranging)
-     * @param  array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
+     * @param  int $unfetchedRowCount An output parameter containing the number of rows left unfetched (if ranging)
+     * @param  array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
      *                                                             try to auto hydrate (if supported)
      * @return array
      */
@@ -239,7 +239,7 @@ abstract class Repository
     /**
      * Commits changes to the repository in batch against a collection.
      *
-     * @param Collection    $collection
+     * @param Collection $collection
      * @param $propertyPairs
      */
     public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
@@ -255,9 +255,9 @@ abstract class Repository
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
      * @param Collection $collection
-     * @param array      $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
+     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
      *                                                                  try to auto hydrate (if supported)
-     * @param array      $namedParams                                   Named parameters to be used in execution of the command
+     * @param array $namedParams Named parameters to be used in execution of the command
      *
      * @return string|null
      */
@@ -272,7 +272,7 @@ abstract class Repository
      * An answer will be null if the repository is unable to answer it.
      *
      * @param  Aggregate[] $aggregates
-     * @param  Collection  $collection
+     * @param  Collection $collection
      * @return array
      */
     public function calculateAggregates($aggregates, Collection $collection)
@@ -465,7 +465,7 @@ abstract class Repository
      * @see    Repository::fetchMissingObjectData()
      * @param  \Rhubarb\Stem\Models\Model $object
      * @param  $uniqueIdentifier
-     * @param  array                      $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
+     * @param  array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      * @return mixed
@@ -491,7 +491,7 @@ abstract class Repository
      *
      * @param  \Rhubarb\Stem\Models\Model $object
      * @param  $uniqueIdentifier
-     * @param  array                      $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
+     * @param  array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      * @return array
@@ -507,7 +507,7 @@ abstract class Repository
      *
      * @param \Rhubarb\Stem\Models\Model $object
      * @param $uniqueIdentifier
-     * @param array                      $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
+     * @param array $relationshipsToAutoHydrate An array of relationship names which should be automatically hydrated (i.e. joined) during the hydration of this object. Not supported by all Repositories.
      *                                            (i.e. joined) during the hydration of this object. Not supported by all
      *                                            Repositories.
      */
@@ -521,7 +521,7 @@ abstract class Repository
     /**
      * Rehydrates the model fresh from the back end data store.
      *
-     * @param Model            $object
+     * @param Model $object
      * @param $uniqueIdentifier
      */
     public function reHydrateObject(Model $object, $uniqueIdentifier)
@@ -580,7 +580,7 @@ abstract class Repository
      * Normally used to perform the actual deletion in the back end
      *
      * @param Repository ::deleteObject()
-     * @param \Rhubarb\Stem\Models\Model  $object
+     * @param \Rhubarb\Stem\Models\Model $object
      */
     protected function onObjectDeleted(Model $object)
     {

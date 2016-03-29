@@ -23,16 +23,16 @@ class ValidationTest extends RhubarbTestCase
 	public function testValidationCanBeInverted()
 	{
 		$equalTo = new EqualTo( "Username", "abc" );
-		$notEqualTo = $equalTo->Invert();
+		$notEqualTo = $equalTo->invert();
 
 		$user = new User();
 		$user->Username = "def";
 
-		$this->assertTrue( $notEqualTo->Validate( $user ) );
+		$this->assertTrue( $notEqualTo->validate( $user ) );
 
 		$user->Username = "abc";
 		$this->setExpectedException( "Gcd\Core\Modelling\Exceptions\ValidationErrorException" );
-		$notEqualTo->Validate( $user );
+		$notEqualTo->validate( $user );
 	}
 }
 

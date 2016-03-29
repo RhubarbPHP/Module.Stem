@@ -24,7 +24,7 @@ class MySqlTestCase extends ModelUnitTestCase
 
         self::setDefaultConnectionSettings();
 
-        Log::DisableLogging();
+        Log::disableLogging();
 
         $unitTestingSolutionSchema = new UnitTestingSolutionSchema();
         $unitTestingSolutionSchema->checkModelSchemas();

@@ -30,7 +30,7 @@ class MySqlTinyIntColumn extends MySqlIntegerColumn
     public function getDefinition()
     {
         return '`' . $this->columnName . '` TINYINT(4) ' .
-            (!$this->signed ? 'UNSIGNED ' : '') .
-            $this->getDefaultDefinition();
+        (!$this->signed ? 'UNSIGNED ' : '') .
+        $this->getDefaultDefinition();
     }
 }

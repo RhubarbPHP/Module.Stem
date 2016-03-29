@@ -24,22 +24,22 @@ class FilterTest extends ModelUnitTestCase
         $example->Username = "a";
 
         $users = $widgetCo->Users;
-        $users->Append($example);
+        $users->append($example);
 
         $example = new User();
         $example->Username = "b";
 
-        $gcd->Users->Append($example);
+        $gcd->Users->append($example);
 
         $example = new User();
         $example->Username = "c";
 
-        $widgetCo->Users->Append($example);
+        $widgetCo->Users->append($example);
 
         $example = new User();
         $example->Username = "d";
 
-        $gcd->Users->Append($example);
+        $gcd->Users->append($example);
 
         $list = new Collection(User::class);
         $list->filter(new Equals("Company.CompanyName", "GCD"));

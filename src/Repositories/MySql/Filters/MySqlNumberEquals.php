@@ -33,9 +33,9 @@ class MySqlNumberEquals extends NumberEquals
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  Equals|Filter                         $originalFilter
-     * @param  array                                 $params
-     * @param  array                                 $relationshipsToAutoHydrate
+     * @param  Equals|Filter $originalFilter
+     * @param  array $params
+     * @param  array $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
@@ -44,8 +44,8 @@ class MySqlNumberEquals extends NumberEquals
         &$params,
         &$relationshipsToAutoHydrate
     ) {
-        if ($originalFilter->isNumeric){
-            return MySqlEquals::doFilterWithRepository($repository,$originalFilter,$params,$relationshipsToAutoHydrate);
+        if ($originalFilter->isNumeric) {
+            return MySqlEquals::doFilterWithRepository($repository, $originalFilter, $params, $relationshipsToAutoHydrate);
         }
 
         $originalFilter->filteredByRepository = true;

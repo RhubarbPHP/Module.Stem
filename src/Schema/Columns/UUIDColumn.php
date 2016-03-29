@@ -32,7 +32,7 @@ class UUIDColumn extends StringColumn implements ModelValueInitialiserInterface
      */
     public function createStorageColumns()
     {
-        return [ new StringColumn($this->columnName, 100, $this->defaultValue) ];
+        return [new StringColumn($this->columnName, 100, $this->defaultValue)];
     }
 
     private function generateUUID()
@@ -69,6 +69,6 @@ class UUIDColumn extends StringColumn implements ModelValueInitialiserInterface
 
     public function onNewModelInitialising(Model $model)
     {
-        $model[ $this->columnName ] = $this->generateUUID();
+        $model[$this->columnName] = $this->generateUUID();
     }
 }

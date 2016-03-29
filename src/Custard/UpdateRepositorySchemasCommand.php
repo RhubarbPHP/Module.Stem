@@ -2,7 +2,6 @@
 
 namespace Rhubarb\Stem\Custard;
 
-use Rhubarb\Custard\Command\CustardCommand;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -10,7 +9,6 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 {
@@ -57,7 +55,7 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 
     private function updateSchema(SolutionSchema $schema)
     {
-        $this->writeNormal(" Processing schema ".get_class($schema), true);
+        $this->writeNormal(" Processing schema " . get_class($schema), true);
         $schema->checkModelSchemas();
     }
 }

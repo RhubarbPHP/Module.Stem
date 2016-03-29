@@ -28,7 +28,7 @@ class MySqlLongTextColumn extends MySqlMediumTextColumn
 
     public function getDefinition()
     {
-        return "`".$this->columnName."` longtext ".$this->getDefaultDefinition();
+        return "`" . $this->columnName . "` longtext " . $this->getDefaultDefinition();
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)

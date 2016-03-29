@@ -32,9 +32,9 @@ class MySqlInArray extends InArray
     use MySqlFilterTrait;
 
     /**
-     * @param Repository                 $repository
-     * @param Filter|InArray             $originalFilter
-     * @param array                      $params
+     * @param Repository $repository
+     * @param Filter|InArray $originalFilter
+     * @param array $params
      * @param                                            $relationshipsToAutoHydrate
      *
      * @return string|void
@@ -45,7 +45,7 @@ class MySqlInArray extends InArray
         &$params,
         &$relationshipsToAutoHydrate
     ) {
-    
+
         $columnName = $originalFilter->columnName;
 
         if (count($originalFilter->candidates) == 0) {

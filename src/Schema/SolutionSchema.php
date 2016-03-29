@@ -24,7 +24,6 @@ use Rhubarb\Stem\Exceptions\RelationshipDefinitionException;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\ManyToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
@@ -157,7 +156,7 @@ abstract class SolutionSchema
      * Gets an empty model of the appropriate type for a given model name.
      *
      * @param $modelName
-     * @param null      $uniqueIdentifier Optionally a unique identifier to load.
+     * @param null $uniqueIdentifier Optionally a unique identifier to load.
      *
      * @return Model
      */
@@ -569,7 +568,7 @@ abstract class SolutionSchema
         $targetColumnName,
         $navigationPropertyName = ""
     ) {
-    
+
         $oneToOne = new OneToOne(
             $navigationPropertyName,
             $sourceModelName,
@@ -612,7 +611,7 @@ abstract class SolutionSchema
         $manyColumnName = "",
         $manyNavigationName = ""
     ) {
-    
+
         $oneToMany = new OneToMany($oneNavigationName, $oneModelName, $oneColumnName, $manyModelName, $manyColumnName);
 
         $this->addRelationship(
@@ -711,11 +710,11 @@ abstract class SolutionSchema
         Model::clearAllRepositories();
 
         /**
- * @var Model $class
-*/
+         * @var Model $class
+         */
         /**
- * @var Model $object
-*/
+         * @var Model $object
+         */
         foreach ($this->models as $class) {
             $object = new $class();
 

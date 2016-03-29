@@ -7,7 +7,6 @@ use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Models\ModelEventManager;
-use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlDateColumn;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
@@ -107,7 +106,7 @@ class ModelTest extends ModelUnitTestCase
             "DateOfBirth" => "today"
         ];
 
-        $test->ImportData($data);
+        $test->importData($data);
 
         $this->assertEquals("John", $test->Forename);
         $this->assertEquals("Smith", $test->Surname);
@@ -197,7 +196,7 @@ class ModelTest extends ModelUnitTestCase
         $user = new User();
         $user->Username = "abc";
 
-        $company->Users->Append($user);
+        $company->Users->append($user);
 
         $this->assertEquals("GCD", $user["Company.CompanyName"]);
     }
@@ -211,7 +210,7 @@ class ModelTest extends ModelUnitTestCase
         $user = new User();
         $user->Username = "abc";
 
-        $company->Users->Append($user);
+        $company->Users->append($user);
 
         $user["Company.CompanyName"] = "ABC";
 
@@ -237,7 +236,7 @@ class ModelTest extends ModelUnitTestCase
         try {
             $company->isConsistent();
         } catch (ModelConsistencyValidationException $er) {
-            $errors = $er->GetErrors();
+            $errors = $er->getErrors();
         }
 
         $this->assertCount(1, $errors);
@@ -261,13 +260,13 @@ class ModelTest extends ModelUnitTestCase
         $user->Active = true;
         $user->save();
 
-        $user = User::FromUsername("def");
+        $user = User::fromUsername("def");
 
         $this->assertEquals("def", $user->Username);
 
         $this->setExpectedException(RecordNotFoundException::class);
 
-        User::FromUsername("123");
+        User::fromUsername("123");
     }
 
     public function testPublicProperties()
@@ -278,7 +277,7 @@ class ModelTest extends ModelUnitTestCase
         $example->Surname = "123";
         $example->DateOfBirth = "2010-01-01";
 
-        $data = $example->ExportPublicData();
+        $data = $example->exportPublicData();
 
         // Date of birth should not be in here!
         $this->assertEquals(["ContactID" => 3, "Forename" => "abc", "Surname" => "123"], $data);
@@ -318,13 +317,13 @@ class ModelTest extends ModelUnitTestCase
             $product = $x * $y * $z;
         });
 
-        $example->SimulateRaiseEvent("Test", 1, 2, 3);
+        $example->simulateRaiseEvent("Test", 1, 2, 3);
 
         $this->assertEquals(6, $product);
 
         $product = 0;
 
-        $example->SimulateRaiseEventAfterSave("Test", 2, 3, 4);
+        $example->simulateRaiseEventAfterSave("Test", 2, 3, 4);
 
         $this->assertEquals(0, $product);
 

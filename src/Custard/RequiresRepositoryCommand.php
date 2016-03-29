@@ -10,7 +10,7 @@ abstract class RequiresRepositoryCommand extends CustardCommand
 {
     /**
      * @var OutputInterface
-    */
+     */
     protected $output;
 
     /**
@@ -53,7 +53,7 @@ abstract class RequiresRepositoryCommand extends CustardCommand
      * This means that this is the only place where the command can
      * interactively ask for values of missing required arguments.
      *
-     * @param InputInterface  $input  An InputInterface instance
+     * @param InputInterface $input An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -72,7 +72,7 @@ abstract class RequiresRepositoryCommand extends CustardCommand
      */
     protected function configure()
     {
-        if ( self::$repositoryConnector) {
+        if (self::$repositoryConnector) {
             self::$repositoryConnector->configure($this);
         }
 

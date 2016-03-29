@@ -5,13 +5,13 @@ namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Schema;
 use Rhubarb\Stem\Exceptions\SchemaException;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlEnumColumn;
-use Rhubarb\Stem\Repositories\MySql\Schema\MySqlIndex;
-use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlComparisonSchema;
+use Rhubarb\Stem\Repositories\MySql\Schema\MySqlIndex;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlModelSchema;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
+use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
@@ -26,7 +26,7 @@ class MySqlSchemaTest extends MySqlTestCase
 
         $this->setExpectedException(SchemaException::class);
 
-        new MySqlEnumColumn("Test", null, ["A","B"]);
+        new MySqlEnumColumn("Test", null, ["A", "B"]);
     }
 
     public function testSchemaIsCreated()

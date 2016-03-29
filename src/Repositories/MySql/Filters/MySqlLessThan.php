@@ -34,8 +34,8 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  \Rhubarb\Stem\Filters\Equals|Filter   $originalFilter
-     * @param  array                                 $params
+     * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
+     * @param  array $params
      * @param  $relationshipsToAutoHydrate
      * @return string|void
      */
@@ -45,7 +45,7 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
         &$params,
         &$relationshipsToAutoHydrate
     ) {
-    
+
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {

@@ -75,7 +75,7 @@ abstract class Aggregate
         Aggregate $originalAggregate,
         &$relationshipsToAutoHydrate
     ) {
-    
+
 
     }
 

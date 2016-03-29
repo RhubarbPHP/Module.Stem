@@ -54,12 +54,12 @@ class Example extends Model
         $this->loaded = true;
     }
 
-    public function SimulateRaiseEvent($eventName)
+    public function simulateRaiseEvent($eventName)
     {
         call_user_func_array([$this, "raiseEvent"], func_get_args());
     }
 
-    public function SimulateRaiseEventAfterSave($eventName)
+    public function simulateRaiseEventAfterSave($eventName)
     {
         call_user_func_array([$this, "raiseEventAfterSave"], func_get_args());
     }
@@ -72,12 +72,12 @@ class Example extends Model
         return $properties;
     }
 
-    public function SetName($name)
+    public function setName($name)
     {
         $this->modelData["Name"] = strtoupper($name);
     }
 
-    public function GetMyTestValue()
+    public function getMyTestValue()
     {
         return "TestValue";
     }

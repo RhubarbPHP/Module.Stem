@@ -58,7 +58,7 @@ abstract class Relationship
      * Fetches a collection for this relationship, using the model class' find() method to allow for default filters on
      * the collection.
      *
-     * @param  string                            $collectionClassName
+     * @param  string $collectionClassName
      * @param  \Rhubarb\Stem\Filters\Filter|null $filter
      * @return \Rhubarb\Stem\Collections\Collection
      */

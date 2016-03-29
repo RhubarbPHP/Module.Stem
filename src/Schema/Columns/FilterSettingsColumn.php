@@ -48,7 +48,7 @@ class FilterSettingsColumn extends JsonColumn
 
             $value = json_decode($value, true);
 
-            return ($value != null ) ? Filter::speciateFromSettingsArray($value) : [];
+            return ($value != null) ? Filter::speciateFromSettingsArray($value) : [];
         };
     }
 }

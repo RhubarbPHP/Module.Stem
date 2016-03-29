@@ -38,8 +38,8 @@ trait MySqlFilterTrait
      * communication back to the repository which properties require auto hydration (if supported).
      *
      * @param  Repository $repository
-     * @param  string     $columnName
-     * @param  string[]   $propertiesToAutoHydrate
+     * @param  string $columnName
+     * @param  string[] $propertiesToAutoHydrate
      * @return bool True if the MySql Repository can add this filter to its where clause.
      * @throws FilterNotSupportedException
      */

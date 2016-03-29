@@ -17,13 +17,13 @@ class ValidatorTest extends RhubarbTestCase
 		$user = new User();
 		$user->Username = "abc";
 
-		$validator->Validate( $user );
+		$validator->validate( $user );
 
 		$user->Username = "def";
 
 		$this->setExpectedException( "Gcd\Core\Modelling\Exceptions\ValidationErrorException" );
 
-		$validator->Validate( $user );
+		$validator->validate( $user );
 	}
 
 	public function testValidateOneMode()
@@ -37,19 +37,19 @@ class ValidatorTest extends RhubarbTestCase
 		$user->Forename = "Chris";
 
 		// This should work okay as one validates
-		$validator->Validate( $user );
+		$validator->validate( $user );
 
 		$user->Username = "def";
 		$user->Forename = "john";
 
 		// ditto
-		$validator->Validate( $user );
+		$validator->validate( $user );
 
 		$user->Username = "abc";
 		$user->Forename = "john";
 
 		// ditto
-		$validator->Validate( $user );
+		$validator->validate( $user );
 
 		$user->Username = "123";
 		$user->Forename = "456";
@@ -58,7 +58,7 @@ class ValidatorTest extends RhubarbTestCase
 
 		$this->setExpectedException( "Gcd\Core\Modelling\Exceptions\ValidationErrorException" );
 
-		$validator->Validate( $user );
+		$validator->validate( $user );
 	}
 }
 */

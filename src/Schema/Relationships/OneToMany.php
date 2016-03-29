@@ -38,7 +38,7 @@ class OneToMany extends Relationship
         $targetModelName,
         $targetColumnName = ""
     ) {
-    
+
         parent::__construct($navigationPropertyName);
 
         $this->sourceModelName = $sourceModelName;

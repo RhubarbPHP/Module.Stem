@@ -36,7 +36,7 @@ class MySqlMax extends Max
             $aliasName = $originalAggregate->getAlias();
 
             $originalAggregate->aggregatedByRepository = true;
-            $prefix = ( strpos($columnName, '.') === false ) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
+            $prefix = (strpos($columnName, '.') === false) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
 
             return "MAX( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
         }

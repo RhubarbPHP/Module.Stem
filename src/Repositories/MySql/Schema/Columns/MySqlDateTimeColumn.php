@@ -56,7 +56,7 @@ class MySqlDateTimeColumn extends DateTimeColumn
         return function ($data) {
             $data = new RhubarbDateTime($data[$this->columnName]);
 
-            if ($data->IsValidDateTime()) {
+            if ($data->isValidDateTime()) {
                 $date = clone $data;
                 // Normalise timezones to default system timezone when stored in DB
                 $date->setTimezone(new \DateTimeZone(date_default_timezone_get()));

@@ -46,7 +46,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             $schema = $model->getSchema();
             $repository = $model->getRepository();
 
-            $this->writeNormal(" Truncating ".str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
+            $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
 
             $repository->clearRepositoryData();
         }
@@ -63,7 +63,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         foreach (self::$seeders as $seeder) {
             $progressBar->advance();
 
-            $this->writeNormal(" Processing ".str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+            $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
 
             $seeder->seedData($output);
         }

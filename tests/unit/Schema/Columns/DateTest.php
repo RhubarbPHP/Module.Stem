@@ -12,7 +12,7 @@ class DateTest extends RhubarbTestCase
         $example = new Example();
         $example->DateOfBirth = "2012-10-01";
 
-        $rawData = $example->ExportRawData();
+        $rawData = $example->exportRawData();
 
         $this->assertInstanceOf(\DateTime::class, $rawData["DateOfBirth"]);
         $this->assertEquals("1st October 2012", $rawData["DateOfBirth"]->format("jS F Y"));
@@ -24,7 +24,7 @@ class DateTest extends RhubarbTestCase
 
         $example->DateOfBirth = "2012-10-02";
 
-        $rawData = $example->ExportRawData();
+        $rawData = $example->exportRawData();
 
         $this->assertInstanceOf(\DateTime::class, $rawData["DateOfBirth"]);
         $this->assertEquals("2nd October 2012", $rawData["DateOfBirth"]->format("jS F Y"));

@@ -19,7 +19,7 @@ class ModelLoginProviderTest extends RhubarbTestCase
 
         User::clearObjectCache();
 
-        HashProvider::SetHashProviderClassName(Sha512HashProvider::class);
+        HashProvider::setHashProviderClassName(Sha512HashProvider::class);
 
         $user = new User();
         $user->Username = "billy";
@@ -84,12 +84,12 @@ class ModelLoginProviderTest extends RhubarbTestCase
         } catch (LoginFailedException $er) {
         }
 
-        $this->assertFalse($testLoginProvider->IsLoggedIn());
+        $this->assertFalse($testLoginProvider->isLoggedIn());
 
         $result = $testLoginProvider->login("mdoe", "abc123");
 
         $this->assertTrue($result);
-        $this->assertTrue($testLoginProvider->IsLoggedIn());
+        $this->assertTrue($testLoginProvider->isLoggedIn());
 
         $model = $testLoginProvider->getModel();
 
@@ -98,9 +98,9 @@ class ModelLoginProviderTest extends RhubarbTestCase
 
         $this->assertNotNull($testLoginProvider->LoggedInUserIdentifier);
 
-        $testLoginProvider->LogOut();
+        $testLoginProvider->logOut();
 
-        $this->assertFalse($testLoginProvider->IsLoggedIn());
+        $this->assertFalse($testLoginProvider->isLoggedIn());
         $this->assertNull($testLoginProvider->LoggedInUserIdentifier);
 
         $this->setExpectedException(NotLoggedInException::class);
@@ -117,7 +117,7 @@ class ModelLoginProviderTest extends RhubarbTestCase
         $testLoginProvider = new TestLoginProvider();
         $testLoginProvider->forceLogin($user);
 
-        $this->assertTrue($testLoginProvider->IsLoggedIn());
+        $this->assertTrue($testLoginProvider->isLoggedIn());
         $this->assertEquals($user->UniqueIdentifier, $testLoginProvider->getModel()->UniqueIdentifier);
     }
 }

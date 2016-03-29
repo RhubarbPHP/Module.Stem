@@ -67,7 +67,7 @@ class GroupTest extends ModelUnitTestCase
             new Contains("Forename", "Jo", true),
             new Contains("Surname", "Johnson", true)
         );
-        $this->list->Filter($filterGroup);
+        $this->list->filter($filterGroup);
         $this->assertCount(1, $this->list);
         $this->assertContains("Johnson", $this->list[0]->Surname);
     }
@@ -79,7 +79,7 @@ class GroupTest extends ModelUnitTestCase
             new Contains("Forename", "Jo", true),
             new Contains("Surname", "Smithe", true)
         );
-        $this->list->Filter($filterGroup);
+        $this->list->filter($filterGroup);
         $this->assertCount(4, $this->list);
         $this->assertContains("Smithe", $this->list[3]->Surname);
     }
@@ -104,7 +104,7 @@ class GroupTest extends ModelUnitTestCase
             $filterGroup1,
             $filterGroup2
         );
-        $this->list->Filter($filterGroup);
+        $this->list->filter($filterGroup);
         $this->assertCount(4, $this->list);
         $this->assertContains("Joe", $this->list[0]->Surname);
     }

@@ -57,7 +57,7 @@ abstract class ColumnFilter extends Filter
      * by the relevant model.
      *
      * @param  $rawComparisonValue
-     * @param  Collection         $list
+     * @param  Collection $list
      * @return mixed
      */
     final protected function getTransformedComparisonValue($rawComparisonValue, Collection $list)

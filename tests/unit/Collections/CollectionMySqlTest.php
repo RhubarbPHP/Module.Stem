@@ -8,7 +8,6 @@ use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\MySql\MySql;
-use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
 
@@ -50,7 +49,7 @@ class CollectionMySqlTest extends MySqlTestCase
                 true
             ))->batchUpdate(["CompanyName" => "Test Company 2"]);
 
-                $this->fail("Batch update shouldn't have been allowed if not filtered by the repository.");
+            $this->fail("Batch update shouldn't have been allowed if not filtered by the repository.");
         } catch (BatchUpdateNotPossibleException $er) {
         }
 
@@ -60,9 +59,9 @@ class CollectionMySqlTest extends MySqlTestCase
             true
         ))->batchUpdate(["CompanyName" => "Test Company 2"], true);
 
-            $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company 2'");
+        $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company 2'");
 
-            $this->assertEquals(3, $count);
+        $this->assertEquals(3, $count);
     }
 
     public function testDataListFetchesObjects()

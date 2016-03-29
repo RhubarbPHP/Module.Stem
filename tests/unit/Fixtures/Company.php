@@ -15,7 +15,6 @@ use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Models\Validation\HasValue;
 use Rhubarb\Stem\Models\Validation\Validator;
 use Rhubarb\Stem\Repositories\MySql\Schema\MySqlIndex;
-use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\BooleanColumn;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
@@ -26,6 +25,7 @@ use Rhubarb\Stem\Schema\Columns\MoneyColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Columns\TimeColumn;
 use Rhubarb\Stem\Schema\Columns\UUIDColumn;
+use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\ModelSchema;
 
 class Company extends Model
@@ -70,7 +70,7 @@ class Company extends Model
         return $list;
     }
 
-    public function GetCompanyIDSquared()
+    public function getCompanyIDSquared()
     {
         return $this->CompanyID * $this->CompanyID;
     }
@@ -86,7 +86,7 @@ class Company extends Model
         return $errors;
     }
 
-    protected function CreateConsistencyValidator()
+    protected function createConsistencyValidator()
     {
         $validator = new Validator();
         $validator->validations[] = new HasValue("CompanyName");

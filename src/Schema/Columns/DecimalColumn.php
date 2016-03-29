@@ -18,7 +18,7 @@
 
 namespace Rhubarb\Stem\Schema\Columns;
 
-require_once __DIR__."/Column.php";
+require_once __DIR__ . "/Column.php";
 
 class DecimalColumn extends Column
 {
@@ -35,8 +35,8 @@ class DecimalColumn extends Column
         $this->decimalDigits = $decimalDigits;
 
         // Calculate the range of values allowed by $totalDigits
-        $padding = ( $decimalDigits > 1 ) ? str_repeat('0', $decimalDigits - 1) : "";
-        $this->maxValue = (float) (pow(10, $totalDigits - $decimalDigits) - ('0.' . $padding . '1'));
+        $padding = ($decimalDigits > 1) ? str_repeat('0', $decimalDigits - 1) : "";
+        $this->maxValue = (float)(pow(10, $totalDigits - $decimalDigits) - ('0.' . $padding . '1'));
         $this->minValue = $this->maxValue * -1;
     }
 

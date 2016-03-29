@@ -34,7 +34,7 @@ class MySqlCollectionPropertyMatches extends CollectionPropertyMatches
         &$params,
         &$relationshipsToAutoHydrate
     ) {
-    
+
         $relationshipsToAutoHydrate[] = $originalFilter->collectionProperty;
 
         // Get the relationship

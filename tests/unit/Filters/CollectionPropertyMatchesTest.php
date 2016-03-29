@@ -22,7 +22,7 @@ class CollectionPropertyMatchesTest extends ModelUnitTestCase
         $category->CategoryName = "AppendTest";
         $category->save();
 
-        $company->Categories->Append($category);
+        $company->Categories->append($category);
 
         $this->assertCount(1, $company->Categories);
 
