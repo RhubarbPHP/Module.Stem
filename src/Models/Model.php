@@ -529,7 +529,10 @@ abstract class Model extends ModelState
             call_user_func_array([$this, "raiseEvent"], $eventArgs);
         }
 
-        foreach ($this->callbacksToRunAfterSave as $callback) {
+        $callbacksToRunAfterSave = $this->callbacksToRunAfterSave;
+        $this->callbacksToRunAfterSave = [];
+
+        foreach ($callbacksToRunAfterSave as $callback) {
             $callback();
         }
     }
