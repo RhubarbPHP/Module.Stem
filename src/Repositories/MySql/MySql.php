@@ -676,7 +676,7 @@ class MySql extends PdoRepository
                     [\PDO::ERRMODE_EXCEPTION => true]
                 );
 
-                $timeZone = $pdo->query("SELECT IF(@@session.time_zone = 'SYSTEM', @@system_time_zone, @@session.time_zone)");
+                $timeZone = $pdo->query("SELECT @@system_time_zone");
                 if ($timeZone->rowCount()) {
                     $settings->RepositoryTimeZone = new \DateTimeZone($timeZone->fetchColumn());
                 }
