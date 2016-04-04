@@ -20,11 +20,13 @@ namespace Rhubarb\Stem\Repositories\MySql;
 
 require_once __DIR__ . "/../PdoRepository.php";
 
+use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
+use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
@@ -654,17 +656,12 @@ class MySql extends PdoRepository
         return $results;
     }
 
-
     /**
      * Gets a PDO connection.
      *
-     * @param    \Rhubarb\Stem\StemSettings $settings
-     * @throws   \Rhubarb\Stem\Exceptions\RepositoryConnectionException Thrown if the connection could not be established
-     * @internal param $host
-     * @internal param $username
-     * @internal param $password
-     * @internal param $database
-     * @return   mixed /PDO
+     * @param StemSettings $settings
+     * @throws RepositoryConnectionException Thrown if the connection could not be established
+     * @return \PDO
      */
     public static function getConnection(StemSettings $settings)
     {
@@ -678,6 +675,11 @@ class MySql extends PdoRepository
                     $settings->Password,
                     [\PDO::ERRMODE_EXCEPTION => true]
                 );
+
+                $timeZone = $pdo->query("SELECT IF(@@session.time_zone = 'SYSTEM', @@system_time_zone, @@session.time_zone)");
+                if ($timeZone->rowCount()) {
+                    $settings->RepositoryTimeZone = new \DateTimeZone($timeZone->fetchColumn());
+                }
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MySql", $er);
             }
