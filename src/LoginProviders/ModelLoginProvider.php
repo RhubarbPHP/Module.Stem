@@ -40,6 +40,8 @@ class ModelLoginProvider extends LoginProvider
     protected $activeColumnName = "";
     protected $modelClassName = "";
 
+    protected $loggedInUserIdentifier = "";
+
     public function __construct($modelClassName, $usernameColumnName, $passwordColumnName, $activeColumnName = "")
     {
         parent::__construct();
@@ -73,7 +75,7 @@ class ModelLoginProvider extends LoginProvider
             throw new LoginFailedException();
         }
 
-        $hashProvider = HashProvider::getHashProvider();
+        $hashProvider = HashProvider::getProvider();
 
         // There should only be one user matching the username. It would be possible to support
         // unique *combinations* of username and password but it's a potential security issue and
@@ -96,8 +98,8 @@ class ModelLoginProvider extends LoginProvider
         if ($hashProvider->compareHash($password, $userPasswordHash)) {
             // Matching login - but is it enabled?
             if ($this->isModelActive($user)) {
-                $this->LoggedIn = true;
-                $this->LoggedInUserIdentifier = $user->getUniqueIdentifier();
+                $this->loggedIn = true;
+                $this->loggedInUserIdentifier = $user->getUniqueIdentifier();
 
                 $this->storeSession();
 
@@ -130,7 +132,7 @@ class ModelLoginProvider extends LoginProvider
             throw new ImplementationException('A model is required to force login');
         }
 
-        $this->LoggedInUserIdentifier = $user->UniqueIdentifier;
+        $this->loggedInUserIdentifier = $user->UniqueIdentifier;
 
         parent::forceLogin();
     }
@@ -160,9 +162,9 @@ class ModelLoginProvider extends LoginProvider
             throw new NotLoggedInException();
         }
 
-        if (isset($this->LoggedInUserIdentifier)) {
+        if (isset($this->loggedInUserIdentifier)) {
             try {
-                return SolutionSchema::getModel($this->modelClassName, $this->LoggedInUserIdentifier);
+                return SolutionSchema::getModel($this->modelClassName, $this->loggedInUserIdentifier);
             } catch (RecordNotFoundException $er) {
                 throw new NotLoggedInException();
             }
@@ -174,7 +176,7 @@ class ModelLoginProvider extends LoginProvider
     protected function onLogOut()
     {
         // Remove the logged in user identifier from the session.
-        unset($this->LoggedInUserIdentifier);
+        unset($this->loggedInUserIdentifier);
 
         parent::onLogOut();
     }

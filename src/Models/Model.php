@@ -385,7 +385,7 @@ abstract class Model extends ModelState
      *
      * @param Filter $filter
      * @throws RecordNotFoundException
-     * @return Model|static
+     * @return static
      */
     public static function findLast(Filter $filter = null)
     {

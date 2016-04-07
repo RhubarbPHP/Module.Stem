@@ -18,7 +18,7 @@
 
 namespace Rhubarb\Stem\Schema;
 
-use Rhubarb\Crown\Context;
+use Rhubarb\Crown\Application;
 use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Stem\Exceptions\RelationshipDefinitionException;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
@@ -681,9 +681,9 @@ abstract class SolutionSchema
         $versionFile = "cache/schema-versions/" . str_replace("\\", "_", get_class($this)) . ".txt";
         $fileVersion = 0;
 
-        $context = new Context();
+        $application = Application::current();
 
-        if ($context->UnitTesting) {
+        if ($application->unitTesting) {
             return;
         }
 

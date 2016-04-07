@@ -19,7 +19,7 @@ class ModelLoginProviderTest extends RhubarbTestCase
 
         User::clearObjectCache();
 
-        HashProvider::setHashProviderClassName(Sha512HashProvider::class);
+        HashProvider::setProviderClassName(Sha512HashProvider::class);
 
         $user = new User();
         $user->Username = "billy";
@@ -96,12 +96,9 @@ class ModelLoginProviderTest extends RhubarbTestCase
         $this->assertInstanceOf(User::class, $model);
         $this->assertEquals("111222", $model->SecretProperty);
 
-        $this->assertNotNull($testLoginProvider->LoggedInUserIdentifier);
-
-        $testLoginProvider->logOut();
+        $testLoginProvider->LogOut();
 
         $this->assertFalse($testLoginProvider->isLoggedIn());
-        $this->assertNull($testLoginProvider->LoggedInUserIdentifier);
 
         $this->setExpectedException(NotLoggedInException::class);
 

@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Custard\CommandHelpers;
 
-use Rhubarb\Crown\Context;
+use Rhubarb\Crown\Application;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -40,9 +40,9 @@ trait SchemaCommandTrait
                 throw new \Exception("Schema registered as  \"$schemaName\" is not a SolutionSchema");
             }
 
-            $context = new Context();
+            $application = Application::current();
 
-            if ($context->DeveloperMode) {
+            if ($application->developerMode) {
                 // Store default schema to make it faster next time
                 file_put_contents(self::$SETTINGS_PATH, $schemaName);
                 $this->output->writeln("Stored default schema \"$schemaName\" in " . realpath(self::$SETTINGS_PATH));
