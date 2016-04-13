@@ -40,7 +40,7 @@ class ModelLoginProvider extends LoginProvider
     protected $activeColumnName = "";
     protected $modelClassName = "";
 
-    protected $loggedInUserIdentifier = "";
+    public $loggedInUserIdentifier = "";
 
     public function __construct($modelClassName, $usernameColumnName, $passwordColumnName, $activeColumnName = "")
     {
