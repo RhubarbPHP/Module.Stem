@@ -22,6 +22,7 @@ use Rhubarb\Crown\DateTime\RhubarbDate;
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
+use Rhubarb\Stem\StemSettings;
 
 require_once __DIR__ . "/../../../../Schema/Columns/DateColumn.php";
 require_once __DIR__ . "/MySqlColumn.php";
@@ -51,11 +52,7 @@ class MySqlDateColumn extends DateColumn
             $data = new RhubarbDateTime($data[$this->columnName]);
 
             if ($data->isValidDateTime()) {
-                $date = clone $data;
-                // Normalise timezones to default system timezone when stored in DB
-                $date->setTimezone(new \DateTimeZone(date_default_timezone_get()));
-
-                $date = $date->format("Y-m-d");
+                $date = $data->format("Y-m-d");
             } else {
                 $date = "0000-00-00";
             }

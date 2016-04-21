@@ -93,6 +93,7 @@ abstract class Model extends ModelState
     public function __clone()
     {
         $this->setUniqueIdentifier(null);
+        $this->onNewModelInitialised();
     }
 
     /**

@@ -31,4 +31,21 @@ class StemSettings extends Settings
     public $username = "";
     public $password = "";
     public $database = "";
+
+    /**
+     * @var \DateTimeZone
+     */
+    public $projectTimeZone;
+
+    /**
+     * @var \DateTimeZone
+     */
+    public $repositoryTimeZone;
+
+    protected function initialiseDefaultValues()
+    {
+        parent::initialiseDefaultValues();
+
+        $this->projectTimeZone = new \DateTimeZone(date_default_timezone_get());
+    }
 }

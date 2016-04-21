@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateTimeColumn;
+use Rhubarb\Stem\StemSettings;
 
 require_once __DIR__ . "/../../../../Schema/Columns/DateTimeColumn.php";
 require_once __DIR__ . "/MySqlColumn.php";
@@ -58,8 +59,12 @@ class MySqlDateTimeColumn extends DateTimeColumn
 
             if ($data->isValidDateTime()) {
                 $date = clone $data;
-                // Normalise timezones to default system timezone when stored in DB
-                $date->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+
+                $settings = StemSettings::singleton();
+                if ($settings->repositoryTimeZone) {
+                    // Normalise timezones to default system timezone when stored in DB
+                    $date->setTimezone($settings->repositoryTimeZone);
+                }
 
                 $date = $date->format("Y-m-d H:i:s");
             } else {
@@ -73,7 +78,12 @@ class MySqlDateTimeColumn extends DateTimeColumn
     public function getTransformFromRepository()
     {
         return function ($data) {
-            return new RhubarbDateTime($data[$this->columnName]);
+            $settings = StemSettings::singleton();
+            $dateTime = new RhubarbDateTime($data[$this->columnName], $settings->repositoryTimeZone);
+            if ($settings->projectTimeZone) {
+                $dateTime->setTimezone($settings->projectTimeZone);
+            }
+            return $dateTime;
         };
     }
 }
