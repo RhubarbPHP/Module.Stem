@@ -73,7 +73,7 @@ abstract class Filter
 
     public function detectPlaceHolder($value)
     {
-        if (strpos($value, "@{") === 0) {
+        if (is_string($value) && strpos($value, "@{") === 0) {
             $field = str_replace("}", "", str_replace("@{", "", $value));
 
             return $field;

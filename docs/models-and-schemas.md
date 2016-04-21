@@ -81,6 +81,12 @@ You must define a schema for your model by implementing the `createSchema` funct
 > The first example in this document is only to illustrate a point and would actually cause an error.
 
 ``` php
+use Rhubarb\Stem\Schema\ModelSchema
+use Rhubarb\Stem\Schema\Columns\AutoIncrement;
+use Rhubarb\Stem\Schema\Columns\ForeignKey;
+use Rhubarb\Stem\Schema\Columns\Integer;
+use Rhubarb\Stem\Schema\Columns\String;
+
 class Customer extends ModelObject
 {
 	public function createSchema()
@@ -240,7 +246,7 @@ This will get the CompanyName property of the Company model connected to our `$c
 is this useful?
 
 1. Templates can drill through the relationships simply by using the dot notation in field placeholders
-2. Other features of Stem can make use this feature, for example filtering and sorting.
+2. Other features of Stem can make use of this feature for example filtering and sorting.
 
 Performance permitting, there is no limit to how deep you can drill with this pattern in most cases.
 

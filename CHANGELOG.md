@@ -1,3 +1,12 @@
+### 1.0.x
+
+* FIXED:    Bug with Filter::detectPlaceHolder
+* CHANGE:   Some documentation updates
+* FIXED:    EndsWith filter fixed
+* ADDED:    stem:create-model custard command
+* ADDED:    CommaSeparatedColumn supports enclosure with additional commas
+* CHANGE:   Relationship declaration methods are now protected so the can be called directly from the solution schema
+
 ### 1.0.0
 
 * ADDED:    Added codeception
