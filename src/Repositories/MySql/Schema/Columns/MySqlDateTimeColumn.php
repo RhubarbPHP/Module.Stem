@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateTimeColumn;
 use Rhubarb\Stem\StemSettings;
@@ -61,6 +62,9 @@ class MySqlDateTimeColumn extends DateTimeColumn
                 $date = clone $data;
 
                 $settings = new StemSettings();
+                if (!$settings->RepositoryTimeZone) {
+                    MySql::getDefaultConnection();
+                }
                 if ($settings->RepositoryTimeZone) {
                     // Normalise timezones to default system timezone when stored in DB
                     $date->setTimezone($settings->RepositoryTimeZone);
