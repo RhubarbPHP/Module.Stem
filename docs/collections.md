@@ -180,7 +180,7 @@ of data with some of the columns coming from a relationship:
 ``` php
 $contacts = new Collection( "Contact" );
 $table = new Table( $contacts );
-$table->Columns =
+$table->columns =
 [
 	"Title",
 	"Forename",
@@ -199,7 +199,7 @@ $contacts = new Collection( "Contact" );
 $contacts->autoHydrate( "Company" );
 
 $table = new Table( $contacts );
-$table->Columns =
+$table->columns =
 [
 	"Title",
 	"Forename",
