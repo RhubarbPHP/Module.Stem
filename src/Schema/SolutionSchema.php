@@ -670,15 +670,17 @@ abstract class SolutionSchema
      */
     public function checkModelSchemasIfNecessary()
     {
-        if (!file_exists("cache/schema-versions")) {
-            mkdir("cache/schema-versions", 0777, true);
+        $cachePath = Application::current()->applicationRootPath."/cache/";
+
+        if (!file_exists($cachePath."schema-versions")) {
+            mkdir($cachePath."schema-versions", 0777, true);
         }
 
-        if (!file_exists("cache/schema-versions")) {
+        if (!file_exists($cachePath."schema-versions")) {
             throw new ImplementationException("The cache/schema-versions folder could not be created. Please check file permissions and ownership.");
         }
 
-        $versionFile = "cache/schema-versions/" . str_replace("\\", "_", get_class($this)) . ".txt";
+        $versionFile = $cachePath."schema-versions/" . str_replace("\\", "_", get_class($this)) . ".txt";
         $fileVersion = 0;
 
         $application = Application::current();

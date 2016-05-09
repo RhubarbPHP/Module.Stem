@@ -1,18 +1,19 @@
 ### 1.0.x
 
-* FIXED:    Bug with Filter::detectPlaceHolder
-* CHANGE:   Some documentation updates
-* FIXED:    EndsWith filter fixed
-* ADDED:    stem:create-model custard command
-* ADDED:    CommaSeparatedColumn supports enclosure with additional commas
-* CHANGE:   Relationship declaration methods are now protected so the can be called directly from the solution schema
+* Fixed:    Bug with Filter::detectPlaceHolder
+* Change:   Some documentation updates
+* Fixed:    EndsWith filter fixed
+* Added:    stem:create-model custard command
+* Added:    CommaSeparatedColumn supports enclosure with additional commas
+* Change:   Relationship declaration methods are now protected so the can be called directly from the solution schema
+* Fixed:    Cache path now uses application root dir correctly.
 
 ### 1.0.0
 
-* ADDED:    Added codeception
-* CHANGE:   PHP7 support by suffixing column class names with "Column"
-* ADDED:    Added a changelog
-* FIXED:    Fixed failing tests
-* ADDED:    Added build.xml for Jenkins CI
-* ADDED:    Added generic form of Index class which becomes specialised into MySql versions with the schema, the same way Columns work
-* ADDED:    Project and repository timezone defaults added to StemSettings
+* Added:    Added codeception
+* Change:   PHP7 support by suffixing column class names with "Column"
+* Added:    Added a changelog
+* Fixed:    Fixed failing tests
+* Added:    Added build.xml for Jenkins CI
+* Added:    Added generic form of Index class which becomes specialised into MySql versions with the schema, the same way Columns work
+* Added:    Project and repository timezone defaults added to StemSettings
