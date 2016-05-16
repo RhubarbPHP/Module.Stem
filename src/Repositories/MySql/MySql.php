@@ -498,6 +498,11 @@ class MySql extends PdoRepository
         $joinColumnClause = "";
 
         if (sizeof($joins)) {
+
+            if (!in_array("`{$table}`.`".$schema->uniqueIdentifierColumnName."`", $groups)){
+                $groups[] = "`{$table}`.`".$schema->uniqueIdentifierColumnName."`";
+            }
+
             $joinString = " " . implode(" ", $joins);
 
             $joinClauses = [];

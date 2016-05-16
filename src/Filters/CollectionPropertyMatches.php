@@ -70,6 +70,11 @@ class CollectionPropertyMatches extends Equals
         foreach ($list as $item) {
             $collection = $item[$this->collectionProperty];
 
+            if ($collection == null){
+                $ids[] = $item->UniqueIdentifier;
+                continue;
+            }
+
             $filter = new Group("AND");
             $filter->addFilters(
                 $collection->getFilter(),
