@@ -19,6 +19,8 @@
 namespace Rhubarb\Stem\Schema\Columns;
 
 use Rhubarb\Crown\Modelling\AllPublicModelState;
+use Rhubarb\Crown\Modelling\ModelState;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * A column type that can present a group of 'sub columns' in a single datastructure.
@@ -26,11 +28,27 @@ use Rhubarb\Crown\Modelling\AllPublicModelState;
  * Useful for doing things like Address structures without requiring the model designer to add
  * all the backing columns and allow for an easier way to pass the Address structure around.
  */
-abstract class CompositeColumn extends Column
+abstract class CompositeColumn extends Column implements ModelValueInitialiserInterface
 {
     public function __construct($columnName)
     {
         parent::__construct($columnName, $this->getNewContainerObject());
+    }
+
+    public function onNewModelInitialising(Model $model)
+    {
+        $object = $this->getNewContainerObject();
+        $columns = $this->createStorageColumns();
+
+        foreach($this->getCompositeColumnsNames() as $columnName){
+            foreach($columns as $column){
+                if ($column->columnName == $this->columnName.$columnName){
+                    $object[$columnName] = $column->getDefaultValue();
+                }
+            }
+        }
+
+        $model[$this->columnName] = $object;
     }
 
     public function getPhpType()
@@ -58,6 +76,8 @@ abstract class CompositeColumn extends Column
         return new AllPublicModelState();
     }
 
+
+
     public function getTransformFromRepository()
     {
         return function ($data) {
@@ -79,7 +99,7 @@ abstract class CompositeColumn extends Column
             $compositeData = $data[$this->columnName];
 
             // Handle occasions when the data value is an object (usually stdClass) rather than an array
-            if (is_object($compositeData)) {
+            if (is_object($compositeData) && !($compositeData instanceof ModelState)) {
                 $compositeData = get_object_vars($compositeData);
             }
 
