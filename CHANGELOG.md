@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.0.x
+### 1.0.1
 
 * Change:   Collections that use join queries no longer provider multiple instances of a model during iteration.
 * Fixed:    Bug with Filter::detectPlaceHolder
