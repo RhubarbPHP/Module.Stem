@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Models;
 require_once __DIR__ . '/../Schema/SolutionSchema.php';
 require_once __DIR__ . '/../Schema/ModelSchema.php';
 
+use Rhubarb\Crown\Application;
 use Rhubarb\Crown\Modelling\ModelState;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Decorators\DataDecorator;
@@ -201,9 +202,10 @@ abstract class Model extends ModelState
     public function ensureRelationshipsArePopulated()
     {
         $className = get_class($this);
+        $relationships = &Application::current()->getSharedArray("ModelRelationships");
 
-        if (!isset(self::$relationships[$this->modelName])) {
-            self::$relationships[$this->modelName] = SolutionSchema::getAllRelationshipsForModel($this->modelName);
+        if (!isset($relationships[$this->modelName])) {
+            $relationships[$this->modelName] = SolutionSchema::getAllRelationshipsForModel($this->modelName);
 
             return $className;
         }
@@ -246,20 +248,6 @@ abstract class Model extends ModelState
     protected $modelName = "";
 
     /**
-     * The cached repository for all objects type
-     *
-     * @var Repository[]
-     */
-    private static $repositories = [];
-
-    /**
-     * A cached collection of relationships
-     *
-     * @var \Rhubarb\Stem\Schema\Relationships\Relationship[]
-     */
-    private static $relationships = [];
-
-    /**
      * A cached collection of any properties that require it.
      *
      * @var array
@@ -292,21 +280,24 @@ abstract class Model extends ModelState
      */
     final public function getRepository()
     {
-        if (!isset(self::$repositories[$this->modelName])) {
-            self::$repositories[$this->modelName] = $this->createRepository();
+        $repositories = &Application::current()->getSharedArray("ModelRepositories");
+        if (!isset($repositories[$this->modelName])) {
+            $repositories[$this->modelName] = $this->createRepository();
         }
 
-        return self::$repositories[$this->modelName];
+        return $repositories[$this->modelName];
     }
 
     /**
      * Removes all repositories from all models.
      *
      * Generally only used in unit testing to allow the default repository to be changed.
+     *
+     * @deprecated Instantiate a new application instead.
      */
     public static function deleteRepositories()
     {
-        self::$repositories = [];
+
     }
 
     /**
@@ -337,10 +328,12 @@ abstract class Model extends ModelState
      *
      * After this call all cached data for model objects will be lost and repositories will be recreated when
      * next required.
+     *
+     * @deprecated Create a new application object instead.
      */
     public static function clearAllRepositories()
     {
-        self::$repositories = [];
+
     }
 
     public function clearPropertyCache()
@@ -716,11 +709,13 @@ abstract class Model extends ModelState
         // Check for relationships
         $className = get_class($this);
 
-        if (!isset(self::$relationships[$className])) {
-            self::$relationships[$className] = SolutionSchema::getAllRelationshipsForModel($this->modelName);
+        $relationships = &Application::current()->getSharedArray("ModelRelationships");
+
+        if (!isset($relationships[$className])) {
+            $relationships[$className] = SolutionSchema::getAllRelationshipsForModel($this->modelName);
         }
 
-        if (isset(self::$relationships[$className][$propertyName])) {
+        if (isset($relationships[$className][$propertyName])) {
             return true;
         }
 
@@ -757,9 +752,10 @@ abstract class Model extends ModelState
             }
 
             $this->ensureRelationshipsArePopulated();
+            $relationships = &Application::current()->getSharedArray("ModelRelationships");
 
-            if (isset(self::$relationships[$this->modelName][$propertyName])) {
-                $relationship = self::$relationships[$this->modelName][$propertyName];
+            if (isset($relationships[$this->modelName][$propertyName])) {
+                $relationship = $relationships[$this->modelName][$propertyName];
                 $value = $relationship->fetchFor($this);
 
                 if ($value instanceof Model) {
@@ -819,9 +815,10 @@ abstract class Model extends ModelState
             $relationshipName = $parts[0];
 
             $this->ensureRelationshipsArePopulated();
+            $relationships = &Application::current()->getSharedArray("ModelRelationships");
 
-            if (isset(self::$relationships[$this->modelName][$relationshipName])) {
-                $relationship = self::$relationships[$this->modelName][$relationshipName];
+            if (isset($relationships[$this->modelName][$relationshipName])) {
+                $relationship = $relationships[$this->modelName][$relationshipName];
                 $relatedModel = SolutionSchema::getModel($relationship->getTargetModelName());
 
                 return $relatedModel->getColumnSchemaForColumnReference($parts[1], $fromModelSchema);

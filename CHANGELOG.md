@@ -3,6 +3,7 @@
 ### 1.1.x
 
 * Added:    New ColumnIntersectsCollection filter type.
+* Change:   Model cache for repositories and relationships is no in application shared data.
 
 ### 1.0.1
 
