@@ -297,7 +297,7 @@ abstract class Model extends ModelState
      */
     public static function deleteRepositories()
     {
-
+        $this->clearAllRepositories();
     }
 
     /**
@@ -328,12 +328,11 @@ abstract class Model extends ModelState
      *
      * After this call all cached data for model objects will be lost and repositories will be recreated when
      * next required.
-     *
-     * @deprecated Create a new application object instead.
      */
     public static function clearAllRepositories()
     {
-
+        Application::current()->clearSharedArray("ModelRepositories");
+        Application::current()->clearSharedArray("ModelRelationships");
     }
 
     public function clearPropertyCache()
