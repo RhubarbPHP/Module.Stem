@@ -297,7 +297,7 @@ abstract class Model extends ModelState
      */
     public static function deleteRepositories()
     {
-        $this->clearAllRepositories();
+        self::clearAllRepositories();
     }
 
     /**
