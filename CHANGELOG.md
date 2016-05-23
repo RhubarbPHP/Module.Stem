@@ -1,9 +1,11 @@
 # Change Log
 
-### 1.1.x
+### 1.1.0
 
 * Added:    New ColumnIntersectsCollection filter type.
 * Change:   Model cache for repositories and relationships is no in application shared data.
+* Fix:      Unit test fixes
+* Fix:      Composer bumps to fix ant build.
 
 ### 1.0.1
 
