@@ -80,9 +80,16 @@ class ModelLoginProvider extends LoginProvider
         // There should only be one user matching the username. It would be possible to support
         // unique *combinations* of username and password but it's a potential security issue and
         // could trip us up when supporting the project.
-        if (sizeof($list) > 1) {
-            Log::debug("Login failed for {$username} - the username wasn't unique", "LOGIN");
-            throw new LoginFailedException();
+        $existingActiveUsers = 0;
+        foreach ($list as $user) {
+            if ($this->isModelActive($user)) {
+                $existingActiveUsers++;
+            }
+
+            if ($existingActiveUsers > 1) {
+                Log::debug("Login failed for {$username} - the username wasn't unique", "LOGIN");
+                throw new LoginFailedException();
+            }
         }
 
         /**
