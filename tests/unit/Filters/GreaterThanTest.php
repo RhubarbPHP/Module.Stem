@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -10,7 +10,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class GreaterThanTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -37,7 +37,7 @@ class GreaterThanTest extends ModelUnitTestCase
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(Example::class);
     }
 
     public function testFiltersDate()

@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 class Average extends Aggregate
 {
@@ -29,7 +29,7 @@ class Average extends Aggregate
         return "AverageOf" . str_replace(".", "", $this->aggregatedColumnName);
     }
 
-    public function calculateByIteration(Collection $collection)
+    public function calculateByIteration(RepositoryCollection $collection)
     {
         $sum = 0;
         $count = sizeof($collection);

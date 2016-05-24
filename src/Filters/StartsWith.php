@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 /**
  * Keeps all records with a value that starts with a given value.
@@ -65,7 +65,7 @@ class StartsWith extends ColumnFilter
         return new self($settings["columnName"], $settings["startsWith"], $settings["caseSensitive"]);
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
         $ids = [];
 

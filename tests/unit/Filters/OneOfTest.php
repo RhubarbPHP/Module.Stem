@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\OneOf;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -10,7 +10,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class OneOfTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -49,7 +49,7 @@ class OneOfTest extends ModelUnitTestCase
         $example->Forename = "Grub";
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(Example::class);
     }
 
     public function testFilters()

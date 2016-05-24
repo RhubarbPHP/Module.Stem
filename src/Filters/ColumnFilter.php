@@ -20,7 +20,8 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . '/Filter.php';
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
@@ -56,15 +57,13 @@ abstract class ColumnFilter extends Filter
      * Converts the comparison value used in the constructor to one which can be compared against that returned
      * by the relevant model.
      *
-     * @param  $rawComparisonValue
-     * @param  Collection $list
+     * @param $rawComparisonValue
+     * @param Model $model
      * @return mixed
      */
-    final protected function getTransformedComparisonValue($rawComparisonValue, Collection $list)
+    final protected function getTransformedComparisonValue($rawComparisonValue, Model $model)
     {
-        $exampleObject = SolutionSchema::getModel($list->getModelClassName());
-
-        $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($this->columnName);
+        $columnSchema = $model->getRepositoryColumnSchemaForColumnReference($this->columnName);
 
         if ($columnSchema != null) {
             $closure = $columnSchema->getTransformIntoModelData();

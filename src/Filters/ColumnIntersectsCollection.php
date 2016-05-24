@@ -18,18 +18,18 @@
 
 namespace Rhubarb\Stem\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 class ColumnIntersectsCollection extends Filter
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     protected $collection;
 
     protected $columnName;
 
-    public function __construct($columnName, Collection $collectionToCheckForIntersection)
+    public function __construct($columnName, RepositoryCollection $collectionToCheckForIntersection)
     {
         $this->columnName = $columnName;
         $this->collection = $collectionToCheckForIntersection;
@@ -38,10 +38,10 @@ class ColumnIntersectsCollection extends Filter
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      *
-     * @param  Collection $list The data list to filter.
+     * @param  RepositoryCollection $list The data list to filter.
      * @return array
      */
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
         $idsToFilter = [];
         $ids = [];

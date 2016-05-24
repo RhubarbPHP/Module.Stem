@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Between;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -10,7 +10,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class BetweenTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -47,7 +47,7 @@ class BetweenTest extends ModelUnitTestCase
         $example->DateOfBirth = "1976-05-10";
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(Example::class);
     }
 
     public function testBetweenNumbers()

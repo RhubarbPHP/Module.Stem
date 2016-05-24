@@ -19,7 +19,7 @@
 namespace Rhubarb\Stem\Filters;
 
 use Rhubarb\Crown\Exceptions\ImplementationException;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 
@@ -43,32 +43,24 @@ abstract class Filter
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      *
-     * @param  Collection $list The data list to filter.
+     * @param Model $model
      * @return array
      */
-    abstract public function doGetUniqueIdentifiersToFilter(Collection $list);
+    abstract public function evaluate(Model $model);
 
     /**
-     * Returns an array of unique identifiers to filter from the list.
+     * Returns true if the list should remove this model from the list because it doesn't match the criteria.
      *
-     * This will be an empty array if a repository has used this filter to do it's filtering.
-     *
-     * @param  Collection $list The data list to filter.
+     * @param  Model $model The model to evaluate
      * @return array
      */
-    final public function getUniqueIdentifiersToFilter(Collection $list)
+    final public function shouldFilter(Model $model)
     {
         if ($this->wasFilteredByRepository()) {
             return [];
         }
 
-        $list->disableRanging();
-
-        $filtered = $this->doGetUniqueIdentifiersToFilter($list);
-
-        $list->enableRanging();
-
-        return $filtered;
+        return $this->evaluate($model);
     }
 
     public function detectPlaceHolder($value)

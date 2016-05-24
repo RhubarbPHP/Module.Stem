@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -13,7 +13,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class EqualsTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -35,7 +35,7 @@ class EqualsTest extends ModelUnitTestCase
         $example->Surname = "Thumb";
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(Example::class);
     }
 
     public function testFiltersMatchingRows()

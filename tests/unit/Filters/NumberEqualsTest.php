@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\NumberEquals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
@@ -15,7 +15,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class NumberEqualsTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 

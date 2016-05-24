@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/Filter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 /**
  * Removes the records NOT selected by the filter in the constructor.
@@ -41,7 +41,7 @@ class Not extends Filter
         $this->filter = $filter;
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
         $idsToKeep = $this->filter->doGetUniqueIdentifiersToFilter($list);
         $ids = [];

@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql;
 
 use Rhubarb\Stem\Aggregates\Sum;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Filters\Contains;
@@ -62,7 +62,7 @@ class MySqlTest extends MySqlTestCase
             $company->save();
         }
 
-        $collection = new Collection(Company::class);
+        $collection = new RepositoryCollection(Company::class);
         $collection->setRange(10, 4);
 
         // Need to trigger a normal population of the list otherwise count is optimised
@@ -159,11 +159,11 @@ class MySqlTest extends MySqlTestCase
         $company->CompanyName = "GCD";
         $company->save();
 
-        $this->assertCount(1, new Collection("Company"));
+        $this->assertCount(1, new RepositoryCollection("Company"));
 
         $company->delete();
 
-        $this->assertCount(0, new Collection("Company"));
+        $this->assertCount(0, new RepositoryCollection("Company"));
     }
 
     public function testRepositoryFilters()
@@ -171,7 +171,7 @@ class MySqlTest extends MySqlTestCase
         $group = new Group();
         $group->addFilters(new Equals("CompanyName", "GCD"));
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($group);
 
         $list->fetchList();
@@ -183,7 +183,7 @@ class MySqlTest extends MySqlTestCase
         $group->addFilters(new Equals("CompanyName", "GCD"));
         $group->addFilters(new Equals("Test", "GCD"));
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($group);
 
         $list->fetchList();
@@ -196,7 +196,7 @@ class MySqlTest extends MySqlTestCase
         $group = new Group();
         $group->addFilters(new Contains("CompanyName", "GCD"));
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($group);
 
         $list->fetchList();
@@ -221,7 +221,7 @@ class MySqlTest extends MySqlTestCase
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
 
-        $users = new Collection(User::class);
+        $users = new RepositoryCollection(User::class);
         $users->filter(new Equals("Company.CompanyName", "GCD"));
 
         $users->fetchList();
@@ -232,7 +232,7 @@ class MySqlTest extends MySqlTestCase
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
 
-        $users = new Collection(User::class);
+        $users = new RepositoryCollection(User::class);
         $users->replaceSort("Company.CompanyName", true);
 
         $users->fetchList();
@@ -310,7 +310,7 @@ class MySqlTest extends MySqlTestCase
 
     public function testManualAutoHydration()
     {
-        $users = new Collection(User::class);
+        $users = new RepositoryCollection(User::class);
         $users->autoHydrate("Company");
 
         $users->fetchList();
@@ -346,7 +346,7 @@ class MySqlTest extends MySqlTestCase
         $company4->CompanyName = "5";
         $company4->save();
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->filter(new OneOf("CompanyName", ["1", "3", "5"]));
 
         $this->assertCount(3, $companies);
@@ -382,7 +382,7 @@ class MySqlTest extends MySqlTestCase
         $user4->Wage = 400;
         $company2->Users->append($user4);
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.Wage"));
 
         $results = [];
@@ -398,7 +398,7 @@ class MySqlTest extends MySqlTestCase
         $this->assertEquals("SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`",
             $sql);
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.BigWage"));
 
         $results = [];
@@ -418,12 +418,12 @@ class MySqlTest extends MySqlTestCase
         $company->CompanyName = "GCD";
         $company->save();
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->filter(new Equals("CompanyName", null));
 
         $this->assertEquals(0, $companies->count());
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->filter(new Equals("ProjectCount", null));
 
         $this->assertEquals(1, $companies->count());

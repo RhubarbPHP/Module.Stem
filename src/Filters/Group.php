@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/Filter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 
 /**
@@ -107,33 +107,35 @@ class Group extends Filter
         return $this->filters;
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function evaluate(Model $model)
     {
-        $filtered = [];
-        $firstFilter = true;
+        $or = true;
 
         foreach ($this->filters as $filter) {
             if ($filter->filteredByRepository) {
                 continue;
             }
 
-            $subFiltered = $filter->doGetUniqueIdentifiersToFilter($list);
+            $subFiltered = $filter->evaluate($model);
 
             if (strtoupper($this->booleanType) == "AND") {
-                $filtered = array_merge($subFiltered, $filtered);
-            } else {
-                if ($firstFilter) {
-                    $filtered = $subFiltered;
-                    $firstFilter = false;
+                if ($subFiltered){
+                    // When ANDing, if any of the filters would remove it, we need to remove. In other words
+                    // all the filters must want to keep the model.
+                    return true;
                 }
-
-                $filtered = array_intersect($filtered, $subFiltered);
+            } else {
+                if (!$subFiltered){
+                    return false;
+                }
             }
-
-            $filtered = array_unique($filtered);
         }
 
-        return $filtered;
+        if (strtoupper($this->booleanType) == "AND") {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public function setFilterValuesOnModel(Model $model)

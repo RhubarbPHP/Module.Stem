@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Aggregates;
 
 use Rhubarb\Stem\Aggregates\Sum;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
@@ -38,7 +38,7 @@ class SumTest extends MySqlTestCase
 
     public function testSumIsCalculatedOnRepository()
     {
-        $examples = new Collection("Company");
+        $examples = new RepositoryCollection("Company");
 
         list($sumTotal) = $examples->calculateAggregates(new Sum("Balance"));
 
@@ -48,7 +48,7 @@ class SumTest extends MySqlTestCase
 
         $this->assertContains("SUM( `tblCompany`.`Balance` ) AS `SumOfBalance`", $lastStatement);
 
-        $examples = new Collection("Company");
+        $examples = new RepositoryCollection("Company");
         $examples->filter(new GreaterThan("Balance", 1));
 
         list($sumTotal) = $examples->calculateAggregates(new Sum("Balance"));

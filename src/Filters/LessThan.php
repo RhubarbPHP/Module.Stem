@@ -20,7 +20,8 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Filters items less than (or optionally equal to) a particular value
@@ -63,42 +64,39 @@ class LessThan extends ColumnFilter
     }
 
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function evaluate(Model $model)
     {
         $ids = [];
 
         $placeHolder = $this->detectPlaceHolder($this->lessThan);
 
         if (!$placeHolder) {
-            $lessThan = $this->getTransformedComparisonValue($this->lessThan, $list);
+            $lessThan = $this->getTransformedComparisonValue($this->lessThan, $model);
+
+            if (is_string($lessThan)) {
+                $lessThan = strtolower($lessThan);
+            }
+        } else {
+            $lessThan = $this->getTransformedComparisonValue($model[$placeHolder], $model);
 
             if (is_string($lessThan)) {
                 $lessThan = strtolower($lessThan);
             }
         }
 
-        foreach ($list as $item) {
-            if ($placeHolder) {
-                $lessThan = $this->getTransformedComparisonValue($item[$placeHolder], $list);
+        $valueToTest = $model[$this->columnName];
 
-                if (is_string($lessThan)) {
-                    $lessThan = strtolower($lessThan);
-                }
-            }
-
-            $valueToTest = $item[$this->columnName];
-
-            if (is_string($valueToTest)) {
-                $valueToTest = strtolower($valueToTest);
-            }
-
-            if (($valueToTest > $lessThan)
-                || ($this->inclusive == false && $valueToTest == $lessThan)
-            ) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+        if (is_string($valueToTest)) {
+            $valueToTest = strtolower($valueToTest);
         }
 
-        return $ids;
+        if (($valueToTest > $lessThan)
+            || ($this->inclusive == false && $valueToTest == $lessThan)
+        ) {
+            return true;
+        }
+
+
+        return false;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\GreaterThan;
@@ -57,7 +57,7 @@ class GroupTest extends ModelUnitTestCase
         $example->ContactID = 5;
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(Example::class);
     }
 
     public function testFiltersAnd()

@@ -98,7 +98,7 @@ class OneToMany extends Relationship
      *
      * Used for populating drop down lists etc.
      *
-     * @return \Rhubarb\Stem\Collections\Collection
+     * @return \Rhubarb\Stem\Collections\RepositoryCollection
      */
     public function getCollection()
     {

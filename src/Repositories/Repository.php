@@ -19,7 +19,8 @@
 namespace Rhubarb\Stem\Repositories;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Collections\UniqueIdentifierListCursor;
 use Rhubarb\Stem\Exceptions\ModelException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
@@ -224,13 +225,13 @@ abstract class Repository
      *
      * Used normally to hydrate data lists with their data.
      *
-     * @param  Collection $list
+     * @param  RepositoryCollection $list
      * @param  int $unfetchedRowCount An output parameter containing the number of rows left unfetched (if ranging)
      * @param  array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
      *                                                             try to auto hydrate (if supported)
      * @return array
      */
-    public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
+    public function getUniqueIdentifiersForDataList(RepositoryCollection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
     {
         // For now just returning all items in the collection.
         return array_keys($this->cachedObjectData);
@@ -239,10 +240,10 @@ abstract class Repository
     /**
      * Commits changes to the repository in batch against a collection.
      *
-     * @param Collection $collection
+     * @param RepositoryCollection $collection
      * @param $propertyPairs
      */
-    public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
+    public function batchCommitUpdatesFromCollection(RepositoryCollection $collection, $propertyPairs)
     {
         foreach ($collection as $item) {
             $item->mergeRawData($propertyPairs);
@@ -254,14 +255,14 @@ abstract class Repository
      * Returns the repository-specific command so it can be used externally for other operations.
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
-     * @param Collection $collection
+     * @param RepositoryCollection $collection
      * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
      *                                                                  try to auto hydrate (if supported)
      * @param array $namedParams Named parameters to be used in execution of the command
      *
      * @return string|null
      */
-    public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams)
+    public function getRepositoryFetchCommandForDataList(RepositoryCollection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams)
     {
         return null;
     }
@@ -272,45 +273,49 @@ abstract class Repository
      * An answer will be null if the repository is unable to answer it.
      *
      * @param  Aggregate[] $aggregates
-     * @param  Collection $collection
+     * @param  RepositoryCollection $collection
      * @return array
      */
-    public function calculateAggregates($aggregates, Collection $collection)
+    public function calculateAggregates($aggregates, RepositoryCollection $collection)
     {
         return [];
     }
 
-    public function canFilterExclusivelyByRepository(Collection $collection)
+    public function canFilterExclusivelyByRepository(RepositoryCollection $collection)
     {
         return false;
     }
 
     /**
-     * Returns the sorts needed for manual sorting.
-     *
-     * @param  Collection $list
-     * @return array
-     */
-    protected function getManualSortsRequiredForList(Collection $list)
-    {
-        return $list->getSorts();
-    }
-
-    /**
      * Get's a sorted list of unique identifiers for the supplied list.
      *
-     * @param  Collection $list
+     * @param  RepositoryCollection $list
      * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
      * @return array
      */
-    public function getSortedUniqueIdentifiersForDataList(Collection $list)
+    public function createCursorForCollection(RepositoryCollection $list)
     {
-        $sorts = $this->getManualSortsRequiredForList($list);
+        $uniqueIdentifiers = array_keys($this->cachedObjectData);
+        $filter = $list->getFilter();
+        $class = $this->modelClassName;
 
-        if (sizeof($sorts) == 0) {
-            return false;
+        if ($filter){
+
+            $uniqueIdentifiersToFilter = [];
+
+            foreach($uniqueIdentifiers as $uniqueIdentifier){
+                $model = new $class($uniqueIdentifier);
+
+                if ($filter->shouldFilter($model)){
+                    $uniqueIdentifiersToFilter[] = $uniqueIdentifier;
+                }
+            }
+            
+            $uniqueIdentifiers = array_values(array_diff($uniqueIdentifiers, $uniqueIdentifiersToFilter));
         }
 
+        return new UniqueIdentifierListCursor($uniqueIdentifiers, $this->modelClassName);
+        /*
         $schema = $list->getModelSchema();
         $columns = $schema->getColumns();
 
@@ -390,6 +395,7 @@ abstract class Repository
         }
 
         return array_values($ids);
+        */
     }
 
     /**

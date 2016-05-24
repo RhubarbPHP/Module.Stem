@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Filters\LessThan;
@@ -12,7 +12,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class GetInvertedFilterTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -56,7 +56,7 @@ class GetInvertedFilterTest extends ModelUnitTestCase
         $example->ContactID = 5;
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(Example::class);
     }
 
     function testFiltersSimple()

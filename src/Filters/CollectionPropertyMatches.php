@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . '/Equals.php';
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -60,10 +60,10 @@ class CollectionPropertyMatches extends Equals
     /**
      * Implement to return an array of unique identifiers to filter from the list.
      *
-     * @param  Collection $list The data list to filter.
+     * @param  RepositoryCollection $list The data list to filter.
      * @return array
      */
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
         $ids = [];
 

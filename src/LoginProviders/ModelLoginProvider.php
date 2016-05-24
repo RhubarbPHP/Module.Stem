@@ -25,7 +25,7 @@ use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
 use Rhubarb\Crown\LoginProviders\LoginProvider;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\Model;
@@ -67,7 +67,7 @@ class ModelLoginProvider extends LoginProvider
             throw new LoginFailedException();
         }
 
-        $list = new Collection($this->modelClassName);
+        $list = new RepositoryCollection($this->modelClassName);
         $list->filter(new Equals($this->usernameColumnName, $username));
 
         if (!sizeof($list)) {

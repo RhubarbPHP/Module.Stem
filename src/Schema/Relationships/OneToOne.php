@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Schema\Relationships;
 
 require_once __DIR__ . "/Relationship.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\Model;
@@ -53,7 +53,7 @@ class OneToOne extends Relationship
     {
         $class = SolutionSchema::getModelClass($this->targetModelName);
 
-        return new Collection($class);
+        return new RepositoryCollection($class);
     }
 
     /**
@@ -113,7 +113,7 @@ class OneToOne extends Relationship
                 return null;
             }
         } else {
-            $collection = new Collection($this->targetModelName);
+            $collection = new RepositoryCollection($this->targetModelName);
             $collection->filter(new Equals($targetColumnName, $sourceValue));
 
             if (sizeof($collection) > 0) {

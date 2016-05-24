@@ -23,7 +23,7 @@ require_once __DIR__ . '/../Schema/ModelSchema.php';
 
 use Rhubarb\Crown\Application;
 use Rhubarb\Crown\Modelling\ModelState;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Decorators\DataDecorator;
 use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
@@ -399,13 +399,13 @@ abstract class Model extends ModelState
      * Returns the Collection of models matching the given filter.
      *
      * @param Filter $filter
-     * @return Collection|static[]
+     * @return RepositoryCollection|static[]
      */
     public static function find(Filter $filter = null)
     {
         $modelClass = get_called_class();
 
-        $collections = new Collection($modelClass);
+        $collections = new RepositoryCollection($modelClass);
 
         if ($filter !== null) {
             $collections->filter($filter);

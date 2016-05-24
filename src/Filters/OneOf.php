@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 /**
  * Keeps all records which have a value matching one of the values in the given array
@@ -59,7 +59,7 @@ class OneOf extends ColumnFilter
         return new self($settings["columnName"], $settings["oneOf"]);
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
         $ids = [];
 

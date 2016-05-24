@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 class Min extends Aggregate
 {
@@ -29,7 +29,7 @@ class Min extends Aggregate
         return "MinOf" . str_replace(".", "", $this->aggregatedColumnName);
     }
 
-    public function calculateByIteration(Collection $collection)
+    public function calculateByIteration(RepositoryCollection $collection)
     {
         $min = null;
         foreach ($collection as $model) {

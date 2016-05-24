@@ -18,7 +18,7 @@
 
 namespace Rhubarb\Stem\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
@@ -52,7 +52,7 @@ class EndsWith extends ColumnFilter
         $this->caseSensitive = $caseSensitive;
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
         $ids = [];
 

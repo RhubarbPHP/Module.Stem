@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Models;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
@@ -293,11 +293,11 @@ class ModelTest extends ModelUnitTestCase
 
         $example->save();
 
-        $this->assertCount(1, new Collection("Example"));
+        $this->assertCount(1, new RepositoryCollection("Example"));
 
         $example->delete();
 
-        $this->assertCount(0, new Collection("Example"));
+        $this->assertCount(0, new RepositoryCollection("Example"));
 
         // Test that deleting a new model throws an exception.
 

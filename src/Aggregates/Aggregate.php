@@ -18,7 +18,7 @@
 
 namespace Rhubarb\Stem\Aggregates;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Repositories\Repository;
 
 /**
@@ -108,7 +108,7 @@ abstract class Aggregate
 
     abstract public function getAlias();
 
-    public function calculateByIteration(Collection $collection)
+    public function calculateByIteration(RepositoryCollection $collection)
     {
         return null;
     }

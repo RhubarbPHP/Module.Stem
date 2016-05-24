@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.2.0
+
+* Added:    Much better repository support for complicated joins, aggregates and filters
+* Added:    RepositoryCollection, UnionRepositoryCollection, ArrayCollection, CallbackCollection
+
 ### 1.1.0
 
 * Added:    New ColumnIntersectsCollection filter type.

@@ -22,7 +22,7 @@ require_once __DIR__ . "/../PdoRepository.php";
 
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Crown\Logging\Log;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
@@ -219,7 +219,7 @@ class MySql extends PdoRepository
         return 'Rhubarb\Stem\Repositories\MySql\Filters';
     }
 
-    public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
+    public function batchCommitUpdatesFromCollection(RepositoryCollection $collection, $propertyPairs)
     {
         $filter = $collection->getFilter();
 
@@ -264,12 +264,12 @@ class MySql extends PdoRepository
      * Gets the unique identifiers required for the matching filters and loads the data into
      * the cache for performance reasons.
      *
-     * @param  Collection $list
+     * @param  RepositoryCollection $list
      * @param  int $unfetchedRowCount
      * @param  array $relationshipNavigationPropertiesToAutoHydrate
      * @return array
      */
-    public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
+    public function getUniqueIdentifiersForDataList(RepositoryCollection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
     {
         $this->lastSortsUsed = [];
 
@@ -332,7 +332,7 @@ class MySql extends PdoRepository
      * Returns the repository-specific command so it can be used externally for other operations.
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
-     * @param Collection $collection
+     * @param RepositoryCollection $collection
      * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
      *                                                                  try to auto hydrate (if supported)
      * @param array $namedParams Named parameters to be used in execution of the command Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more than just the SQL command to be returned from this method.
@@ -348,7 +348,7 @@ class MySql extends PdoRepository
      * @return string The SQL command to be executed
      */
     public function getRepositoryFetchCommandForDataList(
-        Collection $collection,
+        RepositoryCollection $collection,
         $relationshipNavigationPropertiesToAutoHydrate = [],
         &$namedParams = null,
         &$joinColumns = null,
@@ -550,11 +550,11 @@ class MySql extends PdoRepository
      * An answer will be null if the repository is unable to answer it.
      *
      * @param \Rhubarb\Stem\Aggregates\Aggregate[] $aggregates
-     * @param \Rhubarb\Stem\Collections\Collection $collection
+     * @param \Rhubarb\Stem\Collections\RepositoryCollection $collection
      *
      * @return array
      */
-    public function calculateAggregates($aggregates, Collection $collection)
+    public function calculateAggregates($aggregates, RepositoryCollection $collection)
     {
         $propertiesToAutoHydrate = [];
         if (!$this->canFilterExclusivelyByRepository($collection, $namedParams, $propertiesToAutoHydrate)) {
