@@ -21,7 +21,7 @@
     "bin-dir": "bin/"
   },
   "require": {
-    "rhubarbphp/rhubarb": "1.0.x-dev@dev"
+    "rhubarbphp/rhubarb": "*"
   },
   "require-dev": {
     "rhubarbphp/custard" : "^1.0.4",
