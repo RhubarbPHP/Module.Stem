@@ -296,23 +296,6 @@ abstract class Repository
     public function createCursorForCollection(RepositoryCollection $list)
     {
         $uniqueIdentifiers = array_keys($this->cachedObjectData);
-        $filter = $list->getFilter();
-        $class = $this->modelClassName;
-
-        if ($filter){
-
-            $uniqueIdentifiersToFilter = [];
-
-            foreach($uniqueIdentifiers as $uniqueIdentifier){
-                $model = new $class($uniqueIdentifier);
-
-                if ($filter->shouldFilter($model)){
-                    $uniqueIdentifiersToFilter[] = $uniqueIdentifier;
-                }
-            }
-            
-            $uniqueIdentifiers = array_values(array_diff($uniqueIdentifiers, $uniqueIdentifiersToFilter));
-        }
 
         return new UniqueIdentifierListCursor($uniqueIdentifiers, $this->modelClassName);
         /*

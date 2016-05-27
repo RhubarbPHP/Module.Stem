@@ -42,6 +42,13 @@ abstract class Aggregate
      */
     protected $aggregatedByRepository = false;
 
+    /**
+     * True if the aggregate as already been calculated.
+     * 
+     * @var bool
+     */
+    public $calculated = false;
+
     public function __construct($aggregatedColumnName)
     {
         $this->aggregatedColumnName = $aggregatedColumnName;

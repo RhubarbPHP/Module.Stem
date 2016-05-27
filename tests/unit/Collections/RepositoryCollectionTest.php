@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
+use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
@@ -27,6 +28,23 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(1, $collection);
         $this->assertEquals("Mary", $collection[0]->Forename);
+
+        $collection = new RepositoryCollection(Example::class);
+        $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID", ["Balance"]);
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals(2, $collection[0]->Balance);
+
+        $collection = new RepositoryCollection(Example::class);
+        $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID", ["Balance" => "CompanyBalance"]);
+
+        $this->assertEquals(2, $collection[0]->CompanyBalance);
+
+        $collection = Company::all();
+        $collection->intersectWith(Example::all()->addAggregateColumn(new Count("Contacts")), "CompanyID", "CompanyID");
+
+        $this->assertCount(3, $collection);
+        $this->assertEquals(2, $collection[0]->CountOfContacts);
     }
 
     private function setupData()

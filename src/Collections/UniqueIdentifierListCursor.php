@@ -31,6 +31,11 @@ class UniqueIdentifierListCursor extends CollectionCursor
         $this->uniqueIdentifiers = $uniqueIdentifiers;
     }
 
+    public function filterModelsByIdentifier($uniqueIdentifiersToFilter)
+    {
+        $this->uniqueIdentifiers = array_values(array_diff($this->uniqueIdentifiers, $uniqueIdentifiersToFilter));
+    }
+
     /**
      * Return the current element
      * @link http://php.net/manual/en/iterator.current.php
@@ -84,7 +89,7 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function rewind()
     {
-        $this->index = -1;
+        $this->index = 0;
     }
 
     /**
@@ -115,8 +120,16 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function offsetGet($offset)
     {
+        $id = $this->uniqueIdentifiers[$offset];
+
         $class = $this->modelClassName;
-        return new $class($this->uniqueIdentifiers[$offset]);
+        $object = new $class($id);
+
+        if (isset($this->augmentationData[$id])){
+            $object->importRawData($this->augmentationData[$id]);
+        }
+
+        return $object;
     }
 
     /**

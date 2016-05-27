@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Collections;
 
+use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Filter;
 
@@ -42,16 +43,56 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private $rangingDisabled = false;
 
+    /**
+     * The collection of intersections to perform.
+     *
+     * @var Intersection[]
+     */
     private $intersections = [];
+
+    /**
+     * The collection of aggregate columns.
+     *
+     * @var Aggregate[]
+     */
+    private $aggregateColumns = [];
 
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
     }
 
-    public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName)
+    /**
+     * Create an intersection with a second collection.
+     *
+     * Only rows matching the conditions will remain in the collection.
+     *
+     * @param Collection $collection
+     * @param string $parentColumnName
+     * @param string $childColumnName
+     * @param string[] $columnsToPullUp An array of column names in the intersected collection to copy to the parent collection.
+     * @return $this
+     */
+    public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [])
     {
-        $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName);
+        $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
+
+        return $this;
+    }
+
+    /**
+     * Adds the instruction to build an aggregate column.
+     *
+     * Should be used in conjuction with group()
+     *
+     * @param Aggregate $aggregate
+     * @return $this
+     */
+    public final function addAggregateColumn(Aggregate $aggregate)
+    {
+        $this->aggregateColumns[] = $aggregate;
+
+        return $this;
     }
 
     /**
@@ -119,6 +160,98 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $this->collectionCursor = $this->createCursor();
+
+        /**
+         * Some cursors will be able to perform intersections. Any intersections remaining
+         * are handled by filterIntersections()
+         */
+        foreach($this->intersections as $intersection){
+            if (!$intersection->intersected){
+                $this->filterIntersection($intersection);
+            }
+        }
+
+        /**
+         * Some cursors will be able to perform the filtering internally. Those that can't
+         * will be handled by filterCursor()
+         */
+        if (!$this->collectionCursor->filtered){
+            $this->filterCursor();
+        }
+
+        /**
+         * Some cursors can handle aggregates. Any aggregates that aren't yet computed are mopped
+         * up in processAggregates();
+         */
+        foreach($this->aggregateColumns as $aggregateColumn){
+            if (!$aggregateColumn->calculated){
+                $this->processAggregate($aggregateColumn);
+            }
+        }
+
+        $this->collectionCursor->rewind();
+    }
+
+    private function processAggregate(Aggregate $aggregate)
+    {
+        $value = $aggregate->calculateByIteration($this);
+    }
+
+    private function filterIntersection(Intersection $intersection)
+    {
+        $childByIntersectColumn = [];
+
+        foreach($intersection->collection as $childModel){
+            $childByIntersectColumn[$childModel[$intersection->childColumnName]] = $childModel;
+        }
+
+        $uniqueIdsToFilter = [];
+        $augmentationData = [];
+        $hasColumnsToPullUp = count($intersection->columnsToPullUp);
+
+        foreach($this->collectionCursor as $parentModel){
+            $parentValue = $parentModel[$intersection->parentColumnName];
+            if (!isset($childByIntersectColumn[$parentValue])){
+                $uniqueIdsToFilter[] = $parentModel->uniqueIdentifier;
+            } elseif ($hasColumnsToPullUp) {
+
+                $augmentationData[$parentModel->uniqueIdentifier] = [];
+
+                foreach($intersection->columnsToPullUp as $column => $alias){
+                    if (is_numeric($column)){
+                        $column = $alias;
+                    }
+                    $augmentationData[$parentModel->uniqueIdentifier][$alias] = $childByIntersectColumn[$parentValue][$column];
+                }
+            }
+        }
+
+        if (count($augmentationData)){
+            $this->collectionCursor->setAugmentationData($augmentationData);
+        }
+
+        $this->collectionCursor->filterModelsByIdentifier($uniqueIdsToFilter);
+    }
+
+    /**
+     * Filters the collection manually if it wasn't able to filter itself.
+     */
+    private function filterCursor()
+    {
+        $filter = $this->getFilter();
+
+        if ($filter){
+
+            $uniqueIdentifiersToFilter = [];
+
+            foreach($this->collectionCursor as $model){
+                if ($filter->shouldFilter($model)){
+                    $uniqueIdentifiersToFilter[] = $model->uniqueIdentifier;
+                }
+            }
+
+            $this->collectionCursor->filterModelsByIdentifier($uniqueIdentifiersToFilter);
+        }
     }
 
     protected abstract function createCursor();

@@ -395,6 +395,17 @@ abstract class Model extends ModelState
         return $results[0];
     }
 
+
+    /**
+     * Returns a Collection containing all the models
+     * 
+     * @return RepositoryCollection|static[]
+     */
+    public static function all()
+    {
+        return static::find();
+    }
+
     /**
      * Returns the Collection of models matching the given filter.
      *
