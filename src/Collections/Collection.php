@@ -3,8 +3,12 @@
 namespace Rhubarb\Stem\Collections;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
+use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Filter;
+use Rhubarb\Stem\Schema\Columns\DateColumn;
+use Rhubarb\Stem\Schema\Columns\FloatColumn;
+use Rhubarb\Stem\Schema\Columns\IntegerColumn;
 
 abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 {
@@ -57,9 +61,53 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private $aggregateColumns = [];
 
+    /**
+     * An array of sorting directives.
+     *
+     * @var array
+     */
+    private $sorts = [];
+
+    /**
+     * An array of column names to group by.
+     *
+     * @var array
+     */
+    private $groups = [];
+
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
+    }
+
+    public final function addSort($columnName, $ascending = true)
+    {
+        $sort = new Sort();
+        $sort->columnName = $columnName;
+        $sort->ascending = $ascending;
+        $this->sorts[] = $sort;
+
+        return $this;
+    }
+
+    public final function replaceSorts($sorts)
+    {
+        $this->sorts = [];
+
+        foreach($sorts as $index => $value){
+            if ($value instanceof Sort){
+                $this->sorts[] = $value;
+                continue;
+            }
+
+            $sort = new Sort();
+            $sort->columnName = $index;
+            $sort->ascending = $value;
+
+            $this->sorts[] = $sort;
+        }
+
+        return $this;
     }
 
     /**
@@ -134,6 +182,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->filter;
     }
 
+    final public function getSorts()
+    {
+        return $this->sorts;
+    }
+
     public function disableRanging()
     {
         $this->rangingDisabled = true;
@@ -183,17 +236,29 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
          * Some cursors can handle aggregates. Any aggregates that aren't yet computed are mopped
          * up in processAggregates();
          */
+        $aggregatesToProcess = [];
         foreach($this->aggregateColumns as $aggregateColumn){
             if (!$aggregateColumn->calculated){
-                $this->processAggregate($aggregateColumn);
+                $aggregatesToProcess[] = $aggregateColumn;
             }
+        }
+
+        if (count($aggregatesToProcess) > 0){
+            $this->processAggregates($aggregatesToProcess);
         }
 
         $this->collectionCursor->rewind();
     }
 
-    private function processAggregate(Aggregate $aggregate)
+    /**
+     * Takes a collection of aggregates and computes their values.
+     *
+     * @param $aggregates
+     */
+    private function processAggregates($aggregates)
     {
+        $oldSorts = $this->getSorts();
+
         $value = $aggregate->calculateByIteration($this);
     }
 

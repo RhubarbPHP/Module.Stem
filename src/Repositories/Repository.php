@@ -295,29 +295,22 @@ abstract class Repository
      */
     public function createCursorForCollection(RepositoryCollection $list)
     {
-        $uniqueIdentifiers = array_keys($this->cachedObjectData);
-
-        return new UniqueIdentifierListCursor($uniqueIdentifiers, $this->modelClassName);
-        /*
-        $schema = $list->getModelSchema();
+        $schema = $this->getModelSchema();
         $columns = $schema->getColumns();
+        $class = $this->getModelClass();
 
         $arrays = [];
         $directions = [];
         $types = [];
 
-        $ids = [];
+        $ids = array_keys($this->cachedObjectData);
+        $sorts = $list->getSorts();
 
-        $count = 0;
+        foreach ($sorts as $sort) {
 
-        $list->disableRanging();
+            $columnName = $sort->columnName;
+            $ascending = $sort->ascending;
 
-        foreach ($list as $item) {
-            $ids[$count] = $item->getUniqueIdentifier();
-            $count++;
-        }
-
-        foreach ($sorts as $columnName => $ascending) {
             $arrays[$columnName] = [];
 
             $type = SORT_STRING;
@@ -341,7 +334,9 @@ abstract class Repository
 
             $count = 0;
 
-            foreach ($list as $item) {
+            foreach ($ids as $id) {
+                $item = new $class($id);
+
                 if (!isset($item[$columnName])) {
                     // If the 'column' contains a dot, we are accessing a relationship or a magical
                     // method. It is then not appropriate to say that we can't sort just because the first
@@ -377,8 +372,7 @@ abstract class Repository
             call_user_func_array("array_multisort", $params);
         }
 
-        return array_values($ids);
-        */
+        return new UniqueIdentifierListCursor(array_values($ids), $this->modelClassName);
     }
 
     /**

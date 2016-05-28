@@ -11,6 +11,15 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class RepositoryCollectionTest extends ModelUnitTestCase
 {
+    public function testCollectionSorts()
+    {
+        $this->setupData();
+
+        $collection = Example::find()->addSort("Forename", false);
+
+        $this->assertEquals("Mary", $collection[0]->Forename);
+    }
+
     public function testCollectionFilters()
     {
         $this->setupData();
