@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Aggregates;
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 
 /**
@@ -49,9 +50,20 @@ abstract class Aggregate
      */
     public $calculated = false;
 
+    /**
+     * The groups of calculated values.
+     * @var array
+     */
+    protected $groups = [];
+
     public function __construct($aggregatedColumnName)
     {
         $this->aggregatedColumnName = $aggregatedColumnName;
+    }
+
+    public function getGroups()
+    {
+        return $this->groups;
     }
 
     /**
@@ -115,7 +127,7 @@ abstract class Aggregate
 
     abstract public function getAlias();
 
-    public function calculateByIteration(RepositoryCollection $collection)
+    public function calculateByIteration(Model $model)
     {
         return null;
     }

@@ -126,7 +126,7 @@ class UniqueIdentifierListCursor extends CollectionCursor
         $object = new $class($id);
 
         if (isset($this->augmentationData[$id])){
-            $object->importRawData($this->augmentationData[$id]);
+            $object->mergeRawData($this->augmentationData[$id]);
         }
 
         return $object;

@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Aggregates;
 require_once __DIR__ . "/Aggregate.php";
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 class Average extends Aggregate
 {
@@ -29,15 +30,17 @@ class Average extends Aggregate
         return "AverageOf" . str_replace(".", "", $this->aggregatedColumnName);
     }
 
-    public function calculateByIteration(RepositoryCollection $collection)
-    {
-        $sum = 0;
-        $count = sizeof($collection);
+    protected $averageGroups = [];
 
-        foreach ($collection as $item) {
-            $sum += $item[$this->aggregatedColumnName];
+    public function calculateByIteration(Model $model, $groupKey = "")
+    {
+        if (!isset($this->averageGroups[$groupKey])){
+            $this->averageGroups[$groupKey] = [0,0,0];
         }
 
-        return $sum / $count;
+        $this->averageGroups[$groupKey][0] += $model[$this->aggregatedColumnName];
+        $this->averageGroups[$groupKey][1] += 1;
+
+        $this->groups[$groupKey] = $this->averageGroups[$groupKey][0] / $this->averageGroups[$groupKey][1];
     }
 }

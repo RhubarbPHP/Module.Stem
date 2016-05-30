@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Aggregates;
 require_once __DIR__ . "/Aggregate.php";
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 class CountDistinct extends Aggregate
 {
@@ -29,16 +30,15 @@ class CountDistinct extends Aggregate
         return "DistinctCountOf" . str_replace(".", "", $this->aggregatedColumnName);
     }
 
-    public function calculateByIteration(RepositoryCollection $collection)
+    private $distinctGroups = [];
+
+    public function calculateByIteration(Model $model, $groupKey = "")
     {
-        $items = [];
-
-        foreach ($collection as $item) {
-            $items[] = $item[$this->aggregatedColumnName];
+        if (!$this->distinctGroups[$groupKey]){
+            $this->distinctGroups[$groupKey] = [];
         }
+        $this->distinctGroups[$groupKey][] = $model[$this->aggregatedColumnName];
 
-        $items = array_unique($items);
-
-        return count($items);
+        $this->groups[$groupKey] = count(array_unique($this->distinctGroups[$groupKey]));
     }
 }

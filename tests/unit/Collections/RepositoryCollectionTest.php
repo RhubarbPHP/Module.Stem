@@ -50,10 +50,12 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertEquals(2, $collection[0]->CompanyBalance);
 
         $collection = Company::all();
-        $collection->intersectWith(Example::all()->addAggregateColumn(new Count("Contacts")), "CompanyID", "CompanyID");
+        $collection->intersectWith(Example::all()->addAggregateColumn(new Count("Contacts")), "CompanyID", "CompanyID", ["CountOfContacts"]);
 
         $this->assertCount(3, $collection);
         $this->assertEquals(2, $collection[0]->CountOfContacts);
+
+
     }
 
     private function setupData()

@@ -33,6 +33,12 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
      */
     public final function setAugmentationData($data)
     {
-        $this->augmentationData = $data;
+        foreach($data as $id => $rowData){
+            if (!isset($this->augmentationData[$id])){
+                $this->augmentationData[$id] = $rowData;
+            } else {
+                $this->augmentationData[$id] = array_merge($this->augmentationData[$id], $rowData);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Filter;
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
@@ -123,6 +124,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [])
     {
+        // Group the intersected collection by the child column:
+        $collection->groups[] = $childColumnName;
+
         $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
 
         return $this;
@@ -250,16 +254,51 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->collectionCursor->rewind();
     }
 
+    private function getGroupKeyForModel(Model $model)
+    {
+        $key = "";
+
+        foreach($this->groups as $group){
+            $key .= $model[$group]."|";
+        }
+
+        return $key;
+    }
+
     /**
      * Takes a collection of aggregates and computes their values.
      *
-     * @param $aggregates
+     * @param Aggregate[] $aggregates
      */
     private function processAggregates($aggregates)
     {
-        $oldSorts = $this->getSorts();
+        foreach($this->collectionCursor as $model){
+            foreach($aggregates as $aggregate){
+                $aggregate->calculateByIteration($model, $this->getGroupKeyForModel($model));
+            }
+        }
 
-        $value = $aggregate->calculateByIteration($this);
+        $additionalData = [];
+
+        foreach($aggregates as $aggregate){
+            $groups = $aggregate->getGroups();
+
+            foreach($this->collectionCursor as $model){
+
+                $id = $model->UniqueIdentifier;
+                $groupKey = $this->getGroupKeyForModel($model);
+
+                if (!isset($additionalData[$id])){
+                    $additionalData[$id] = [];
+                }
+
+                if (isset($groups[$groupKey])){
+                    $additionalData[$id][$aggregate->getAlias()] = $groups[$groupKey];
+                }
+            }
+        }
+        
+        $this->collectionCursor->setAugmentationData($additionalData);
     }
 
     private function filterIntersection(Intersection $intersection)
