@@ -252,22 +252,6 @@ abstract class Repository
     }
 
     /**
-     * Returns the repository-specific command so it can be used externally for other operations.
-     * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
-     *
-     * @param RepositoryCollection $collection
-     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
-     *                                                                  try to auto hydrate (if supported)
-     * @param array $namedParams Named parameters to be used in execution of the command
-     *
-     * @return string|null
-     */
-    public function getRepositoryFetchCommandForDataList(RepositoryCollection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams)
-    {
-        return null;
-    }
-
-    /**
      * Computes the given aggregates and returns an array of answers
      *
      * An answer will be null if the repository is unable to answer it.
@@ -289,11 +273,11 @@ abstract class Repository
     /**
      * Get's a sorted list of unique identifiers for the supplied list.
      *
-     * @param  RepositoryCollection $list
+     * @param  RepositoryCollection $collection
      * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
      * @return array
      */
-    public function createCursorForCollection(RepositoryCollection $list)
+    public function createCursorForCollection(RepositoryCollection $collection)
     {
         $schema = $this->getModelSchema();
         $columns = $schema->getColumns();
@@ -304,7 +288,7 @@ abstract class Repository
         $types = [];
 
         $ids = array_keys($this->cachedObjectData);
-        $sorts = $list->getSorts();
+        $sorts = $collection->getSorts();
 
         foreach ($sorts as $sort) {
 
@@ -356,7 +340,7 @@ abstract class Repository
             }
         }
 
-        $list->enableRanging();
+        $collection->enableRanging();
 
         if (sizeof($arrays)) {
             $params = [];

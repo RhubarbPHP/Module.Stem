@@ -28,6 +28,7 @@ use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\MySql\Collections\MySqlCursor;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
@@ -275,7 +276,7 @@ class MySql extends PdoRepository
 
         $schema = $this->reposSchema;
 
-        $sql = $this->getRepositoryFetchCommandForDataList($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
+        $sql = $this->getRepositoryFetchCommandForCollection($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
 
         $statement = self::executeStatement($sql, $namedParams);
 
@@ -329,217 +330,36 @@ class MySql extends PdoRepository
     }
 
     /**
+     * Get's a sorted list of unique identifiers for the supplied list.
+     *
+     * @param  RepositoryCollection $collection
+     * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
+     * @return array
+     */
+    public function createCursorForCollection(RepositoryCollection $collection)
+    {
+        $params = [];
+
+        $sql = $this->getRepositoryFetchCommandForCollection($collection, $params);
+        $statement = MySql::executeStatement($sql, $params);
+
+        return new MySqlCursor($statement, $this);
+    }
+
+    /**
      * Returns the repository-specific command so it can be used externally for other operations.
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
      * @param RepositoryCollection $collection
-     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
-     *                                                                  try to auto hydrate (if supported)
-     * @param array $namedParams Named parameters to be used in execution of the command Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more than just the SQL command to be returned from this method.
-     *
-     * Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more
-     * than just the SQL command to be returned from this method.
-     *
-     * @param array $joinColumns
-     * @param array $joinOriginalToAliasLookup
-     * @param array $joinColumnsByModel
-     * @param bool $ranged
-     *
+     * @param string[] $namedParams
      * @return string The SQL command to be executed
      */
-    public function getRepositoryFetchCommandForDataList(
-        RepositoryCollection $collection,
-        $relationshipNavigationPropertiesToAutoHydrate = [],
-        &$namedParams = null,
-        &$joinColumns = null,
-        &$joinOriginalToAliasLookup = null,
-        &$joinColumnsByModel = null,
-        &$ranged = null
-    ) {
-        $schema = $this->reposSchema;
-        $table = $schema->schemaName;
+    public function getRepositoryFetchCommandForCollection(RepositoryCollection $collection, &$namedParams)
+    {
+        $model = $collection->getModelClassName();
+        $schema = SolutionSchema::getModelSchema($model);
 
-        $whereClause = "";
-
-        $filter = $collection->getFilter();
-
-        $namedParams = [];
-        $propertiesToAutoHydrate = $relationshipNavigationPropertiesToAutoHydrate;
-
-        $filteredExclusivelyByRepository = true;
-
-        if ($filter !== null) {
-            $filterSql = $filter->filterWithRepository($this, $namedParams, $propertiesToAutoHydrate);
-
-            if ($filterSql != "") {
-                $whereClause .= " WHERE " . $filterSql;
-            }
-
-            $filteredExclusivelyByRepository = $filter->wasFilteredByRepository();
-        }
-
-        $relationships = SolutionSchema::getAllRelationshipsForModel($this->getModelClass());
-
-        $aggregateColumnClause = "";
-        $aggregateColumnClauses = [];
-        $aggregateColumnAliases = [];
-
-        $aggregateRelationshipPropertiesToAutoHydrate = [];
-
-        foreach ($collection->getAggregates() as $aggregate) {
-            $clause = $aggregate->aggregateWithRepository($this, $aggregateRelationshipPropertiesToAutoHydrate);
-
-            if ($clause != "") {
-                $aggregateColumnClauses[] = $clause;
-                $aggregateColumnAliases[] = $aggregate->getAlias();
-            }
-        }
-
-        if (sizeof($aggregateColumnClauses) > 0) {
-            $aggregateColumnClause = ", " . implode(", ", $aggregateColumnClauses);
-        }
-
-        $aggregateRelationshipPropertiesToAutoHydrate = array_unique($aggregateRelationshipPropertiesToAutoHydrate);
-
-        $joins = [];
-        $groups = [];
-
-        foreach ($aggregateRelationshipPropertiesToAutoHydrate as $joinRelationship) {
-            /**
-             * @var OneToMany $relationship
-             */
-            $relationship = $relationships[$joinRelationship];
-
-            $targetModelName = $relationship->getTargetModelName();
-            $targetModelClass = SolutionSchema::getModelClass($targetModelName);
-
-            /**
-             * @var Model $targetModel
-             */
-            $targetModel = new $targetModelClass();
-            $targetSchema = $targetModel->getSchema();
-
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
-            $groups[] = "`{$table}`.`" . $relationship->getSourceColumnName() . '`';
-        }
-
-        $joinColumns = [];
-        $joinOriginalToAliasLookup = [];
-        $joinColumnsByModel = [];
-
-        $sorts = $collection->getSorts();
-        $possibleSorts = [];
-        $columns = $schema->getColumns();
-
-        foreach ($sorts as $columnName => $ascending) {
-            if (!isset($columns[$columnName])) {
-                // If this is a one to one relationship we can still sort by using auto hydration.
-                $parts = explode(".", $columnName);
-                $relationshipProperty = $parts[0];
-                $escapedColumnName = '`' . implode('`.`', $parts) . '`';
-
-                if (isset($relationships[$relationshipProperty]) && ($relationships[$relationshipProperty] instanceof OneToOne)) {
-                    $propertiesToAutoHydrate[] = $relationshipProperty;
-
-                    $possibleSorts[] = $escapedColumnName . " " . (($ascending) ? "ASC" : "DESC");
-                    $this->lastSortsUsed[] = $columnName;
-                } else {
-                    // If the request sorts contain any that we can't sort by we must only sort by those
-                    // after this column.
-                    $possibleSorts = [];
-                    $this->lastSortsUsed = [];
-                }
-            } else {
-                $possibleSorts[] = '`' . str_replace('.', '`.`', $columnName) . "` " . (($ascending) ? "ASC" : "DESC");
-                $this->lastSortsUsed[] = $columnName;
-            }
-        }
-
-        $propertiesToAutoHydrate = array_unique($propertiesToAutoHydrate);
-
-        foreach ($propertiesToAutoHydrate as $joinRelationship) {
-            /**
-             * @var OneToMany $relationship
-             */
-            $relationship = $relationships[$joinRelationship];
-
-            $targetModelName = $relationship->getTargetModelName();
-            $targetModelClass = SolutionSchema::getModelClass($targetModelName);
-
-            /**
-             * @var Model $targetModel
-             */
-            $targetModel = new $targetModelClass();
-            $targetSchema = $targetModel->getRepository()->getRepositorySchema();
-
-            $columns = $targetSchema->getColumns();
-
-            foreach ($columns as $column) {
-                $storageColumns = $column->getStorageColumns();
-
-                foreach ($storageColumns as $storageColumn) {
-                    $columnName = $storageColumn->columnName;
-
-                    $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
-                    $joinOriginalToAliasLookup[$targetModelName . "." . $columnName] = $targetModelName . $columnName;
-
-                    if (!isset($joinColumnsByModel[$targetModelName])) {
-                        $joinColumnsByModel[$targetModelName] = [];
-                    }
-
-                    $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
-                }
-            }
-
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
-        }
-
-        $joinString = "";
-        $joinColumnClause = "";
-
-        if (sizeof($joins)) {
-
-            if (!in_array("`{$table}`.`".$schema->uniqueIdentifierColumnName."`", $groups)){
-                $groups[] = "`{$table}`.`".$schema->uniqueIdentifierColumnName."`";
-            }
-
-            $joinString = " " . implode(" ", $joins);
-
-            $joinClauses = [];
-
-            foreach ($joinColumns as $aliasName => $columnName) {
-                $joinClauses[] = "{$columnName} AS `{$aliasName}`";
-            }
-
-            if (sizeof($joinClauses)) {
-                $joinColumnClause = ", " . implode(", ", $joinClauses);
-            }
-        }
-
-        $groupClause = "";
-
-        if (sizeof($groups)) {
-            $groupClause = " GROUP BY " . implode(", ", $groups);
-        }
-
-        $orderBy = "";
-        if (sizeof($possibleSorts)) {
-            $orderBy .= " ORDER BY " . implode(", ", $possibleSorts);
-        }
-
-        $sql = "SELECT `{$table}`.*{$joinColumnClause}{$aggregateColumnClause} FROM `{$table}`" . $joinString . $whereClause . $groupClause . $orderBy;
-
-        $ranged = false;
-
-        if ($filteredExclusivelyByRepository && (sizeof($possibleSorts) == sizeof($sorts))) {
-            $range = $collection->getRange();
-
-            if ($range != false) {
-                $ranged = true;
-                $sql .= " LIMIT " . $range[0] . ", " . $range[1];
-                $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
-            }
-        }
+        $sql = "SELECT * FROM `".$schema->schemaName."`";
 
         return $sql;
     }
@@ -678,7 +498,7 @@ class MySql extends PdoRepository
                     "mysql:host=" . $settings->host . ";port=" . $settings->port . ";dbname=" . $settings->database . ";charset=utf8",
                     $settings->username,
                     $settings->password,
-                    [\PDO::ERRMODE_EXCEPTION => true]
+                    [\PDO::ERRMODE_EXCEPTION => true, \PDO::MYSQL_ATTR_FOUND_ROWS => true]
                 );
 
                 $timeZone = $pdo->query("SELECT @@system_time_zone");

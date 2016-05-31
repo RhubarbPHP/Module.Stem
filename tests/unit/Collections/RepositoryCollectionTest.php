@@ -64,7 +64,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
     }
 
-    private function setupData()
+    protected function setupData()
     {
         $company = new Company();
         $company->CompanyName = "C1";
