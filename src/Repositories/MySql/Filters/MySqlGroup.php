@@ -23,31 +23,41 @@ require_once __DIR__ . "/../../../Filters/Group.php";
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\AndExpression;
+use Rhubarb\Stem\Sql\OrExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlGroup extends Group
 {
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
 
+        switch ($originalFilter->booleanType){
+            case "OR":
+                $group = new OrExpression();
+                break;
+            default:
+                $group = new AndExpression();
+                break;
+        }
+
+        /**
+         * @var Filter[] $filters
+         */
         $filters = $originalFilter->getFilters();
         $filterSql = [];
 
         foreach ($filters as $filter) {
-            $thisFilterSql = $filter->filterWithRepository($repository, $params, $propertiesToAutoHydrate);
-
-            if ($thisFilterSql != "") {
-                $filterSql[] = $thisFilterSql;
-            }
+            $filter->filterWithRepository($repository, $group, $params);
         }
 
-        if (sizeof($filterSql) > 0) {
-            return "( " . implode(" " . $originalFilter->booleanType . " ", $filterSql) . " )";
+        if (sizeof($group->whereExpressions) > 0) {
+            $whereExpressionCollector->addWhereExpression($group);
         }
-
-        return "";
     }
 }

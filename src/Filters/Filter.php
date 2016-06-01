@@ -22,6 +22,8 @@ use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
  * The base class for all DataFilters.
@@ -88,14 +90,14 @@ abstract class Filter
      *
      * @param \Rhubarb\Stem\Repositories\Repository $repository
      * @param Filter $originalFilter The base filter containing the settings we need.
+     * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param $propertiesToAutoHydrate
      */
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
 
 
@@ -105,11 +107,11 @@ abstract class Filter
      * Returns A string containing information needed for a repository to use a filter directly.
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param WhereExpressionCollector $sqlStatement
      * @param  array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param  array $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
      * @return string
      */
-    final public function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
+    final public function filterWithRepository(Repository $repository, WhereExpressionCollector $sqlStatement, &$params)
     {
         $namespace = $repository->getFiltersNamespace();
 
@@ -125,7 +127,7 @@ abstract class Filter
         if (class_exists($className)) {
             return call_user_func_array(
                 $className . "::doFilterWithRepository",
-                [$repository, $this, &$params, &$propertiesToAutoHydrate]
+                [$repository, $this, $sqlStatement, &$params]
             );
         }
 

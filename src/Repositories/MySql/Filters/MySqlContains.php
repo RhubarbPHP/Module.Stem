@@ -23,6 +23,8 @@ require_once __DIR__ . "/../../../Filters/Contains.php";
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlContains extends Contains
 {
@@ -31,29 +33,22 @@ class MySqlContains extends Contains
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        SqlStatement $whereExpressionCollector,
+        &$params
     ) {
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName, $propertiesToAutoHydrate)) {
+        if (self::canFilter($repository, $columnName)) {
             $paramName = uniqid() . str_replace(".", "", $columnName);
 
             $params[$paramName] = "%" . $originalFilter->contains . "%";
 
             $originalFilter->filteredByRepository = true;
 
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
-            } else {
-                $columnName = str_replace('.', '`.`', $columnName);
-            }
-
-            return "`{$columnName}` LIKE :{$paramName}";
+            $whereExpressionCollector->andWhere(new ColumnWhereExpression($columnName, "LIKE :".$paramName));
+        } else {
+            parent::doFilterWithRepository($repository, $originalFilter, $whereExpressionCollector, $params);
         }
-
-        parent::doFilterWithRepository($repository, $originalFilter, $object, $params, $propertiesToAutoHydrate);
     }
 }

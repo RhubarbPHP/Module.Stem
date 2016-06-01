@@ -9,7 +9,7 @@ class Intersection
     public $parentColumnName;
 
     public $childColumnName;
-
+    
     public $columnsToPullUp = [];
 
     /**

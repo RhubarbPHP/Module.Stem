@@ -39,40 +39,16 @@ trait MySqlFilterTrait
      *
      * @param  Repository $repository
      * @param  string $columnName
-     * @param  string[] $propertiesToAutoHydrate
      * @return bool True if the MySql Repository can add this filter to its where clause.
      * @throws FilterNotSupportedException
      */
-    protected static function canFilter(Repository $repository, $columnName, &$propertiesToAutoHydrate)
+    protected static function canFilter(Repository $repository, $columnName)
     {
         $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
 
         if (!isset($columns[$columnName])) {
-            if (stripos($columnName, ".") !== false) {
-                $parts = explode(".", $columnName);
-
-                if (sizeof($parts) == 2) {
-                    $relationship = $parts[0];
-
-                    $relationships = SolutionSchema::getAllRelationshipsForModel($repository->getModelClass());
-
-                    if (isset($relationships[$relationship])) {
-                        if ($relationships[$relationship] instanceof OneToOne) {
-                            // This is a foreign field and as the __isset() returned true there must be a relationship for this
-                            $propertiesToAutoHydrate[] = $relationship;
-                        } else {
-                            throw new FilterNotSupportedException("Only OneToOne relationships are supported for Repository filtering, $relationship is not OneToOne");
-                        }
-                    } else {
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            return false;
         }
 
         return true;

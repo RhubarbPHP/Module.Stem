@@ -140,7 +140,7 @@ class MySqlCursor extends CollectionCursor
      */
     public function rewind()
     {
-        $this->index = -1;
+        $this->index = 0;
     }
 
     /**

@@ -65,7 +65,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * An array of sorting directives.
      *
-     * @var array
+     * @var Sort[]
      */
     private $sorts = [];
 
@@ -189,6 +189,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     final public function getSorts()
     {
         return $this->sorts;
+    }
+
+    final public function getIntersections()
+    {
+        return $this->intersections;
     }
 
     public function disableRanging()

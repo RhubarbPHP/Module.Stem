@@ -23,6 +23,9 @@ require_once __DIR__ . "/../../../Filters/Equals.php";
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlEquals extends Equals
 {
@@ -33,40 +36,29 @@ class MySqlEquals extends Equals
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
      * @param  Equals|Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
-     * @param  array $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$relationshipsToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
-
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
-            $queryColumnName = $columnName;
-            if (strpos($queryColumnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $queryColumnName = $schema->schemaName . "`.`" . $queryColumnName;
-            } else {
-                $queryColumnName = str_replace('.', '`.`', $queryColumnName);
-            }
-
+        if (self::canFilter($repository, $columnName)) {
             if ($originalFilter->equalTo === null) {
-                return "`{$queryColumnName}` IS NULL";
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IS NULL"));
             }
 
-            $paramName = uniqid() . str_replace(".", "", $columnName);
-
-            $originalFilter->filteredByRepository = true;
+            $paramName = uniqid() . $columnName;
 
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->equalTo);
 
             if (!$placeHolder) {
-                $params[$paramName] = $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                $params[$paramName] = self::getTransformedComparisonValueForRepository(
                     $columnName,
                     $originalFilter->equalTo,
                     $repository
@@ -76,7 +68,7 @@ class MySqlEquals extends Equals
                 $paramName = $placeHolder;
             }
 
-            return "`{$queryColumnName}` = {$paramName}";
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " = ".$paramName));
         }
     }
 }

@@ -33,6 +33,10 @@ use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Sql\Join;
+use Rhubarb\Stem\Sql\SelectColumn;
+use Rhubarb\Stem\Sql\SortExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 use Rhubarb\Stem\StemSettings;
 
 class MySql extends PdoRepository
@@ -276,7 +280,7 @@ class MySql extends PdoRepository
 
         $schema = $this->reposSchema;
 
-        $sql = $this->getRepositoryFetchCommandForCollection($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
+        $sql = $this->getSqlStatementForCollection($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
 
         $statement = self::executeStatement($sql, $namedParams);
 
@@ -340,7 +344,7 @@ class MySql extends PdoRepository
     {
         $params = [];
 
-        $sql = $this->getRepositoryFetchCommandForCollection($collection, $params);
+        $sql = $this->getSqlStatementForCollection($collection, $params);
         $statement = MySql::executeStatement($sql, $params);
 
         return new MySqlCursor($statement, $this);
@@ -354,14 +358,47 @@ class MySql extends PdoRepository
      * @param string[] $namedParams
      * @return string The SQL command to be executed
      */
-    public function getRepositoryFetchCommandForCollection(RepositoryCollection $collection, &$namedParams)
+    public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams)
     {
         $model = $collection->getModelClassName();
         $schema = SolutionSchema::getModelSchema($model);
 
-        $sql = "SELECT * FROM `".$schema->schemaName."`";
+        $sqlStatement = new SqlStatement();
+        $sqlStatement->schemaName = $schema->schemaName;
+        $sqlStatement->columns[] = new SelectColumn();
 
-        return $sql;
+        foreach($collection->getIntersections() as $intersection){
+            $join = new Join();
+            $join->statement = $this->getSqlStatementForCollection($intersection->collection, $namedParams);
+            $join->joinType = Join::JOIN_TYPE_INNER;
+            $join->parentColumn = $intersection->parentColumnName;
+            $join->childColumn = $intersection->childColumnName;
+
+            $sqlStatement->joins[] = $join;
+
+            foreach($intersection->columnsToPullUp as $column => $alias){
+                if (is_numeric($column)){
+                    $column = $alias;
+                }
+
+                $sqlStatement->columns[] = new SelectColumn("`".$join->statement->getAlias()."`.".$column, $alias);
+            }
+        }
+        
+        $filter = $collection->getFilter();
+
+        if ($filter){
+            $filter->filterWithRepository($this, $sqlStatement, $namedParams);
+        }
+
+        $sorts = $collection->getSorts();
+
+        foreach($sorts as $sort){
+            /// TODO: What if the column isn't in the table - how do we fall back to normal sorting.
+            $sqlStatement->sorts[] = new SortExpression($sort->columnName, $sort->ascending);
+        }
+
+        return $sqlStatement;
     }
 
     /**
