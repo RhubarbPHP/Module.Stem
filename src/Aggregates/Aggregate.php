@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Aggregates;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 /**
  * A base class for aggregates
@@ -66,19 +67,6 @@ abstract class Aggregate
         return $this->groups;
     }
 
-    /**
-     * Returns the column to be used when calcuating by iteration
-     *
-     * Provided in case this aggregate is working on a relationship.
-     */
-    protected function getModelColumnForIteration()
-    {
-        $parts = explode(".", $this->aggregatedColumnName);
-
-        return $parts[sizeof($parts) - 1];
-    }
-
-
     final public function getAggregateColumnName()
     {
         return $this->aggregatedColumnName;
@@ -92,7 +80,8 @@ abstract class Aggregate
     protected static function calculateByRepository(
         Repository $repository,
         Aggregate $originalAggregate,
-        &$relationshipsToAutoHydrate
+        SqlStatement $sqlStatement,
+        &$namedParams
     ) {
 
 
@@ -105,10 +94,11 @@ abstract class Aggregate
      * to the repository will be returned.
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  $relationshipsToAutoHydrate
+     * @param SqlStatement $sqlStatement
+     * @param $namedParams
      * @return mixed|string
      */
-    final public function aggregateWithRepository(Repository $repository, &$relationshipsToAutoHydrate)
+    final public function aggregateWithRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
         $reposName = basename(str_replace("\\", "/", get_class($repository)));
 
@@ -118,7 +108,7 @@ abstract class Aggregate
         if (class_exists($className)) {
             return call_user_func_array(
                 $className . "::calculateByRepository",
-                [$repository, $this, &$relationshipsToAutoHydrate]
+                [$repository, $this, $sqlStatement, &$namedParams]
             );
         }
 

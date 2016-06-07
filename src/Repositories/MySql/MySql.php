@@ -33,8 +33,10 @@ use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Sql\GroupExpression;
 use Rhubarb\Stem\Sql\Join;
 use Rhubarb\Stem\Sql\SelectColumn;
+use Rhubarb\Stem\Sql\SelectExpression;
 use Rhubarb\Stem\Sql\SortExpression;
 use Rhubarb\Stem\Sql\SqlStatement;
 use Rhubarb\Stem\StemSettings;
@@ -356,20 +358,23 @@ class MySql extends PdoRepository
      *
      * @param RepositoryCollection $collection
      * @param string[] $namedParams
+     * @param string $intersectionColumnName If the collection is an intersection, we pass the column within the collection
+     *                                       used for the joins. This is essential to allow aggregate expressions to group
+     *                                       correctly.
      * @return string The SQL command to be executed
      */
-    public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams)
+    public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
     {
         $model = $collection->getModelClassName();
         $schema = SolutionSchema::getModelSchema($model);
 
         $sqlStatement = new SqlStatement();
         $sqlStatement->schemaName = $schema->schemaName;
-        $sqlStatement->columns[] = new SelectColumn();
+        $sqlStatement->columns[] = new SelectExpression("`".$sqlStatement->getAlias()."`.*");
 
         foreach($collection->getIntersections() as $intersection){
             $join = new Join();
-            $join->statement = $this->getSqlStatementForCollection($intersection->collection, $namedParams);
+            $join->statement = $this->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->childColumnName);
             $join->joinType = Join::JOIN_TYPE_INNER;
             $join->parentColumn = $intersection->parentColumnName;
             $join->childColumn = $intersection->childColumnName;
@@ -383,6 +388,8 @@ class MySql extends PdoRepository
 
                 $sqlStatement->columns[] = new SelectColumn("`".$join->statement->getAlias()."`.".$column, $alias);
             }
+
+            $intersection->intersected = true;
         }
         
         $filter = $collection->getFilter();
@@ -396,6 +403,18 @@ class MySql extends PdoRepository
         foreach($sorts as $sort){
             /// TODO: What if the column isn't in the table - how do we fall back to normal sorting.
             $sqlStatement->sorts[] = new SortExpression($sort->columnName, $sort->ascending);
+        }
+        
+        $aggregates = $collection->getAggregateColumns();
+
+        if (sizeof($aggregates)) {
+            if ($intersectionColumnName) {
+                $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $intersectionColumnName . "`");
+            }
+
+            foreach ($aggregates as $aggregate) {
+                $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
+            }
         }
 
         return $sqlStatement;

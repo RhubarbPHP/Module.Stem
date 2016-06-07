@@ -20,20 +20,21 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 class Sum extends Aggregate
 {
-    public function calculateByIteration(RepositoryCollection $collection)
-    {
-        $sum = 0;
-        $column = $this->getModelColumnForIteration();
+    private $sum = 0;
 
-        foreach ($collection as $item) {
-            $sum += $item[$column];
+    public function calculateByIteration(Model $model, $groupKey = "")
+    {
+        $column = $this->aggregatedColumnName;
+
+        if (!isset($this->groups[$groupKey])){
+            $this->groups[$groupKey] = 0;
         }
 
-        return $sum;
+        $this->groups[$groupKey] += $model[$column];
     }
 
     public function getAlias()

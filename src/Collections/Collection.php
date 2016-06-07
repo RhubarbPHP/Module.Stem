@@ -148,6 +148,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
+     * Returns the list of aggregate columns.
+     * 
+     * @return \Rhubarb\Stem\Aggregates\Aggregate[]
+     */
+    public final function getAggregateColumns()
+    {
+        return $this->aggregateColumns;
+    }
+
+    /**
      * Returns the name of the model in our collection.
      *
      * @return string

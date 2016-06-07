@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Sql;
 
-class SelectColumn extends SqlClause
+class SelectColumn extends SelectExpression
 {
     public $columnName;
     public $alias;
@@ -11,12 +11,10 @@ class SelectColumn extends SqlClause
     {
         $this->columnName = $columnName;
         $this->alias = $alias;
-    }
 
-    public function getSql()
-    {
         if (!$this->columnName){
-            return "*";
+            parent::__construct("*");
+            return;
         }
 
         if (strpos($this->columnName, '`') !== false){
@@ -29,6 +27,6 @@ class SelectColumn extends SqlClause
             $sql .= " AS `" . $this->alias . "`";
         }
 
-        return $sql;
+        parent::__construct($sql);
     }
 }

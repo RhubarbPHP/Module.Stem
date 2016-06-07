@@ -7,7 +7,7 @@ use Rhubarb\Stem\Filters\AndGroup;
 class SqlStatement extends SqlClause implements WhereExpressionCollector
 {
     /**
-     * @var SelectColumn[]
+     * @var SelectExpression[]
      */
     public $columns = [];
 
@@ -30,6 +30,11 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
      * @var SortExpression[]
      */
     public $sorts = [];
+
+    /**
+     * @var GroupExpression[]
+     */
+    public $groups = [];
 
     private $alias = "";
 
@@ -60,17 +65,8 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
     public function getSql()
     {
         $sql = "SELECT ";
-        $columnsWithAliases = [];
 
-        foreach($this->columns as $column){
-            if (strpos($column, ".") !== false){
-                $columnsWithAliases[] = $column;
-            } else {
-                $columnsWithAliases[] = "`" . $this->getAlias() . "`." . $column;
-            }
-        }
-
-        $sql .= implode($columnsWithAliases, ", ").
+        $sql .= implode($this->columns, ", ").
             " FROM `".$this->schemaName."` AS `".$this->getAlias()."`";
 
         foreach($this->joins as $join){
@@ -84,6 +80,10 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
         if (count($this->sorts)){
             $sql .= " ORDER BY ".implode($this->sorts, ", ");
+        }
+
+        if (count($this->groups)){
+            $sql .= " GROUP BY ".implode($this->groups, ", ");
         }
 
         return $sql;
