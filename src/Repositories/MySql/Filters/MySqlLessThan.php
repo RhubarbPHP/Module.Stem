@@ -22,6 +22,8 @@ require_once __DIR__ . "/../../../Filters/LessThan.php";
 
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 /**
  * Adds MySql repository support for the Equals filter.
@@ -42,18 +44,16 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$relationshipsToAutoHydrate
+        SqlStatement $whereExpressionCollector,
+        &$params
     ) {
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
-            $paramName = uniqid() . str_replace(".", "", $columnName);
+        if (self::canFilter($repository, $columnName)) {
+            $paramName = uniqid();
 
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->lessThan);
-
-            $originalFilter->filteredByRepository = true;
 
             if (!$placeHolder) {
                 $params[$paramName] = self::getTransformedComparisonValueForRepository(
@@ -66,20 +66,15 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
                 $paramName = $placeHolder;
             }
 
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
+            if ($originalFilter->inclusive) {
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '<= '.$paramName));
             } else {
-                $columnName = str_replace('.', '`.`', $columnName);
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '< '.$paramName));
             }
 
-            if ($originalFilter->inclusive) {
-                return "`{$columnName}` <= $paramName";
-            } else {
-                return "`{$columnName}` < $paramName";
-            }
+            return true;
         }
 
-        parent::doFilterWithRepository($repository, $originalFilter, $object, $params);
+        return false;
     }
 }

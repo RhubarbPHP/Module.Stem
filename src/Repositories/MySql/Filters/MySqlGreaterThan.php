@@ -23,6 +23,8 @@ require_once __DIR__ . "/../../../Filters/GreaterThan.php";
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 /**
  * Adds MySql repository support for the Equals filter.
@@ -43,18 +45,16 @@ class MySqlGreaterThan extends GreaterThan
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$relationshipsToAutoHydrate
+        SqlStatement $whereExpressionCollector,
+        &$params
     ) {
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
-            $paramName = uniqid() . str_replace(".", "", $columnName);
+        if (self::canFilter($repository, $columnName)) {
+            $paramName = uniqid();
 
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->greaterThan);
-
-            $originalFilter->filteredByRepository = true;
 
             if (!$placeHolder) {
                 $params[$paramName] = self::getTransformedComparisonValueForRepository(
@@ -67,20 +67,15 @@ class MySqlGreaterThan extends GreaterThan
                 $paramName = $placeHolder;
             }
 
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
+            if ($originalFilter->inclusive) {
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '>= '.$paramName));
             } else {
-                $columnName = str_replace('.', '`.`', $columnName);
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '> '.$paramName));
             }
 
-            if ($originalFilter->inclusive) {
-                return "`{$columnName}` >= {$paramName}";
-            } else {
-                return "`{$columnName}` > {$paramName}";
-            }
+            return true;
         }
 
-        parent::doFilterWithRepository($repository, $originalFilter, $object, $params);
+        return false;
     }
 }

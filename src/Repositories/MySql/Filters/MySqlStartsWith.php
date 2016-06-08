@@ -23,6 +23,7 @@ require_once __DIR__ . "/../../../Filters/StartsWith.php";
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\StartsWith;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlStartsWith extends StartsWith
 {
@@ -31,29 +32,22 @@ class MySqlStartsWith extends StartsWith
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        SqlStatement $whereExpressionCollector,
+        &$params
     ) {
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName, $propertiesToAutoHydrate)) {
-            $paramName = uniqid() . str_replace(".", "", $columnName);
+        if (self::canFilter($repository, $columnName)) {
+            $paramName = uniqid() . $columnName;
 
             $params[$paramName] = "" . $originalFilter->startsWith . "%";
 
-            $originalFilter->filteredByRepository = true;
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "LIKE :".$paramName));
 
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
-            } else {
-                $columnName = str_replace('.', '`.`', $columnName);
-            }
-
-            return "`{$columnName}` LIKE :{$paramName}";
+            return true;
         }
 
-        parent::doFilterWithRepository($repository, $originalFilter, $object, $params, $propertiesToAutoHydrate);
+        return false;
     }
 }

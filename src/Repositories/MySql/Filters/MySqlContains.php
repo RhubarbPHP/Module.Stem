@@ -40,15 +40,13 @@ class MySqlContains extends Contains
         $columnName = $originalFilter->columnName;
 
         if (self::canFilter($repository, $columnName)) {
-            $paramName = uniqid() . str_replace(".", "", $columnName);
-
+            $paramName = uniqid() . $columnName;
             $params[$paramName] = "%" . $originalFilter->contains . "%";
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "LIKE :".$paramName));
 
-            $originalFilter->filteredByRepository = true;
-
-            $whereExpressionCollector->andWhere(new ColumnWhereExpression($columnName, "LIKE :".$paramName));
-        } else {
-            parent::doFilterWithRepository($repository, $originalFilter, $whereExpressionCollector, $params);
+            return true;
         }
+
+        return false;
     }
 }

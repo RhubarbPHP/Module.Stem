@@ -24,6 +24,7 @@ use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\NumberEquals;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlNumberEquals extends NumberEquals
 {
@@ -41,15 +42,13 @@ class MySqlNumberEquals extends NumberEquals
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$relationshipsToAutoHydrate
+        SqlStatement $whereExpressionCollector,
+        &$params
     ) {
         if ($originalFilter->isNumeric) {
-            return MySqlEquals::doFilterWithRepository($repository, $originalFilter, $params, $relationshipsToAutoHydrate);
+            return MySqlEquals::doFilterWithRepository($repository, $originalFilter, $whereExpressionCollector, $params);
         }
 
-        $originalFilter->filteredByRepository = true;
-
-        return null;
+        return true;
     }
 }
