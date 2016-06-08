@@ -17,6 +17,8 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         parent::setUp();
 
+        Log::clearLogs();
+        
         Repository::setDefaultRepositoryClassName(MySql::class);
 
         $settings = StemSettings::singleton();
@@ -34,6 +36,8 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
         MySql::executeStatement("TRUNCATE TABLE tblContact");
+
+        $this->setupData();
     }
 
     protected function setupData()
@@ -42,6 +46,4 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         Log::attachLog(new PhpLog(Log::PERFORMANCE_LEVEL));
     }
-
-
 }

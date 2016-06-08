@@ -12,10 +12,15 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class RepositoryCollectionTest extends ModelUnitTestCase
 {
+    protected function setUp()
+    {
+        parent::setUp();
+
+        $this->setupData();
+    }
+
     public function testCollectionSorts()
     {
-        $this->setupData();
-
         $collection = Example::find()->addSort("Forename", false);
 
         $this->assertEquals("Mary", $collection[0]->Forename);
@@ -23,8 +28,6 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
     public function testCollectionFilters()
     {
-        $this->setupData();
-
         $collection = new RepositoryCollection(Example::class);
 
         $this->assertCount(4, $collection);
@@ -33,6 +36,10 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(2, $collection);
 
+    }
+
+    public function testIntersections()
+    {
         $collection = new RepositoryCollection(Example::class);
         $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID");
 
@@ -49,7 +56,10 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID", ["Balance" => "CompanyBalance"]);
 
         $this->assertEquals(2, $collection[0]->CompanyBalance);
+    }
 
+    public function testAggregates()
+    {
         $collection = Company::all();
         $collection->intersectWith(
             Example::all()
