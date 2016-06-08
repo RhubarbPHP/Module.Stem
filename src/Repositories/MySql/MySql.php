@@ -347,9 +347,22 @@ class MySql extends PdoRepository
         $params = [];
 
         $sql = $this->getSqlStatementForCollection($collection, $params);
+        $hasLimit = $sql->hasLimit();
+
+        if ($hasLimit){
+            $sql = (string) $sql;
+            $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
+        }
+
         $statement = MySql::executeStatement($sql, $params);
 
-        return new MySqlCursor($statement, $this);
+        $count = $statement->rowCount();
+
+        if ($hasLimit){
+            $count = MySql::returnSingleValue("SELECT FOUND_ROWS()");
+        }
+
+        return new MySqlCursor($statement, $this, $count);
     }
 
     /**
@@ -361,7 +374,7 @@ class MySql extends PdoRepository
      * @param string $intersectionColumnName If the collection is an intersection, we pass the column within the collection
      *                                       used for the joins. This is essential to allow aggregate expressions to group
      *                                       correctly.
-     * @return string The SQL command to be executed
+     * @return SqlStatement The SQL command to be executed
      */
     public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
     {
@@ -373,6 +386,15 @@ class MySql extends PdoRepository
         $sqlStatement->columns[] = new SelectExpression("`".$sqlStatement->getAlias()."`.*");
 
         foreach($collection->getIntersections() as $intersection){
+
+            if (!($intersection->collection instanceof RepositoryCollection)){
+                continue;
+            }
+
+            if (!$intersection->collection->canBeFilteredByRepository()){
+                continue;
+            }
+
             $join = new Join();
             $join->statement = $this->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->childColumnName);
             $join->joinType = Join::JOIN_TYPE_INNER;
@@ -415,6 +437,13 @@ class MySql extends PdoRepository
             foreach ($aggregates as $aggregate) {
                 $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
             }
+        }
+
+        $rangeStart = $collection->getRangeStart();
+        $rangeEnd = $collection->getRangeEnd();
+
+        if ($rangeStart > 0 || $rangeEnd !== null){
+            $sqlStatement->limit($rangeStart, $rangeEnd - $rangeStart + 1);
         }
 
         return $sqlStatement;

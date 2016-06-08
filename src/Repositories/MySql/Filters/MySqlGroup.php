@@ -30,6 +30,31 @@ use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlGroup extends Group
 {
+    /**
+     * Return true if the repository can handle this filter.
+     *
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @return bool
+     */
+    protected static function doCanFilterWithRepository(
+        Repository $repository,
+        Filter $originalFilter
+    ){
+        /**
+         * @var Filter[] $filters
+         */
+        $filters = $originalFilter->getFilters();
+
+        foreach ($filters as $filter) {
+            if (!$filter->canFilterWithRepository($repository)){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,

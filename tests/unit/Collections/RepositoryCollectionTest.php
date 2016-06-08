@@ -4,6 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Collections;
 
 use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Aggregates\Sum;
+use Rhubarb\Stem\Collections\ArrayCollection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
@@ -84,6 +85,42 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertCount(3, $collection);
         $this->assertEquals(2, $collection[1]->SumOfCompanyID);
         $this->assertEquals(2, $collection[0]->SumOfCompanyID);
+    }
+
+    public function testLimits()
+    {
+        $collection = Company::all();
+        $collection->setRange(0, 2);
+
+        $x = 0;
+        foreach($collection as $item){
+            $x++;
+        }
+
+        $this->assertEquals(2, $x);
+        $this->assertEquals(3, count($collection));
+    }
+
+    public function testIntersectionsWithNonRepositoryCollections()
+    {
+        $collection = Company::all();
+        $contacts = Example::all();
+        $contrivedArray = [];
+
+        foreach($contacts as $contact){
+            $contrivedArray[] = $contact;
+        }
+
+        $collection->intersectWith(
+            (new ArrayCollection("Example", $contrivedArray))
+            ->addAggregateColumn(new Count("Contacts")),
+            "CompanyID",
+            "CompanyID",
+            ["CountOfContacts"]);
+
+        $this->assertCount(3, $collection);
+        $this->assertEquals(1, $collection[1]->CountOfContacts);
+        $this->assertEquals(2, $collection[0]->CountOfContacts);
     }
 
     protected function setupData()

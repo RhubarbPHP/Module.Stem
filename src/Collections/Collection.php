@@ -10,6 +10,7 @@ use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
+use Rhubarb\Stem\Schema\SolutionSchema;
 
 abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 {
@@ -88,6 +89,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $sort->ascending = $ascending;
         $this->sorts[] = $sort;
 
+        $this->invalidate();
+
         return $this;
     }
 
@@ -107,6 +110,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
             $this->sorts[] = $sort;
         }
+
+        $this->invalidate();
 
         return $this;
     }
@@ -129,6 +134,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
 
+        $this->invalidate();
+
         return $this;
     }
 
@@ -143,6 +150,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public final function addAggregateColumn(Aggregate $aggregate)
     {
         $this->aggregateColumns[] = $aggregate;
+        $this->invalidate();
 
         return $this;
     }
@@ -186,6 +194,66 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    private $rangeStartIndex = 0;
+    private $rangeEndIndex = null;
+
+    public function disableRanging()
+    {
+        $this->rangingDisabled = true;
+    }
+
+    public function enableRanging()
+    {
+        $this->rangingDisabled = false;
+    }
+
+    public function getRangeStart()
+    {
+        return $this->rangeStartIndex;
+    }
+
+    public function getRangeEnd()
+    {
+        return $this->rangeEndIndex;
+    }
+
+
+    /**
+     * Limits the range of iteration from startIndex to startIndex + maxItems
+     *
+     * This can be used by the repository to employ limits but generally allows for easy paging of a list.
+     *
+     * @param  int $startIndex
+     * @param  int $maxItems
+     * @return $this
+     */
+    public function setRange($startIndex, $maxItems)
+    {
+        $changed = false;
+        if (sizeof($this->sorts) == 0) {
+            $this->addSort(SolutionSchema::getModelSchema($this->getModelClassName())->uniqueIdentifierColumnName);
+        }
+
+        if ($this->rangeStartIndex != $startIndex) {
+            $this->rangeStartIndex = $startIndex;
+            $changed = true;
+        }
+
+        if ($this->rangeEndIndex != $startIndex + $maxItems - 1) {
+            $this->rangeEndIndex = $startIndex + $maxItems - 1;
+            $changed = true;
+        }
+
+        if ($changed) {
+            // Ranges can often be reset to the same values in which case we don't want to invalidate the list
+            // as that would cause another query being sent to the database.
+            $this->invalidate();
+        }
+
+        return $this;
+    }
+
+
     /**
      * Returns the Filter object being used to filter models for this collection.
      *
@@ -204,16 +272,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     final public function getIntersections()
     {
         return $this->intersections;
-    }
-
-    public function disableRanging()
-    {
-        $this->rangingDisabled = true;
-    }
-
-    public function enableRanging()
-    {
-        $this->rangingDisabled = false;
     }
 
     private function invalidate()
@@ -264,6 +322,20 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         if (count($aggregatesToProcess) > 0){
             $this->processAggregates($aggregatesToProcess);
+        }
+
+        /**
+         * Some cursors can't handle ranging on their own. If we have more rows than we should have we
+         * wrap the cursor in the RangeLimitedCursor to supply the required behaviour.
+         */
+
+        if ($this->rangeStartIndex > 0 || $this->rangeEndIndex !== null ){
+            if ($this->collectionCursor->count() > (($this->rangeEndIndex - $this->rangeStartIndex) + 1)) {
+                $this->collectionCursor = new RangeLimitedCursor(
+                                                        $this->collectionCursor,
+                                                        $this->rangeStartIndex,
+                                                        $this->rangeEndIndex);
+            }
         }
 
         $this->collectionCursor->rewind();

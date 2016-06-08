@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Repositories;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
+use Rhubarb\Stem\Collections\RangeLimitedCursor;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Collections\UniqueIdentifierListCursor;
 use Rhubarb\Stem\Exceptions\ModelException;
@@ -316,7 +317,7 @@ abstract class Repository
             $types[$columnName] = $type;
             $directions[$columnName] = ($ascending) ? SORT_ASC : SORT_DESC;
 
-            $count = 0;
+            $totalCount = 0;
 
             foreach ($ids as $id) {
                 $item = new $class($id);
@@ -335,8 +336,8 @@ abstract class Repository
                     $itemValue = $item[$columnName];
                 }
 
-                $arrays[$columnName][$count] = $itemValue;
-                $count++;
+                $arrays[$columnName][$totalCount] = $itemValue;
+                $totalCount++;
             }
         }
 

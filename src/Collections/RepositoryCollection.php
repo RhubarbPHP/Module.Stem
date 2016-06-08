@@ -53,6 +53,17 @@ class RepositoryCollection extends Collection
         return $repository;
     }
 
+    public function canBeFilteredByRepository()
+    {
+        $filter = $this->getFilter();
+
+        if (!$filter){
+            return true;
+        }
+
+        return $filter->canFilterWithRepository($this->getRepository());
+    }
+
     protected function createCursor()
     {
         $repository = $this->getRepository();

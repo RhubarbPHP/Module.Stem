@@ -4,10 +4,13 @@ namespace Rhubarb\Stem\Tests\unit\Collections;
 
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\Logging\PhpLog;
+use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\StemSettings;
+use Rhubarb\Stem\Tests\unit\Fixtures\Company;
+use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 
 class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 {
@@ -38,6 +41,29 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         MySql::executeStatement("TRUNCATE TABLE tblContact");
 
         $this->setupData();
+    }
+
+
+    public function testCollectionsNotFilterableInRepository()
+    {
+        $collection = Company::find(
+            new Equals("CompanyIDSquared", 4)
+        );
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals(2, $collection[0]->UniqueIdentifier);
+    }
+
+    public function testCollectionIntersectWithNotFilterableCollections()
+    {
+        $example = Example::all();
+        $example->intersectWith(
+            Company::find(
+                new Equals("CompanyIDSquared", 4)
+            ), "CompanyID", "CompanyID");
+
+        $this->assertCount(1, $example);
+        $this->assertEquals("Mary", $example[0]->Forename);
     }
 
     protected function setupData()

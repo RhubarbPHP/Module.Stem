@@ -38,19 +38,27 @@ class MySqlCursor extends CollectionCursor
 
     private $rowCount = 0;
 
-    public function __construct(\PDOStatement $statement, Repository $repository)
+    private $totalCount = 0;
+
+    private $filteredCount = 0;
+
+    private $filteredIds = [];
+
+    public function __construct(\PDOStatement $statement, Repository $repository, $totalCount)
     {
         $this->statement = $statement;
         $this->repository = $repository;
         $this->schema = $repository->getModelSchema();
         $this->modelClassName = $repository->getModelClass();
         $this->uniqueIdentifier = $this->schema->uniqueIdentifierColumnName;
-        $this->rowCount = $this->statement->rowCount();
+        $this->rowCount = $statement->rowCount();
+        $this->totalCount = $totalCount;
     }
 
     public function filterModelsByIdentifier($uniqueIdentifiers)
     {
-
+        $this->filteredIds = array_merge($this->filteredIds, $uniqueIdentifiers);
+        $this->filteredCount = count($this->filteredIds);
     }
 
     public function offsetGet($index)
@@ -68,6 +76,10 @@ class MySqlCursor extends CollectionCursor
         }
 
         $id = $this->rowsFetched[$index];
+
+        if (in_array($id, $this->filteredIds)){
+            return $this->offsetGet($index+1);
+        }
 
         $class = $this->modelClassName;
 
@@ -107,6 +119,14 @@ class MySqlCursor extends CollectionCursor
     public function next()
     {
         $this->index++;
+
+        if ($this->valid()) {
+            $model = $this->offsetGet($this->index);
+
+            if (in_array($model->UniqueIdentifier, $this->filteredIds)){
+                $this->next();
+            }
+        }
     }
 
     /**
@@ -129,7 +149,7 @@ class MySqlCursor extends CollectionCursor
      */
     public function valid()
     {
-        return ($this->index < $this->count());
+        return $this->offsetExists($this->index);
     }
 
     /**
@@ -157,7 +177,7 @@ class MySqlCursor extends CollectionCursor
      */
     public function offsetExists($offset)
     {
-        return ($offset < $this->count() && $offset >= 0);
+        return ($offset < ($this->rowCount - $this->filteredCount) && $offset >= 0);
     }
 
     /**
@@ -204,6 +224,6 @@ class MySqlCursor extends CollectionCursor
      */
     public function count()
     {
-        return $this->rowCount;
+        return $this->totalCount - $this->filteredCount;
     }
 }

@@ -38,6 +38,10 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
     private $alias = "";
 
+    private $limitStart = false;
+
+    private $limitCount = false;
+
     public function addWhereExpression(WhereExpression $where)
     {
         if (!($this->whereExpression instanceof AndExpression)){
@@ -62,6 +66,17 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         return $this->alias;
     }
 
+    public function limit($start, $count)
+    {
+        $this->limitStart = $start;
+        $this->limitCount = $count;
+    }
+
+    public function hasLimit()
+    {
+        return ($this->limitStart || $this->limitCount);
+    }
+
     public function getSql()
     {
         $sql = "SELECT ";
@@ -84,6 +99,10 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
         if (count($this->groups)){
             $sql .= " GROUP BY ".implode($this->groups, ", ");
+        }
+
+        if ($this->hasLimit()){
+            $sql .= " LIMIT ".$this->limitStart.", ".$this->limitCount;
         }
 
         return $sql;

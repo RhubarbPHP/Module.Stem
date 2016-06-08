@@ -19,6 +19,8 @@
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
+use Rhubarb\Stem\Filters\ColumnFilter;
+use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -52,6 +54,24 @@ trait MySqlFilterTrait
         }
 
         return true;
+    }
+
+    /**
+     * Return true if the repository can handle this filter.
+     *
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @return bool
+     */
+    protected static function doCanFilterWithRepository(
+        Repository $repository,
+        Filter $originalFilter
+    ){
+        if ($originalFilter instanceof ColumnFilter) {
+            return self::canFilter($repository, $originalFilter->getColumnName());
+        }
+
+        return false;
     }
 
     protected final static function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository)

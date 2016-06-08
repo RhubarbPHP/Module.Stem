@@ -69,6 +69,10 @@ class MySqlEquals extends Equals
             }
 
             $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " = ".$paramName));
+
+            return true;
         }
+
+        return false;
     }
 }
