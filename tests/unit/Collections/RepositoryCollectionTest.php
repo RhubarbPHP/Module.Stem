@@ -123,6 +123,15 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertEquals(2, $collection[0]->CountOfContacts);
     }
 
+    public function testDotNotationOnFilters()
+    {
+        $collection = new RepositoryCollection(Example::class);
+        $collection->filter(new Equals("Contacts.CompanyID", 2));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals(2, $collection[0]->CompanyID);
+    }
+
     protected function setupData()
     {
         $company = new Company();
