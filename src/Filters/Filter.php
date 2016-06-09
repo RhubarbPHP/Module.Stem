@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Filters;
 
 use Rhubarb\Crown\Exceptions\ImplementationException;
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
@@ -238,4 +239,6 @@ abstract class Filter
 
         return $filter;
     }
+
+    abstract public function checkForRelationshipIntersections(Collection $collection);
 }

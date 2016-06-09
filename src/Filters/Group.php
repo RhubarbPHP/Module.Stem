@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/Filter.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 
@@ -146,6 +147,13 @@ class Group extends Filter
 
         foreach ($this->filters as $filter) {
             $filter->setFilterValuesOnModel($model);
+        }
+    }
+
+    public function checkForRelationshipIntersections(Collection $collection)
+    {
+        foreach($this->filters as $filter){
+            $filter->checkForRelationshipIntersections($collection);
         }
     }
 }

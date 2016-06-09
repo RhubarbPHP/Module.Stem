@@ -20,8 +20,13 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . '/Filter.php';
 
+use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\Intersection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
@@ -74,5 +79,42 @@ abstract class ColumnFilter extends Filter
         }
 
         return $rawComparisonValue;
+    }
+
+    public function checkForRelationshipIntersections(Collection $collection)
+    {
+        $parts = explode(".",$this->columnName);
+        if (sizeof($parts) > 1){
+
+            $columnName = $parts[sizeof($parts)-1];
+            $relationships = SolutionSchema::getAllRelationshipsForModel($collection->getModelClassName());
+            
+            for($x = 0; $x < sizeof($parts) - 1; $x++){
+                $relationshipPropertyName = $parts[$x];
+
+                if (!isset($relationships[$relationshipPropertyName])){
+                    throw new FilterNotSupportedException("The column ".$this->columnName." couldn't be expanded to intersections");
+                }
+
+                $relationship = $relationships[$relationshipPropertyName];
+
+                if ($relationship instanceof OneToMany) {
+                    $targetModel = $relationship->getTargetModelName();
+                    $parentColumn = $relationship->getSourceColumnName();
+                    $childColumn = $relationship->getTargetColumnName();
+
+                    $collection->intersectWith(
+                        new RepositoryCollection($targetModel),
+                        $parentColumn,
+                        $childColumn,
+                        [
+                            $columnName
+                        ]
+                    );
+                }
+            }
+
+            $this->columnName = $parts[sizeof($parts)-1];
+        }
     }
 }

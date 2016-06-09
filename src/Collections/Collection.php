@@ -10,6 +10,8 @@ use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
+use Rhubarb\Stem\Schema\Relationships\OneToMany;
+use Rhubarb\Stem\Schema\Relationships\Relationship;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 abstract class Collection implements \ArrayAccess, \Iterator, \Countable
@@ -287,6 +289,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         if ($this->collectionCursor != null){
             // Cursor already exists, we shouldn't bother making a new one.
             return;
+        }
+
+        // Before we prepare the cursor we should ask all of our filters, sorts and aggregates to
+        // check if they have any dot notations that need expanded into intersections.
+        
+        $filter = $this->getFilter();
+
+        if ($filter){
+            $filter->checkForRelationshipIntersections($this);
         }
 
         $this->collectionCursor = $this->createCursor();
