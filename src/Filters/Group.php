@@ -22,6 +22,7 @@ require_once __DIR__ . "/Filter.php";
 
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
 
 /**
@@ -150,10 +151,18 @@ class Group extends Filter
         }
     }
 
-    public function checkForRelationshipIntersections(Collection $collection)
+    public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
     {
+        $filtersToRemove = [];
+
         foreach($this->filters as $filter){
-            $filter->checkForRelationshipIntersections($collection);
+            try {
+                $filter->checkForRelationshipIntersections($collection, $createIntersectionCallback);
+            } catch (CreatedIntersectionException $ex){
+                $filtersToRemove[] = $filter;
+            }
         }
+
+        $this->filters = array_diff($this->filters, $filtersToRemove);
     }
 }

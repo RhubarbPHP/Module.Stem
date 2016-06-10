@@ -18,9 +18,9 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
      */
     public $whereExpressions = [];
 
-    public function getSql()
+    public function getSql(SqlStatement $forStatement)
     {
-        return implode($this->whereExpressions, " ".$this->boolean." ");
+        return $forStatement->implodeSqlClauses($this->whereExpressions, " ".$this->boolean." ");
     }
 
     public function addWhereExpression(WhereExpression $expression)

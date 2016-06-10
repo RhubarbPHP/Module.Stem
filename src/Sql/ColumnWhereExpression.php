@@ -13,8 +13,8 @@ class ColumnWhereExpression extends WhereExpression
         $this->expression = $expression;
     }
 
-    public function getSql()
+    public function getSql(SqlStatement $forStatement)
     {
-        return "`".$this->columnName."` ".$this->expression;
+        return "`".$forStatement->getAlias()."`.`".$this->columnName."` ".$this->expression;
     }
 }

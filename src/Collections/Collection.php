@@ -3,6 +3,8 @@
 namespace Rhubarb\Stem\Collections;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
+use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Filter;
@@ -11,6 +13,7 @@ use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
+use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\Relationships\Relationship;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -82,6 +85,20 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
+    }
+
+    /**
+     * Get's the repository used by the associated data object.
+     *
+     * @return \Rhubarb\Stem\Repositories\Repository
+     */
+    public function getRepository()
+    {
+        $emptyObject = SolutionSchema::getModel($this->modelClassName);
+
+        $repository = $emptyObject->getRepository();
+
+        return $repository;
     }
 
     public final function addSort($columnName, $ascending = true)
@@ -293,11 +310,46 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         // Before we prepare the cursor we should ask all of our filters, sorts and aggregates to
         // check if they have any dot notations that need expanded into intersections.
-        
+
+        $createIntersectionCallback = function($intersectionsNeeded){
+            $collection = $this;
+
+            foreach($intersectionsNeeded as $relationshipPropertyName){
+                $relationships = SolutionSchema::getAllRelationshipsForModel($collection->getModelClassName());
+
+                if (!isset($relationships[$relationshipPropertyName])){
+                    throw new FilterNotSupportedException("The column couldn't be expanded to intersections");
+                }
+
+                $relationship = $relationships[$relationshipPropertyName];
+
+                if ($relationship instanceof OneToMany || $relationship instanceof OneToOne) {
+                    $targetModel = $relationship->getTargetModelName();
+                    $parentColumn = $relationship->getSourceColumnName();
+                    $childColumn = $relationship->getTargetColumnName();
+
+                    $collection->intersectWith(
+                        $newCollection = new RepositoryCollection($targetModel),
+                        $parentColumn,
+                        $childColumn,
+                        []
+                    );
+
+                    $collection = $newCollection;
+                }
+            }
+
+            return $collection;
+        };
+
         $filter = $this->getFilter();
 
         if ($filter){
-            $filter->checkForRelationshipIntersections($this);
+            try {
+                $filter->checkForRelationshipIntersections($this, $createIntersectionCallback);
+            } catch (CreatedIntersectionException $ex){
+                $this->filter = null;
+            }
         }
 
         $this->collectionCursor = $this->createCursor();

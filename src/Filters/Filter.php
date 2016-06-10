@@ -231,6 +231,7 @@ abstract class Filter
      * Create's a filter object of the correct type from the settings array.
      *
      * @param $settings
+     * @return mixed
      */
     final public static function speciateFromSettingsArray($settings)
     {
@@ -240,5 +241,5 @@ abstract class Filter
         return $filter;
     }
 
-    abstract public function checkForRelationshipIntersections(Collection $collection);
+    abstract public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback);
 }

@@ -7,6 +7,7 @@ use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\ArrayCollection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Filters\StartsWith;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\Example;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -31,7 +32,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
     {
         $collection = new RepositoryCollection(Example::class);
 
-        $this->assertCount(4, $collection);
+        $this->assertCount(5, $collection);
 
         $collection->filter(new Equals("Forename", "John"));
 
@@ -71,7 +72,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(3, $collection);
         $this->assertEquals(1, $collection[1]->CountOfContacts);
-        $this->assertEquals(2, $collection[0]->CountOfContacts);
+        $this->assertEquals(3, $collection[0]->CountOfContacts);
 
         $collection = Company::all();
         $collection->intersectWith(
@@ -84,7 +85,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(3, $collection);
         $this->assertEquals(2, $collection[1]->SumOfCompanyID);
-        $this->assertEquals(2, $collection[0]->SumOfCompanyID);
+        $this->assertEquals(3, $collection[0]->SumOfCompanyID);
     }
 
     public function testLimits()
@@ -120,7 +121,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(3, $collection);
         $this->assertEquals(1, $collection[1]->CountOfContacts);
-        $this->assertEquals(2, $collection[0]->CountOfContacts);
+        $this->assertEquals(3, $collection[0]->CountOfContacts);
     }
 
     public function testDotNotationOnFilters()
@@ -130,6 +131,26 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(1, $collection);
         $this->assertEquals(2, $collection[0]->CompanyID);
+
+        $collection = new RepositoryCollection(Company::class);
+        $collection->filter(new Equals("Contacts.Forename", "Mary"));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals(2, $collection[0]->CompanyID);
+
+        $collection = new RepositoryCollection(Example::class);
+        $collection->filter(new Equals("Company.CompanyName", "C2"));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals("Mary", $collection[0]->Forename);
+
+        $collection = new RepositoryCollection(Example::class);
+        $collection->filter(new Equals("Company.Contacts.Forename", "Babs"));
+
+        $this->assertCount(3, $collection);
+        $this->assertEquals("John", $collection[0]->Forename);
+        $this->assertEquals("John", $collection[1]->Forename);
+        $this->assertEquals("Babs", $collection[2]->Forename);
     }
 
     protected function setupData()
@@ -166,6 +187,11 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $contact = new Example();
         $contact->Forename = "John";
+        $contact->CompanyID = 1;
+        $contact->save();
+
+        $contact = new Example();
+        $contact->Forename = "Babs";
         $contact->CompanyID = 1;
         $contact->save();
     }

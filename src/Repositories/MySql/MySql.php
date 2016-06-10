@@ -396,7 +396,10 @@ class MySql extends PdoRepository
             }
 
             $join = new Join();
-            $join->statement = $this->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->childColumnName);
+
+            $intersectionRepository = $intersection->collection->getRepository();
+
+            $join->statement = $intersectionRepository->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->childColumnName);
             $join->joinType = Join::JOIN_TYPE_INNER;
             $join->parentColumn = $intersection->parentColumnName;
             $join->childColumn = $intersection->childColumnName;

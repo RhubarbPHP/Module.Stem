@@ -39,20 +39,6 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class RepositoryCollection extends Collection
 {
-    /**
-     * Get's the repository used by the associated data object.
-     *
-     * @return \Rhubarb\Stem\Repositories\Repository
-     */
-    protected function getRepository()
-    {
-        $emptyObject = SolutionSchema::getModel($this->modelClassName);
-
-        $repository = $emptyObject->getRepository();
-
-        return $repository;
-    }
-
     public function canBeFilteredByRepository()
     {
         $filter = $this->getFilter();

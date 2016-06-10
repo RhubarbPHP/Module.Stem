@@ -13,9 +13,9 @@ class SortExpression extends SqlClause
         $this->ascending = $ascending;
     }
 
-    public function getSql()
+    public function getSql(SqlStatement $forStatement)
     {
-        $sql = "`".$this->columnName."`";
+        $sql = "`".$forStatement->getAlias()."`.`".$this->columnName."`";
 
         if (!$this->ascending){
             $sql .= " DESC";

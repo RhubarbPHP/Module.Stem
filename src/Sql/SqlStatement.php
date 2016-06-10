@@ -77,28 +77,39 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         return ($this->limitStart || $this->limitCount);
     }
 
-    public function getSql()
+    public function implodeSqlClauses($clauses, $glue = ',')
+    {
+        $statements = [];
+
+        foreach($clauses as $clause){
+            $statements[] = $clause->getSql($this);
+        }
+
+        return implode($statements, $glue);
+    }
+
+    public function getStatementSql()
     {
         $sql = "SELECT ";
 
-        $sql .= implode($this->columns, ", ").
+        $sql .= $this->implodeSqlClauses($this->columns, ", ").
             " FROM `".$this->schemaName."` AS `".$this->getAlias()."`";
 
         foreach($this->joins as $join){
-            $sql .= " ".$join->joinType." (".$join.") AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
+            $sql .= " ".$join->joinType." (".$join->getSql($this).") AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
                 $join->parentColumn."` = `".$join->statement->getAlias()."`.`".$join->childColumn."`";
         }
 
         if ($this->whereExpression) {
-            $sql .= " WHERE ".$this->whereExpression;
+            $sql .= " WHERE ".$this->whereExpression->getSql($this);
         }
 
         if (count($this->sorts)){
-            $sql .= " ORDER BY ".implode($this->sorts, ", ");
+            $sql .= " ORDER BY ".$this->implodeSqlClauses($this->sorts, ", ");
         }
 
         if (count($this->groups)){
-            $sql .= " GROUP BY ".implode($this->groups, ", ");
+            $sql .= " GROUP BY ".$this->implodeSqlClauses($this->groups, ", ");
         }
 
         if ($this->hasLimit()){
@@ -106,5 +117,15 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         }
 
         return $sql;
+    }
+    
+    public function getSql(SqlStatement $forStatement)
+    {
+        return $this->getStatementSql();
+    }
+
+    public function __toString()
+    {
+        return $this->getStatementSql();
     }
 }

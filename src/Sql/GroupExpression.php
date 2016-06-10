@@ -13,7 +13,7 @@ class GroupExpression extends SqlClause
         $this->expression = $expression;
     }
 
-    public function getSql()
+    public function getSql(SqlStatement $forStatement)
     {
         return $this->expression;
     }

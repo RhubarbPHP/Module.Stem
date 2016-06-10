@@ -24,6 +24,7 @@ use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\Intersection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
@@ -81,40 +82,18 @@ abstract class ColumnFilter extends Filter
         return $rawComparisonValue;
     }
 
-    public function checkForRelationshipIntersections(Collection $collection)
+    public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
     {
         $parts = explode(".",$this->columnName);
+
         if (sizeof($parts) > 1){
-
-            $columnName = $parts[sizeof($parts)-1];
-            $relationships = SolutionSchema::getAllRelationshipsForModel($collection->getModelClassName());
-            
-            for($x = 0; $x < sizeof($parts) - 1; $x++){
-                $relationshipPropertyName = $parts[$x];
-
-                if (!isset($relationships[$relationshipPropertyName])){
-                    throw new FilterNotSupportedException("The column ".$this->columnName." couldn't be expanded to intersections");
-                }
-
-                $relationship = $relationships[$relationshipPropertyName];
-
-                if ($relationship instanceof OneToMany) {
-                    $targetModel = $relationship->getTargetModelName();
-                    $parentColumn = $relationship->getSourceColumnName();
-                    $childColumn = $relationship->getTargetColumnName();
-
-                    $collection->intersectWith(
-                        new RepositoryCollection($targetModel),
-                        $parentColumn,
-                        $childColumn,
-                        [
-                            $columnName
-                        ]
-                    );
-                }
-            }
-
             $this->columnName = $parts[sizeof($parts)-1];
+            $intersectionsNeeded = array_slice($parts,0, sizeof($parts) - 1 );
+
+            $collection = $createIntersectionCallback($intersectionsNeeded);
+            $collection->filter($this);
+
+            throw new CreatedIntersectionException();
         }
     }
 }
