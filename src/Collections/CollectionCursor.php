@@ -41,4 +41,9 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
             }
         }
     }
+
+    public final function getAugmentationData()
+    {
+        return $this->augmentationData;
+    }
 }

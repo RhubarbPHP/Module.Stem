@@ -24,7 +24,7 @@ use Rhubarb\Stem\Collections\RepositoryCollection;
 
 class Min extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
         return "MinOf" . str_replace(".", "", $this->aggregatedColumnName);
     }

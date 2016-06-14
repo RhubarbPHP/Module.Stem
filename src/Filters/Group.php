@@ -155,14 +155,16 @@ class Group extends Filter
     {
         $filtersToRemove = [];
 
+        $idx = 0;
         foreach($this->filters as $filter){
             try {
                 $filter->checkForRelationshipIntersections($collection, $createIntersectionCallback);
             } catch (CreatedIntersectionException $ex){
-                $filtersToRemove[] = $filter;
+                $filtersToRemove[] = $idx;
             }
+            $idx++;
         }
 
-        $this->filters = array_diff($this->filters, $filtersToRemove);
+        $this->filters = array_diff_key($this->filters, $filtersToRemove);
     }
 }

@@ -25,7 +25,7 @@ use Rhubarb\Stem\Models\Model;
 
 class Average extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
         return "AverageOf" . str_replace(".", "", $this->aggregatedColumnName);
     }

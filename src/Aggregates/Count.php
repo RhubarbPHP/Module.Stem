@@ -25,7 +25,7 @@ use Rhubarb\Stem\Models\Model;
 
 class Count extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
         return "CountOf" . str_replace(".", "", $this->aggregatedColumnName);
     }

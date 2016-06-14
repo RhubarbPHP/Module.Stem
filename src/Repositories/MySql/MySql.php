@@ -228,41 +228,27 @@ class MySql extends PdoRepository
 
     public function batchCommitUpdatesFromCollection(RepositoryCollection $collection, $propertyPairs)
     {
-        $filter = $collection->getFilter();
-
         $namedParams = [];
-        $propertiesToAutoHydrate = [];
-        $whereClause = "";
 
-        $filteredExclusivelyByRepository = true;
-
-        if ($filter !== null) {
-            $filterSql = $filter->filterWithRepository($this, $namedParams, $propertiesToAutoHydrate);
-
-            if ($filterSql != "") {
-                $whereClause .= " WHERE " . $filterSql;
-            }
-
-            $filteredExclusivelyByRepository = $filter->wasFilteredByRepository();
-        }
-
-        if (!$filteredExclusivelyByRepository || sizeof($propertiesToAutoHydrate)) {
+        if (!$collection->getFilter()->canFilterWithRepository($this)){
             throw new BatchUpdateNotPossibleException();
         }
 
-        $schema = $this->reposSchema;
-        $table = $schema->schemaName;
-        $sets = [];
+        $statement = $this->getSqlStatementForCollection($collection, $namedParams);
+
+        foreach($collection->getIntersections() as $intersection){
+            if (!$intersection->intersected){
+                throw new BatchUpdateNotPossibleException();
+                break;
+            }
+        }
 
         foreach ($propertyPairs as $key => $value) {
             $paramName = "Update" . $key;
-
             $namedParams[$paramName] = $value;
-            $sets[] = "`" . $key . "` = :" . $paramName;
-
         }
 
-        $sql = "UPDATE `{$table}` SET " . implode(",", $sets) . $whereClause;
+        $sql = $statement->getUpdateSql(array_keys($propertyPairs));
 
         MySql::executeStatement($sql, $namedParams);
     }
@@ -354,7 +340,7 @@ class MySql extends PdoRepository
             $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
         }
 
-        $statement = MySql::executeStatement($sql, $params);
+        $statement = MySql::executeStatement((string)$sql, $params);
 
         $count = $statement->rowCount();
 
@@ -380,18 +366,24 @@ class MySql extends PdoRepository
     {
         $model = $collection->getModelClassName();
         $schema = SolutionSchema::getModelSchema($model);
+        $columns = $schema->getColumns();
 
         $sqlStatement = new SqlStatement();
+        $sqlStatement->setAlias($collection->getUniqueReference());
         $sqlStatement->schemaName = $schema->schemaName;
         $sqlStatement->columns[] = new SelectExpression("`".$sqlStatement->getAlias()."`.*");
+
+        $allIntersected = true;
 
         foreach($collection->getIntersections() as $intersection){
 
             if (!($intersection->collection instanceof RepositoryCollection)){
+                $allIntersected = false;
                 continue;
             }
 
             if (!$intersection->collection->canBeFilteredByRepository()){
+                $allIntersected = false;
                 continue;
             }
 
@@ -416,18 +408,46 @@ class MySql extends PdoRepository
 
             $intersection->intersected = true;
         }
-        
+
         $filter = $collection->getFilter();
+
+        $allFiltered = true;
 
         if ($filter){
             $filter->filterWithRepository($this, $sqlStatement, $namedParams);
+            $allFiltered = $filter->wasFilteredByRepository();
         }
 
         $sorts = $collection->getSorts();
 
+        $allSorted = true;
+
         foreach($sorts as $sort){
-            /// TODO: What if the column isn't in the table - how do we fall back to normal sorting.
-            $sqlStatement->sorts[] = new SortExpression($sort->columnName, $sort->ascending);
+
+            $alias = false;
+
+            if (!isset($columns[$sort->columnName])) {
+                // Is this an alias?
+                foreach($sqlStatement->columns as $expression){
+                    if ($expression instanceof SelectColumn){
+                        if ($expression->alias == $sort->columnName){
+                            $alias = true;
+                        }
+                    }
+                }
+
+                if (!$alias) {
+                    // We can't sort this column - and therefore we can't sort any secondary sorts either.
+                    // We have to leave the remaining sorts to the manual iteration handled by the Collection class.
+                    $allSorted = false;
+                    break;
+                }
+            }
+
+            $sort->sorted = true;
+
+            $sortColumn = ($alias) ? '`'.$sort->columnName.'`' : "`".$sqlStatement->getAlias()."`.`".$sort->columnName."`";
+            $sqlStatement->sorts[] = new SortExpression($sortColumn, $sort->ascending);
         }
         
         foreach($collection->getGroups() as $group){
@@ -435,18 +455,29 @@ class MySql extends PdoRepository
         }
         
         $aggregates = $collection->getAggregateColumns();
+        $allAggregated = true;
 
         if (sizeof($aggregates)) {
             foreach ($aggregates as $aggregate) {
                 $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
+                if (!$aggregate->wasAggregatedByRepository()){
+                    $allAggregated = false;
+                }
             }
         }
 
-        $rangeStart = $collection->getRangeStart();
-        $rangeEnd = $collection->getRangeEnd();
+        // Only if the repository was able to compute the whole collection in the back end should it
+        // put on a limit clause. Otherwise limiting is premature as the full set of rows hasn't been
+        // calculated yet.
+        if ($allAggregated && $allFiltered && $allSorted && $allIntersected) {
+            $rangeStart = $collection->getRangeStart();
+            $rangeEnd = $collection->getRangeEnd();
 
-        if ($rangeStart > 0 || $rangeEnd !== null){
-            $sqlStatement->limit($rangeStart, $rangeEnd - $rangeStart + 1);
+            if ($rangeStart > 0 || $rangeEnd !== null) {
+                $sqlStatement->limit($rangeStart, $rangeEnd - $rangeStart + 1);
+
+                $collection->markRangeApplied();
+            }
         }
 
         return $sqlStatement;

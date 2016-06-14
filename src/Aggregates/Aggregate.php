@@ -57,9 +57,19 @@ abstract class Aggregate
      */
     protected $groups = [];
 
-    public function __construct($aggregatedColumnName)
+    /**
+     * Aliases can be auto suggested however if the aggregate is constructed with a set alias we store it here.
+     * @var string
+     */
+    protected $alias;
+
+    public function __construct($aggregatedColumnName, $alias = "")
     {
         $this->aggregatedColumnName = $aggregatedColumnName;
+
+        if ($alias){
+            $this->alias = $alias;
+        }
     }
 
     public function getGroups()
@@ -70,6 +80,18 @@ abstract class Aggregate
     final public function getAggregateColumnName()
     {
         return $this->aggregatedColumnName;
+    }
+
+    /**
+     * Called when the aggregate column name needs changed.
+     *
+     * Used when doing intersections with dot notations.
+     *
+     * @param $columnName
+     */
+    final public function setAggregateColumnName($columnName)
+    {
+        $this->aggregatedColumnName = $columnName;
     }
 
     final public function wasAggregatedByRepository()
@@ -115,7 +137,21 @@ abstract class Aggregate
         return "";
     }
 
-    abstract public function getAlias();
+    /**
+     * Override to return a suggested alias for the aggregate.
+     * 
+     * @return mixed
+     */
+    protected abstract function createAlias();
+
+    final public function getAlias()
+    {
+        if ($this->alias){
+            return $this->alias;
+        }
+
+        return $this->createAlias();
+    }
 
     public function calculateByIteration(Model $model)
     {

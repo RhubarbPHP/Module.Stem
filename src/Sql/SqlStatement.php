@@ -59,11 +59,12 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
     public function getAlias()
     {
-        if (!$this->alias){
-            $this->alias = uniqid();
-        }
-
         return $this->alias;
+    }
+
+    public function setAlias($aliasName)
+    {
+        $this->alias = $aliasName;
     }
 
     public function limit($start, $count)
@@ -88,7 +89,43 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         return implode($statements, $glue);
     }
 
-    public function getStatementSql()
+    /**
+     * Returns an UPDATE statement using the supplied key value pairings to update.
+     *
+     * Inserts named parameters using the field name but prefixed with "Update"
+     *
+     * e.g. updating "Forename" should be matched with a named parameter when executing the query of "UpdateForename"
+     *
+     * @param $fieldsToUpdate
+     * @return string
+     */
+    public function getUpdateSql($fieldsToUpdate)
+    {
+        $sql = "UPDATE `".$this->schemaName."` AS `".$this->getAlias()."`";
+
+        foreach($this->joins as $join){
+            $sql .= " ".$join->joinType." (".$join->getSql($this).") AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
+                $join->parentColumn."` = `".$join->statement->getAlias()."`.`".$join->childColumn."`";
+        }
+
+        $sets = [];
+
+        foreach ($fieldsToUpdate as $key) {
+            $paramName = "Update" . $key;
+
+            $sets[] = "`" . $key . "` = :" . $paramName;
+        }
+
+        $sql .= " SET ".implode(",", $sets);
+
+        if ($this->whereExpression) {
+            $sql .= " WHERE ".$this->whereExpression->getSql($this);
+        }
+
+        return $sql;
+    }
+
+    public function getSelectSql()
     {
         $sql = "SELECT ";
 
@@ -121,11 +158,11 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
     
     public function getSql(SqlStatement $forStatement)
     {
-        return $this->getStatementSql();
+        return $this->getSelectSql();
     }
 
     public function __toString()
     {
-        return $this->getStatementSql();
+        return $this->getSelectSql();
     }
 }

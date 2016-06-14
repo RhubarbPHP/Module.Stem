@@ -37,7 +37,7 @@ class Sum extends Aggregate
         $this->groups[$groupKey] += $model[$column];
     }
 
-    public function getAlias()
+    protected function createAlias()
     {
         return "SumOf" . str_replace(".", "", $this->aggregatedColumnName);
     }

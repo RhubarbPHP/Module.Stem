@@ -25,6 +25,7 @@ use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\ColumnWhereExpression;
 use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
  * Adds MySql repository support for the Equals filter.
@@ -38,14 +39,14 @@ class MySqlGreaterThan extends GreaterThan
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
      * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
-     * @param  array $relationshipsToAutoHydrate
      * @return string|void
      */
     protected static function doFilterWithRepository(
         Repository $repository,
         Filter $originalFilter,
-        SqlStatement $whereExpressionCollector,
+        WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
 

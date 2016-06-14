@@ -24,7 +24,7 @@ use Rhubarb\Stem\Collections\RepositoryCollection;
 
 class Max extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
         return "MaxOf" . str_replace(".", "", $this->aggregatedColumnName);
     }

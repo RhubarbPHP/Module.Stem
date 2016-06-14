@@ -118,7 +118,7 @@ class RangeLimitedCursor extends CollectionCursor
      */
     public function offsetGet($offset)
     {
-        return $this->baseCursor->offsetGet($offset);
+        return $this->baseCursor->offsetGet($offset+$this->rangeStart);
     }
 
     /**
@@ -135,7 +135,7 @@ class RangeLimitedCursor extends CollectionCursor
      */
     public function offsetSet($offset, $value)
     {
-        $this->baseCursor->offsetSet($offset, $value);
+        $this->baseCursor->offsetSet($offset+$this->rangeStart, $value);
     }
 
     /**
@@ -149,7 +149,7 @@ class RangeLimitedCursor extends CollectionCursor
      */
     public function offsetUnset($offset)
     {
-        $this->baseCursor->offsetUnset($offset);
+        $this->baseCursor->offsetUnset($offset+$this->rangeStart);
     }
 
     /**

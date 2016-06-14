@@ -3,6 +3,7 @@
 namespace Rhubarb\Stem\Collections;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
+use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
@@ -82,10 +83,31 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private $groups = [];
 
+    /**
+     * When building complex intersection relationships it's important that a collection can be
+     * represented by a unique name (as multiple instances of the collection could be involed)
+     *
+     * @var string
+     * @see getUniqueReference()
+     */
+    private $uniqueReference;
+
+    private $rangeApplied = false;
+
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
     }
+
+    public function getUniqueReference()
+    {
+        if ($this->uniqueReference === null){
+            $this->uniqueReference = uniqid();
+        }
+
+        return $this->uniqueReference;
+    }
+
 
     /**
      * Get's the repository used by the associated data object.
@@ -105,11 +127,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         $parts = explode(".",$columnName);
 
-        if (count($parts) > 0){
+        if (count($parts) > 1){
             $columnName = $parts[count($parts)-1];
 
             $relationships = array_slice($parts,0,count($parts)-1);
-            $this->createIntersectionForRelationships($relationships, [$columnName]);
+            $newColumnName = uniqid().$columnName;
+            $this->createIntersectionForRelationships($relationships, [$columnName => $newColumnName]);
+            $columnName = $newColumnName;
         }
 
         $sort = new Sort();
@@ -122,26 +146,36 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
-    public final function replaceSorts($sorts)
+    public final function replaceSort($sorts)
     {
         $this->sorts = [];
 
         foreach($sorts as $index => $value){
-            if ($value instanceof Sort){
-                $this->sorts[] = $value;
-                continue;
-            }
-
-            $sort = new Sort();
-            $sort->columnName = $index;
-            $sort->ascending = $value;
-
-            $this->sorts[] = $sort;
+            $this->addSort($index, $value);
         }
 
+        return $this;
+    }
+
+    /**
+     * Append a model to the list and correctly set any fields required to make this re-fetchable through the same list.
+     *
+     * @param  \Rhubarb\Stem\Models\Model $model
+     * @return \Rhubarb\Stem\Models\Model|null
+     */
+    public function append(Model $model)
+    {
+        $result = null;
+        // If the list was filtered make sure that value is set on the model.
+        if ($this->filter !== null) {
+            $result = $this->filter->setFilterValuesOnModel($model);
+        }
+        $model->save();
+
+        // Make sure the list is refetched.
         $this->invalidate();
 
-        return $this;
+        return ($result === null) ? $model : $result;
     }
 
     /**
@@ -177,9 +211,92 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public final function addAggregateColumn(Aggregate $aggregate)
     {
+        $parts = explode(".",$aggregate->getAggregateColumnName());
+
+        if (count($parts) > 1){
+            $columnName = $parts[count($parts)-1];
+
+            $relationships = array_slice($parts,0,count($parts)-1);
+            $aggregate->setAggregateColumnName($columnName);
+            $collection = $this->createIntersectionForRelationships($relationships, [$aggregate->getAlias()]);
+            $collection->addAggregateColumn($aggregate);
+            return $this;
+        }
+
         $this->aggregateColumns[] = $aggregate;
         $this->invalidate();
 
+        return $this;
+    }
+
+    /**
+     * @param Aggregate|Aggregate[] $aggregates
+     * @return array
+     */
+    final public function calculateAggregates($aggregates)
+    {
+        $args = func_get_args();
+        if (sizeof($args) > 1) {
+            $aggregates = $args;
+        }
+        if (!is_array($aggregates)) {
+            $aggregates = [$aggregates];
+        }
+
+        $oldAggregates = $this->aggregateColumns;
+
+        $schema = SolutionSchema::getModelSchema($this->modelClassName);
+
+        $this->aggregateColumns = [];
+
+        foreach($aggregates as $aggregate) {
+            $this->addAggregateColumn($aggregate);
+        }
+
+        $this->invalidate();
+
+        $results = [];
+
+        foreach($aggregates as $aggregate){
+            $results[] = $this[0][$aggregate->getAlias()];
+        }
+
+        $this->aggregateColumns = $oldAggregates;
+
+        $this->invalidate();
+
+        return $results;
+    }
+
+    /**
+     * Applies the provided set of property values to all of the models in the collection.
+     *
+     * Where repository specific optimisation is available this will be leveraged to run the batch
+     * update at the data source rather than iterating over the items.
+     *
+     * @param  array $propertyPairs An associative array of key value pairs to update
+     * @param  bool $fallBackToIteration If the repository can't perform the action directly, perform the update by iterating over all the models in the collection. You should only pass true if you know that the collection doesn't meet the criteria for an optimised update and the iteration of items won't cause problems
+     *                                  iterating over all the models in the collection. You should only pass true
+     *                                  if you know that the collection doesn't meet the criteria for an optimised
+     *                                  update and the iteration of items won't cause problems
+     * @return Collection The original collection returned for chaining
+     * @throws BatchUpdateNotPossibleException Thrown if the repository for the collection can't perform the update,
+     *                                         and $fallBackToIteration is false.
+     */
+    public function batchUpdate($propertyPairs, $fallBackToIteration = false)
+    {
+        try {
+            $this->getRepository()->batchCommitUpdatesFromCollection($this, $propertyPairs);
+        } catch (BatchUpdateNotPossibleException $er) {
+            if ($fallBackToIteration) {
+                foreach ($this as $item) {
+                    $item->mergeRawData($propertyPairs);
+                    $item->save();
+                }
+            } else {
+                throw $er;
+            }
+        }
         return $this;
     }
 
@@ -281,6 +398,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    final public function markRangeApplied()
+    {
+        $this->rangeApplied = true;
+    }
 
     /**
      * Returns the Filter object being used to filter models for this collection.
@@ -309,6 +430,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     private function invalidate()
     {
+        $this->rangeApplied = false;
         $this->collectionCursor = null;
     }
 
@@ -406,21 +528,118 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->processAggregates($aggregatesToProcess);
         }
 
+        /** Some cursors handle sorts. Any that couldn't be handled are processed here */
+        $sortsToProcess = [];
+        foreach($this->sorts as $sort){
+            if (!$sort->sorted){
+                $sortsToProcess[] = $sort;
+                $this->processSorts($sortsToProcess);
+            }
+        }
+
         /**
          * Some cursors can't handle ranging on their own. If we have more rows than we should have we
          * wrap the cursor in the RangeLimitedCursor to supply the required behaviour.
          */
 
-        if ($this->rangeStartIndex > 0 || $this->rangeEndIndex !== null ){
-            if ($this->collectionCursor->count() > (($this->rangeEndIndex - $this->rangeStartIndex) + 1)) {
-                $this->collectionCursor = new RangeLimitedCursor(
-                                                        $this->collectionCursor,
-                                                        $this->rangeStartIndex,
-                                                        $this->rangeEndIndex);
-            }
+        if (!$this->rangeApplied && ($this->rangeStartIndex > 0 || $this->rangeEndIndex !== null )){
+            $augmentationData = $this->collectionCursor->getAugmentationData();
+            $this->collectionCursor = new RangeLimitedCursor(
+                                                    $this->collectionCursor,
+                                                    $this->rangeStartIndex,
+                                                    $this->rangeEndIndex);
+            $this->collectionCursor->setAugmentationData($augmentationData);
         }
 
         $this->collectionCursor->rewind();
+    }
+
+    /**
+     * @param Sort[] $sorts
+     * @throws SortNotValidException
+     */
+    private function processSorts($sorts)
+    {
+        $class = $this->getModelClassName();
+        $schema = SolutionSchema::getModelSchema($class);
+        $columns = $schema->getColumns();
+
+        $ids = [];
+        $arrays = [];
+        $directions = [];
+        $types = [];
+
+        $this->disableRanging();
+
+        $sorts = $this->getSorts();
+        $firstPass = true;
+
+        foreach ($sorts as $sort) {
+
+            $columnName = $sort->columnName;
+            $ascending = $sort->ascending;
+
+            $arrays[$columnName] = [];
+
+            $type = SORT_STRING;
+
+            $column = null;
+
+            if (isset($columns[$columnName])) {
+                $column = $columns[$columnName];
+
+                if ($column instanceof IntegerColumn || $column instanceof FloatColumn) {
+                    $type = SORT_NUMERIC;
+                } elseif ($column instanceof DateColumn) {
+                    $type = SORT_REGULAR;
+                }
+            } else {
+                $type = SORT_REGULAR;
+            }
+
+            $types[$columnName] = $type;
+            $directions[$columnName] = ($ascending) ? SORT_ASC : SORT_DESC;
+
+            $totalCount = 0;
+
+            foreach ($this->collectionCursor as $item) {
+                if (!isset($item[$columnName])) {
+                    throw new SortNotValidException($columnName);
+                } else {
+                    $itemValue = $item[$columnName];
+                }
+
+                $arrays[$columnName][$totalCount] = $itemValue;
+                $totalCount++;
+
+                if ($firstPass){
+                    $ids[] = $item->getUniqueIdentifier();
+                }
+            }
+
+            $firstPass = false;
+        }
+
+        $this->enableRanging();
+
+        if (sizeof($arrays)) {
+            $params = [];
+
+            foreach ($arrays as $column => $data) {
+                $params[] = &$arrays[$column];
+                $params[] = $directions[$column];
+                $params[] = $types[$column];
+            }
+
+            $params[] = &$ids;
+
+            call_user_func_array("array_multisort", $params);
+        }
+
+        // Switch to the unique identifer list cursor now we have a set list of ids.
+        $augmentationData = $this->collectionCursor->getAugmentationData();
+        $this->collectionCursor = new UniqueIdentifierListCursor($ids, $class);
+        $this->collectionCursor->setAugmentationData($augmentationData);
     }
 
     private function getGroupKeyForModel(Model $model)

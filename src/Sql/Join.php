@@ -19,6 +19,6 @@ class Join extends SqlClause
 
     public function getSql(SqlStatement $forStatement)
     {
-        return $this->statement->getStatementSql();
+        return $this->statement->getSelectSql();
     }
 }

@@ -25,7 +25,7 @@ use Rhubarb\Stem\Models\Model;
 
 class CountDistinct extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
         return "DistinctCountOf" . str_replace(".", "", $this->aggregatedColumnName);
     }
@@ -34,7 +34,7 @@ class CountDistinct extends Aggregate
 
     public function calculateByIteration(Model $model, $groupKey = "")
     {
-        if (!$this->distinctGroups[$groupKey]){
+        if (!isset($this->distinctGroups[$groupKey])){
             $this->distinctGroups[$groupKey] = [];
         }
         $this->distinctGroups[$groupKey][] = $model[$this->aggregatedColumnName];

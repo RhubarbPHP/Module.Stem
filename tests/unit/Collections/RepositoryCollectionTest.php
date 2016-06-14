@@ -124,6 +124,23 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertEquals(3, $collection[0]->CountOfContacts);
     }
 
+    public function testSortOnAggregate()
+    {
+        $collection = Company::all();
+        $collection->intersectWith(
+            Example::all()
+                ->addAggregateColumn(new Count("Contacts")),
+            "CompanyID",
+            "CompanyID",
+            ["CountOfContacts"]);
+        $collection->addSort("CountOfContacts", false);
+        $collection->addSort("CompanyID", true);
+
+        $this->assertCount(3, $collection);
+        $this->assertEquals(1, $collection[0]->UniqueIdentifier);
+        $this->assertEquals(2, $collection[1]->UniqueIdentifier);
+    }
+
     public function testDotNotationOnFilters()
     {
         $collection = new RepositoryCollection(Company::class);
@@ -151,13 +168,26 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertEquals("John", $collection[0]->Forename);
         $this->assertEquals("John", $collection[1]->Forename);
         $this->assertEquals("Babs", $collection[2]->Forename);
+    }
 
+    public function testDotNotationOnSorts()
+    {
         $collection = new RepositoryCollection(Example::class);
         $collection->addSort("Company.CompanyName");
+        $collection->addSort("ContactID");
 
         $this->assertEquals("John", $collection[0]->Forename);
         $this->assertEquals("Babs", $collection[2]->Forename);
         $this->assertEquals("Jule", $collection[4]->Forename);
+    }
+
+    public function testDotNotationOnAggregates()
+    {
+        $collection = Company::all();
+        $collection->addAggregateColumn(new Count("Contacts.All", "CountOfContacts"));
+        $collection->addSort("CompanyID");
+
+        $this->assertEquals(3, $collection[0]->CountOfContacts);
     }
 
     protected function setupData()

@@ -68,7 +68,7 @@ class MySqlEquals extends Equals
                 $paramName = $placeHolder;
             }
 
-            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " = ".$paramName));
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "=".$paramName));
 
             return true;
         }
