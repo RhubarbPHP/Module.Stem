@@ -151,6 +151,13 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertEquals("John", $collection[0]->Forename);
         $this->assertEquals("John", $collection[1]->Forename);
         $this->assertEquals("Babs", $collection[2]->Forename);
+
+        $collection = new RepositoryCollection(Example::class);
+        $collection->addSort("Company.CompanyName");
+
+        $this->assertEquals("John", $collection[0]->Forename);
+        $this->assertEquals("Babs", $collection[2]->Forename);
+        $this->assertEquals("Jule", $collection[4]->Forename);
     }
 
     protected function setupData()

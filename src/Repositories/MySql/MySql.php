@@ -430,13 +430,13 @@ class MySql extends PdoRepository
             $sqlStatement->sorts[] = new SortExpression($sort->columnName, $sort->ascending);
         }
         
+        foreach($collection->getGroups() as $group){
+            $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
+        }
+        
         $aggregates = $collection->getAggregateColumns();
 
         if (sizeof($aggregates)) {
-            if ($intersectionColumnName) {
-                $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $intersectionColumnName . "`");
-            }
-
             foreach ($aggregates as $aggregate) {
                 $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
             }

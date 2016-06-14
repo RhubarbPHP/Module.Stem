@@ -103,6 +103,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     public final function addSort($columnName, $ascending = true)
     {
+        $parts = explode(".",$columnName);
+
+        if (count($parts) > 0){
+            $columnName = $parts[count($parts)-1];
+
+            $relationships = array_slice($parts,0,count($parts)-1);
+            $this->createIntersectionForRelationships($relationships, [$columnName]);
+        }
+
         $sort = new Sort();
         $sort->columnName = $columnName;
         $sort->ascending = $ascending;
@@ -288,6 +297,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->sorts;
     }
 
+    final public function getGroups()
+    {
+        return $this->groups;
+    }
+
     final public function getIntersections()
     {
         return $this->intersections;
@@ -296,6 +310,38 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     private function invalidate()
     {
         $this->collectionCursor = null;
+    }
+
+    private function createIntersectionForRelationships($relationshipsNeeded, $pullUps = [])
+    {
+        $collection = $this;
+
+        foreach($relationshipsNeeded as $relationshipPropertyName){
+            $relationships = SolutionSchema::getAllRelationshipsForModel($collection->getModelClassName());
+
+            if (!isset($relationships[$relationshipPropertyName])){
+                throw new FilterNotSupportedException("The column couldn't be expanded to intersections");
+            }
+
+            $relationship = $relationships[$relationshipPropertyName];
+
+            if ($relationship instanceof OneToMany || $relationship instanceof OneToOne) {
+                $targetModel = $relationship->getTargetModelName();
+                $parentColumn = $relationship->getSourceColumnName();
+                $childColumn = $relationship->getTargetColumnName();
+
+                $collection->intersectWith(
+                    $newCollection = new RepositoryCollection($targetModel),
+                    $parentColumn,
+                    $childColumn,
+                    $pullUps
+                );
+
+                $collection = $newCollection;
+            }
+        }
+
+        return $collection;
     }
 
     /**
@@ -312,34 +358,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         // check if they have any dot notations that need expanded into intersections.
 
         $createIntersectionCallback = function($intersectionsNeeded){
-            $collection = $this;
-
-            foreach($intersectionsNeeded as $relationshipPropertyName){
-                $relationships = SolutionSchema::getAllRelationshipsForModel($collection->getModelClassName());
-
-                if (!isset($relationships[$relationshipPropertyName])){
-                    throw new FilterNotSupportedException("The column couldn't be expanded to intersections");
-                }
-
-                $relationship = $relationships[$relationshipPropertyName];
-
-                if ($relationship instanceof OneToMany || $relationship instanceof OneToOne) {
-                    $targetModel = $relationship->getTargetModelName();
-                    $parentColumn = $relationship->getSourceColumnName();
-                    $childColumn = $relationship->getTargetColumnName();
-
-                    $collection->intersectWith(
-                        $newCollection = new RepositoryCollection($targetModel),
-                        $parentColumn,
-                        $childColumn,
-                        []
-                    );
-
-                    $collection = $newCollection;
-                }
-            }
-
-            return $collection;
+            return $this->createIntersectionForRelationships($intersectionsNeeded);
         };
 
         $filter = $this->getFilter();
