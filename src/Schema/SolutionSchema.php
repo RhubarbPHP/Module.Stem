@@ -679,7 +679,7 @@ abstract class SolutionSchema
         }
 
         $versionFile = "cache/schema-versions/" . str_replace("\\", "_", get_class($this)) . ".txt";
-        $fileVersion = 0;
+        $fileVersion = null;
 
         $context = new Context();
 
