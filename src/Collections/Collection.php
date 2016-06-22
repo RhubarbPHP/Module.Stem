@@ -384,7 +384,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $changed = true;
         }
 
-        if ($this->rangeEndIndex != $startIndex + $maxItems - 1) {
+        if ($this->rangeEndIndex !== $startIndex + $maxItems - 1) {
             $this->rangeEndIndex = $startIndex + $maxItems - 1;
             $changed = true;
         }
@@ -888,5 +888,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         $this->prepareCursor();
         return $this->collectionCursor->count();
+    }
+
+    public function toArray()
+    {
+        $array = [];
+
+        foreach($this as $model){
+            $array[] = $model;
+        }
+
+        return $array;
     }
 }

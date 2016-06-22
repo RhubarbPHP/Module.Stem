@@ -20,7 +20,9 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/Filter.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Removes the records NOT selected by the filter in the constructor.
@@ -39,7 +41,7 @@ class Not extends Filter
     public function __construct(Filter $filter)
     {
         $this->filter = $filter;
-    }
+    } 
 
     public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
     {
@@ -53,5 +55,32 @@ class Not extends Filter
         }
 
         return $ids;
+    }
+
+    public function evaluate(Model $model)
+    {
+        $allRecords = $model->all()->toArray();
+        $filter = $this->filter->evaluate($model);
+        $ids = [];
+        if($filter === true || $filter === false)
+        {
+            return !$filter;
+        }
+        else if(sizeof($filter)>0) {
+            foreach ($allRecords as $record) {
+                if(!in_array($record->UniqueIdentifier, $filter))
+                {
+                    $ids[] = $record->UniqueIdentifier;
+                }
+            }
+        }
+        return $ids;
+
+    }
+
+
+    public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
+    {
+        
     }
 }
