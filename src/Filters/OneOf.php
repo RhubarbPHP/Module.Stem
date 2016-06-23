@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Filters;
 require_once __DIR__ . "/ColumnFilter.php";
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Keeps all records which have a value matching one of the values in the given array
@@ -67,6 +68,31 @@ class OneOf extends ColumnFilter
             if (!in_array($item[$this->columnName], $this->oneOf)) {
                 $ids[] = $item->UniqueIdentifier;
             }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Implement to return an array of unique identifiers to filter from the list.
+     *
+     * @param Model $model
+     * @return array
+     */
+    public function evaluate(Model $model)
+    {
+        $ids = [];
+        $placeHolder = $this->detectPlaceHolder($this->oneOf);
+
+        if (!$placeHolder) {
+            $oneOf = $this->getTransformedComparisonValue($this->oneOf, $model);
+        } else {
+            $oneOf = $model[$placeHolder];
+            $oneOf = $this->getTransformedComparisonValue($oneOf, $model);
+        }
+
+        if (!in_array($model[$this->columnName], $oneOf)) {
+            $ids[] = $model->UniqueIdentifier;
         }
 
         return $ids;
