@@ -59,28 +59,11 @@ class Not extends Filter
 
     public function evaluate(Model $model)
     {
-        $allRecords = $model->all()->toArray();
-        $filter = $this->filter->evaluate($model);
-        $ids = [];
-        if($filter === true || $filter === false)
-        {
-            return !$filter;
-        }
-        else if(sizeof($filter)>0) {
-            foreach ($allRecords as $record) {
-                if(!in_array($record->UniqueIdentifier, $filter))
-                {
-                    $ids[] = $record->UniqueIdentifier;
-                }
-            }
-        }
-        return $ids;
-
+        return !$this->filter->evaluate($model);
     }
-
 
     public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
     {
-        
+        $this->filter->checkForRelationshipIntersections($collection, $createIntersectionCallback);
     }
 }

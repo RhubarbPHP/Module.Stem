@@ -62,7 +62,7 @@ class MySqlEquals extends Equals
                     $columnName,
                     $originalFilter->equalTo,
                     $repository
-                );;
+                );
                 $paramName = ":" . $paramName;
             } else {
                 $paramName = $placeHolder;

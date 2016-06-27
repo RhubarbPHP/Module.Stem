@@ -44,7 +44,9 @@ abstract class Filter
     protected $filteredByRepository = false;
 
     /**
-     * Implement to return an array of unique identifiers to filter from the list.
+     * Chooses whether to remove the model from the list or not
+     * 
+     * Returns true to remove it, false to keep it.
      *
      * @param Model $model
      * @return array
