@@ -19,6 +19,9 @@ $company = new Company( 1 );
 $contacts = $company->Contacts;
 ```
 
+`Model::find()` and `Collection::filter()` can be given any number of filters as arguments and they will formed
+into an `AndGroup` filter. They also support passing in filters as a single array argument.
+
 ## Iteration
 
 As the `Collection` class implements `\Iterator`, `\ArrayAccess` and `\Countable` you can use the
