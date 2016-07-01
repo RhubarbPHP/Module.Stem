@@ -24,6 +24,7 @@ use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Exceptions\AggregateNotSupportedException;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
+use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
@@ -379,12 +380,30 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param  Filter $filter
      * @return $this
      */
-    public function filter(Filter $filter)
+    public function filter(...$filters)
     {
+        if(sizeof($filters) == 0){
+            return;
+        }
+
+        $andGroup = new AndGroup();
+
+        if (is_array($filters[0])){
+            $filters = $filters[0];
+        }
+
+        foreach ($filters as $filter) {
+            if (!($filter instanceof Filter)){
+                throw new FilterNotSupportedException('One or more of the parameters, or one or more elements of an array parameter, was not of the Filter Class');
+            }
+
+            $andGroup->addFilters($filter);
+        }
+        
         if (is_null($this->filter)) {
-            $this->filter = $filter;
+            $this->filter = $andGroup;
         } else {
-            $this->filter = new AndGroup([$filter, $this->filter]);
+            $this->filter = new AndGroup([$andGroup, $this->filter]);
         }
 
         $this->invalidateList();

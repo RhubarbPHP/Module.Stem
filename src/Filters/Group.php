@@ -45,9 +45,16 @@ class Group extends Filter
     protected $booleanType = "And";
 
 
-    public function __construct($booleanType = "And", $filters = [])
+    public function __construct($booleanType = "And", ...$filters)
     {
         $this->booleanType = $booleanType;
+        
+        if (sizeof($filters) == 0){
+            return;
+        }
+        if (is_array($filters[0])){
+            $filters = $filters[0];
+        }
 
         $this->filters = $filters;
     }
