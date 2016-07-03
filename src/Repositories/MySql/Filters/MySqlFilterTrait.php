@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Filters\ColumnFilter;
 use Rhubarb\Stem\Filters\Filter;
@@ -39,17 +40,27 @@ trait MySqlFilterTrait
      * Note $propertiesToAutoHydrate is passed by reference as this how the filtering stack is able to
      * communication back to the repository which properties require auto hydration (if supported).
      *
+     * @param  Collection $collection
      * @param  Repository $repository
      * @param  string $columnName
      * @return bool True if the MySql Repository can add this filter to its where clause.
      * @throws FilterNotSupportedException
      */
-    protected static function canFilter(Repository $repository, $columnName)
+    protected static function canFilter(Collection $collection, Repository $repository, $columnName)
     {
         $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
 
         if (!isset($columns[$columnName])) {
+            $aliases = $collection->getAliasedColumns();
+
+            if (in_array($columnName, $aliases)){
+                // While not a column in the underlying table, the filter is actually on an alias from
+                // an intersection or aggregate. We can handle this with a having clause so we'll
+                // say "yes - we can handle this".
+                return true;
+            }
+
             return false;
         }
 
@@ -59,16 +70,18 @@ trait MySqlFilterTrait
     /**
      * Return true if the repository can handle this filter.
      *
+     * @param Collection $collection
      * @param Repository $repository
      * @param Filter $originalFilter
      * @return bool
      */
     protected static function doCanFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter
     ){
         if ($originalFilter instanceof ColumnFilter) {
-            return self::canFilter($repository, $originalFilter->getColumnName());
+            return self::canFilter($collection, $repository, $originalFilter->getColumnName());
         }
 
         return false;

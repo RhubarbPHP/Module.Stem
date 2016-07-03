@@ -7,7 +7,7 @@ use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Filters\Not;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 /**
@@ -26,51 +26,51 @@ class NotTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->Surname = "Joe";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Johnson";
         $example->DateOfBirth = "1988-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Luc";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->Surname = "Smithe";
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "James";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
         $example->ContactID = 6;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
         $example->save();
 
-        $this->list = new RepositoryCollection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     function testFiltersSimple()

@@ -13,8 +13,10 @@ class UnitTestingSolutionSchema extends SolutionSchema
         $this->addModel("Company", Company::class);
         $this->addModel("Category", Category::class);
         $this->addModel("CompanyCategory", CompanyCategory::class);
-        $this->addModel("Example", Example::class);
+        $this->addModel("TestContact", TestContact::class);
         $this->addModel("UnitTestUser", User::class);
+        $this->addModel("TestDeclaration", TestDeclaration::class);
+        $this->addModel("TestDonation", TestDonation::class);
     }
 
     public function defineRelationships()
@@ -24,8 +26,8 @@ class UnitTestingSolutionSchema extends SolutionSchema
                 "Company" =>
                     [
                         "Users" => "UnitTestUser.CompanyID",
-                        "TestContacts" => "Example.CompanyID:ExampleRelationshipName",
-                        "Contacts" => "Example.CompanyID",
+                        "TestContacts" => "TestContact.CompanyID:ExampleRelationshipName",
+                        "Contacts" => "TestContact.CompanyID",
                     ],
             ]
         );

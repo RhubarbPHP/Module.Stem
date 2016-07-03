@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Filters;
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\OneOf;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class OneOfTest extends ModelUnitTestCase
@@ -20,36 +20,36 @@ class OneOfTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "Pugh";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Pugh";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Barney";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "McGrew";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Cuthbert";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Dibble";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Grub";
         $example->save();
 
-        $this->list = new RepositoryCollection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     public function testFilters()

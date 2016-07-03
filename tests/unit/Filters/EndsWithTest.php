@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Filters;
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\EndsWith;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class EndsWithTest extends ModelUnitTestCase
@@ -20,21 +20,21 @@ class EndsWithTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->save();
 
-        $this->list = new RepositoryCollection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     public function testFiltersCaseInsensitive()

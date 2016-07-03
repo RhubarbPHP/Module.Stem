@@ -7,14 +7,14 @@ use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Offline\Offline;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class RepositoryTest extends ModelUnitTestCase
 {
     public function testDefaultRepositoryIsOffline()
     {
-        $repository = Repository::getNewDefaultRepository(new Example());
+        $repository = Repository::getNewDefaultRepository(new TestContact());
 
         $this->assertInstanceOf(Offline::class, $repository);
     }
@@ -23,7 +23,7 @@ class RepositoryTest extends ModelUnitTestCase
     {
         Repository::setDefaultRepositoryClassName(MySql::class);
 
-        $repository = Repository::getNewDefaultRepository(new Example());
+        $repository = Repository::getNewDefaultRepository(new TestContact());
 
         $this->assertInstanceOf(MySql::class, $repository);
 
@@ -38,11 +38,11 @@ class RepositoryTest extends ModelUnitTestCase
 
     public function testHydrationOfNonExtantObjectThrowsException()
     {
-        $offline = new Offline(new Example());
+        $offline = new Offline(new TestContact());
 
         $this->setExpectedException(RecordNotFoundException::class);
 
         // Load the example data object with a silly identifier that doesn't exist.
-        $offline->hydrateObject(new Example(), 10);
+        $offline->hydrateObject(new TestContact(), 10);
     }
 }

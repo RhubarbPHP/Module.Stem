@@ -89,13 +89,15 @@ abstract class Filter
      *
      * Rhubarb\Stem\Repositories\MySql\Filters\Equals
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
+     * @param Repository $repository
+     * @param Collection $collection
      * @param Filter $originalFilter The base filter containing the settings we need.
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
      * @return bool True if repository filtering was possible
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
@@ -107,18 +109,20 @@ abstract class Filter
     /**
      * Return true if the repository can handle this filter.
      *
+     * @param Colleciton $collection
      * @param Repository $repository
      * @param Filter $originalFilter
      * @return bool
      */
     protected static function doCanFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter
     ){
         return false;
     }
 
-    final public function canFilterWithRepository(Repository $repository)
+    final public function canFilterWithRepository(Collection $collection, Repository $repository)
     {
         $namespace = $repository->getFiltersNamespace();
 
@@ -134,7 +138,7 @@ abstract class Filter
         if (class_exists($className)) {
             return call_user_func_array(
                 $className . "::doCanFilterWithRepository",
-                [$repository, $this]
+                [$collection, $repository, $this]
             );
         }
 
@@ -144,11 +148,12 @@ abstract class Filter
     /**
      * Returns A string containing information needed for a repository to use a filter directly.
      *
-     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param Collection $collection
+     * @param Repository $repository
      * @param WhereExpressionCollector $sqlStatement
-     * @param  array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
+     * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
      */
-    final public function filterWithRepository(Repository $repository, WhereExpressionCollector $sqlStatement, &$params)
+    final public function filterWithRepository(Collection $collection, Repository $repository, WhereExpressionCollector $sqlStatement, &$params)
     {
         $namespace = $repository->getFiltersNamespace();
 
@@ -164,7 +169,7 @@ abstract class Filter
         if (class_exists($className)) {
             $filtered = call_user_func_array(
                 $className . "::doFilterWithRepository",
-                [$repository, $this, $sqlStatement, &$params]
+                [$collection, $repository, $this, $sqlStatement, &$params]
             );
 
             if ($filtered){

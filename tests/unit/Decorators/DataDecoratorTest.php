@@ -15,7 +15,7 @@ use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Tests\unit\Fixtures\Category;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\CompanyDecorator;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ExampleDecorator;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelDecorator;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;
@@ -27,7 +27,7 @@ class DataDecoratorTest extends RhubarbTestCase
         parent::setUp();
 
         DataDecorator::clearDecoratorClasses();
-        DataDecorator::registerDecoratorClass(ExampleDecorator::class, Example::class);
+        DataDecorator::registerDecoratorClass(ExampleDecorator::class, TestContact::class);
         DataDecorator::registerDecoratorClass(CompanyDecorator::class, Company::class);
     }
 
@@ -42,7 +42,7 @@ class DataDecoratorTest extends RhubarbTestCase
 
         $this->assertFalse($decorator, "If no decorator exists false should be returned.");
 
-        $example = new Example();
+        $example = new TestContact();
         $decorator = DataDecorator::getDecoratorForModel($example);
         $this->assertInstanceOf(ExampleDecorator::class, $decorator);
 
@@ -115,7 +115,7 @@ class DataDecoratorTest extends RhubarbTestCase
 
         $this->assertTrue($decorator->singletonMonitor);
 
-        $example = new Example();
+        $example = new TestContact();
         $decorator = DataDecorator::getDecoratorForModel($example);
 
         $this->assertFalse($decorator->singletonMonitor);

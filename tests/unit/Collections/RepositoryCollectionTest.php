@@ -7,10 +7,14 @@ use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\ArrayCollection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Filters\LessThan;
+use Rhubarb\Stem\Filters\OrGroup;
 use Rhubarb\Stem\Filters\StartsWith;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestDeclaration;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestDonation;
 
 class RepositoryCollectionTest extends ModelUnitTestCase
 {
@@ -23,38 +27,37 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
     public function testCollectionSorts()
     {
-        $collection = Example::find()->addSort("Forename", false);
+        $collection = TestContact::find()->addSort("Forename", false);
 
         $this->assertEquals("Mary", $collection[0]->Forename);
     }
 
     public function testCollectionFilters()
     {
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
 
         $this->assertCount(5, $collection);
 
         $collection->filter(new Equals("Forename", "John"));
 
         $this->assertCount(2, $collection);
-
     }
 
     public function testIntersections()
     {
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
         $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID");
 
         $this->assertCount(1, $collection);
         $this->assertEquals("Mary", $collection[0]->Forename);
 
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
         $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID", ["Balance"]);
 
         $this->assertCount(1, $collection);
         $this->assertEquals(2, $collection[0]->Balance);
 
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
         $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID", ["Balance" => "CompanyBalance"]);
 
         $this->assertEquals(2, $collection[0]->CompanyBalance);
@@ -64,7 +67,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
     {
         $collection = Company::all();
         $collection->intersectWith(
-            Example::all()
+            TestContact::all()
                 ->addAggregateColumn(new Count("Contacts")),
             "CompanyID",
             "CompanyID",
@@ -76,7 +79,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $collection = Company::all();
         $collection->intersectWith(
-            Example::all()
+            TestContact::all()
                 ->addAggregateColumn(new Count("Contacts"))
                 ->addAggregateColumn(new Sum("CompanyID")),
             "CompanyID",
@@ -86,6 +89,18 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertCount(3, $collection);
         $this->assertEquals(2, $collection[1]->SumOfCompanyID);
         $this->assertEquals(3, $collection[0]->SumOfCompanyID);
+
+        $collection = Company::all();
+        $collection->intersectWith(
+            TestContact::all()
+                ->addAggregateColumn(new Count("Contacts")),
+            "CompanyID",
+            "CompanyID",
+            ["CountOfContacts"]);
+        $collection->filter(new Equals("CountOfContacts", 3));
+
+        $this->assertCount(1, $collection);
+        $this->assertEquals(3, $collection[0]->CountOfContacts);
     }
 
     public function testLimits()
@@ -105,7 +120,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
     public function testIntersectionsWithNonRepositoryCollections()
     {
         $collection = Company::all();
-        $contacts = Example::all();
+        $contacts = TestContact::all();
         $contrivedArray = [];
 
         foreach($contacts as $contact){
@@ -113,7 +128,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         }
 
         $collection->intersectWith(
-            (new ArrayCollection("Example", $contrivedArray))
+            (new ArrayCollection("TestContact", $contrivedArray))
             ->addAggregateColumn(new Count("Contacts")),
             "CompanyID",
             "CompanyID",
@@ -128,7 +143,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
     {
         $collection = Company::all();
         $collection->intersectWith(
-            Example::all()
+            TestContact::all()
                 ->addAggregateColumn(new Count("Contacts")),
             "CompanyID",
             "CompanyID",
@@ -155,13 +170,13 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertCount(1, $collection);
         $this->assertEquals(2, $collection[0]->CompanyID);
 
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
         $collection->filter(new Equals("Company.CompanyName", "C2"));
 
         $this->assertCount(1, $collection);
         $this->assertEquals("Mary", $collection[0]->Forename);
 
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
         $collection->filter(new Equals("Company.Contacts.Forename", "Babs"));
 
         $this->assertCount(3, $collection);
@@ -172,7 +187,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
     public function testDotNotationOnSorts()
     {
-        $collection = new RepositoryCollection(Example::class);
+        $collection = new RepositoryCollection(TestContact::class);
         $collection->addSort("Company.CompanyName");
         $collection->addSort("ContactID");
 
@@ -188,6 +203,87 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection->addSort("CompanyID");
 
         $this->assertEquals(3, $collection[0]->CountOfContacts);
+    }
+
+    public function testComplicatedExample()
+    {
+        // This is a real life example that tries to find donations for contacts that have
+        // qualifying gift aid declarations.
+        $donation = new TestDonation();
+        $donation->DonationDate = "now";
+        $donation->save();
+
+        $donation = new TestDonation();
+        $donation->DonationDate = "now";
+        $donation->save();
+
+        $contact = new TestContact();
+        $contact->Forename = "billy";
+        $contact->save();
+
+        $donation = new TestDonation();
+        $donation->DonationDate = "now";
+        $donation->ContactID = $contact->ContactID;
+        $donation->save();
+        
+        $declaration = new TestDeclaration();
+        $declaration->StartDate = "yesterday";
+        $declaration->ContactID = $contact->ContactID;
+        $declaration->save();
+
+        $donations = TestDonation::all()
+        ->intersectWith(
+            TestDeclaration::all(),
+            "ContactID",
+            "ContactID",
+            [
+                "StartDate" => "DeclarationStartDate",
+                "DonationID" => "DeclarationDonationID"
+            ]
+        )
+        ->filter(
+            new OrGroup([
+		        new LessThan( "DeclarationStartDate", "@{DonationDate}" )
+            ])
+        );
+
+        $this->assertCount(1, $donations);
+        $this->assertEquals($contact->getUniqueIdentifier(), $donations[0]->ContactID);
+
+        $contact = new TestContact();
+        $contact->Forename = "robin";
+        $contact->save();
+
+        $donation = new TestDonation();
+        $donation->DonationDate = "now";
+        $donation->ContactID = $contact->ContactID;
+        $donation->save();
+
+        $declaration = new TestDeclaration();
+        $declaration->DonationID = $donation->DonationID;
+        $declaration->ContactID = $contact->ContactID;
+        $declaration->save();
+
+        $donations = TestDonation::all()
+            ->intersectWith(
+                TestDeclaration::all(),
+                "ContactID",
+                "ContactID",
+                [
+                    "StartDate" => "DeclarationStartDate",
+                    "DonationID" => "DeclarationDonationID"
+                ]
+            )
+            ->filter(
+                new OrGroup([
+                    new LessThan( "DeclarationStartDate", "{DonationDate}" ),
+                    new Equals( "DeclarationDonationID", "{DonationID}")
+                ])
+            );
+
+        $this->assertCount(2, $donations);
+        $this->assertEquals($contact->getUniqueIdentifier(), $donations[1]->ContactID);
+
     }
 
     protected function setupData()
@@ -207,27 +303,27 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $company->Balance = 3;
         $company->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "John";
         $contact->CompanyID = 1;
         $contact->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "Mary";
         $contact->CompanyID = 2;
         $contact->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "Jule";
         $contact->CompanyID = 3;
         $contact->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "John";
         $contact->CompanyID = 1;
         $contact->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "Babs";
         $contact->CompanyID = 1;
         $contact->save();

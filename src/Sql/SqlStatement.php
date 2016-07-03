@@ -32,6 +32,11 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
     public $sorts = [];
 
     /**
+     * @var WhereExpression
+     */
+    public $havingExpression;
+
+    /**
      * @var GroupExpression[]
      */
     public $groups = [];
@@ -52,6 +57,21 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
          * @var AndExpression $andExpression
          */
         $andExpression = $this->whereExpression;
+        $andExpression->whereExpressions[] = $where;
+
+        return $andExpression;
+    }
+
+    public function addHavingExpression(WhereExpression $where)
+    {
+        if (!($this->havingExpression instanceof AndExpression)){
+            $this->havingExpression = new AndExpression($this->havingExpression);
+        }
+
+        /**
+         * @var AndExpression $andExpression
+         */
+        $andExpression = $this->havingExpression;
         $andExpression->whereExpressions[] = $where;
 
         return $andExpression;

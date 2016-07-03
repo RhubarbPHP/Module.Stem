@@ -10,7 +10,7 @@ use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 
 class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 {
@@ -39,6 +39,8 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
         MySql::executeStatement("TRUNCATE TABLE tblContact");
+        MySql::executeStatement("TRUNCATE TABLE tblDonation");
+        MySql::executeStatement("TRUNCATE TABLE tblDeclaration");
 
         $this->setupData();
     }
@@ -56,7 +58,7 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
     public function testCollectionIntersectWithNotFilterableCollections()
     {
-        $example = Example::all();
+        $example = TestContact::all();
         $example->intersectWith(
             Company::find(
                 new Equals("CompanyIDSquared", 4)
@@ -64,6 +66,15 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         $this->assertCount(1, $example);
         $this->assertEquals("Mary", $example[0]->Forename);
+    }
+
+    public function testAggregatesUseHavingClause()
+    {
+        $this->testAggregates();
+
+        $sql = MySql::getPreviousStatement();
+
+        $this->assertContains("HAVING", $sql);
     }
 
     protected function setupData()

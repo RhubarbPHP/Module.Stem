@@ -94,6 +94,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     private $rangeApplied = false;
 
+    /**
+     * Columns that are being added to the collection to serve the purposes of aggregates or intersections
+     * are listed here.
+     *
+     * @var array
+     */
+    private $aliasedColumns = [];
+
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
@@ -108,6 +116,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->uniqueReference;
     }
 
+    public function getAliasedColumns()
+    {
+        return $this->aliasedColumns;
+    }
 
     /**
      * Get's the repository used by the associated data object.
@@ -195,6 +207,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $collection->groups[] = $childColumnName;
 
         $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
+
+        foreach($columnsToPullUp as $column){
+            $this->aliasedColumns[] = $column;
+        }
 
         $this->invalidate();
 

@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Filters;
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\LessThan;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class LessThanTest extends ModelUnitTestCase
@@ -20,30 +20,30 @@ class LessThanTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Clancy";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Clifford";
         $example->Surname = "Morris";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $this->list = new RepositoryCollection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     public function testFiltersDate()

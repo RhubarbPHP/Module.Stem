@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/Equals.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
@@ -34,13 +35,15 @@ class MySqlEquals extends Equals
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  Equals|Filter $originalFilter
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
-     * @param  array $params
+     * @param array $params
      * @return string|void
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
@@ -48,9 +51,17 @@ class MySqlEquals extends Equals
     ) {
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName)) {
+        if (self::canFilter($collection, $repository, $columnName)) {
+
+            $aliases = $collection->getAliasedColumns();
+            $isAlias = in_array($columnName, $aliases);
+
             if ($originalFilter->equalTo === null) {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IS NULL"));
+                if ($isAlias){
+                    $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IS NULL"));
+                } else {
+                    $whereExpressionCollector->(new ColumnWhereExpression($columnName, " IS NULL"));
+                }
             }
 
             $paramName = uniqid() . $columnName;

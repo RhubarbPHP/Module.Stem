@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Tests\unit\Aggregates;
 
 use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
 use Rhubarb\Stem\Aggregates\Sum;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 
 class SumTest extends RhubarbTestCase
 {
@@ -12,20 +12,20 @@ class SumTest extends RhubarbTestCase
     {
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "a";
         $example->CompanyID = 1;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "b";
         $example->CompanyID = 2;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "c";
         $example->CompanyID = 3;
         $example->save();
@@ -33,7 +33,7 @@ class SumTest extends RhubarbTestCase
 
     public function testSum()
     {
-        $examples = Example::find();
+        $examples = TestContact::find();
 
         list($sumTotal) = $examples->calculateAggregates(
             [new Sum("CompanyID")]

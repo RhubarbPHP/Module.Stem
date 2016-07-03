@@ -8,7 +8,7 @@ use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Filters\LessThan;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class GroupTest extends ModelUnitTestCase
@@ -21,7 +21,7 @@ class GroupTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->Surname = "Joe";
@@ -29,35 +29,35 @@ class GroupTest extends ModelUnitTestCase
         $example->ContactID = 1;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Johnson";
         $example->DateOfBirth = "1988-01-01";
         $example->ContactID = 2;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Luc";
         $example->DateOfBirth = "1990-01-01";
         $example->ContactID = 3;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->Surname = "Smithe";
         $example->DateOfBirth = "1980-06-09";
         $example->ContactID = 4;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
         $example->ContactID = 5;
         $example->save();
 
-        $this->list = new RepositoryCollection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     public function testFiltersAnd()
@@ -131,14 +131,14 @@ class GroupTest extends ModelUnitTestCase
             $subGroup
         );
 
-        $model = new Example();
+        $model = new TestContact();
         $andGroup->setFilterValuesOnModel($model);
 
         $this->assertEquals(1, $model->CompanyID);
         $this->assertEquals("Cuthbert", $model->Surname);
         $this->assertEquals("Andrew", $model->Forename);
 
-        $model = new Example();
+        $model = new TestContact();
         $orGroup->setFilterValuesOnModel($model);
 
         $this->assertNotEquals(1, $model->CompanyID);
