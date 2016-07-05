@@ -680,14 +680,14 @@ abstract class SolutionSchema
             throw new ImplementationException("The cache/schema-versions folder could not be created. Please check file permissions and ownership.");
         }
 
-        $versionFile = $cachePath . "schema-versions/" . $this->getVersionFileName();
-        $fileVersion = 0;
-
         $application = Application::current();
 
         if ($application->unitTesting) {
             return;
         }
+        
+        $versionFile = $cachePath . "schema-versions/" . $this->getVersionFileName();
+        $fileVersion = 0;
 
         if (file_exists($versionFile)) {
             $fileVersion = file_get_contents($versionFile);
