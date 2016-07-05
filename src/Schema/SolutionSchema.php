@@ -680,7 +680,7 @@ abstract class SolutionSchema
             throw new ImplementationException("The cache/schema-versions folder could not be created. Please check file permissions and ownership.");
         }
 
-        $versionFile = $cachePath."schema-versions/" . str_replace("\\", "_", get_class($this)) . ".txt";
+        $versionFile = $cachePath . "schema-versions/" . $this->getVersionFileName();
         $fileVersion = 0;
 
         $application = Application::current();
@@ -700,6 +700,11 @@ abstract class SolutionSchema
 
             file_put_contents($versionFile, $currentVersion);
         }
+    }
+    
+    protected function getVersionFileName()
+    {
+        return str_replace("\\", "_", get_class($this)) . ".txt";
     }
 
     /**
