@@ -414,7 +414,7 @@ class MySql extends PdoRepository
         $allFiltered = true;
 
         if ($filter){
-            $filter->filterWithRepository($this, $sqlStatement, $namedParams);
+            $filter->filterWithRepository($collection, $this, $sqlStatement, $namedParams);
             $allFiltered = $filter->wasFilteredByRepository();
         }
 

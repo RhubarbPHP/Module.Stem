@@ -67,7 +67,7 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         $this->assertCount(1, $example);
         $this->assertEquals("Mary", $example[0]->Forename);
     }
-
+    
     public function testAggregatesUseHavingClause()
     {
         $this->testAggregates();

@@ -32,11 +32,6 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
     public $sorts = [];
 
     /**
-     * @var WhereExpression
-     */
-    public $havingExpression;
-
-    /**
      * @var GroupExpression[]
      */
     public $groups = [];
@@ -64,14 +59,16 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
     public function addHavingExpression(WhereExpression $where)
     {
-        if (!($this->havingExpression instanceof AndExpression)){
-            $this->havingExpression = new AndExpression($this->havingExpression);
+        $where->onHavingClause = true;
+
+        if (!($this->whereExpression instanceof AndExpression)){
+            $this->whereExpression = new AndExpression($this->whereExpression);
         }
 
         /**
          * @var AndExpression $andExpression
          */
-        $andExpression = $this->havingExpression;
+        $andExpression = $this->whereExpression;
         $andExpression->whereExpressions[] = $where;
 
         return $andExpression;
@@ -158,15 +155,26 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         }
 
         if ($this->whereExpression) {
-            $sql .= " WHERE ".$this->whereExpression->getSql($this);
+            $havingSql = $this->whereExpression->getWhereSql($this);
+            if ($havingSql != "" ){
+                $sql .= " WHERE ".$havingSql;
+            }
+        }
+
+
+        if (count($this->groups)){
+            $sql .= " GROUP BY ".$this->implodeSqlClauses($this->groups, ", ");
+        }
+
+        if ($this->whereExpression) {
+            $havingSql = $this->whereExpression->getHavingSql($this);
+            if ($havingSql != "" ){
+                $sql .= " HAVING ".$havingSql;
+            }
         }
 
         if (count($this->sorts)){
             $sql .= " ORDER BY ".$this->implodeSqlClauses($this->sorts, ", ");
-        }
-
-        if (count($this->groups)){
-            $sql .= " GROUP BY ".$this->implodeSqlClauses($this->groups, ", ");
         }
 
         if ($this->hasLimit()){
@@ -184,5 +192,15 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
     public function __toString()
     {
         return $this->getSelectSql();
+    }
+
+    public function getWhereSql(SqlStatement $forStatement)
+    {
+        // TODO: Implement getWhereSql() method.
+    }
+
+    public function getHavingSql(SqlStatement $forStatement)
+    {
+        // TODO: Implement getHavingSql() method.
     }
 }

@@ -57,11 +57,7 @@ class MySqlEquals extends Equals
             $isAlias = in_array($columnName, $aliases);
 
             if ($originalFilter->equalTo === null) {
-                if ($isAlias){
-                    $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IS NULL"));
-                } else {
-                    $whereExpressionCollector->(new ColumnWhereExpression($columnName, " IS NULL"));
-                }
+               $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IS NULL", $isAlias));
             }
 
             $paramName = uniqid() . $columnName;
@@ -79,7 +75,7 @@ class MySqlEquals extends Equals
                 $paramName = $placeHolder;
             }
 
-            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "=".$paramName));
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "=" . $paramName, $isAlias));
 
             return true;
         }

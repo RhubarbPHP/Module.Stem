@@ -13,15 +13,11 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
 
     protected $boolean = "";
 
-    /**
-     * @var WhereExpression[]
-     */
-    public $whereExpressions = [];
 
     /**
      * @var WhereExpression[]
      */
-    public $havingExpressions = [];
+    public $whereExpressions = [];
 
     public function getSql(SqlStatement $forStatement)
     {
@@ -33,8 +29,35 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
         $this->whereExpressions[] = $expression;
     }
 
+    public function getWhereSql(SqlStatement $forStatement)
+    {
+        $whereExpressions = [];
+
+        foreach($this->whereExpressions as $expression){
+            if ($expression->requiredForClause(true)){
+                $whereExpressions[] = $expression->getWhereSql($forStatement);
+            }
+        }
+
+        return implode(" ".$this->boolean." ", $whereExpressions);
+    }
+
+    public function getHavingSql(SqlStatement $forStatement)
+    {
+        $havingExpressions = [];
+
+        foreach($this->whereExpressions as $expression){
+            if ($expression->requiredForClause(false)){
+                $havingExpressions[] = $expression->getHavingSql($forStatement);
+            }
+        }
+
+        return implode(" ".$this->boolean." ", $havingExpressions);
+    }
+
     public function addHavingExpression(WhereExpression $expression)
     {
-        $this->havingExpressions[] = $expression;
+        $expression->onHavingClause = true;
+        $this->whereExpressions[] = $expression;
     }
 }

@@ -20,10 +20,10 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/LessThan.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\ColumnWhereExpression;
-use Rhubarb\Stem\Sql\SqlStatement;
 use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
@@ -36,6 +36,7 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
+     * @param Collection $collection
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
      * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
@@ -44,6 +45,7 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
      * @internal param $relationshipsToAutoHydrate
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
@@ -52,9 +54,10 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName)) {
+        if (self::canFilter($collection, $repository, $columnName)) {
             $paramName = uniqid();
-
+            $aliases = $collection->getAliasedColumns();
+            $isAlias = in_array($columnName, $aliases);
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->lessThan);
 
             if (!$placeHolder) {
@@ -68,10 +71,11 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
                 $paramName = $placeHolder;
             }
 
+
             if ($originalFilter->inclusive) {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '<= '.$paramName));
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '<= '.$paramName, $isAlias));
             } else {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '< '.$paramName));
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '< '.$paramName, $isAlias));
             }
 
             return true;

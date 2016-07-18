@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/Group.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Repositories\Repository;
@@ -33,11 +34,13 @@ class MySqlGroup extends Group
     /**
      * Return true if the repository can handle this filter.
      *
+     * @param Collection $collection
      * @param Repository $repository
      * @param Filter $originalFilter
      * @return bool
      */
     protected static function doCanFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter
     ){
@@ -47,7 +50,7 @@ class MySqlGroup extends Group
         $filters = $originalFilter->getFilters();
 
         foreach ($filters as $filter) {
-            if (!$filter->canFilterWithRepository($repository)){
+            if (!$filter->canFilterWithRepository($collection, $repository)){
                 return false;
             }
         }
@@ -56,6 +59,7 @@ class MySqlGroup extends Group
     }
 
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
@@ -78,7 +82,7 @@ class MySqlGroup extends Group
         $filterSql = [];
 
         foreach ($filters as $filter) {
-            $filter->filterWithRepository($repository, $group, $params);
+            $filter->filterWithRepository($collection, $repository, $group, $params);
         }
 
         if (sizeof($group->whereExpressions) > 0) {
