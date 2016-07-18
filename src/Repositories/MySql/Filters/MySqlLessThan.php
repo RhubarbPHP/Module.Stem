@@ -56,7 +56,7 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
 
         if (self::canFilter($collection, $repository, $columnName)) {
             $paramName = uniqid();
-            $aliases = $collection->getAliasedColumns();
+            $aliases = $collection->getPulledUpAggregatedColumns();
             $isAlias = in_array($columnName, $aliases);
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->lessThan);
 

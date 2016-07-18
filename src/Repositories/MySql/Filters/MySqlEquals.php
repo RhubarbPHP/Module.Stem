@@ -53,7 +53,7 @@ class MySqlEquals extends Equals
 
         if (self::canFilter($collection, $repository, $columnName)) {
 
-            $aliases = $collection->getAliasedColumns();
+            $aliases = $collection->getPulledUpAggregatedColumns();
             $isAlias = in_array($columnName, $aliases);
 
             if ($originalFilter->equalTo === null) {

@@ -102,6 +102,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private $aliasedColumns = [];
 
+    /**
+     * Columns that are being added to the collection to serve the purposes of aggregates pulled up from intersections
+     * are listed here.
+     *
+     * @var array
+     */
+    private $pulledUpAggregatedColumns = [];
+
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
@@ -119,6 +127,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function getAliasedColumns()
     {
         return $this->aliasedColumns;
+    }
+
+    public function getPulledUpAggregatedColumns()
+    {
+        return $this->pulledUpAggregatedColumns;
     }
 
     /**
@@ -212,9 +225,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         foreach($columnsToPullUp as $column){
 
+            $this->aliasedColumns[] = $column;
+
             foreach($childAggregates as $aggregate){
                 if ($aggregate->getAlias() == $column){
-                    $this->aliasedColumns[] = $column;
+                    $this->pulledUpAggregatedColumns[] = $column;
                 }
             }
         }
