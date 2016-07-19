@@ -6,10 +6,11 @@ use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\ArrayCollection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Filters\OrGroup;
-use Rhubarb\Stem\Filters\StartsWith;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -255,7 +256,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $contact->save();
 
         $donation = new TestDonation();
-        $donation->DonationDate = "now";
+        $donation->DonationDate = "-3 days";
         $donation->ContactID = $contact->ContactID;
         $donation->save();
 
@@ -263,6 +264,11 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $declaration->DonationID = $donation->DonationID;
         $declaration->ContactID = $contact->ContactID;
         $declaration->save();
+
+        $donation = new TestDonation();
+        $donation->DonationDate = "-2 days";
+        $donation->ContactID = $contact->ContactID;
+        $donation->save();
 
         $donations = TestDonation::all()
             ->intersectWith(
@@ -276,12 +282,44 @@ class RepositoryCollectionTest extends ModelUnitTestCase
             )
             ->filter(
                 new OrGroup([
-                    new LessThan( "DeclarationStartDate", "{DonationDate}" ),
-                    new Equals( "DeclarationDonationID", "{DonationID}")
+                    new AndGroup([
+                        new LessThan( "DeclarationStartDate", "@{DonationDate}" ),
+                        new GreaterThan( "DeclarationStartDate", "0000-00-00" )
+                    ]),
+                    new Equals( "DeclarationDonationID", "@{DonationID}")
                 ])
             );
 
         $this->assertCount(2, $donations);
+        $this->assertEquals($contact->getUniqueIdentifier(), $donations[1]->ContactID);
+
+        $contacts = TestContact::all()->
+            intersectWith(
+                TestDonation::all()
+                    ->intersectWith(
+                        TestDeclaration::all(),
+                        "ContactID",
+                        "ContactID",
+                        [
+                            "StartDate" => "DeclarationStartDate",
+                            "DonationID" => "DeclarationDonationID"
+                        ])
+                    ->filter(
+                        new AndGroup([
+                            new OrGroup([
+                                new LessThan( "DeclarationStartDate", "@{DonationDate}" ),
+                                new Equals( "DeclarationDonationID", "@{DonationID}")
+                            ]),
+                        ])
+                    )
+                    ->addAggregateColumn(new Count("DonationID", "CountOfDonations")),
+                    "ContactID",
+                    "ContactID",
+                    [ "CountOfDonations" ]
+                )
+            ->filter(new Equals("CountOfDonations", 2));
+
+        $this->assertCount(1, $contacts);
         $this->assertEquals($contact->getUniqueIdentifier(), $donations[1]->ContactID);
 
     }

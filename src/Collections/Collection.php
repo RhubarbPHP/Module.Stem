@@ -103,6 +103,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     private $aliasedColumns = [];
 
     /**
+     * A map for aliases to the unique reference of their source collection
+     *
+     * @var array
+     */
+    private $aliasedColumnsToCollection = [];
+
+    /**
      * Columns that are being added to the collection to serve the purposes of aggregates pulled up from intersections
      * are listed here.
      *
@@ -127,6 +134,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function getAliasedColumns()
     {
         return $this->aliasedColumns;
+    }
+
+    public function getAliasedColumnsToCollection()
+    {
+        return $this->aliasedColumnsToCollection;
     }
 
     public function getPulledUpAggregatedColumns()
@@ -223,9 +235,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $childAggregates = $collection->getAggregateColumns();
 
-        foreach($columnsToPullUp as $column){
+        foreach($columnsToPullUp as $column => $alias){
 
-            $this->aliasedColumns[] = $column;
+            if (is_numeric($column)){
+                $column = $alias;
+            }
+
+            $this->aliasedColumns[$alias] = $column;
+            $this->aliasedColumnsToCollection[$column] = $collection->getUniqueReference();
 
             foreach($childAggregates as $aggregate){
                 if ($aggregate->getAlias() == $column){

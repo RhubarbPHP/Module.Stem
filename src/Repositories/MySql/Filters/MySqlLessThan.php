@@ -57,8 +57,21 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
         if (self::canFilter($collection, $repository, $columnName)) {
             $paramName = uniqid();
             $aliases = $collection->getPulledUpAggregatedColumns();
+
             $isAlias = in_array($columnName, $aliases);
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->lessThan);
+
+            $aliases = $collection->getAliasedColumns();
+            if (isset($aliases[$columnName])){
+                $columnName = $aliases[$columnName];
+            }
+
+            $toAlias = null;
+
+            $aliases = $collection->getAliasedColumnsToCollection();
+            if (isset($aliases[$columnName])){
+                $toAlias = $aliases[$columnName];
+            }
 
             if (!$placeHolder) {
                 $params[$paramName] = self::getTransformedComparisonValueForRepository(
@@ -68,14 +81,14 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
                 );
                 $paramName = ":" . $paramName;
             } else {
-                $paramName = $placeHolder;
+                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
             }
 
 
             if ($originalFilter->inclusive) {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '<= '.$paramName, $isAlias));
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '<= '.$paramName, $isAlias, $toAlias));
             } else {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '< '.$paramName, $isAlias));
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '< '.$paramName, $isAlias, $toAlias));
             }
 
             return true;

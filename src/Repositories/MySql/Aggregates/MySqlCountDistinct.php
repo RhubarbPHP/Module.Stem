@@ -28,7 +28,7 @@ class MySqlCountDistinct extends CountDistinct
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, &$relationshipsToAutoHydrate)
+    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
     {
         $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
 

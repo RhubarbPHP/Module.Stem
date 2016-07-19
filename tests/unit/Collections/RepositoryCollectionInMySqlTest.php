@@ -71,6 +71,10 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
     public function testComplicatedExampleMySql()
     {
         $this->testComplicatedExample();
+
+        $sql = MySql::getPreviousStatement();
+
+        $this->assertContains(".`DonationID` =`", $sql, "If placeholders are working we should see this comparison in the last query");
     }
 
     public function testAggregatesUseHavingClause()

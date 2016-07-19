@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/GreaterThan.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\Repository;
@@ -37,13 +38,16 @@ class MySqlGreaterThan extends GreaterThan
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
+     * @param Collection $collection
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
      * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
      * @return string|void
+     * @internal param $relationshipsToAutoHydrate
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
@@ -52,10 +56,24 @@ class MySqlGreaterThan extends GreaterThan
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName)) {
+        if (self::canFilter($collection, $repository, $columnName)) {
             $paramName = uniqid();
+            $aliases = $collection->getPulledUpAggregatedColumns();
 
+            $isAlias = in_array($columnName, $aliases);
             $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->greaterThan);
+
+            $aliases = $collection->getAliasedColumns();
+            if (isset($aliases[$columnName])){
+                $columnName = $aliases[$columnName];
+            }
+
+            $toAlias = null;
+
+            $aliases = $collection->getAliasedColumnsToCollection();
+            if (isset($aliases[$columnName])){
+                $toAlias = $aliases[$columnName];
+            }
 
             if (!$placeHolder) {
                 $params[$paramName] = self::getTransformedComparisonValueForRepository(
@@ -65,13 +83,14 @@ class MySqlGreaterThan extends GreaterThan
                 );
                 $paramName = ":" . $paramName;
             } else {
-                $paramName = $placeHolder;
+                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
             }
 
+
             if ($originalFilter->inclusive) {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '>= '.$paramName));
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '>= '.$paramName, $isAlias, $toAlias));
             } else {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '> '.$paramName));
+                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '> '.$paramName, $isAlias, $toAlias));
             }
 
             return true;

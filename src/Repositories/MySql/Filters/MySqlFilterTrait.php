@@ -54,7 +54,7 @@ trait MySqlFilterTrait
         if (!isset($columns[$columnName])) {
             $aliases = $collection->getAliasedColumns();
 
-            if (in_array($columnName, $aliases)){
+            if (in_array($columnName, $aliases) || array_key_exists($columnName, $aliases)){
                 // While not a column in the underlying table, the filter is actually on an alias from
                 // an intersection or aggregate. We can handle this with a having clause so we'll
                 // say "yes - we can handle this".
