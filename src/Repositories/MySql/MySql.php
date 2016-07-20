@@ -230,7 +230,7 @@ class MySql extends PdoRepository
     {
         $namedParams = [];
 
-        if (!$collection->getFilter()->canFilterWithRepository($this)){
+        if (!$collection->getFilter()->canFilterWithRepository($collection, $this)){
             throw new BatchUpdateNotPossibleException();
         }
 

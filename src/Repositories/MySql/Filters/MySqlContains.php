@@ -20,33 +20,42 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/Contains.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\ColumnWhereExpression;
 use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlContains extends Contains
 {
     use MySqlFilterTrait;
 
+    /**
+     * Returns the SQL fragment needed to filter where a column equals a given value.
+     *
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Equals|Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
+     * @param array $params
+     * @return string|void
+     */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        SqlStatement $whereExpressionCollector,
+        WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-
-        $columnName = $originalFilter->columnName;
-
-        if (self::canFilter($repository, $columnName)) {
-            $paramName = uniqid() . $columnName;
-            $params[$paramName] = "%" . $originalFilter->contains . "%";
-            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "LIKE :".$paramName));
-
-            return true;
-        }
-
-        return false;
+        return self::createColumnWhereClauseExpression(
+            "LIKE",
+            "%".$originalFilter->contains."%",
+            $collection,
+            $repository,
+            $originalFilter,
+            $whereExpressionCollector,
+            $params);
     }
 }

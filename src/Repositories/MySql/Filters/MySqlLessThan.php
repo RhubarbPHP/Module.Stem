@@ -23,7 +23,6 @@ require_once __DIR__ . "/../../../Filters/LessThan.php";
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Sql\ColumnWhereExpression;
 use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
@@ -51,49 +50,13 @@ class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-
-        $columnName = $originalFilter->columnName;
-
-        if (self::canFilter($collection, $repository, $columnName)) {
-            $paramName = uniqid();
-            $aliases = $collection->getPulledUpAggregatedColumns();
-
-            $isAlias = in_array($columnName, $aliases);
-            $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->lessThan);
-
-            $aliases = $collection->getAliasedColumns();
-            if (isset($aliases[$columnName])){
-                $columnName = $aliases[$columnName];
-            }
-
-            $toAlias = null;
-
-            $aliases = $collection->getAliasedColumnsToCollection();
-            if (isset($aliases[$columnName])){
-                $toAlias = $aliases[$columnName];
-            }
-
-            if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository(
-                    $columnName,
-                    $originalFilter->lessThan,
-                    $repository
-                );
-                $paramName = ":" . $paramName;
-            } else {
-                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
-            }
-
-
-            if ($originalFilter->inclusive) {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '<= '.$paramName, $isAlias, $toAlias));
-            } else {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '< '.$paramName, $isAlias, $toAlias));
-            }
-
-            return true;
-        }
-
-        return false;
+        return self::createColumnWhereClauseExpression(
+            ($originalFilter->inclusive) ? "<=" : "<",
+            $originalFilter->lessThan,
+            $collection,
+            $repository,
+            $originalFilter,
+            $whereExpressionCollector,
+            $params);
     }
 }

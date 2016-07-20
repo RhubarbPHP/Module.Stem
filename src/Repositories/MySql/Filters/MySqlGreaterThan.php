@@ -53,49 +53,13 @@ class MySqlGreaterThan extends GreaterThan
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-
-        $columnName = $originalFilter->columnName;
-
-        if (self::canFilter($collection, $repository, $columnName)) {
-            $paramName = uniqid();
-            $aliases = $collection->getPulledUpAggregatedColumns();
-
-            $isAlias = in_array($columnName, $aliases);
-            $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->greaterThan);
-
-            $aliases = $collection->getAliasedColumns();
-            if (isset($aliases[$columnName])){
-                $columnName = $aliases[$columnName];
-            }
-
-            $toAlias = null;
-
-            $aliases = $collection->getAliasedColumnsToCollection();
-            if (isset($aliases[$columnName])){
-                $toAlias = $aliases[$columnName];
-            }
-
-            if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository(
-                    $columnName,
-                    $originalFilter->greaterThan,
-                    $repository
-                );
-                $paramName = ":" . $paramName;
-            } else {
-                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
-            }
-
-
-            if ($originalFilter->inclusive) {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '>= '.$paramName, $isAlias, $toAlias));
-            } else {
-                $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, '> '.$paramName, $isAlias, $toAlias));
-            }
-
-            return true;
-        }
-
-        return false;
+        return self::createColumnWhereClauseExpression(
+            ($originalFilter->inclusive) ? ">=" : ">",
+            $originalFilter->greaterThan,
+            $collection,
+            $repository,
+            $originalFilter,
+            $whereExpressionCollector,
+            $params);
     }
 }

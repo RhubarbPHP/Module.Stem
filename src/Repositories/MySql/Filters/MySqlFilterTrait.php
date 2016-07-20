@@ -25,6 +25,8 @@ use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
  * Adds a method used to determine if the filter requires auto hydration of navigation properties.
@@ -65,6 +67,83 @@ trait MySqlFilterTrait
         }
 
         return true;
+    }
+
+    protected static function getTableAlias($originalFilter, Collection $collection)
+    {
+        $tableAlias = null;
+
+        $columnName = self::getRealColumnName($originalFilter, $collection);
+
+        $aliases = $collection->getAliasedColumnsToCollection();
+
+        if (isset($aliases[$columnName])){
+            $tableAlias = $aliases[$columnName];
+        }
+
+        return $tableAlias;
+    }
+
+    protected static function getRealColumnName($originalFilter, Collection $collection)
+    {
+        $columnName = $originalFilter->columnName;
+
+        $aliases = $collection->getAliasedColumns();
+        if (isset($aliases[$columnName])){
+            $columnName = $aliases[$columnName];
+        }
+
+        return $columnName;
+    }
+
+    protected static function createColumnWhereClauseExpression(
+        $sqlOperator,
+        $value,
+        Collection $collection,
+        Repository $repository,
+        ColumnFilter $originalFilter,
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
+    )
+    {
+        $columnName = $originalFilter->columnName;
+
+        if (self::canFilter($collection, $repository, $columnName)) {
+
+            $aliases = $collection->getPulledUpAggregatedColumns();
+            $isAlias = in_array($columnName, $aliases);
+
+            $columnName = self::getRealColumnName($originalFilter, $collection);
+            $toAlias = self::getTableAlias($originalFilter, $collection);
+
+            if ($value === null) {
+                $value = "NULL";
+                if ($sqlOperator == "="){
+                    $sqlOperator = "IS";
+                }
+            }
+
+            $paramName = uniqid() . $columnName;
+
+            $placeHolder = $originalFilter->detectPlaceHolder($value);
+
+            if (!$placeHolder) {
+                $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                    $columnName,
+                    $value,
+                    $repository
+                );;
+                $paramName = ":" . $paramName;
+            } else {
+                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
+            }
+
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, $sqlOperator . " ".$paramName, $isAlias, $toAlias));
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

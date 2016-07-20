@@ -74,7 +74,7 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         $sql = MySql::getPreviousStatement();
 
-        $this->assertContains(".`DonationID` =`", $sql, "If placeholders are working we should see this comparison in the last query");
+        $this->assertContains(".`DonationID` = `", $sql, "If placeholders are working we should see this comparison in the last query");
     }
 
     public function testAggregatesUseHavingClause()

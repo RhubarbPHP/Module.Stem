@@ -49,49 +49,13 @@ class MySqlEquals extends Equals
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-        $columnName = $originalFilter->columnName;
-
-        if (self::canFilter($collection, $repository, $columnName)) {
-
-            $aliases = $collection->getPulledUpAggregatedColumns();
-            $isAlias = in_array($columnName, $aliases);
-
-            $aliases = $collection->getAliasedColumns();
-            if (isset($aliases[$columnName])){
-                $columnName = $aliases[$columnName];
-            }
-
-            $toAlias = null;
-
-            $aliases = $collection->getAliasedColumnsToCollection();
-            if (isset($aliases[$columnName])){
-                $toAlias = $aliases[$columnName];
-            }
-
-            if ($originalFilter->equalTo === null) {
-               $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IS NULL", $isAlias, $toAlias));
-            }
-
-            $paramName = uniqid() . $columnName;
-
-            $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->equalTo);
-
-            if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository(
-                    $columnName,
-                    $originalFilter->equalTo,
-                    $repository
-                );;
-                $paramName = ":" . $paramName;
-            } else {
-                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
-            }
-
-            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, "=" . $paramName, $isAlias, $toAlias));
-
-            return true;
-        }
-
-        return false;
+        return self::createColumnWhereClauseExpression(
+            "=",
+            $originalFilter->equalTo,
+            $collection,
+            $repository,
+            $originalFilter,
+            $whereExpressionCollector,
+            $params);
     }
 }

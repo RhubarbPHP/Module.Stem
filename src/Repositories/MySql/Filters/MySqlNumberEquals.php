@@ -20,11 +20,13 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/NumberEquals.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\NumberEquals;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlNumberEquals extends NumberEquals
 {
@@ -33,20 +35,22 @@ class MySqlNumberEquals extends NumberEquals
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  Equals|Filter $originalFilter
-     * @param  array $params
-     * @param  array $relationshipsToAutoHydrate
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
+     * @param array $params
      * @return string|void
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        SqlStatement $whereExpressionCollector,
+        WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
         if ($originalFilter->isNumeric) {
-            return MySqlEquals::doFilterWithRepository($repository, $originalFilter, $whereExpressionCollector, $params);
+            return MySqlEquals::doFilterWithRepository($collection, $repository, $originalFilter, $whereExpressionCollector, $params);
         }
 
         return true;
