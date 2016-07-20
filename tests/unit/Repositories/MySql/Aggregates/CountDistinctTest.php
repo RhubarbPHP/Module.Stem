@@ -45,11 +45,11 @@ class CountDistinctTest extends MySqlTestCase
         $examples = new RepositoryCollection("Company");
 
         list($sumTotal) = $examples->calculateAggregates(new CountDistinct("CompanyName"));
+        $lastStatement = MySql::getPreviousStatement(false);
 
         $this->assertEquals(2, $sumTotal);
 
-        $lastStatement = MySql::getPreviousStatement(false);
-
-        $this->assertContains("COUNT( DISTINCT `tblCompany`.`CompanyName` ) AS `DistinctCountOfCompanyName`", $lastStatement);
+        $this->assertContains("COUNT( DISTINCT `", $lastStatement);
+        $this->assertContains("DistinctCountOfCompanyName", $lastStatement);
     }
 }

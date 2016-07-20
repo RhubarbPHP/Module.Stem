@@ -37,14 +37,6 @@ abstract class Aggregate
     protected $aggregatedColumnName;
 
     /**
-     * Set to true by a repository specific implementation of the aggregate to indicate it was able to offload this to
-     * the repository.
-     *
-     * @var bool
-     */
-    protected $aggregatedByRepository = false;
-
-    /**
      * True if the aggregate as already been calculated.
      * 
      * @var bool
@@ -96,7 +88,7 @@ abstract class Aggregate
 
     final public function wasAggregatedByRepository()
     {
-        return $this->aggregatedByRepository;
+        return $this->calculated;
     }
 
     protected static function calculateByRepository(

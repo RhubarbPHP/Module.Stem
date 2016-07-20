@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  */
@@ -38,35 +39,6 @@ class DayOfWeek extends ColumnFilter
         $this->validDays = $validDays;
     }
 
-    /**
-     * Implement to return an array of unique identifiers to filter from the list.
-     *
-     * @param  RepositoryCollection $list The data list to filter.
-     * @return array
-     */
-    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
-    {
-        $idsToFilter = [];
-
-        foreach ($list as $item) {
-            $filter = false;
-
-            if (!$item[$this->columnName] instanceof RhubarbDateTime) {
-                $filter = true;
-            } else {
-                if (!in_array($item[$this->columnName]->format("N") - 1, $this->validDays)) {
-                    $filter = true;
-                }
-            }
-
-            if ($filter) {
-                $idsToFilter[] = $item->UniqueIdentifier;
-            }
-        }
-
-        return $idsToFilter;
-    }
-
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
@@ -77,5 +49,28 @@ class DayOfWeek extends ColumnFilter
     public static function fromSettingsArray($settings)
     {
         return new self($settings["columnName"], $settings["validDays"]);
+    }
+
+    /**
+     * Chooses whether to remove the model from the list or not
+     *
+     * Returns true to remove it, false to keep it.
+     *
+     * @param Model $model
+     * @return array
+     */
+    public function evaluate(Model $model)
+    {
+        $filter = false;
+
+        if (!$model[$this->columnName] instanceof RhubarbDateTime) {
+            $filter = true;
+        } else {
+            if (!in_array($model[$this->columnName]->format("N") - 1, $this->validDays)) {
+                $filter = true;
+            }
+        }
+
+        return $filter;
     }
 }

@@ -10,6 +10,7 @@ use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
@@ -117,15 +118,32 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private $pulledUpAggregatedColumns = [];
 
+    private static $uniqueReferencesUsed = [];
+
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
     }
 
+    public static function clearUniqueReferencesUsed()
+    {
+        self::$uniqueReferencesUsed = [];
+    }
+
     public function getUniqueReference()
     {
         if ($this->uniqueReference === null){
-            $this->uniqueReference = uniqid();
+
+            $alias = $modelName = basename(str_replace("\\", "/", $this->getModelClassName()));
+            $count = 1;
+
+            while (in_array($alias, self::$uniqueReferencesUsed)){
+                $count++;
+                $alias = $modelName.$count;
+            }
+
+            $this->uniqueReference = $alias;
+            self::$uniqueReferencesUsed[] = $alias;
         }
 
         return $this->uniqueReference;
@@ -168,7 +186,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $columnName = $parts[count($parts)-1];
 
             $relationships = array_slice($parts,0,count($parts)-1);
-            $newColumnName = uniqid().$columnName;
+            $newColumnName = PdoRepository::getPdoParamName($columnName);
             $this->createIntersectionForRelationships($relationships, [$columnName => $newColumnName]);
             $columnName = $newColumnName;
         }
@@ -183,8 +201,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
-    public final function replaceSort($sorts)
+    public final function replaceSort($columnName, $ascending = true)
     {
+        if (!is_array($columnName)){
+             $sorts = [$columnName => $ascending];
+        } else {
+            $sorts = $columnName;
+        }
+
         $this->sorts = [];
 
         foreach($sorts as $index => $value){
@@ -270,9 +294,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         if (count($parts) > 1){
             $columnName = $parts[count($parts)-1];
+            $alias = str_replace(".", "", $aggregate->getAggregateColumnName());
 
             $relationships = array_slice($parts,0,count($parts)-1);
             $aggregate->setAggregateColumnName($columnName);
+
             $collection = $this->createIntersectionForRelationships($relationships, [$aggregate->getAlias()]);
             $collection->addAggregateColumn($aggregate);
             return $this;
@@ -373,6 +399,20 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     final public function getModelClassName()
     {
         return $this->modelClassName;
+    }
+
+    /**
+     * Replaces the filter on the collection completely rather than blending it as filter() does
+     *
+     * @param Filter $filter
+     * @return $this
+     */
+    public function replaceFilter(Filter $filter)
+    {
+        $this->filter = $filter;
+        $this->invalidate();
+
+        return $this;
     }
 
     /**

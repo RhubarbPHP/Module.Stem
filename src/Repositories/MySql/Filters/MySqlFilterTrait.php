@@ -22,6 +22,7 @@ use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Filters\ColumnFilter;
 use Rhubarb\Stem\Filters\Filter;
+use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -123,7 +124,7 @@ trait MySqlFilterTrait
                 }
             }
 
-            $paramName = uniqid() . $columnName;
+            $paramName = PdoRepository::getPdoParamName($columnName);
 
             $placeHolder = $originalFilter->detectPlaceHolder($value);
 

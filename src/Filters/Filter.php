@@ -21,6 +21,7 @@ namespace Rhubarb\Stem\Filters;
 use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\SqlStatement;
@@ -248,5 +249,13 @@ abstract class Filter
         return $filter;
     }
 
+    /**
+     * An opportunity for implementors to create intersections on the collection.
+     *
+     * @param Collection $collection
+     * @param $createIntersectionCallback
+     * @throws CreatedIntersectionException
+     * @return void
+     */
     abstract public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback);
 }

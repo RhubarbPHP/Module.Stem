@@ -44,6 +44,37 @@ abstract class PdoRepository extends Repository
      */
     protected static $defaultConnection = null;
 
+    private static $pdoParamAliasesUsed = [];
+
+    /**
+     * Resets the param aliases used in PDO - used when unit testing to verify query outputs consistantly.
+     */
+    public static function resetPdoParamAliases()
+    {
+        self::$pdoParamAliasesUsed = [];
+    }
+
+    /**
+     * Returns a guaranteed unique parameter name for the column
+     * @param $columnName
+     * @return string
+     */
+    public static function getPdoParamName($columnName)
+    {
+        $alias = $columnName;
+        $count = 1;
+
+        while(in_array($alias, self::$pdoParamAliasesUsed)){
+            $count++;
+
+            $alias = $columnName.$count;
+        }
+
+        self::$pdoParamAliasesUsed[] = $alias;
+
+        return $alias;
+    }
+
     /**
      * Return's the default connection.
      */

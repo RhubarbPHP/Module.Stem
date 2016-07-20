@@ -23,6 +23,8 @@ require_once __DIR__ . '/../../../Aggregates/CountDistinct.php';
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\CountDistinct;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SelectExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlCountDistinct extends CountDistinct
 {
@@ -30,17 +32,15 @@ class MySqlCountDistinct extends CountDistinct
 
     protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
     {
-        $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
-
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName, $relationshipsToAutoHydrate)) {
+        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
             $aliasName = $originalAggregate->getAlias();
+            $columnName = $originalAggregate->getAggregateColumnName();
 
-            $originalAggregate->aggregatedByRepository = true;
-            $prefix = (strpos($columnName, '.') === false) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
+            $originalAggregate->calculated = true;
 
-            return "COUNT( DISTINCT {$prefix}`{$columnName}` ) AS `{$aliasName}`";
+            $prefix = "`".$sqlStatement->getAlias()."`.";
+
+            $sqlStatement->columns[] = new SelectExpression("COUNT( DISTINCT {$prefix}`{$columnName}` ) AS `{$aliasName}`");
         }
-
-        return "";
     }
 }

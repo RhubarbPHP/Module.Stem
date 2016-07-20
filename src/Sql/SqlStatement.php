@@ -7,6 +7,13 @@ use Rhubarb\Stem\Filters\AndGroup;
 class SqlStatement extends SqlClause implements WhereExpressionCollector
 {
     /**
+     * Tracks the use of alias names.
+     *
+     * @var array
+     */
+    private static $aliasNames = [];
+
+    /**
      * @var SelectExpression[]
      */
     public $columns = [];

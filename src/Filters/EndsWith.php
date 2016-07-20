@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Filters;
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
@@ -52,25 +53,29 @@ class EndsWith extends ColumnFilter
         $this->caseSensitive = $caseSensitive;
     }
 
-    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
+    public function evaluate(Model $model)
     {
-        $ids = [];
+        $placeHolder = $this->detectPlaceHolder($this->endsWith);
 
-        foreach ($list as $item) {
-            if (!$this->caseSensitive) {
-                $columnValue = strtolower($item[$this->columnName]);
-                $endsWith = strtolower($this->endsWith);
-            } else {
-                $columnValue = $item[$this->columnName];
-                $endsWith = $this->endsWith;
-            }
-
-            if (substr($columnValue, strlen($columnValue) - strlen($endsWith)) != $endsWith) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+        if (!$placeHolder) {
+            $endsWith = $this->getTransformedComparisonValue($this->endsWith, $model);
+        } else {
+            $endsWith = $model[$placeHolder];
+            $endsWith = $this->getTransformedComparisonValue($endsWith, $model);
         }
 
-        return $ids;
+        if (!$this->caseSensitive) {
+            $columnValue = strtolower($model[$this->columnName]);
+            $endsWith = strtolower($endsWith);
+        } else {
+            $columnValue = $model[$this->columnName];
+        }
+
+        if (substr($columnValue, strlen($columnValue) - strlen($endsWith)) != $endsWith) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getSettingsArray()

@@ -18,7 +18,10 @@
 
 namespace Rhubarb\Stem\Filters;
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
+use Rhubarb\Stem\Models\Model;
 
 class ColumnIntersectsCollection extends Filter
 {
@@ -36,25 +39,30 @@ class ColumnIntersectsCollection extends Filter
     }
 
     /**
-     * Implement to return an array of unique identifiers to filter from the list.
+     * Chooses whether to remove the model from the list or not
      *
-     * @param  RepositoryCollection $list The data list to filter.
+     * Returns true to remove it, false to keep it.
+     *
+     * @param Model $model
      * @return array
      */
-    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
+    public function evaluate(Model $model)
     {
-        $idsToFilter = [];
-        $ids = [];
-        foreach($this->collection as $model){
-            $ids[$model[$this->columnName]] = 1;
-        }
+        // Not used.
+    }
 
-        foreach($list as $model){
-            if (!isset($ids[$model[$this->columnName]])){
-                $idsToFilter[] = $model->UniqueIdentifier;
-            }
-        }
+    /**
+     * An opportunity for implementors to create intersections on the collection.
+     *
+     * @param Collection $collection
+     * @param $createIntersectionCallback
+     * @throws CreatedIntersectionException
+     * @return void
+     */
+    public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
+    {
+        $collection->intersectWith($this->collection, $this->columnName, $this->collection->getRepository()->getModelSchema()->uniqueIdentifierColumnName);
 
-        return $idsToFilter;
+        throw new CreatedIntersectionException();
     }
 }

@@ -41,20 +41,6 @@ class Not extends Filter
     public function __construct(Filter $filter)
     {
         $this->filter = $filter;
-    } 
-
-    public function doGetUniqueIdentifiersToFilter(RepositoryCollection $list)
-    {
-        $idsToKeep = $this->filter->doGetUniqueIdentifiersToFilter($list);
-        $ids = [];
-
-        foreach ($list as $item) {
-            if (!in_array($item->UniqueIdentifier, $idsToKeep)) {
-                $ids[] = $item->UniqueIdentifier;
-            }
-        }
-
-        return $ids;
     }
 
     public function evaluate(Model $model)

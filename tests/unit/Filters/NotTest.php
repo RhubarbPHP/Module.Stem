@@ -155,7 +155,7 @@ class NotTest extends ModelUnitTestCase
         $filter = new Contains("Forename", "Jo", true);
         $notFilter = new Not($filter);
 
-        $listOne = new RepositoryCollection(Example::class);
+        $listOne = new RepositoryCollection(TestContact::class);
 
         $this->assertCount(7, $listOne, "The list starts off with the size of 7");
 
@@ -165,7 +165,7 @@ class NotTest extends ModelUnitTestCase
         $this->assertCount(4, $this->list, "The list with the filter \$filter applied to it should be length 4");
         $this->assertCount(3, $listOne, "The list with the filter \$notFilter should be length 3, (7-4 = 3)");
 
-        $listTwo = new RepositoryCollection(Example::class);
+        $listTwo = new RepositoryCollection(TestContact::class);
         $filterTwo = new Contains("Surname", "Thu", true);
         $listTwo->filter($filterTwo);
 

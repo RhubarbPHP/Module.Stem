@@ -364,6 +364,9 @@ class MySql extends PdoRepository
      */
     public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
     {
+        PdoRepository::resetPdoParamAliases();
+        RepositoryCollection::clearUniqueReferencesUsed();
+
         $model = $collection->getModelClassName();
         $schema = SolutionSchema::getModelSchema($model);
         $columns = $schema->getColumns();
