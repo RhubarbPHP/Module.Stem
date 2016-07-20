@@ -37,7 +37,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     /**
      * The source of our collection items.
-     * 
+     *
      * @var CollectionCursor
      */
     private $collectionCursor;
@@ -127,7 +127,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     public static function clearUniqueReferencesUsed()
     {
-        self::$uniqueReferencesUsed = [];
+        Collection::$uniqueReferencesUsed = [];
     }
 
     public function getUniqueReference()
@@ -143,7 +143,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
 
             $this->uniqueReference = $alias;
-            self::$uniqueReferencesUsed[] = $alias;
+            Collection::$uniqueReferencesUsed[] = $alias;
         }
 
         return $this->uniqueReference;
@@ -176,6 +176,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $repository = $emptyObject->getRepository();
 
         return $repository;
+    }
+
+    public function getModelSchema()
+    {
+        return $this->getRepository()->getModelSchema();
     }
 
     public final function addSort($columnName, $ascending = true)
@@ -383,7 +388,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     /**
      * Returns the list of aggregate columns.
-     * 
+     *
      * @return \Rhubarb\Stem\Aggregates\Aggregate[]
      */
     public final function getAggregateColumns()
@@ -780,7 +785,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                 }
             }
         }
-        
+
         $this->collectionCursor->setAugmentationData($additionalData);
     }
 

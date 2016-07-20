@@ -250,7 +250,7 @@ class MySql extends PdoRepository
 
         $sql = $statement->getUpdateSql(array_keys($propertyPairs));
 
-        MySql::executeStatement($sql, $namedParams);
+        static::executeStatement($sql, $namedParams);
     }
 
     /**
@@ -309,7 +309,7 @@ class MySql extends PdoRepository
         }
 
         if ($ranged) {
-            $foundRows = Mysql::returnSingleValue("SELECT FOUND_ROWS()");
+            $foundRows = static::returnSingleValue("SELECT FOUND_ROWS()");
 
             $unfetchedRowCount = $foundRows - sizeof($uniqueIdentifiers);
         }
@@ -340,12 +340,12 @@ class MySql extends PdoRepository
             $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
         }
 
-        $statement = MySql::executeStatement((string)$sql, $params);
+        $statement = static::executeStatement((string)$sql, $params);
 
         $count = $statement->rowCount();
 
         if ($hasLimit){
-            $count = MySql::returnSingleValue("SELECT FOUND_ROWS()");
+            $count = static::returnSingleValue("SELECT FOUND_ROWS()");
         }
 
         return new MySqlCursor($statement, $this, $count);
@@ -364,9 +364,6 @@ class MySql extends PdoRepository
      */
     public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
     {
-        PdoRepository::resetPdoParamAliases();
-        RepositoryCollection::clearUniqueReferencesUsed();
-
         $model = $collection->getModelClassName();
         $schema = SolutionSchema::getModelSchema($model);
         $columns = $schema->getColumns();
@@ -452,11 +449,11 @@ class MySql extends PdoRepository
             $sortColumn = ($alias) ? '`'.$sort->columnName.'`' : "`".$sqlStatement->getAlias()."`.`".$sort->columnName."`";
             $sqlStatement->sorts[] = new SortExpression($sortColumn, $sort->ascending);
         }
-        
+
         foreach($collection->getGroups() as $group){
             $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
         }
-        
+
         $aggregates = $collection->getAggregateColumns();
         $allAggregated = true;
 
