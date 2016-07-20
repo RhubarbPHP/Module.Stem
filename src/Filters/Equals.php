@@ -56,8 +56,6 @@ class Equals extends ColumnFilter
 
     public function evaluate(Model $model)
     {
-        $ids = [];
-
         $placeHolder = $this->detectPlaceHolder($this->equalTo);
 
         if (!$placeHolder) {
@@ -68,10 +66,10 @@ class Equals extends ColumnFilter
         }
 
         if ($model[$this->columnName] != $equalTo) {
-            $ids[] = $model->UniqueIdentifier;
+            return true;
         }
 
-        return $ids;
+        return false;
     }
 
     public function setFilterValuesOnModel(Model $model)
