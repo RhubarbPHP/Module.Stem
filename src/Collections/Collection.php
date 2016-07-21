@@ -258,7 +258,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [])
     {
         // Group the intersected collection by the child column:
-        $collection->groups[] = $childColumnName;
+        //$collection->groups[] = $childColumnName;
 
         $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
 
@@ -576,6 +576,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             return;
         }
 
+        // If we have intersections we need to protect against getting multiple occurrences of our models
+        // in the collection so we add a group by on our unique identifier.
+
+        if (count($this->intersections)>0){
+            $uniqueIdentifier = $this->getModelSchema()->uniqueIdentifierColumnName;
+            if (!in_array($uniqueIdentifier, $this->groups)){
+                $this->groups[] = $uniqueIdentifier;
+            }
+        }
+
         // Before we prepare the cursor we should ask all of our filters, sorts and aggregates to
         // check if they have any dot notations that need expanded into intersections.
 
@@ -651,6 +661,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->collectionCursor->setAugmentationData($augmentationData);
         }
 
+        $this->collectionCursor->deDupe();
         $this->collectionCursor->rewind();
     }
 
@@ -794,26 +805,65 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $childByIntersectColumn = [];
 
         foreach($intersection->collection as $childModel){
-            $childByIntersectColumn[$childModel[$intersection->childColumnName]] = $childModel;
+
+            $index = $childModel[$intersection->childColumnName];
+
+            if (isset($childByIntersectColumn[$index])){
+                if (!is_array($childByIntersectColumn[$index])) {
+                    $childByIntersectColumn[$index] = [$childByIntersectColumn[$index]];
+                }
+
+                $childByIntersectColumn[$index][] = $childModel;
+            } else {
+                $childByIntersectColumn[$index] = $childModel;
+            }
         }
 
         $uniqueIdsToFilter = [];
         $augmentationData = [];
         $hasColumnsToPullUp = count($intersection->columnsToPullUp);
 
+        $alreadyDone = [];
+
         foreach($this->collectionCursor as $parentModel){
+
+            $parentId = rtrim($parentModel->uniqueIdentifier, "_");
+
+            if (isset($alreadyDone[$parentId])){
+                continue;
+            }
+
+            $alreadyDone[$parentId] = true;
+
             $parentValue = $parentModel[$intersection->parentColumnName];
             if (!isset($childByIntersectColumn[$parentValue])){
                 $uniqueIdsToFilter[] = $parentModel->uniqueIdentifier;
-            } elseif ($hasColumnsToPullUp) {
+            } else {
 
-                $augmentationData[$parentModel->uniqueIdentifier] = [];
+                $childRows = $childByIntersectColumn[$parentValue];
+                $childRows = (is_array($childRows)) ? $childRows : [$childRows];
 
-                foreach($intersection->columnsToPullUp as $column => $alias){
-                    if (is_numeric($column)){
-                        $column = $alias;
+                $firstRow = true;
+                foreach($childRows as $childRow) {
+
+                    $augmentationIndex = $parentModel->uniqueIdentifier;
+
+                    if (!$firstRow){
+                        $augmentationIndex = $this->collectionCursor->duplicateRow($augmentationIndex);
                     }
-                    $augmentationData[$parentModel->uniqueIdentifier][$alias] = $childByIntersectColumn[$parentValue][$column];
+
+                    $firstRow = false;
+
+                    if ($hasColumnsToPullUp) {
+                        $augmentationData[$augmentationIndex] = [];
+
+                        foreach ($intersection->columnsToPullUp as $column => $alias) {
+                            if (is_numeric($column)) {
+                                $column = $alias;
+                            }
+                            $augmentationData[$augmentationIndex][$alias] = $childRow[$column];
+                        }
+                    }
                 }
             }
         }

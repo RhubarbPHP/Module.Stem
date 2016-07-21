@@ -34,6 +34,12 @@ class UniqueIdentifierListCursor extends CollectionCursor
     public function filterModelsByIdentifier($uniqueIdentifiersToFilter)
     {
         $this->uniqueIdentifiers = array_values(array_diff($this->uniqueIdentifiers, $uniqueIdentifiersToFilter));
+
+        if (count($this->duplicatedRows)){
+            foreach($uniqueIdentifiersToFilter as $id) {
+                unset($this->duplicatedRows[$id]);
+            }
+        }
     }
 
     /**
@@ -120,13 +126,25 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function offsetGet($offset)
     {
-        $id = $this->uniqueIdentifiers[$offset];
+        if($offset >= count($this->uniqueIdentifiers))
+        {
+            $newoffset = $offset - count($this->uniqueIdentifiers);
+            $values = array_values($this->duplicatedRows);
+            $keys = array_keys($this->duplicatedRows);
+
+            $id = $values[$newoffset];
+            $augmentationId = $keys[$newoffset];
+        } else {
+            $id = $this->uniqueIdentifiers[$offset];
+            $augmentationId = $id;
+        }
 
         $class = $this->modelClassName;
         $object = new $class($id);
+        $object->UniqueIdentifier = $augmentationId;
 
-        if (isset($this->augmentationData[$id])){
-            $object->mergeRawData($this->augmentationData[$id]);
+        if (isset($this->augmentationData[$augmentationId])){
+            $object->mergeRawData($this->augmentationData[$augmentationId]);
         }
 
         return $object;
@@ -176,6 +194,17 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function count()
     {
-        return count($this->uniqueIdentifiers);
+        return count($this->uniqueIdentifiers) + count($this->duplicatedRows);
+    }
+
+    public function deDupe()
+    {
+        foreach ($this->duplicatedRows as $augmentedId => $id) {
+            if (!in_array($id, $this->uniqueIdentifiers)){
+                $this->uniqueIdentifiers[] = $id;
+            }
+        }
+
+        parent::deDupe();
     }
 }

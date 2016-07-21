@@ -16,6 +16,6 @@ class NotExpression extends WhereExpression
 
     public function getSql(SqlStatement $forStatement)
     {
-        return "!(".$this->expressionToNot->getSql($forStatement);
+        return "!(".$this->expressionToNot->getSql($forStatement).")";
     }
 }

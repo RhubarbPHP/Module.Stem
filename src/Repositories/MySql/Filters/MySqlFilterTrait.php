@@ -118,7 +118,6 @@ trait MySqlFilterTrait
             $toAlias = self::getTableAlias($originalFilter, $collection);
 
             if ($value === null) {
-                $value = "NULL";
                 if ($sqlOperator == "="){
                     $sqlOperator = "IS";
                 }
@@ -129,12 +128,16 @@ trait MySqlFilterTrait
             $placeHolder = $originalFilter->detectPlaceHolder($value);
 
             if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository(
-                    $columnName,
-                    $value,
-                    $repository
-                );;
-                $paramName = ":" . $paramName;
+                if ($value === null){
+                    $paramName = "NULL";
+                } else {
+                    $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                        $columnName,
+                        $value,
+                        $repository
+                    );
+                    $paramName = ":" . $paramName;
+                }
             } else {
                 $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
             }

@@ -39,8 +39,13 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
             }
         }
 
-        return implode(" ".$this->boolean." ", $whereExpressions);
-    }
+        $expression = implode(" " . $this->boolean . " ", $whereExpressions);
+
+        if ($expression != "") {
+            $expression = "(" . $expression . ")";
+        }
+
+        return $expression;    }
 
     public function getHavingSql(SqlStatement $forStatement)
     {
@@ -52,7 +57,14 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
             }
         }
 
-        return implode(" ".$this->boolean." ", $havingExpressions);
+        $expression = implode(" ".$this->boolean." ", $havingExpressions);
+
+        if ($expression != "")
+        {
+            $expression = "(".$expression.")";
+        }
+
+        return $expression;
     }
 
     public function addHavingExpression(WhereExpression $expression)

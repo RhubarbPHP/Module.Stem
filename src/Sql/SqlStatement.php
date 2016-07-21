@@ -167,8 +167,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
                 $sql .= " WHERE ".$havingSql;
             }
         }
-
-
+        
         if (count($this->groups)){
             $sql .= " GROUP BY ".$this->implodeSqlClauses($this->groups, ", ");
         }
@@ -190,7 +189,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
         return $sql;
     }
-    
+
     public function getSql(SqlStatement $forStatement)
     {
         return $this->getSelectSql();

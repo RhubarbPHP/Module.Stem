@@ -31,6 +31,8 @@ use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlNot extends Not
 {
+    use MySqlFilterTrait;
+
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *

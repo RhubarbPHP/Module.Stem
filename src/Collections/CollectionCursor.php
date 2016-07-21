@@ -19,6 +19,8 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
      */
     protected $augmentationData = [];
 
+    protected $duplicatedRows = [];
+
     public abstract function filterModelsByIdentifier($uniqueIdentifiers);
 
     /**
@@ -40,6 +42,30 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
                 $this->augmentationData[$id] = array_merge($this->augmentationData[$id], $rowData);
             }
         }
+    }
+
+    public function deDupe()
+    {
+        foreach($this->duplicatedRows as $augmentedId => $id)
+        {
+            $this->augmentationData[$id] = $this->augmentationData[$augmentedId];
+        }
+
+        $this->duplicatedRows = [];
+    }
+
+    public final function duplicateRow($uniqueIdentifier)
+    {
+        $index = $uniqueIdentifier . "_";
+
+        while(key_exists($index, $this->duplicatedRows))
+        {
+            $index .= "_";
+        }
+
+        $this->duplicatedRows[$index] = $uniqueIdentifier;
+
+        return $index;
     }
 
     public final function getAugmentationData()

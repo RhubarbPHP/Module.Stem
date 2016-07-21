@@ -44,7 +44,7 @@ class DateColumn extends Column
                 return clone $data;
             }
 
-            return $data;
+            return new RhubarbDate($data);
         };
     }
 }
