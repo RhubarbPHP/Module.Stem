@@ -394,7 +394,7 @@ class MySqlTest extends MySqlTestCase
         $sql = MySql::getPreviousStatement();
 
         $this->assertEquals([300, 700], $results);
-        $this->assertEquals("SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`",
+        $this->assertEquals("SELECT `Company`.*, `UnitTestUser`.SumOfUsersWage AS `SumOfUsersWage` FROM `tblCompany` AS `Company` INNER JOIN (SELECT `UnitTestUser`.*, SUM( `UnitTestUser`.`Wage`) AS `SumOfUsersWage` FROM `tblUser` AS `UnitTestUser` GROUP BY `UnitTestUser`.`CompanyID`) AS `UnitTestUser` ON `Company`.`CompanyID` = `UnitTestUser`.`CompanyID`",
             $sql);
 
         $companies = new RepositoryCollection(Company::class);

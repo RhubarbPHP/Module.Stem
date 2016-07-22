@@ -26,7 +26,7 @@ class Min extends Aggregate
 {
     protected function createAlias()
     {
-        return "MinOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "MinOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
     public function calculateByIteration(RepositoryCollection $collection)

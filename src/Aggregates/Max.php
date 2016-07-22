@@ -26,7 +26,7 @@ class Max extends Aggregate
 {
     protected function createAlias()
     {
-        return "MaxOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "MaxOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
     public function calculateByIteration(RepositoryCollection $collection)

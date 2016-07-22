@@ -4,7 +4,7 @@ namespace Rhubarb\Stem\Sql;
 
 class SelectExpression extends SqlClause
 {
-    private $expression;
+    public $expression;
 
     public function __construct($expression)
     {

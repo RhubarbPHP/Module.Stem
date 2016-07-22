@@ -41,13 +41,24 @@ class RepositoryCollection extends Collection
 {
     public function canBeFilteredByRepository()
     {
-        $filter = $this->getFilter();
+        // If the collection can't be filtered entirely by the repos, OR any of the aggregates
+        // can't be calculated by the repos, we can't perform the intersection (as the intersection itself
+        // depends critically on the rows selected).
 
-        if (!$filter){
-            return true;
+        $filter = $this->getFilter();
+        $repository = $this->getRepository();
+
+        if ($filter && !$filter->canFilterWithRepository($this, $repository)){
+            return false;
         }
 
-        return $filter->canFilterWithRepository($this, $this->getRepository());
+        foreach($this->getAggregateColumns() as $aggregateColumn){
+            if (!$aggregateColumn->canAggregateWithRepository($repository)){
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function createCursor()

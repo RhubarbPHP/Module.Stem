@@ -27,7 +27,7 @@ class Average extends Aggregate
 {
     protected function createAlias()
     {
-        return "AverageOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "AverageOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
     protected $averageGroups = [];

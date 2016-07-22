@@ -403,7 +403,15 @@ class MySql extends PdoRepository
                     $column = $alias;
                 }
 
-                $sqlStatement->columns[] = new SelectColumn("`".$join->statement->getAlias()."`.".$column, $alias);
+                // To pull this column up directly in the SQL we need to first make sure the column is in the select
+                // list of our query. Some aggregates may not be computable in SQL so may not be in the query yet.
+                foreach($join->statement->columns as $joinColumn){
+                    if ($joinColumn instanceof SelectExpression){
+                        if (strpos($joinColumn->expression, $alias)){
+                            $sqlStatement->columns[] = new SelectColumn("`".$join->statement->getAlias()."`.".$column, $alias);
+                        }
+                    }
+                }
             }
 
             $intersection->intersected = true;

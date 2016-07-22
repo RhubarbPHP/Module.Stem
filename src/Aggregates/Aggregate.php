@@ -38,7 +38,7 @@ abstract class Aggregate
 
     /**
      * True if the aggregate as already been calculated.
-     * 
+     *
      * @var bool
      */
     public $calculated = false;
@@ -55,11 +55,17 @@ abstract class Aggregate
      */
     protected $alias;
 
+    /**
+     * When not empty is used as the source of column name creation.
+     * @var string
+     */
+    protected $aliasDerivedFromColumn = "";
+
     public function __construct($aggregatedColumnName, $alias = "")
     {
         $this->aggregatedColumnName = $aggregatedColumnName;
 
-        if ($alias){
+        if ($alias) {
             $this->alias = $alias;
         }
     }
@@ -86,6 +92,20 @@ abstract class Aggregate
         $this->aggregatedColumnName = $columnName;
     }
 
+    final public function setAliasDerivedColumn($columnName)
+    {
+        $this->aliasDerivedFromColumn = $columnName;
+    }
+
+    protected function getAliasDerivedColumn()
+    {
+        if ($this->aliasDerivedFromColumn){
+            return $this->aliasDerivedFromColumn;
+        }
+
+        return $this->aggregatedColumnName;
+    }
+
     final public function wasAggregatedByRepository()
     {
         return $this->calculated;
@@ -96,9 +116,43 @@ abstract class Aggregate
         Aggregate $originalAggregate,
         SqlStatement $sqlStatement,
         &$namedParams
-    ) {
+    )
+    {
 
 
+    }
+
+    protected static function canCalculateByRepository(
+        Repository $repository,
+        Aggregate $originalAggregate
+    )
+    {
+        return false;
+    }
+
+    /**
+     * Checks if this aggregate can be calculated using it's repository
+     *
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param SqlStatement $sqlStatement
+     * @param $namedParams
+     * @return mixed|string
+     */
+    final public function canAggregateWithRepository(Repository $repository)
+    {
+        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+
+        // Get the repository specific implementation of the aggregate.
+        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Aggregates\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
+
+        if (class_exists($className)) {
+            return call_user_func_array(
+                $className . "::canCalculateByRepository",
+                [$repository, $this]
+            );
+        }
+
+        return false;
     }
 
     /**
@@ -131,11 +185,18 @@ abstract class Aggregate
 
     /**
      * Override to return a suggested alias for the aggregate.
-     * 
+     *
      * @return mixed
      */
     protected abstract function createAlias();
 
+
+
+    /**
+     * Returns the alias to use for the aggregate, or if one isn't defined, creates ones.
+     *
+     * @return mixed|string
+     */
     final public function getAlias()
     {
         if ($this->alias){

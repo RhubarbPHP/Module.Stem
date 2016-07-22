@@ -27,7 +27,7 @@ class CountDistinct extends Aggregate
 {
     protected function createAlias()
     {
-        return "DistinctCountOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "DistinctCountOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
     private $distinctGroups = [];

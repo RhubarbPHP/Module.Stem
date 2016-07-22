@@ -39,6 +39,6 @@ class Sum extends Aggregate
 
     protected function createAlias()
     {
-        return "SumOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "SumOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 }

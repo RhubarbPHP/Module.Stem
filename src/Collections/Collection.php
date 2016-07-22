@@ -10,6 +10,7 @@ use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
@@ -299,9 +300,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         if (count($parts) > 1){
             $columnName = $parts[count($parts)-1];
-            $alias = str_replace(".", "", $aggregate->getAggregateColumnName());
 
             $relationships = array_slice($parts,0,count($parts)-1);
+
+            $aggregate->setAliasDerivedColumn(str_replace(".", "", $aggregate->getAggregateColumnName()));
             $aggregate->setAggregateColumnName($columnName);
 
             $collection = $this->createIntersectionForRelationships($relationships, [$aggregate->getAlias()]);

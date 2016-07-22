@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Aggregates;
 
+use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -34,5 +35,13 @@ trait MySqlAggregateTrait
         }
 
         return false;
+    }
+
+    protected static function canCalculateByRepository(
+        Repository $repository,
+        Aggregate $originalAggregate
+    )
+    {
+        return self::canAggregateInMySql($repository,$originalAggregate->getAggregateColumnName());
     }
 }

@@ -27,7 +27,7 @@ class Count extends Aggregate
 {
     protected function createAlias()
     {
-        return "CountOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "CountOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
     public function calculateByIteration(Model $model, $groupKey = "")
