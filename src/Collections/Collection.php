@@ -330,9 +330,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $oldAggregates = $this->aggregateColumns;
-
-        $schema = SolutionSchema::getModelSchema($this->modelClassName);
-
         $this->aggregateColumns = [];
 
         foreach($aggregates as $aggregate) {
