@@ -151,7 +151,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
      * @param string $glue
      * @return mixed
      */
-    protected function implodeSqlClauses($clauses, $glue = ',')
+    public function implodeSqlClauses($clauses, $glue = ',')
     {
         $statements = [];
 
