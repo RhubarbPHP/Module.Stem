@@ -6,6 +6,7 @@ use Rhubarb\Stem\Collections\CollectionCursor;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\ModelSchema;
+use Rhubarb\Stem\Schema\SolutionSchema;
 
 class MySqlCursor extends CollectionCursor
 {
@@ -44,6 +45,8 @@ class MySqlCursor extends CollectionCursor
 
     private $filteredIds = [];
 
+    private $hydrationMappings = [];
+
     public function __construct(\PDOStatement $statement, Repository $repository, $totalCount)
     {
         $this->statement = $statement;
@@ -61,6 +64,47 @@ class MySqlCursor extends CollectionCursor
         $this->filteredCount = count($this->filteredIds);
     }
 
+    public function setHydrationMappings($mappings)
+    {
+        $this->hydrationMappings = $mappings;
+    }
+
+    /**
+     * Takes a row with hydrated data and extracts it from the array.
+     *
+     * @param $row
+     */
+    private function processHydration(&$row)
+    {
+        $reposFields = [];
+
+        foreach($row as $key => $value){
+            if (isset($this->hydrationMappings[$key])){
+                unset($row[$key]);
+
+                $primary = $this->hydrationMappings[$key][0];
+                $field = $this->hydrationMappings[$key][1];
+
+                /**
+                 * @var Repository $repos
+                 */
+                $repos = $this->hydrationMappings[$key][2];
+
+                if ($field == $primary){
+                    $reposFields[$repos->getModelClass()] = $value;
+                }
+
+                if (isset($reposFields[$repos->getModelClass()])){
+                    if (!isset($repos->cachedObjectData[$reposFields[$repos->getModelClass()]])){
+                        $repos->cachedObjectData[$reposFields[$repos->getModelClass()]] = [];
+                    }
+
+                    $repos->cachedObjectData[$reposFields[$repos->getModelClass()]][$primary] = $value;
+                }
+            }
+        }
+    }
+
     public function offsetGet($index)
     {
         while($this->lastFetchedRow < $index){
@@ -69,6 +113,9 @@ class MySqlCursor extends CollectionCursor
             $this->lastFetchedRow++;
 
             if ($row){
+
+                $this->processHydration($row);
+
                 $this->currentRow = $row;
                 $this->repository->cachedObjectData[$row[$this->uniqueIdentifier]] = $row;
                 $this->rowsFetched[$this->lastFetchedRow] = $row[$this->uniqueIdentifier];

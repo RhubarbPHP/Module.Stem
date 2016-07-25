@@ -49,6 +49,8 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
 
     private $limitCount = false;
 
+    public $potentialHydrationMappings = [];
+
     public function addWhereExpression(WhereExpression $where)
     {
         if (!($this->whereExpression instanceof AndExpression)){

@@ -348,7 +348,9 @@ class MySql extends PdoRepository
             $count = static::returnSingleValue("SELECT FOUND_ROWS()");
         }
 
-        return new MySqlCursor($statement, $this, $count);
+        $cursor = new MySqlCursor($statement, $this, $count);
+        $cursor->setHydrationMappings($sql->potentialHydrationMappings);
+        return $cursor;
     }
 
     /**
@@ -380,6 +382,8 @@ class MySql extends PdoRepository
         foreach($columns as $columnName => $column){
             $intersectionColumnAliases[$columnName] = $sqlStatement->getAlias();
         }
+
+        $hydrationMappings = [];
 
         foreach($collection->getIntersections() as $intersection){
 
@@ -441,9 +445,25 @@ class MySql extends PdoRepository
                 }
             }
 
+            // If we need to auto hydrate, select the columns in the outer query.
+            if ($intersection->autoHydrate){
+                $intersectionColumns = $intersectionRepository->getModelSchema()->getColumns();
+                $primaryKey = $intersectionRepository->getModelSchema()->uniqueIdentifierColumnName;
+                foreach($intersectionColumns as $hydrateColumn){
+                    $sqlStatement->columns[] = new SelectExpression("`".$join->statement->getAlias()."`.`".$hydrateColumn->columnName."` AS `".$join->statement->getAlias().$hydrateColumn->columnName."`");
+                    $hydrationMappings[$join->statement->getAlias().$hydrateColumn->columnName] =
+                        [
+                            $hydrateColumn->columnName,
+                            $primaryKey,
+                            $intersectionRepository
+                        ];
+                }
+            }
+
             $intersection->intersected = true;
         }
 
+        $sqlStatement->potentialHydrationMappings = $hydrationMappings;
         $filter = $collection->getFilter();
 
         $allFiltered = true;

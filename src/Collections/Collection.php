@@ -272,11 +272,12 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param string $parentColumnName
      * @param string $childColumnName
      * @param string[] $columnsToPullUp An array of column names in the intersected collection to copy to the parent collection.
+     * @param bool $autoHydrate A hint that you want to auto hydrate this relationship.
      * @return $this
      */
-    public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [])
+    public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [], $autoHydrate = false)
     {
-        $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
+        $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp, $autoHydrate);
 
         $childAggregates = $collection->getAggregateColumns();
 
@@ -556,6 +557,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->collectionCursor = null;
     }
 
+    public function autoHydrate($relationshipName)
+    {
+        $this->createIntersectionForRelationships([$relationshipName]);
+    }
+
     private function createIntersectionForRelationships($relationshipsNeeded, $pullUps = [])
     {
         $collection = $this;
@@ -574,11 +580,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                 $parentColumn = $relationship->getSourceColumnName();
                 $childColumn = $relationship->getTargetColumnName();
 
+                $autoHydrate = ($collection == $this);
+
                 $collection->intersectWith(
                     $newCollection = new RepositoryCollection($targetModel),
                     $parentColumn,
                     $childColumn,
-                    $pullUps
+                    $pullUps,
+                    $autoHydrate
                 );
 
                 $newCollection->groups[] = $childColumn;

@@ -19,11 +19,14 @@ class Intersection
      */
     public $intersected = false;
 
-    public function __construct($collection, $parentColumnName, $childColumnName, $columnsToPullUp)
+    public $autoHydrate = false;
+
+    public function __construct($collection, $parentColumnName, $childColumnName, $columnsToPullUp, $autoHydrate)
     {
         $this->collection = $collection;
         $this->parentColumnName = $parentColumnName;
         $this->childColumnName = $childColumnName;
         $this->columnsToPullUp = $columnsToPullUp;
+        $this->autoHydrate = $autoHydrate;
     }
 }
