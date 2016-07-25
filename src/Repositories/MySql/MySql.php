@@ -96,6 +96,7 @@ class MySql extends PdoRepository
      * Crafts and executes an SQL statement to update the object in MySQL
      *
      * @param \Rhubarb\Stem\Models\Model $object
+     * @return int|void
      */
     private function updateObject(Model $object)
     {
@@ -254,74 +255,6 @@ class MySql extends PdoRepository
     }
 
     /**
-     * Gets the unique identifiers required for the matching filters and loads the data into
-     * the cache for performance reasons.
-     *
-     * @param  RepositoryCollection $list
-     * @param  int $unfetchedRowCount
-     * @param  array $relationshipNavigationPropertiesToAutoHydrate
-     * @return array
-     */
-    public function getUniqueIdentifiersForDataList(RepositoryCollection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
-    {
-        $this->lastSortsUsed = [];
-
-        $schema = $this->reposSchema;
-
-        $sql = $this->getSqlStatementForCollection($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
-
-        $statement = self::executeStatement($sql, $namedParams);
-
-        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $uniqueIdentifiers = [];
-
-        if (sizeof($joinColumns)) {
-            foreach ($joinColumnsByModel as $joinModel => $modelJoinedColumns) {
-                $model = SolutionSchema::getModel($joinModel);
-                $repository = $model->getRepository();
-
-                foreach ($results as &$result) {
-                    $aliasedUniqueIdentifierColumnName = $joinOriginalToAliasLookup[$joinModel . "." . $model->UniqueIdentifierColumnName];
-
-                    if (isset($result[$aliasedUniqueIdentifierColumnName]) && !isset($repository->cachedObjectData[$result[$aliasedUniqueIdentifierColumnName]])) {
-                        $joinedData = array_intersect_key($result, $modelJoinedColumns);
-
-                        $modelData = array_combine($modelJoinedColumns, $joinedData);
-
-                        $repository->cachedObjectData[$modelData[$model->UniqueIdentifierColumnName]] = $modelData;
-                    }
-
-                    $result = array_diff_key($result, $modelJoinedColumns);
-                }
-                unset($result);
-            }
-        }
-
-        foreach ($results as $result) {
-            $uniqueIdentifier = $result[$schema->uniqueIdentifierColumnName];
-
-            $result = $this->transformDataFromRepository($result);
-
-            // Store the data in the cache and add the unique identifier to our list.
-            $this->cachedObjectData[$uniqueIdentifier] = $result;
-
-            $uniqueIdentifiers[] = $uniqueIdentifier;
-        }
-
-        if ($ranged) {
-            $foundRows = static::returnSingleValue("SELECT FOUND_ROWS()");
-
-            $unfetchedRowCount = $foundRows - sizeof($uniqueIdentifiers);
-        }
-
-        if ($list->getFilter() && !$list->getFilter()->wasFilteredByRepository()) {
-            Log::warning("A query wasn't completely filtered by the repository", "STEM", $sql);
-        }
-
-        return $uniqueIdentifiers;
-    }
-
-    /**
      * Get's a sorted list of unique identifiers for the supplied list.
      *
      * @param  RepositoryCollection $collection
@@ -332,11 +265,12 @@ class MySql extends PdoRepository
     {
         $params = [];
 
-        $sql = $this->getSqlStatementForCollection($collection, $params);
-        $hasLimit = $sql->hasLimit();
+        $sqlStatement = $this->getSqlStatementForCollection($collection, $params);
+        $hasLimit = $sqlStatement->hasLimit();
+
+        $sql = (string)$sqlStatement;
 
         if ($hasLimit){
-            $sql = (string) $sql;
             $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
         }
 
@@ -349,7 +283,7 @@ class MySql extends PdoRepository
         }
 
         $cursor = new MySqlCursor($statement, $this, $count);
-        $cursor->setHydrationMappings($sql->potentialHydrationMappings);
+        $cursor->setHydrationMappings($sqlStatement->potentialHydrationMappings);
         return $cursor;
     }
 
@@ -401,10 +335,10 @@ class MySql extends PdoRepository
 
             $intersectionRepository = $intersection->collection->getRepository();
 
-            $join->statement = $intersectionRepository->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->childColumnName);
+            $join->statement = $intersectionRepository->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->intersectionColumnName);
             $join->joinType = Join::JOIN_TYPE_INNER;
-            $join->parentColumn = $intersection->parentColumnName;
-            $join->childColumn = $intersection->childColumnName;
+            $join->parentColumn = $intersection->sourceColumnName;
+            $join->childColumn = $intersection->intersectionColumnName;
 
             $sqlStatement->joins[] = $join;
 

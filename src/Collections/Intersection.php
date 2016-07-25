@@ -6,9 +6,9 @@ class Intersection
 {
     public $collection;
 
-    public $parentColumnName;
+    public $sourceColumnName;
 
-    public $childColumnName;
+    public $intersectionColumnName;
     
     public $columnsToPullUp = [];
 
@@ -24,8 +24,8 @@ class Intersection
     public function __construct($collection, $parentColumnName, $childColumnName, $columnsToPullUp, $autoHydrate)
     {
         $this->collection = $collection;
-        $this->parentColumnName = $parentColumnName;
-        $this->childColumnName = $childColumnName;
+        $this->sourceColumnName = $parentColumnName;
+        $this->intersectionColumnName = $childColumnName;
         $this->columnsToPullUp = $columnsToPullUp;
         $this->autoHydrate = $autoHydrate;
     }

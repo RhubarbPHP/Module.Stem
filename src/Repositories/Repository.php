@@ -222,23 +222,6 @@ abstract class Repository
     }
 
     /**
-     * Get's an array of unique identifiers for the given DataFilter
-     *
-     * Used normally to hydrate data lists with their data.
-     *
-     * @param  RepositoryCollection $list
-     * @param  int $unfetchedRowCount An output parameter containing the number of rows left unfetched (if ranging)
-     * @param  array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
-     *                                                             try to auto hydrate (if supported)
-     * @return array
-     */
-    public function getUniqueIdentifiersForDataList(RepositoryCollection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
-    {
-        // For now just returning all items in the collection.
-        return array_keys($this->cachedObjectData);
-    }
-
-    /**
      * Commits changes to the repository in batch against a collection.
      *
      * @param RepositoryCollection $collection
@@ -456,6 +439,14 @@ abstract class Repository
         return false;
     }
 
+    /**
+     * Delete's a model from the repository.
+     *
+     * Calls onObjectDeleted afterwards which most repositories extend to do the actual deletion.
+     *
+     * @see onObjectDeleted()
+     * @param Model $object
+     */
     final public function deleteObject(Model $object)
     {
         if ($object->isNewRecord()) {

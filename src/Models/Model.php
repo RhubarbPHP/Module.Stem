@@ -257,22 +257,6 @@ abstract class Model extends ModelState
     private static $modelDataTransforms = [];
 
     /**
-     * Contains an array of relationship names that should be automatically hydrated when loading this model.
-     *
-     * Designed to be set by the child class in it's constructor.
-     *
-     * Auto hydrating relationships allows for faster sorting and filtering on collections where the sort or
-     * filter is on a related model column. However it does result in larger data sets being stored in memory
-     * so it is worth performing bench marks to be sure the auto hydration is in fact having a positive rather
-     * than negative impact.
-     *
-     * NOT YET IMPLEMENTED
-     *
-     * @var array
-     */
-    protected $autoHydratedRelationships = [];
-
-    /**
      * Returns the cached repository and generates one if it doesn't exist.
      *
      * @see DataObject::createRepository()

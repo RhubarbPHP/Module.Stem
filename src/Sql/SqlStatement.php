@@ -43,14 +43,41 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
      */
     public $groups = [];
 
+    /**
+     * The alias given to the table being selected
+     *
+     * @var string
+     */
     private $alias = "";
 
+    /**
+     * A positive number if limiting in the SQL query
+     *
+     * @var bool|int
+     */
     private $limitStart = false;
 
+    /**
+     * A positive number if limiting to a certain number of records.
+     *
+     * @var bool|int
+     */
     private $limitCount = false;
 
+    /**
+     * A mapping of column alias => [ field, primary key, repository ] for potential use
+     * during selection if supporting auto hydration of relationships.
+     *
+     * @var array
+     */
     public $potentialHydrationMappings = [];
 
+    /**
+     * Add a where clause expression.
+     *
+     * @param WhereExpression $where
+     * @return AndExpression
+     */
     public function addWhereExpression(WhereExpression $where)
     {
         if (!($this->whereExpression instanceof AndExpression)){
@@ -66,45 +93,65 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         return $andExpression;
     }
 
+    /**
+     * Add a having clause expressions
+     *
+     * @param WhereExpression $where
+     */
     public function addHavingExpression(WhereExpression $where)
     {
         $where->onHavingClause = true;
-
-        if (!($this->whereExpression instanceof AndExpression)){
-            $this->whereExpression = new AndExpression($this->whereExpression);
-        }
-
-        /**
-         * @var AndExpression $andExpression
-         */
-        $andExpression = $this->whereExpression;
-        $andExpression->whereExpressions[] = $where;
-
-        return $andExpression;
+        $this->addWhereExpression($where);
     }
 
+    /**
+     * Returns the alias in use.
+     *
+     * @return string
+     */
     public function getAlias()
     {
         return $this->alias;
     }
 
+    /**
+     * Set's the alias to a particular value.
+     *
+     * @param $aliasName
+     */
     public function setAlias($aliasName)
     {
         $this->alias = $aliasName;
     }
 
+    /**
+     * Set the limit parameters
+     * @param $start
+     * @param $count
+     */
     public function limit($start, $count)
     {
         $this->limitStart = $start;
         $this->limitCount = $count;
     }
 
+    /**
+     * Returns true if this statement is limited
+     * @return bool
+     */
     public function hasLimit()
     {
         return ($this->limitStart || $this->limitCount);
     }
 
-    public function implodeSqlClauses($clauses, $glue = ',')
+    /**
+     * Utility function to implode a sequence of Sql clauses with glue.
+     *
+     * @param $clauses
+     * @param string $glue
+     * @return mixed
+     */
+    protected function implodeSqlClauses($clauses, $glue = ',')
     {
         $statements = [];
 
@@ -151,6 +198,10 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         return $sql;
     }
 
+    /**
+     * Returns the SELECT statement required to fetch the data.
+     * @return string
+     */
     public function getSelectSql()
     {
         $sql = "SELECT ";
@@ -192,6 +243,11 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         return $sql;
     }
 
+    /**
+     * Get's the SQL for this clause for the given statement
+     * @param SqlStatement $forStatement
+     * @return string
+     */
     public function getSql(SqlStatement $forStatement)
     {
         return $this->getSelectSql();

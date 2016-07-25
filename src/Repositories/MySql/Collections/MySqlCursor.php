@@ -8,6 +8,11 @@ use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
+/**
+ * A collection cursor for MySql
+ *
+ * Supports reading rows individually from the query buffer, aggregates, group by, joins and sorting.
+ */
 class MySqlCursor extends CollectionCursor
 {
     /**
@@ -35,16 +40,40 @@ class MySqlCursor extends CollectionCursor
      */
     private $uniqueIdentifier;
 
+    /**
+     * As rows are fetched they are cached here (to support rewind)
+     * @var array
+     */
     private $rowsFetched = [];
 
+    /**
+     * The number of rows selected within the limits of the query
+     * @var int
+     */
     private $rowCount = 0;
 
+    /**
+     * The number of rows selected discounting the limits of the query
+     * @var int
+     */
     private $totalCount = 0;
 
+    /**
+     * The number of rows being filtered by post filtering.
+     * @var int
+     */
     private $filteredCount = 0;
 
+    /**
+     * The IDs of rows to skip because they have been filtered outside of the query.
+     * @var array
+     */
     private $filteredIds = [];
 
+    /**
+     * A mapping of column alias => [ field, primary key, repository ] for hydration of joins to models
+     * @var array
+     */
     private $hydrationMappings = [];
 
     public function __construct(\PDOStatement $statement, Repository $repository, $totalCount)
@@ -58,6 +87,11 @@ class MySqlCursor extends CollectionCursor
         $this->totalCount = $totalCount;
     }
 
+    /**
+     * Excludes the array of identifiers from the list of selected rows.
+     *
+     * @param $uniqueIdentifiers
+     */
     public function filterModelsByIdentifier($uniqueIdentifiers)
     {
         $this->filteredIds = array_merge($this->filteredIds, $uniqueIdentifiers);
@@ -107,6 +141,7 @@ class MySqlCursor extends CollectionCursor
 
     public function offsetGet($index)
     {
+        // Keep selecting rows until we find the row we need. We can't with PDO 'skip' rows unfortunately.
         while($this->lastFetchedRow < $index){
             $row = $this->statement->fetch(\PDO::FETCH_ASSOC);
 
@@ -114,10 +149,16 @@ class MySqlCursor extends CollectionCursor
 
             if ($row){
 
+                // Strip the row of any hydration columns.
                 $this->processHydration($row);
 
+                // Keep a handle on the current row.
                 $this->currentRow = $row;
+
+                // Populate the modelling repository data
                 $this->repository->cachedObjectData[$row[$this->uniqueIdentifier]] = $row;
+
+                // Remember we've already been here.
                 $this->rowsFetched[$this->lastFetchedRow] = $row[$this->uniqueIdentifier];
             }
         }
@@ -135,6 +176,7 @@ class MySqlCursor extends CollectionCursor
          */
         $object = new $class($id);
 
+        // If we have data to augment the model data (aggregates etc.) we need to merge it in.
         if (isset($this->augmentationData[$id])){
             $object->mergeRawData($this->augmentationData[$id]);
         }

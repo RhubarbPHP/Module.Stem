@@ -39,6 +39,11 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class RepositoryCollection extends Collection
 {
+    /**
+     * True if this repository can filter the collection entirely by itself.
+     * 
+     * @return bool
+     */
     public function canBeFilteredByRepository()
     {
         // If the collection can't be filtered entirely by the repos, OR any of the aggregates

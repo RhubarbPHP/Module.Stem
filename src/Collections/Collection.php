@@ -8,6 +8,7 @@ use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\AndGroup;
+use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\MySql\MySql;
@@ -126,6 +127,28 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private $pulledUpAggregatedColumns = [];
 
+    /**
+     * The starting row for iteration
+     * @var int
+     */
+    private $rangeStartIndex = 0;
+
+    /**
+     * The ending row for iteration.
+     *
+     * Null denotes no end.
+     *
+     * @var null|int
+     */
+    private $rangeEndIndex = null;
+
+    /**
+     * A list of all unique references already in use.
+     *
+     * Used by some repository providers to guarantee unique table names during complex interesections.
+     *
+     * @var string[]
+     */
     private static $uniqueReferencesUsed = [];
 
     public function __construct($modelClassName)
@@ -133,11 +156,21 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->modelClassName = $modelClassName;
     }
 
+    /**
+     * Clears the unique reference counters.
+     *
+     * Used only by unit testing to guarantee predictable SQL generation.
+     */
     public static function clearUniqueReferencesUsed()
     {
         Collection::$uniqueReferencesUsed = [];
     }
 
+    /**
+     * Gets the unique reference for this collection.
+     *
+     * @return string
+     */
     public function getUniqueReference()
     {
         if ($this->uniqueReference === null){
@@ -157,16 +190,28 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->uniqueReference;
     }
 
+    /**
+     * Gets the list of aliased columns
+     * @return array
+     */
     public function getAliasedColumns()
     {
         return $this->aliasedColumns;
     }
 
+    /**
+     * Gets the mapping of aliased columns to their source collection.
+     * @return array
+     */
     public function getAliasedColumnsToCollection()
     {
         return $this->aliasedColumnsToCollection;
     }
 
+    /**
+     * Gets the names of aggregate columns pulled up from intersected collections.
+     * @return array
+     */
     public function getPulledUpAggregatedColumns()
     {
         return $this->pulledUpAggregatedColumns;
@@ -186,11 +231,22 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $repository;
     }
 
+    /**
+     * Gets the model's schema.
+     *
+     * @return \Rhubarb\Stem\Schema\ModelSchema
+     */
     public function getModelSchema()
     {
         return $this->getRepository()->getModelSchema();
     }
 
+    /**
+     * Adds a group to the collection.
+     *
+     * @param $columnName
+     * @return $this
+     */
     public final function addGroup($columnName)
     {
         $this->groups[] = $columnName;
@@ -198,6 +254,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    /**
+     * Adds another sort condition.
+     *
+     * @param string $columnName   The name of the column to sort on.
+     * @param bool $ascending       True to sort ascending
+     * @return $this
+     * @throws FilterNotSupportedException
+     */
     public final function addSort($columnName, $ascending = true)
     {
         $parts = explode(".",$columnName);
@@ -225,6 +289,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    /**
+     * Removes current sorts and replaces with another.
+     *
+     * Can take an array of sorts instead of a single sort in which case it should be an associative array
+     * of column name => true/false values (true for ascending false for descending)
+     *
+     * @param $columnName
+     * @param bool $ascending
+     * @return $this
+     */
     public final function replaceSort($columnName, $ascending = true)
     {
         if (!is_array($columnName)){
@@ -266,25 +340,34 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Create an intersection with a second collection.
      *
-     * Only rows matching the conditions will remain in the collection.
+     * Only rows found where the value of $sourceColumnName is found in $intersectedColumnName of
+     * $collection will remain in this collection.
      *
-     * @param Collection $collection
-     * @param string $parentColumnName
-     * @param string $childColumnName
-     * @param string[] $columnsToPullUp An array of column names in the intersected collection to copy to the parent collection.
-     * @param bool $autoHydrate A hint that you want to auto hydrate this relationship.
+     * Not that if the collection contains aggregate columns but isn't yet grouped, we will automatically
+     * add a group to the collection using the $intersectedColumnName
+     *
+     * @param Collection $collection The collection to intersect with
+     * @param string $sourceColumnName The name of the column in the parent collection to intersect using.
+     * @param string $intersectedColumnName The name of the column in the child collection to intersect using
+     * @param string[] $columnsToPullUp An array of column names in the intersected collection to copy upwards
+     *                                  into the rows of the parent collection.
+     * @param bool $autoHydrate A hint that you want to auto hydrate this relationship. Auto hydration ensures that
+     *                          the data in the intersected repository are loaded and ready for use by modelling.
+     *                          If your repository supports it this is often very efficient if you will need this
+     *                          data when processing the collection. Without auto hydration secondary hits on the
+     *                          repository will be unavoidable.
      * @return $this
      */
-    public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [], $autoHydrate = false)
+    public final function intersectWith(Collection $collection, $sourceColumnName, $intersectedColumnName, $columnsToPullUp = [], $autoHydrate = false)
     {
-        $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp, $autoHydrate);
+        $this->intersections[] = new Intersection($collection, $sourceColumnName, $intersectedColumnName, $columnsToPullUp, $autoHydrate);
 
         $childAggregates = $collection->getAggregateColumns();
 
         // If we're aggregating on the intersection, we need to group by. Aggregates used without group bys cause
         // meaningless data in the best case and (depending on the repository) an error in the worst case.
         if (count($childAggregates) > 0 && count($collection->groups) == 0){
-            $collection->groups[] = $childColumnName;
+            $collection->groups[] = $intersectedColumnName;
         }
 
         foreach($columnsToPullUp as $column => $alias){
@@ -462,24 +545,36 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
-    private $rangeStartIndex = 0;
-    private $rangeEndIndex = null;
-
+    /**
+     * Disables ranging on this collection
+     */
     public function disableRanging()
     {
         $this->rangingDisabled = true;
     }
 
+    /**
+     * Enables ranging on this collection
+     */
     public function enableRanging()
     {
         $this->rangingDisabled = false;
     }
 
+    /**
+     * Gets the first row number to select.
+     *
+     * @return int
+     */
     public function getRangeStart()
     {
         return $this->rangeStartIndex;
     }
 
+    /**
+     * Gets the last row number to select.
+     * @return null
+     */
     public function getRangeEnd()
     {
         return $this->rangeEndIndex;
@@ -521,6 +616,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    /**
+     * Flags this collections has having had a range applied.
+     */
     final public function markRangeApplied()
     {
         $this->rangeApplied = true;
@@ -557,11 +655,33 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->collectionCursor = null;
     }
 
+    /**
+     * Creates an intersection for the given relationship.
+     *
+     * @param $relationshipName
+     * @throws FilterNotSupportedException
+     */
     public function autoHydrate($relationshipName)
     {
         $this->createIntersectionForRelationships([$relationshipName]);
     }
 
+    /**
+     * Builds a chain of intersections that follow the chain of relationships passed in $relationshipsNeeded.
+     *
+     * For example if you had a Contact model which was related to a Company model which was related to a
+     * Category model (Contact->Company->Category), and your starting collection was a Contacts collection you
+     * would call createIntersectionForRelationships(["Company", "Category"]);
+     *
+     * This function is used to provide for filtering and sorting on "dot notation" column expressions e.g.
+     *
+     * "Company.Category.CategoryName"
+     *
+     * @param string[] $relationshipsNeeded The names of the relationships to intersect with.
+     * @param string[] $pullUps An array of columns to pull up to the top, e.g. CategoryName
+     * @return Collection|RepositoryCollection The last collection created, i.e. the most heavily nested one.
+     * @throws FilterNotSupportedException Thrown if any of the models don't have an applicable relationship name.
+     */
     private function createIntersectionForRelationships($relationshipsNeeded, $pullUps = [])
     {
         $collection = $this;
@@ -600,7 +720,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * Ensures a cursor has been created.
+     * Create a cursor for the collection if one has not been already.
+     *
+     * If the repository cannot handle any feature of the collection this function will 'polyfill' support.
      */
     private function prepareCursor()
     {
@@ -787,6 +909,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->collectionCursor->setAugmentationData($augmentationData);
     }
 
+    /**
+     * Returns a string which uniquely represents the group the given model should be in for aggregation.
+     * @param Model $model
+     * @return string
+     */
     private function getGroupKeyForModel(Model $model)
     {
         $key = "";
@@ -799,12 +926,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * Takes a collection of aggregates and computes their values.
+     * Takes a collection of aggregate columns and calculates their value.
      *
      * @param Aggregate[] $aggregates
      */
     private function processAggregates($aggregates)
     {
+        // Step 1. Calculate the aggregate group values.
         foreach($this->collectionCursor as $model){
             foreach($aggregates as $aggregate){
                 $aggregate->calculateByIteration($model, $this->getGroupKeyForModel($model));
@@ -813,6 +941,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $additionalData = [];
 
+        // Step 2. Extract the group values and apply to models using augmentation data.
         foreach($aggregates as $aggregate){
             $groups = $aggregate->getGroups();
 
@@ -831,16 +960,31 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
         }
 
+        // Give the cursor the augmentation data.
         $this->collectionCursor->setAugmentationData($additionalData);
     }
 
+    public function findModelByUniqueIdentifier($identifier)
+    {
+        $this->filter(new Equals($this->getModelSchema()->uniqueIdentifierColumnName, $identifier));
+
+        return $this[0];
+    }
+    
+    /**
+     * Filter the collection against another using the intersection settings in $intersection.
+     *
+     * @param Intersection $intersection
+     */
     private function filterIntersection(Intersection $intersection)
     {
         $childByIntersectColumn = [];
 
+        // First scan through the collection and make the models easily addressable in an array indexed by the
+        // joining column
         foreach($intersection->collection as $childModel){
 
-            $index = $childModel[$intersection->childColumnName];
+            $index = $childModel[$intersection->intersectionColumnName];
 
             if (isset($childByIntersectColumn[$index])){
                 if (!is_array($childByIntersectColumn[$index])) {
@@ -869,7 +1013,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
             $alreadyDone[$parentId] = true;
 
-            $parentValue = $parentModel[$intersection->parentColumnName];
+            $parentValue = $parentModel[$intersection->sourceColumnName];
             if (!isset($childByIntersectColumn[$parentValue])){
                 $uniqueIdsToFilter[] = $parentModel->uniqueIdentifier;
             } else {
