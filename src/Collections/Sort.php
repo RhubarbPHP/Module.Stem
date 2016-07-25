@@ -8,5 +8,6 @@ class Sort
     public $ascending = true;
     public $sorted = false;
     public $tableAlias = false;
+    public $alias = false;
     public $inSchema = false;
 }

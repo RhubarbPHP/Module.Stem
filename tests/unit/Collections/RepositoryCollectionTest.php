@@ -223,7 +223,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $donation->DonationDate = "now";
         $donation->save();
 
-        $contact = new TestContact();
+        $contact = $billy = new TestContact();
         $contact->Forename = "billy";
         $contact->save();
 
@@ -298,6 +298,12 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertCount(2, $donations);
         $this->assertEquals($contact->getUniqueIdentifier(), $donations[1]->ContactID);
 
+        $donation = new TestDonation();
+        $donation->DonationDate = "now";
+        $donation->ContactID = $billy->ContactID;
+        $donation->save();
+
+
         $contacts = TestContact::all()->
             intersectWith(
                 TestDonation::all()
@@ -326,7 +332,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
             ->filter(new Equals("CountOfDonations", 2));
 
         $this->assertCount(1, $contacts);
-        $this->assertEquals($contact->getUniqueIdentifier(), $donations[1]->ContactID);
+        $this->assertEquals($billy->getUniqueIdentifier(), $contacts[0]->ContactID);
 
     }
 

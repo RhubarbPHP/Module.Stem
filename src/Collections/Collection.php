@@ -65,6 +65,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     private $intersections = [];
 
     /**
+     * If this is an intersection collection this will be true to signify it has a parent.
+     *
+     * @var null
+     */
+    private $isIntersection = false;
+
+    /**
      * The collection of aggregate columns.
      *
      * @var Aggregate[]
@@ -204,6 +211,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $newColumnName = PdoRepository::getPdoParamName($columnName);
             $intersectionCollection = $this->createIntersectionForRelationships($relationships, [$columnName => $newColumnName]);
             $sort->tableAlias = $intersectionCollection->getUniqueReference();
+            $sort->alias = $newColumnName;
+        } else {
+            $sort->alias = $columnName;
         }
 
         $sort->columnName = $columnName;
@@ -266,12 +276,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public final function intersectWith(Collection $collection, $parentColumnName, $childColumnName, $columnsToPullUp = [])
     {
-        // Group the intersected collection by the child column:
-        //$collection->groups[] = $childColumnName;
-
         $this->intersections[] = new Intersection($collection, $parentColumnName, $childColumnName, $columnsToPullUp);
 
         $childAggregates = $collection->getAggregateColumns();
+
+        // If we're aggregating on the intersection, we need to group by. Aggregates used without group bys cause
+        // meaningless data in the best case and (depending on the repository) an error in the worst case.
+        if (count($childAggregates) > 0 && count($collection->groups) == 0){
+            $collection->groups[] = $childColumnName;
+        }
 
         foreach($columnsToPullUp as $column => $alias){
 
@@ -290,6 +303,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $this->invalidate();
+
+        $collection->isIntersection = true;
 
         return $this;
     }
@@ -585,10 +600,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             return;
         }
 
-        // If we have intersections we need to protect against getting multiple occurrences of our models
-        // in the collection so we add a group by on our unique identifier.
+        // If we have intersections AND we are not the top most statement we need to protect against getting
+        // multiple occurrences of our models in the collection so we add a group by on our unique identifier.
 
-        if (count($this->intersections)>0){
+        if (count($this->intersections)>0 && !$this->isIntersection){
             $uniqueIdentifier = $this->getModelSchema()->uniqueIdentifierColumnName;
             if (!in_array($uniqueIdentifier, $this->groups)){
                 $this->groups[] = $uniqueIdentifier;
@@ -647,6 +662,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->processAggregates($aggregatesToProcess);
         }
 
+        $this->collectionCursor->deDupe();
+
         /** Some cursors handle sorts. Any that couldn't be handled are processed here */
         $sortsToProcess = [];
         foreach($this->sorts as $sort){
@@ -670,7 +687,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->collectionCursor->setAugmentationData($augmentationData);
         }
 
-        $this->collectionCursor->deDupe();
         $this->collectionCursor->rewind();
     }
 
@@ -696,7 +712,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         foreach ($sorts as $sort) {
 
-            $columnName = $sort->columnName;
+            $columnName = $sort->alias;
             $ascending = $sort->ascending;
 
             $arrays[$columnName] = [];
