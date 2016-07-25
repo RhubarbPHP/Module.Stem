@@ -2,14 +2,13 @@ Collections
 ===
 
 A collection is a list of model objects that you can iterate over. Collections are normally created
-either by instantiating an instance of `Rhubarb\Stem\Collections\Collection` with a model
-class name, by navigating through a one-to-many relationship of a model object or by calling the
-`find()` static method on a model class.
+by calling the `all()` or `find()` static method on a model class or by navigating through a one-to-many
+relationship of a model object.
 
 ``` php
 // Create a list of smiths:
-$contacts = new Collection( "Contact" );
-$contacts->filter( new Equals( "Surname", "Smith" ) );
+$contacts = Contact::all();
+$contacts->filter(new Equals( "Surname", "Smith" ) );
 
 // Same thing, less code:
 $contacts = Contact::find( new Equals( "Surname", "Smith" ) );
@@ -37,30 +36,58 @@ for( $i = 0; $i < count( $contacts ); $i++ )
 }
 ```
 
-The item returned by each iteration or array access is a model object matching the class name set on
-the collection.
+The item returned by each iteration or array access is a model object of the class requested when
+creating the collection.
 
 ## Filtering
 
-Collections work in tandem with the `Filter` object to allow a list to be filtered for matching
-models. The filtering is abstracted away from any particular repository and therefore you can filter
-on any property, *even on computed properties*. It is the responsibility of the repository to provide
-whatever performance optimisations it can, such as altering SQL where clauses appropriately.
+Collections can be filtered for models matching one or more Filter expressions. Filtering is
+abstracted away from any particular repository type and therefore you can filter on any property,
+*even on computed properties*. It is the responsibility of the repository to provide
+whatever performance optimisations it can, such as crafting SQL where clauses appropriately.
 
 Read the [guide to filters](filters/index) for an in-depth look at filters.
+
+To filter a collection simply call `filter()` and pass a filter object. Sequential calls to filter
+will combine filters (like an And operation).
+
+``` php
+$companies = Company::all();
+$companies->filter(new StartsWith("Surname", "Smit"));
+$companies->filter(new Contains("Forename", "John"));
+
+// Finds John Smith, Johnny Smithson etc.
+```
+
+To filter with more complicated expressions you can use the AndGroup or OrGroup filters:
+
+``` php
+$companies = Company::all();
+$companies->filter(
+    new OrGroup(
+        new Equals("Surname", "Smith"),
+        new AndGroup(
+            new Equals("Surname", "Doe"),
+            new Equals("Forename", "Jane")
+            )
+        )
+    );
+
+// Finds all people with a surname of Smith OR Jane Doe
+```
 
 ## Sorting
 
 Sorting a collection is allowed for by two methods, `addSort()` and `replaceSort()`. You can sort on any
 property of the model even computed properties. Bear in mind that for large collections sorting can be
 expensive. If the repository for your model is able to it can improve performance by sorting at the
-back end data store (e.g. using an ORDER BY statement). You can safely mix sorts that get done by the
-back end with those that aren't e.g. database columns and computed properties - just bear in mind
-that performance may become an issue.
+back end data store (e.g. using an ORDER BY statement). You can safely mix sorts that operate in the
+back end with those that don't e.g. database columns and computed properties - just bear in mind
+of the performance implications of doing this.
 
 You can also sort by columns in related models using the dot operator, e.g. `Company.CompanyName`,
-however the same reservations about performance must be borne in mind. If the repository supports it
-auto hydration will be used to improve performance of sorting on related properties.
+however the same reservations about performance must be borne in mind. If the repository supports intersections
+it can improve performance of sorting on related properties.
 
 addSort()
 :	To add an additional sort to an existing list simply call `addSort()` passing the name of the column
@@ -93,7 +120,7 @@ Within a collection, filtered or not, you can search for a model with a particul
 simply calling:
 
 ``` php
-$model = $collection->findModelByUniqueIdentifier( $myModelId );
+$model = $collection->findModelByUniqueIdentifier($myModelId);
 ```
 
 If the model isn't in the collection a `RecordNotFoundException` will be thrown.
@@ -105,16 +132,13 @@ what is appropriate for them to access and so defends against simple request man
 ``` php
 // This is bad - we would have to remember to check that this ticket is allowed
 // for this user.
-$ticket = new Ticket( $ticketId );
+$ticket = new Ticket($ticketId);
 
 // This is better - it's not possible to get a ticket that isn't allowed for the user.
-try
-{
-    $ticket = $user->Tickets->findModelByUniqueIdentifier( $ticketId );
-}
-catch( RecordNotFoundException $er )
-{
-    die( "Sorry, invalid access attempt detected" );
+try {
+    $ticket = $user->Tickets->findModelByUniqueIdentifier($ticketId);
+} catch( RecordNotFoundException$er) {
+    die("Sorry, invalid access attempt detected");
 }
 ```
 
@@ -136,12 +160,12 @@ $contacts->append( $contact );
 > Note that this has the side effect of saving new models if necessary in order to retrieve their unique
 > identifier.
 
-If the collection was filtered many filters will be able to set values on the model being appended
-such that the same filters would match this new model. This also works when the filters are part of
-a Group filter in AND boolean mode.
+If the collection was filtered each filter will be able to set values on the model being appended
+so that the model meets the constraints imposed by the filters on the collection. This will not work however if
+the filters contain and OrGroup filter.
 
 This pattern is the preferred way of attaching models to satisfy relationships as it lets you
-implement code like this:
+write readable code like this:
 
 ```php
 $contact = new Contact();
@@ -156,7 +180,7 @@ print $contact->CompanyID;
 
 This is easier to read and understand than setting the CompanyID manually, but also should the
 filter returning Contacts change in future, the relationship will still be satisfied. For example
-should the Contacts relationship be filtered so that it only returns contacts where Active = 1, then
+should the Contacts relationship be filtered so that it only returns contacts where Active is true, then
 **adding a contact in this way will also set Active to 1**. This also means that adding an existing
 *inactive* contact to the Contacts collection will reactivate it.
 
@@ -172,8 +196,7 @@ further round trips to the data store when those relationships are needed. For e
 repository can implement an `INNER JOIN` to load relationship models along with the primary
 model.
 
-This happens automatically if you are filtering or sorting on a related property, however you can
-manually request this behaviour if you know that later in your code you will be accessing a
+You can request this behaviour if you know that later in your code you will be accessing a
 relationship for a large number of models. A classic example is where you are displaying a table
 of data with some of the columns coming from a relationship:
 
@@ -227,15 +250,15 @@ matching query on the backend data store it offers a number of advantages:
 * Deleting individual items is safer when used in a replication environment
 
 If large volumes of rows need removed it would still be best to use alternative methods such as using the
-MySql repository Execute method directly to perform a `DELETE` statement.
+MySql repository `execute` method directly to perform a `DELETE` statement.
 
 ## Batch updates
 
-Sometimes you need to update all models in a collection with the same changes. To do this you can simply iterate:
+Sometimes you need to update all models in a collection with the same changes. To do this you could simply iterate:
 
 ``` php
 // Deactivate all contacts.
-$contacts = Contact::find();
+$contacts = Contact::all();
 
 foreach( $contacts as $contact ){
 	$contact->Active = false;
@@ -243,15 +266,14 @@ foreach( $contacts as $contact ){
 }
 ```
 
-Iterating over the collection however, especially large ones, is slow and doesn't scale well. In a 1,000
-item collection the same update will involve 1,000 queries instead of just 1. Traditionally an application
-might use an UPDATE SQL statement to do this, which is fast and efficient. Once we resort to using a SQL
-statement, we loose the ability to easily unit test our code.
+Iterating over a collection, especially large ones, is slow and doesn't scale well. In a 1,000
+item collection the same update will involve 1,000 update queries instead of just 1. Traditionally an application
+might use an UPDATE SQL statement to do this, which is fast and efficient but once we use hard coded SQL
+statements, we loose the ability to easily unit test that code.
 
-In most cases Rhubarb offers a solution. The Collection class has a function called `batchUpdate` to which
-you can pass an associative array of property name to values. The collection will update all items with the
-new values. The interesting thing about this is that the repository can still optimise this back to a single
-update SQL statement under a number of conditions:
+Instead the Collection class has a function called `batchUpdate` to which you can pass an associative array of property
+name to values. The collection will update all items with the new values. The interesting thing about this is
+that the repository can still optimise this back to a single update SQL statement under a number of conditions:
 
 1. The Repository in use must support it
 2. The filters on the collection must be entirely support by the repository
@@ -272,3 +294,5 @@ as the optional second argument to this function to do iteration as a fallback i
 
 As a general guide you should only call batchUpdate while passing true as a second parameter if you are
 100% confident you require it, and that the size of any iteration is going to be within safe limits.
+
+##

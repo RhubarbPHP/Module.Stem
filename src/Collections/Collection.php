@@ -1231,6 +1231,20 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->collectionCursor->count();
     }
 
+    /**
+     * Deletes all models in the collection by iteration.
+     */
+    public function deleteAll()
+    {
+        foreach($this as $model){
+            $model->delete();
+        }
+    }
+
+    /**
+     * Converts the collection to a simple array by iteration.
+     * @return array
+     */
     public function toArray()
     {
         $array = [];

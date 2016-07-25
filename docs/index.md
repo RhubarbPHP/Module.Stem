@@ -26,5 +26,5 @@ You can intersect one collection with another and perform aggregates on groups s
 [Repository](repositories)
 :	Connects models with a data store
 
-[Filter](filters/index)
-:	Provides a way to search lists for matching models
+[Filters](filters/index)
+:	Provides a way to search collections for matching models
