@@ -295,4 +295,12 @@ as the optional second argument to this function to do iteration as a fallback i
 As a general guide you should only call batchUpdate while passing true as a second parameter if you are
 100% confident you require it, and that the size of any iteration is going to be within safe limits.
 
-##
+## Aggregates
+
+Aggregates refer to any group based calculation on a column e.g. Sum, Count, CountDistinct, Average, Min, Max.
+Aggregates is a more advanced topic and covered in full on the [aggregates](aggregates) manual entry page.
+
+## Intersections
+
+Often compared to SQL joins, [intersections](intersections) allow you to filter rows from a collection based upon rows matching
+constraints within a second collection.
