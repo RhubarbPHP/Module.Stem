@@ -41,7 +41,7 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
 
         $expression = implode(" " . $this->boolean . " ", $whereExpressions);
 
-        if ($expression != "") {
+        if (count($whereExpressions) > 1) {
             $expression = "(" . $expression . ")";
         }
 
@@ -59,8 +59,7 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
 
         $expression = implode(" ".$this->boolean." ", $havingExpressions);
 
-        if ($expression != "")
-        {
+        if (count($havingExpressions) > 1) {
             $expression = "(".$expression.")";
         }
 

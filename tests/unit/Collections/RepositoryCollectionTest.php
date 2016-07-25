@@ -69,7 +69,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection = Company::all();
         $collection->intersectWith(
             TestContact::all()
-                ->addAggregateColumn(new Count("Contacts")),
+                ->addAggregateColumn(new Count("Contacts"))
+                ->addGroup("CompanyID"),
             "CompanyID",
             "CompanyID",
             ["CountOfContacts"]);
@@ -82,7 +83,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection->intersectWith(
             TestContact::all()
                 ->addAggregateColumn(new Count("Contacts"))
-                ->addAggregateColumn(new Sum("CompanyID")),
+                ->addAggregateColumn(new Sum("CompanyID"))
+                ->addGroup("CompanyID"),
             "CompanyID",
             "CompanyID",
             ["CountOfContacts", "SumOfCompanyID"]);
@@ -94,7 +96,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection = Company::all();
         $collection->intersectWith(
             TestContact::all()
-                ->addAggregateColumn(new Count("Contacts")),
+                ->addAggregateColumn(new Count("Contacts"))
+                ->addGroup("CompanyID"),
             "CompanyID",
             "CompanyID",
             ["CountOfContacts"]);
@@ -130,7 +133,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $collection->intersectWith(
             (new ArrayCollection("TestContact", $contrivedArray))
-            ->addAggregateColumn(new Count("Contacts")),
+            ->addAggregateColumn(new Count("Contacts"))
+            ->addGroup("CompanyID"),
             "CompanyID",
             "CompanyID",
             ["CountOfContacts"]);
@@ -145,7 +149,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection = Company::all();
         $collection->intersectWith(
             TestContact::all()
-                ->addAggregateColumn(new Count("Contacts")),
+                ->addAggregateColumn(new Count("Contacts"))
+                ->addGroup("CompanyID"),
             "CompanyID",
             "CompanyID",
             ["CountOfContacts"]);
@@ -305,11 +310,12 @@ class RepositoryCollectionTest extends ModelUnitTestCase
                             "DonationID" => "DeclarationDonationID"
                         ])
                     ->filter(
-                        new AndGroup([
-                            new OrGroup([
+                        new OrGroup([
+                            new AndGroup([
                                 new LessThan( "DeclarationStartDate", "@{DonationDate}" ),
-                                new Equals( "DeclarationDonationID", "@{DonationID}")
+                                new GreaterThan( "DeclarationStartDate", "0000-00-00" )
                             ]),
+                            new Equals( "DeclarationDonationID", "@{DonationID}")
                         ])
                     )
                     ->addAggregateColumn(new Count("DonationID", "CountOfDonations")),

@@ -32,6 +32,11 @@ class MySqlCount extends Count
 {
     use MySqlAggregateTrait;
 
+    protected static function canAggregateInMySql(Repository $repository, $columnName)
+    {
+        return true;
+    }
+
     protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
     {
         $aliasName = $originalAggregate->getAlias();

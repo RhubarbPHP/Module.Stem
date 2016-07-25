@@ -184,20 +184,28 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->getRepository()->getModelSchema();
     }
 
+    public final function addGroup($columnName)
+    {
+        $this->groups[] = $columnName;
+
+        return $this;
+    }
+
     public final function addSort($columnName, $ascending = true)
     {
         $parts = explode(".",$columnName);
+
+        $sort = new Sort();
 
         if (count($parts) > 1){
             $columnName = $parts[count($parts)-1];
 
             $relationships = array_slice($parts,0,count($parts)-1);
             $newColumnName = PdoRepository::getPdoParamName($columnName);
-            $this->createIntersectionForRelationships($relationships, [$columnName => $newColumnName]);
-            $columnName = $newColumnName;
+            $intersectionCollection = $this->createIntersectionForRelationships($relationships, [$columnName => $newColumnName]);
+            $sort->tableAlias = $intersectionCollection->getUniqueReference();
         }
 
-        $sort = new Sort();
         $sort->columnName = $columnName;
         $sort->ascending = $ascending;
         $this->sorts[] = $sort;
@@ -557,6 +565,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                     $childColumn,
                     $pullUps
                 );
+
+                $newCollection->groups[] = $childColumn;
 
                 $collection = $newCollection;
             }

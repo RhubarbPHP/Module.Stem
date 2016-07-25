@@ -7,4 +7,6 @@ class Sort
     public $columnName;
     public $ascending = true;
     public $sorted = false;
+    public $tableAlias = false;
+    public $inSchema = false;
 }

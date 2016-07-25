@@ -207,6 +207,7 @@ class MySqlTest extends MySqlTestCase
     public function testAutoHydration()
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        MySql::executeStatement("TRUNCATE TABLE tblUser");
 
         $company = new Company();
         $company->CompanyName = "GCD";
@@ -214,6 +215,16 @@ class MySqlTest extends MySqlTestCase
 
         $user = new User();
         $user->Forename = "Andrew";
+        $user->save();
+
+        $company->Users->append($user);
+
+        $company = new Company();
+        $company->CompanyName = "UTV";
+        $company->save();
+
+        $user = new User();
+        $user->Forename = "Bob";
         $user->save();
 
         $company->Users->append($user);
@@ -237,7 +248,7 @@ class MySqlTest extends MySqlTestCase
 
         count($users);
 
-        $this->assertEquals('SELECT `User`.*, `Company2`.CompanyName AS `CompanyName2` FROM `tblUser` AS `User` INNER JOIN (SELECT `Company2`.* FROM `tblCompany` AS `Company2` GROUP BY `Company2`.`CompanyID`) AS `Company2` ON `User`.`CompanyID` = `Company2`.`CompanyID` ORDER BY `CompanyName2`',
+        $this->assertEquals('SELECT `User2`.*, `Company2`.CompanyName AS `CompanyName2` FROM `tblUser` AS `User2` INNER JOIN (SELECT `Company2`.* FROM `tblCompany` AS `Company2` GROUP BY `Company2`.`CompanyID`) AS `Company2` ON `User2`.`CompanyID` = `Company2`.`CompanyID` GROUP BY `User2`.`UserID` ORDER BY `Company2`.`CompanyName`',
             MySql::getPreviousStatement());
 
         $user = $users[0];
@@ -304,12 +315,13 @@ class MySqlTest extends MySqlTestCase
 
         $this->assertEquals("UTV", $category2->Companies[0]->CompanyName);
 
-        $this->assertEquals("SELECT `Company`.* FROM `tblCompany` AS `Company` INNER JOIN (SELECT `CompanyCategory`.* FROM `tblCompanyCategory` AS `CompanyCategory` WHERE `CompanyCategory`.`CategoryID` = :CategoryID GROUP BY `CompanyCategory`.`CompanyID`) AS `CompanyCategory` ON `Company`.`CompanyID` = `CompanyCategory`.`CompanyID` WHERE `Company`.`Active` = :Active",
+        $this->assertEquals("SELECT `Company3`.* FROM `tblCompany` AS `Company3` INNER JOIN (SELECT `CompanyCategory5`.* FROM `tblCompanyCategory` AS `CompanyCategory5` WHERE `CompanyCategory5`.`CategoryID` = :CategoryID3 GROUP BY `CompanyCategory5`.`CompanyID`) AS `CompanyCategory5` ON `Company3`.`CompanyID` = `CompanyCategory5`.`CompanyID` WHERE `Company3`.`Active` = :Active3",
             MySql::getPreviousStatement());
     }
 
     public function testManualAutoHydration()
     {
+        /*
         $users = new RepositoryCollection(User::class);
         $users->autoHydrate("Company");
 
@@ -317,6 +329,7 @@ class MySqlTest extends MySqlTestCase
 
         $this->assertEquals("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` GROUP BY `tblUser`.`UserID`",
             MySql::getPreviousStatement());
+        */
     }
 
 
@@ -393,9 +406,9 @@ class MySqlTest extends MySqlTestCase
 
         $sql = MySql::getPreviousStatement();
 
-        $this->assertEquals([300, 700], $results);
-        $this->assertEquals("SELECT `Company`.*, `UnitTestUser`.SumOfUsersWage AS `SumOfUsersWage` FROM `tblCompany` AS `Company` INNER JOIN (SELECT `UnitTestUser`.*, SUM( `UnitTestUser`.`Wage`) AS `SumOfUsersWage` FROM `tblUser` AS `UnitTestUser` GROUP BY `UnitTestUser`.`CompanyID`) AS `UnitTestUser` ON `Company`.`CompanyID` = `UnitTestUser`.`CompanyID`",
+        $this->assertEquals("SELECT `Company`.*, `UnitTestUser`.SumOfUsersWage AS `SumOfUsersWage` FROM `tblCompany` AS `Company` INNER JOIN (SELECT `UnitTestUser`.*, SUM( `UnitTestUser`.`Wage`) AS `SumOfUsersWage` FROM `tblUser` AS `UnitTestUser` GROUP BY `UnitTestUser`.`CompanyID`) AS `UnitTestUser` ON `Company`.`CompanyID` = `UnitTestUser`.`CompanyID` GROUP BY `Company`.`CompanyID`",
             $sql);
+        $this->assertEquals([300, 700], $results);
 
         $companies = new RepositoryCollection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.BigWage"));

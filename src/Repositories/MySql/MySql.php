@@ -375,6 +375,12 @@ class MySql extends PdoRepository
 
         $allIntersected = true;
 
+        $intersectionColumnAliases = [];
+
+        foreach($columns as $columnName => $column){
+            $intersectionColumnAliases[$columnName] = $sqlStatement->getAlias();
+        }
+
         foreach($collection->getIntersections() as $intersection){
 
             if (!($intersection->collection instanceof RepositoryCollection)){
@@ -398,19 +404,40 @@ class MySql extends PdoRepository
 
             $sqlStatement->joins[] = $join;
 
+            $intersectionCollectionColumns = $intersection->collection->getModelSchema()->getColumns();
+
+            foreach($intersectionCollectionColumns as $columnName => $column){
+                $intersectionColumnAliases[$columnName] = $join->statement->getAlias();
+            }
+
             foreach($intersection->columnsToPullUp as $column => $alias){
                 if (is_numeric($column)){
                     $column = $alias;
                 }
 
                 // To pull this column up directly in the SQL we need to first make sure the column is in the select
-                // list of our query. Some aggregates may not be computable in SQL so may not be in the query yet.
-                foreach($join->statement->columns as $joinColumn){
-                    if ($joinColumn instanceof SelectExpression){
-                        if (strpos($joinColumn->expression, $alias)){
-                            $sqlStatement->columns[] = new SelectColumn("`".$join->statement->getAlias()."`.".$column, $alias);
+                // list of our query or a native column to the schema. Some aggregates may not be computable in SQL
+                // so may not be in the query yet.
+
+                $inQuery = false;
+
+                if (isset($intersectionCollectionColumns[$column])){
+                    $inQuery = true;
+                }
+
+                if (!$inQuery) {
+
+                    foreach ($join->statement->columns as $joinColumn) {
+                        if ($joinColumn instanceof SelectExpression) {
+                            if (strpos($joinColumn->expression, $alias)) {
+                                $inQuery = true;
+                            }
                         }
                     }
+                }
+
+                if ($inQuery){
+                    $sqlStatement->columns[] = new SelectColumn("`" . $join->statement->getAlias() . "`." . $column, $alias);
                 }
             }
 
@@ -434,7 +461,7 @@ class MySql extends PdoRepository
 
             $alias = false;
 
-            if (!isset($columns[$sort->columnName])) {
+            if (!isset($intersectionColumnAliases[$sort->columnName])) {
                 // Is this an alias?
                 foreach($sqlStatement->columns as $expression){
                     if ($expression instanceof SelectColumn){
@@ -454,23 +481,40 @@ class MySql extends PdoRepository
 
             $sort->sorted = true;
 
-            $sortColumn = ($alias) ? '`'.$sort->columnName.'`' : "`".$sqlStatement->getAlias()."`.`".$sort->columnName."`";
-            $sqlStatement->sorts[] = new SortExpression($sortColumn, $sort->ascending);
-        }
-
-        foreach($collection->getGroups() as $group){
-            $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
+            if ($alias){
+                $sqlStatement->sorts[] = new SortExpression("`".$sort->columnName.'`', $sort->ascending);
+            } else {
+                $alias = $intersectionColumnAliases[$sort->columnName];
+                $sqlStatement->sorts[] = new SortExpression("`".$alias."`.`".$sort->columnName.'`', $sort->ascending);
+            }
         }
 
         $aggregates = $collection->getAggregateColumns();
         $allAggregated = true;
 
-        if (sizeof($aggregates)) {
+        // If any of the aggregates can't happen in the repos, then NONE of them can, as the group by won't be
+        // added to the query and we'll be iterating through all the rows anyway for the sake of the one aggregate
+        // that can't be done in the query.
+        foreach ($aggregates as $aggregate) {
+            if (!$aggregate->canAggregateWithRepository($this)){
+                $allAggregated = false;
+            }
+        }
+
+        if ($allAggregated) {
             foreach ($aggregates as $aggregate) {
                 $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
-                if (!$aggregate->wasAggregatedByRepository()){
+                if (!$aggregate->wasAggregatedByRepository()) {
                     $allAggregated = false;
                 }
+            }
+        }
+
+        if ($allAggregated) {
+            // If the aggregates didn't work, we can't group yet otherwise the rows will collapse and post query
+            // aggregates won't have all the rows to work on.
+            foreach ($collection->getGroups() as $group) {
+                $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
             }
         }
 
