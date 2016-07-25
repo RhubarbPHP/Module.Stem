@@ -964,6 +964,12 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->collectionCursor->setAugmentationData($additionalData);
     }
 
+    /**
+     * Filters the collection to the given identifier.
+     *
+     * @param $identifier
+     * @return mixed
+     */
     public function findModelByUniqueIdentifier($identifier)
     {
         $this->filter(new Equals($this->getModelSchema()->uniqueIdentifierColumnName, $identifier));
@@ -981,7 +987,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $childByIntersectColumn = [];
 
         // First scan through the collection and make the models easily addressable in an array indexed by the
-        // joining column
+        // intersection column name
         foreach($intersection->collection as $childModel){
 
             $index = $childModel[$intersection->intersectionColumnName];
@@ -1002,6 +1008,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $hasColumnsToPullUp = count($intersection->columnsToPullUp);
 
         $alreadyDone = [];
+
+        // Now consider each model in the collection and see if the intersected collection
+        // contains a matching row.
 
         foreach($this->collectionCursor as $parentModel){
 
@@ -1027,6 +1036,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                     $augmentationIndex = $parentModel->uniqueIdentifier;
 
                     if (!$firstRow){
+                        // Sometimes if the collection isn't grouped it might actually require us to
+                        // support duplicate rows in the outer collection. Later we flatten out the dupes
+                        // but we need them now to make sure that aggregates and pull ups work as
+                        // expected.
                         $augmentationIndex = $this->collectionCursor->duplicateRow($augmentationIndex);
                     }
 
