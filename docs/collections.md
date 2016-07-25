@@ -114,6 +114,14 @@ replaceSort()
 	// Sorted by balance ascending followed by surname descending.
 	```
 
+## Grouping
+
+Group a collection by calling `addGroup` with the name of the column to
+group on. Iterating over the collection will return only one model per
+group. The content of the other columns is indeterminate and might
+vary from repository to repository. In most cases however the column
+being selected for is the group column itself.
+
 ## Finding Models
 
 Within a collection, filtered or not, you can search for a model with a particular unique identifier by
