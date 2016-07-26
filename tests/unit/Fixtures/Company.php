@@ -94,15 +94,11 @@ class Company extends Model
         return $validator;
     }
 
-    public static function find(Filter $filter = null)
+    public static function find(Filter ...$filters)
     {
         $activeFilter = new Equals('Active', 1);
-        if ($filter === null) {
-            $filter = $activeFilter;
-        } else {
-            $filter = new AndGroup([$filter, $activeFilter]);
-        }
+        $filters[] = $activeFilter;
 
-        return parent::find($filter);
+        return parent::find(...$filters);
     }
 }

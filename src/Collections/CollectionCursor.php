@@ -41,6 +41,17 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
             } else {
                 $this->augmentationData[$id] = array_merge($this->augmentationData[$id], $rowData);
             }
+
+            // If a previous intersection has duplicated any rows we need to find those and make sure those
+            // duplicates also get this augmentation set.
+            if (($key = (array_search($id, $this->duplicatedRows))) !== false){
+
+                if (!isset($this->augmentationData[$key])) {
+                    $this->augmentationData[$key] = $rowData;
+                } else {
+                    $this->augmentationData[$key] = array_merge($this->augmentationData[$key], $rowData);
+                }
+            }
         }
     }
 
@@ -62,8 +73,11 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
         {
             $index .= "_";
         }
-        
+
         $this->duplicatedRows[$index] = $uniqueIdentifier;
+        if (isset($this->augmentationData[$uniqueIdentifier])){
+            $this->augmentationData[$index] = $this->augmentationData[$uniqueIdentifier];
+        }
 
         return $index;
     }

@@ -67,15 +67,11 @@ class User extends Model
         return self::findFirst(new Equals("Username", $username));
     }
 
-    public static function find(Filter $filter = null)
+    public static function find(Filter ...$filters)
     {
         $activeFilter = new Equals('Active', true);
-        if ($filter === null) {
-            $filter = $activeFilter;
-        } else {
-            $filter = new AndGroup([$filter, $activeFilter]);
-        }
+        $filters[] = $activeFilter;
 
-        return parent::find($filter);
+        return parent::find(...$filters);
     }
 }

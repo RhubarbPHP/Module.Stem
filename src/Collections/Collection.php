@@ -553,18 +553,18 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
             $andGroup->addFilters($filter);
         }
-        
+
         if (sizeof($filters) == 1){
             $andGroup = $filters[0];
         }
-        
+
         if (is_null($this->filter)) {
             $this->filter = $andGroup;
         } else {
             $this->filter = new AndGroup([$andGroup, $this->filter]);
         }
 
-        $this->invalidateList();
+        $this->invalidate();
 
         return $this;
     }

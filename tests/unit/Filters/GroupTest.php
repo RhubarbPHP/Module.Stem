@@ -3,11 +3,13 @@
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
 use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Filters\LessThan;
+use Rhubarb\Stem\Filters\OrGroup;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
@@ -149,23 +151,23 @@ class GroupTest extends ModelUnitTestCase
     public function testAndOrGroupsParametersNotAsArray()
     {
         $andGroup = new AndGroup(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
-        $contacts = Example::find($andGroup);
+        $contacts = TestContact::find($andGroup);
         $model = $contacts[0];
         $this->assertEquals("John", $model->Forename);
         $this->assertEquals("Luc", $model->Surname);
 
         $orGroup = new OrGroup(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
-        $contacts = Example::find($orGroup);
+        $contacts = TestContact::find($orGroup);
         $model = $contacts[0];
         $this->assertEquals("John", $model->Forename);
         $this->assertEquals("Joe", $model->Surname);
 
-        $contacts = Example::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
+        TestContact::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
     }
 
     public function testFindAutomaticAndFilterForSeveralParameters()
     {
-        $contacts = Example::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
+        $contacts = TestContact::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
         $model = $contacts[0];
         $this->assertEquals("John", $model->Forename);
         $this->assertEquals("Luc", $model->Surname);

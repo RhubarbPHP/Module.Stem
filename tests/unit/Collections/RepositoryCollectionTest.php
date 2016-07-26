@@ -721,28 +721,31 @@ class RepositoryCollectionTest extends ModelUnitTestCase
          */
 
 
-        $donations->intersectWith(TestContact::find(
-            new AndGroup([
-                new Not(new Equals("Surname", "")),
-                new Not(new Equals("AddressLine1", "")),
-                new Not(new Equals("Postcode", ""))
-            ])),
-            "ContactID",
-            "ContactID"
-        );
-
-
-//        $donations->intersectWith(
-//            TestContact::all(),
-//            "ContactID",
-//            "ContactID"
-//        )->filter(
+//        $donations->intersectWith(TestContact::find(
 //            new AndGroup([
 //                new Not(new Equals("Surname", "")),
 //                new Not(new Equals("AddressLine1", "")),
 //                new Not(new Equals("Postcode", ""))
-//            ])
+//            ])),
+//            "ContactID",
+//            "ContactID"
 //        );
+
+
+        $donations->intersectWith(
+            TestContact::all(),
+            "ContactID",
+            "ContactID",
+            [
+                "Surname",
+                "Postcode",
+                "AddressLine1"
+            ]
+        )->filter(
+            new Not(new Equals("Surname", "")),
+            new Not(new Equals("AddressLine1", "")),
+            new Not(new Equals("Postcode", ""))
+        );
 
         $this->assertEquals(9, sizeof($donations),
             "5 more donations should be filtered out as they don't have all the required contact information 
@@ -754,8 +757,6 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         foreach ($donations as $donation) {
             $string .= "[DonationID:" . $donation->DonationID . "]";
         }
-
-        echo $string;
 
         $this->assertNotFalse(strpos($string, "[DonationID:1]"), "\$donation1 should be found");
         $this->assertNotFalse(strpos($string, "[DonationID:2]"), "\$donation2 should be found");
