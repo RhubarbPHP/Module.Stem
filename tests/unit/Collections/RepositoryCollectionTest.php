@@ -721,17 +721,6 @@ class RepositoryCollectionTest extends ModelUnitTestCase
          */
 
 
-//        $donations->intersectWith(TestContact::find(
-//            new AndGroup([
-//                new Not(new Equals("Surname", "")),
-//                new Not(new Equals("AddressLine1", "")),
-//                new Not(new Equals("Postcode", ""))
-//            ])),
-//            "ContactID",
-//            "ContactID"
-//        );
-
-
         $donations->intersectWith(
             TestContact::all(),
             "ContactID",
@@ -753,6 +742,62 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
 
         // Just a final check to ensure the 9 found are the ones we were expecting
+        $string = "";
+        foreach ($donations as $donation) {
+            $string .= "[DonationID:" . $donation->DonationID . "]";
+        }
+
+        $this->assertNotFalse(strpos($string, "[DonationID:1]"), "\$donation1 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:2]"), "\$donation2 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:3]"), "\$donation3 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:7]"), "\$donation7 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:8]"), "\$donation8 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:11]"), "\$donation11 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:12]"), "\$donation12 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:13]"), "\$donation13 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:14]"), "\$donation14 should be found");
+
+
+        $donations = TestDonation::find(new AndGroup([
+            new Between("DonationDate", $startDate, $endDate)
+        ]))->
+        intersectWith(TestDeclaration::find(
+            new Equals("Cancelled", false)
+        ),
+            "ContactID",
+            "ContactID",
+            [
+                "StartDate" => "DeclarationStartDate",
+                "EndDate" => "DeclarationEndDate",
+                "DonationID" => "DeclarationDonationID"
+            ]
+        )->filter(
+            new OrGroup(
+                new Equals("DeclarationDonationID", "@{DonationID}"),
+                new AndGroup(
+                    new LessThan("DeclarationStartDate", "@{DonationDate}", true),
+                    new OrGroup(
+                        new GreaterThan("DeclarationEndDate", "@{DonationDate}", true),
+                        new OrGroup(
+                            new Equals("DeclarationEndDate", new RhubarbDate("0000-00-00")),
+                            new Equals("DeclarationEndDate", "0000-00-00")
+                        )
+                    ),
+                    new Equals("DeclarationDonationID", 0)
+                )
+            )
+        )->intersectWith(TestContact::find(
+            new AndGroup([
+                new Not(new Equals("Surname", "")),
+                new Not(new Equals("AddressLine1", "")),
+                new Not(new Equals("Postcode", ""))
+            ])),
+            "ContactID",
+            "ContactID"
+        );
+
+        $this->assertEquals(9, sizeof($donations), "We should have 9 by filtering then intersecting (above was intersect then filter)");
+
         $string = "";
         foreach ($donations as $donation) {
             $string .= "[DonationID:" . $donation->DonationID . "]";
