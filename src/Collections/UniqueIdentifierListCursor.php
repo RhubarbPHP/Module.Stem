@@ -72,7 +72,8 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function key()
     {
-        return $this->index;
+        $model = $this->current();
+        return $model->uniqueIdentifier;
     }
 
     /**

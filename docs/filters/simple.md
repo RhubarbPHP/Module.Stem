@@ -1,4 +1,7 @@
-#Equals
+Simple Filters
+==============
+
+The basic set of filters perform the essentials of filtering
 
 Data Filter used to keep all records exactly matching a given variable.
 
