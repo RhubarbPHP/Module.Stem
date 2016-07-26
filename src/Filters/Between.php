@@ -26,6 +26,12 @@ class Between extends Group
 
     private $max;
 
+    /**
+     * Between constructor.
+     * @param string $columnName
+     * @param mixed $min
+     * @param mixed $max
+     */
     public function __construct($columnName, $min, $max)
     {
         $this->min = $min;
