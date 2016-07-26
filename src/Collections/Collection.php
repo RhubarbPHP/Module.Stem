@@ -386,22 +386,21 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
             return;
         }
 
-        $andGroup = new AndGroup();
-
         if (is_array($filters[0])){
             $filters = $filters[0];
         }
 
-        foreach ($filters as $filter) {
-            if (!($filter instanceof Filter)){
-                throw new FilterNotSupportedException('One or more of the parameters, or one or more elements of an array parameter, was not of the Filter Class');
-            }
-
-            $andGroup->addFilters($filter);
-        }
-        
         if (sizeof($filters) == 1){
             $andGroup = $filters[0];
+        } else {
+            $andGroup = new AndGroup();
+            foreach ($filters as $filter) {
+                if (!($filter instanceof Filter)) {
+                    throw new FilterNotSupportedException('One or more of the parameters, or one or more elements of an array parameter, was not of the Filter Class');
+                }
+
+                $andGroup->addFilters($filter);
+            }
         }
         
         if (is_null($this->filter)) {
