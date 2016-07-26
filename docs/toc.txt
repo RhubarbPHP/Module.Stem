@@ -1,11 +1,12 @@
 Basic Concepts:
     . Models and Schemas:models-and-schemas
     . Collections:collections
-    . Filtering:filters/index
+    . Filtering:filters/
         . Groups:filters/group
         . Inverting Filters (not):filters/not
+        . Back references:filters/back-references
+        . Advanced Filters:filters/advanced
         . Creating Your Own Filter:filters/create-a-filter
-        . A Complex Example - XOR:filters/complex-example
         . Default Filters:filters/prefiltering
     . Relationships:relationships
     . Data Decorators:decorators

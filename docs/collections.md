@@ -49,7 +49,7 @@ abstracted away from any particular repository type and therefore you can filter
 *even on computed properties*. It is the responsibility of the repository to provide
 whatever performance optimisations it can, such as crafting SQL where clauses appropriately.
 
-Read the [guide to filters](filters/index) for an in-depth look at filters.
+Read the [guide to filters](filters/) for an in-depth look at filters.
 
 To filter a collection simply call `filter()` and pass a filter object. Sequential calls to filter
 will combine filters (like an And operation).
