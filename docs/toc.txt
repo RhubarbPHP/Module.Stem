@@ -2,9 +2,8 @@ Basic Concepts:
     . Models and Schemas:models-and-schemas
     . Collections:collections
     . Filtering:filters/index
-        . Simple Filters:filters/simple
         . Groups:filters/group
-        . Inverting Filters:filters/not
+        . Inverting Filters (not):filters/not
         . Creating Your Own Filter:filters/create-a-filter
         . A Complex Example - XOR:filters/complex-example
         . Default Filters:filters/prefiltering
