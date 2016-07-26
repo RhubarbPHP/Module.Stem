@@ -62,7 +62,7 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
         {
             $index .= "_";
         }
-
+        
         $this->duplicatedRows[$index] = $uniqueIdentifier;
 
         return $index;

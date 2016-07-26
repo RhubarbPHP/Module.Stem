@@ -53,7 +53,10 @@ class BooleanCollectionExpression extends WhereExpression implements WhereExpres
 
         foreach($this->whereExpressions as $expression){
             if ($expression->requiredForClause(false)){
-                $havingExpressions[] = $expression->getHavingSql($forStatement);
+                if($expression->getHavingSql($forStatement) != "")
+                {
+                    $havingExpressions[] = $expression->getHavingSql($forStatement);
+                }
             }
         }
 

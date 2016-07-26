@@ -2,18 +2,22 @@
 
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
+use Rhubarb\Crown\DateTime\RhubarbDate;
 use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Collections\ArrayCollection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\AndGroup;
+use Rhubarb\Stem\Filters\Between;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Filters\LessThan;
+use Rhubarb\Stem\Filters\Not;
 use Rhubarb\Stem\Filters\OrGroup;
+use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
-use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestDeclaration;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestDonation;
 
@@ -59,7 +63,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertEquals(2, $collection[0]->Balance);
 
         $collection = new RepositoryCollection(TestContact::class);
-        $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID", ["Balance" => "CompanyBalance"]);
+        $collection->intersectWith(Company::find(new Equals("CompanyID", 2)), "CompanyID", "CompanyID",
+            ["Balance" => "CompanyBalance"]);
 
         $this->assertEquals(2, $collection[0]->CompanyBalance);
     }
@@ -113,7 +118,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $collection->setRange(0, 2);
 
         $x = 0;
-        foreach($collection as $item){
+        foreach ($collection as $item) {
             $x++;
         }
 
@@ -127,14 +132,14 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $contacts = TestContact::all();
         $contrivedArray = [];
 
-        foreach($contacts as $contact){
+        foreach ($contacts as $contact) {
             $contrivedArray[] = $contact;
         }
 
         $collection->intersectWith(
             (new ArrayCollection("TestContact", $contrivedArray))
-            ->addAggregateColumn(new Count("Contacts"))
-            ->addGroup("CompanyID"),
+                ->addAggregateColumn(new Count("Contacts"))
+                ->addGroup("CompanyID"),
             "CompanyID",
             "CompanyID",
             ["CountOfContacts"]);
@@ -231,27 +236,27 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $donation->DonationDate = "now";
         $donation->ContactID = $contact->ContactID;
         $donation->save();
-        
+
         $declaration = new TestDeclaration();
         $declaration->StartDate = "yesterday";
         $declaration->ContactID = $contact->ContactID;
         $declaration->save();
 
         $donations = TestDonation::all()
-        ->intersectWith(
-            TestDeclaration::all(),
-            "ContactID",
-            "ContactID",
-            [
-                "StartDate" => "DeclarationStartDate",
-                "DonationID" => "DeclarationDonationID"
-            ]
-        )
-        ->filter(
-            new OrGroup([
-		        new LessThan( "DeclarationStartDate", "@{DonationDate}" )
-            ])
-        );
+            ->intersectWith(
+                TestDeclaration::all(),
+                "ContactID",
+                "ContactID",
+                [
+                    "StartDate" => "DeclarationStartDate",
+                    "DonationID" => "DeclarationDonationID"
+                ]
+            )
+            ->filter(
+                new OrGroup([
+                    new LessThan("DeclarationStartDate", "@{DonationDate}")
+                ])
+            );
 
         $this->assertCount(1, $donations);
         $this->assertEquals($contact->getUniqueIdentifier(), $donations[0]->ContactID);
@@ -288,10 +293,10 @@ class RepositoryCollectionTest extends ModelUnitTestCase
             ->filter(
                 new OrGroup([
                     new AndGroup([
-                        new LessThan( "DeclarationStartDate", "@{DonationDate}" ),
-                        new GreaterThan( "DeclarationStartDate", "0000-00-00" )
+                        new LessThan("DeclarationStartDate", "@{DonationDate}"),
+                        new GreaterThan("DeclarationStartDate", "0000-00-00")
                     ]),
-                    new Equals( "DeclarationDonationID", "@{DonationID}")
+                    new Equals("DeclarationDonationID", "@{DonationID}")
                 ])
             );
 
@@ -305,30 +310,30 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
 
         $contacts = TestContact::all()->
-            intersectWith(
-                TestDonation::all()
-                    ->intersectWith(
-                        TestDeclaration::all(),
-                        "ContactID",
-                        "ContactID",
-                        [
-                            "StartDate" => "DeclarationStartDate",
-                            "DonationID" => "DeclarationDonationID"
-                        ])
-                    ->filter(
-                        new OrGroup([
-                            new AndGroup([
-                                new LessThan( "DeclarationStartDate", "@{DonationDate}" ),
-                                new GreaterThan( "DeclarationStartDate", "0000-00-00" )
-                            ]),
-                            new Equals( "DeclarationDonationID", "@{DonationID}")
-                        ])
-                    )
-                    ->addAggregateColumn(new Count("DonationID", "CountOfDonations")),
+        intersectWith(
+            TestDonation::all()
+                ->intersectWith(
+                    TestDeclaration::all(),
                     "ContactID",
                     "ContactID",
-                    [ "CountOfDonations" ]
+                    [
+                        "StartDate" => "DeclarationStartDate",
+                        "DonationID" => "DeclarationDonationID"
+                    ])
+                ->filter(
+                    new OrGroup([
+                        new AndGroup([
+                            new LessThan("DeclarationStartDate", "@{DonationDate}"),
+                            new GreaterThan("DeclarationStartDate", "0000-00-00")
+                        ]),
+                        new Equals("DeclarationDonationID", "@{DonationID}")
+                    ])
                 )
+                ->addAggregateColumn(new Count("DonationID", "CountOfDonations")),
+            "ContactID",
+            "ContactID",
+            ["CountOfDonations"]
+        )
             ->filter(new Equals("CountOfDonations", 2));
 
         $this->assertCount(1, $contacts);
@@ -377,5 +382,389 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $contact->Forename = "Babs";
         $contact->CompanyID = 1;
         $contact->save();
+    }
+
+
+    public function createTestContact()
+    {
+
+        $contact = new TestContact();
+        $contact->Forename = substr(md5(rand()), 0, 4);
+        $contact->Surname = substr(md5(rand()), 0, 6);
+
+        $contact->Postcode = substr(md5(rand()), 0, 7);
+        $contact->AddressLine1 = substr(md5(rand()), 0, 15);
+
+        $contact->save();
+        return $contact;
+    }
+
+    public function createDeclarationForDonation($donationId, $contactId)
+    {
+        $declaration = new TestDeclaration();
+        $declaration->ContactID = $contactId;
+        $declaration->DonationID = $donationId;
+        $declaration->EndDate = new RhubarbDate("0000-00-00");
+        $declaration->StartDate = new RhubarbDate("0000-00-00");
+        $declaration->save();
+
+        return $declaration;
+    }
+
+    public static function createDeclarationForDateRange($startDate, $endDate, $contactId)
+    {
+        $declaration = new TestDeclaration();
+        $declaration->ContactID = $contactId;
+        $declaration->DonationID = 0;
+        $declaration->StartDate = $startDate;
+        $declaration->EndDate = $endDate;
+        $declaration->save();
+
+        return $declaration;
+    }
+
+    /*
+     * In this test there are:
+     *
+     * 13 Contacts
+     *  $contact1 ... $contact13
+     * 19 Donations
+     *  $donation1 ... $donation17
+     * 17 Declarations
+     *
+     * Donations 1-15, 18 and 19 have been made in 2016, so should be found in the search.
+     * Donations 16 and 17 have been made in 2015, so should not be found.
+     *
+     * Donations 1,2,3,4,5,6,7,8,11,14 all have declarations specific to them - and so should be applicable
+     *
+     * Contacts 2, 3 and 9 have also made declarations for a range of dates
+     *  $contact9 has cancelled their declaration - so their donation isn't applicable
+     *  $contact2 has an open ended declaration starting from 2016-01-01 - which can be used for either
+     *      of his donations ($donation2 and $donation12)
+     *  $contact3 has a closed ended declaration ranging from 2015-01-01 to 2016-12-31
+     *      which is applicable for both of his donations ($donation3 and $donation13),
+     *      however $donation3 won't be found as it's 2015
+     *  $contact11 has a declaration ending on the day of his donation (so their donation $donation14 should be found)
+     *  $contact12 has a declaration ending the day before his donation (so not applicable)
+     */
+    public function testLargeComplexIntersectionTest()
+    {
+        // 10 Contacts
+        $contact1 = $this->createTestContact();
+        $contact2 = $this->createTestContact();
+        $contact3 = $this->createTestContact();
+        $contact4 = $this->createTestContact();
+        $contact5 = $this->createTestContact();
+        $contact6 = $this->createTestContact();
+        $contact7 = $this->createTestContact();
+        $contact8 = $this->createTestContact();
+        $contact9 = $this->createTestContact();
+        $contact10 = $this->createTestContact();
+        $contact11 = $this->createTestContact();
+        $contact12 = $this->createTestContact();
+        $contact13 = $this->createTestContact();
+
+        // $contact4 has no Postcode
+        $contact4->Postcode = "";
+        $contact4->save();
+        // $contact5 has no AddressLine1
+        $contact5->AddressLine1 = "";
+        $contact5->save();
+        // $contact6 has no Surname
+        $contact6->Surname = "";
+        $contact6->save();
+        // $contact13 has no required stuffs
+        $contact13->Postcode = "";
+        $contact13->AddressLine1 = "";
+        $contact13->Surname = "";
+        $contact13->save();
+
+        $allContacts = TestContact::all();
+        $this->assertEquals(18, sizeof($allContacts), "There should be 18 contacts");
+
+
+        $may2016 = new RhubarbDate("2016-05-05");
+
+        // 19 Donations
+        $donation1 = new TestDonation();
+        $donation1->ContactID = $contact1->ContactID;
+        $donation1->Amount = 10;
+        $donation1->DonationDate = $may2016;
+        $donation1->save();
+
+        $donation2 = new TestDonation();
+        $donation2->ContactID = $contact2->ContactID;
+        $donation2->Amount = 10;
+        $donation2->DonationDate = $may2016;
+        $donation2->save();
+
+        $donation3 = new TestDonation();
+        $donation3->ContactID = $contact3->ContactID;
+        $donation3->Amount = 10;
+        $donation3->DonationDate = $may2016;
+        $donation3->save();
+
+        $donation4 = new TestDonation();
+        $donation4->ContactID = $contact4->ContactID;
+        $donation4->Amount = 10;
+        $donation4->DonationDate = $may2016;
+        $donation4->save();
+
+        $donation5 = new TestDonation();
+        $donation5->ContactID = $contact5->ContactID;
+        $donation5->Amount = 10;
+        $donation5->DonationDate = $may2016;
+        $donation5->save();
+
+        $donation6 = new TestDonation();
+        $donation6->ContactID = $contact6->ContactID;
+        $donation6->Amount = 10;
+        $donation6->DonationDate = $may2016;
+        $donation6->save();
+
+        $donation7 = new TestDonation();
+        $donation7->ContactID = $contact7->ContactID;
+        $donation7->Amount = 10;
+        $donation7->DonationDate = $may2016;
+        $donation7->save();
+
+        $donation8 = new TestDonation();
+        $donation8->ContactID = $contact8->ContactID;
+        $donation8->Amount = 10;
+        $donation8->DonationDate = $may2016;
+        $donation8->save();
+
+        $donation9 = new TestDonation();
+        $donation9->ContactID = $contact9->ContactID;
+        $donation9->Amount = 10;
+        $donation9->DonationDate = $may2016;
+        $donation9->save();
+
+        $donation10 = new TestDonation();
+        $donation10->ContactID = $contact10->ContactID;
+        $donation10->Amount = 10;
+        $donation10->DonationDate = $may2016;
+        $donation10->save();
+
+        $donation11 = new TestDonation();
+        $donation11->ContactID = $contact1->ContactID;
+        $donation11->Amount = 10;
+        $donation11->DonationDate = $may2016;
+        $donation11->save();
+
+        $donation12 = new TestDonation();
+        $donation12->ContactID = $contact2->ContactID;
+        $donation12->Amount = 10;
+        $donation12->DonationDate = $may2016;
+        $donation12->save();
+
+        $donation13 = new TestDonation();
+        $donation13->ContactID = $contact3->ContactID;
+        $donation13->Amount = 10;
+        $donation13->DonationDate = $may2016;
+        $donation13->save();
+
+        $donation14 = new TestDonation();
+        $donation14->ContactID = $contact11->ContactID;
+        $donation14->Amount = 10;
+        $donation14->DonationDate = $may2016;
+        $donation14->save();
+
+        $donation15 = new TestDonation();
+        $donation15->ContactID = $contact12->ContactID;
+        $donation15->Amount = 10;
+        $donation15->DonationDate = $may2016;
+        $donation15->save();
+
+        // 2 in 2015 (Outside date range)
+        $donation16 = new TestDonation();
+        $donation16->ContactID = $contact3->ContactID;
+        $donation16->Amount = 10;
+        $donation16->DonationDate = new RhubarbDate("2015-05-05");
+        $donation16->save();
+
+        $donation17 = new TestDonation();
+        $donation17->ContactID = $contact5->ContactID;
+        $donation17->Amount = 10;
+        $donation17->DonationDate = new RhubarbDate("2015-05-05");
+        $donation17->save();
+
+        $donation18 = new TestDonation();
+        $donation18->ContactID = $contact13->ContactID;
+        $donation18->Amount = 10;
+        $donation18->DonationDate = $may2016;
+        $donation18->save();
+
+        $donation19 = new TestDonation();
+        $donation19->ContactID = $contact13->ContactID;
+        $donation19->Amount = 10;
+        $donation19->DonationDate = $may2016;
+        $donation19->save();
+
+
+        $allDonations = TestDonation::all();
+        $this->assertEquals(19, sizeof($allDonations), "There should be 19 donations");
+
+
+        // 10 Donation specific declarations
+        // Notes:
+        //  $donation1 and $donation11 are by the same contact - $contact1
+        //  $donation16 was in 2015
+        $this->createDeclarationForDonation($donation1->DonationID, $donation1->ContactID);
+        $this->createDeclarationForDonation($donation2->DonationID, $donation2->ContactID);
+        $this->createDeclarationForDonation($donation3->DonationID, $donation3->ContactID);
+        $this->createDeclarationForDonation($donation4->DonationID, $donation4->ContactID);
+        $this->createDeclarationForDonation($donation5->DonationID, $donation5->ContactID);
+        $this->createDeclarationForDonation($donation6->DonationID, $donation6->ContactID);
+        $this->createDeclarationForDonation($donation7->DonationID, $donation7->ContactID);
+        $this->createDeclarationForDonation($donation8->DonationID, $donation8->ContactID);
+        $this->createDeclarationForDonation($donation11->DonationID, $donation11->ContactID);
+        $this->createDeclarationForDonation($donation16->DonationID, $donation16->ContactID);
+        $this->createDeclarationForDonation($donation18->DonationID, $donation18->ContactID);
+
+        // 5 Date range declarations
+        // Open ended declaration for Contact 2 - Covering from 2016 onwards
+        $this->createDeclarationForDateRange(new RhubarbDate("2016-01-01"), new RhubarbDate("0000-00-00"),
+            $contact2->ContactID);
+
+        // Close ended declaration for Contact 3 - Covering all of 2015 and 2016
+        $this->createDeclarationForDateRange(new RhubarbDate("2015-01-01"), new RhubarbDate("2016-12-31"),
+            $contact3->ContactID);
+
+        //Close ended declaration ending on the day of the donation
+        $this->createDeclarationForDateRange(new RhubarbDate("2015-01-01"), new RhubarbDate("2016-05-05"),
+            $contact11->ContactID);
+
+        //Close ended declaration ending on the day of the donation
+        $this->createDeclarationForDateRange(new RhubarbDate("2015-01-01"), new RhubarbDate("2016-05-04"),
+            $contact12->ContactID);
+
+        // Cancelled close ended declaration for Contact 9 - Covering all of 2015 and 2016
+        $declaration = $this->createDeclarationForDateRange(new RhubarbDate("2016-01-01"),
+            new RhubarbDate("2016-12-31"),
+            $contact9->ContactID);
+        $declaration->Cancelled = true;
+        $declaration->save();
+
+        // Open ended declaration for Contact 13 - Covering from 2016 onwards
+        $this->createDeclarationForDateRange(new RhubarbDate("2016-01-01"), new RhubarbDate("0000-00-00"),
+            $contact13->ContactID);
+
+
+        $allDeclarations = TestDeclaration::all();
+        $this->assertEquals(17, sizeof($allDeclarations), "There should be 17 declarations");
+
+        // Find all of our donations within the date range
+        $startDate = new RhubarbDate("2016-01-01");
+        $endDate = new RhubarbDate("2016-12-31");
+
+        $donations = TestDonation::find(new AndGroup([
+            new Between("DonationDate", $startDate, $endDate)
+        ]));
+
+
+        $this->assertEquals(17, sizeof($donations), "We should find 17 donations between $startDate and $endDate
+        (\$donation16 and \$donation17 shouldn't be found as they lie outside the date range)");
+
+
+        /*
+         * Find all the Declarations that aren't cancelled. Intersect this with $donations where either:
+         *  [ The DeclarationDonationID equals the DonationID of one of the donations ]
+         * or
+         *
+         * [
+         *      The DeclarationStartDate is less than the Date the donation was made
+         *  AND
+         *      ( The DeclarationEndDate is after the Date the donation was made
+         *          OR
+         *      The DeclarationEndDate is open ended )
+         *  AND
+         *      The DeclarationDonationID isn't set
+         *  ]
+         *
+         * I.e. Remove any donation that we can't find a suitable donation for
+         */
+        $donations->intersectWith(TestDeclaration::find(
+            new Equals("Cancelled", false)
+        ),
+            "ContactID",
+            "ContactID",
+            [
+                "StartDate" => "DeclarationStartDate",
+                "EndDate" => "DeclarationEndDate",
+                "DonationID" => "DeclarationDonationID"
+            ]
+        )->filter(
+            new OrGroup(
+                new Equals("DeclarationDonationID", "@{DonationID}"),
+                new AndGroup(
+                    new LessThan("DeclarationStartDate", "@{DonationDate}", true),
+                    new OrGroup(
+                        new GreaterThan("DeclarationEndDate", "@{DonationDate}", true),
+                        new OrGroup(
+                            new Equals("DeclarationEndDate", new RhubarbDate("0000-00-00")),
+                            new Equals("DeclarationEndDate", "0000-00-00")
+                        )
+                    ),
+                    new Equals("DeclarationDonationID", 0)
+                )
+            )
+        );
+
+        $this->assertEquals(14, sizeof($donations),
+            "We should filter out 3 donations who don't have applicable declarations
+            (\$donation9, \$donation10 and \$donation15 removed)");
+
+
+        /*
+         * Intersect this with All Contacts that have a name, address and postcode - requirements
+         */
+
+
+        $donations->intersectWith(TestContact::find(
+            new AndGroup([
+                new Not(new Equals("Surname", "")),
+                new Not(new Equals("AddressLine1", "")),
+                new Not(new Equals("Postcode", ""))
+            ])),
+            "ContactID",
+            "ContactID"
+        );
+
+
+//        $donations->intersectWith(
+//            TestContact::all(),
+//            "ContactID",
+//            "ContactID"
+//        )->filter(
+//            new AndGroup([
+//                new Not(new Equals("Surname", "")),
+//                new Not(new Equals("AddressLine1", "")),
+//                new Not(new Equals("Postcode", ""))
+//            ])
+//        );
+
+        $this->assertEquals(9, sizeof($donations),
+            "5 more donations should be filtered out as they don't have all the required contact information 
+            (\$donation4, \$donation5, \$donation6, \$donation18 and \$donation19 removed)");
+
+
+        // Just a final check to ensure the 9 found are the ones we were expecting
+        $string = "";
+        foreach ($donations as $donation) {
+            $string .= "[DonationID:" . $donation->DonationID . "]";
+        }
+
+        echo $string;
+
+        $this->assertNotFalse(strpos($string, "[DonationID:1]"), "\$donation1 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:2]"), "\$donation2 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:3]"), "\$donation3 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:7]"), "\$donation7 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:8]"), "\$donation8 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:11]"), "\$donation11 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:12]"), "\$donation12 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:13]"), "\$donation13 should be found");
+        $this->assertNotFalse(strpos($string, "[DonationID:14]"), "\$donation14 should be found");
     }
 }

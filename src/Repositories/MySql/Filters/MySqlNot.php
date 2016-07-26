@@ -34,6 +34,26 @@ class MySqlNot extends Not
     use MySqlFilterTrait;
 
     /**
+     * Return true if the repository can handle this filter.
+     *
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @return bool
+     */
+    protected static function doCanFilterWithRepository(
+        Collection $collection,
+        Repository $repository,
+        Filter $originalFilter
+    ) {
+        if (!$originalFilter->filter->canFilterWithRepository($collection, $repository)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param Collection $collection

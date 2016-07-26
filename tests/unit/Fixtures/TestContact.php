@@ -40,7 +40,9 @@ class TestContact extends Model
             new BooleanColumn("KeyContact"),
             new TimeColumn("CoffeeTime"),
             new DecimalColumn("CreditLimit", 10, 2),
-            new DecimalColumn("Balance", 8, 4)
+            new DecimalColumn("Balance", 8, 4),
+            new StringColumn("Postcode", 50),
+            new StringColumn("AddressLine1", 50)
         );
 
         $schema->uniqueIdentifierColumnName = "ContactID";

@@ -387,6 +387,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         $this->invalidate();
+        $collection->invalidate();
 
         $collection->isIntersection = true;
 
@@ -976,7 +977,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         return $this[0];
     }
-    
+
     /**
      * Filter the collection against another using the intersection settings in $intersection.
      *
@@ -1009,33 +1010,29 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $alreadyDone = [];
 
-        // Now consider each model in the collection and see if the intersected collection
-        // contains a matching row.
-
-        foreach($this->collectionCursor as $parentModel){
+        // Next scan through the nested collection and check to see if we need to double up rows in the parent
+        // collection. Also pulls in any aggregate data from the nested collection.
+        foreach($this->collectionCursor as $parentModel) {
 
             $parentId = rtrim($parentModel->uniqueIdentifier, "_");
 
-            if (isset($alreadyDone[$parentId])){
+            if (isset($alreadyDone[$parentId])) {
                 continue;
             }
 
             $alreadyDone[$parentId] = true;
 
             $parentValue = $parentModel[$intersection->sourceColumnName];
-            if (!isset($childByIntersectColumn[$parentValue])){
-                $uniqueIdsToFilter[] = $parentModel->uniqueIdentifier;
-            } else {
-
+            if (isset($childByIntersectColumn[$parentValue])) {
                 $childRows = $childByIntersectColumn[$parentValue];
                 $childRows = (is_array($childRows)) ? $childRows : [$childRows];
 
                 $firstRow = true;
-                foreach($childRows as $childRow) {
+                foreach ($childRows as $childRow) {
 
                     $augmentationIndex = $parentModel->uniqueIdentifier;
 
-                    if (!$firstRow){
+                    if (!$firstRow) {
                         // Sometimes if the collection isn't grouped it might actually require us to
                         // support duplicate rows in the outer collection. Later we flatten out the dupes
                         // but we need them now to make sure that aggregates and pull ups work as
@@ -1056,6 +1053,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                         }
                     }
                 }
+            }
+        }
+
+        // Finally consider each of our records and see if the intersection constraint is met. Otherwise
+        // filter out the row.
+        foreach ($this->collectionCursor as $parentModel) {
+            $parentValue = $parentModel[$intersection->sourceColumnName];
+            if (!isset($childByIntersectColumn[$parentValue])) {
+                $uniqueIdsToFilter[] = $parentModel->uniqueIdentifier;
             }
         }
 

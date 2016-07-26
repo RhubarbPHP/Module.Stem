@@ -21,7 +21,7 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         parent::setUp();
 
         Log::clearLogs();
-        
+
         Repository::setDefaultRepositoryClassName(MySql::class);
 
         $settings = StemSettings::singleton();
@@ -91,5 +91,10 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         parent::setupData();
 
         Log::attachLog(new PhpLog(Log::PERFORMANCE_LEVEL));
+    }
+
+    public function testLargeComplexIntersectionTestMySql()
+    {
+        $this->testLargeComplexIntersectionTest();
     }
 }
