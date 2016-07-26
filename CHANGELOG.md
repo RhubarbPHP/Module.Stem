@@ -5,6 +5,12 @@
 * Added:    Much better repository support for complicated joins, aggregates and filters
 * Added:    RepositoryCollection, UnionRepositoryCollection, ArrayCollection, CallbackCollection
 
+### 1.1.x
+
+* Change: Group now accepts passing in of filters as parameters as well as in an array.
+* Change: Model::find() now accepts multiple filters as parameters -> will make an 'And' Group of the filters.
+* Change: Collection::filter() now accepts multiple filters as parameters -> will make an 'And' Group of the filters.
+
 ### 1.1.0
 
 * Added:    New ColumnIntersectsCollection filter type.

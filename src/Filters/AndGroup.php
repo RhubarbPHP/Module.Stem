@@ -22,8 +22,8 @@ require_once __DIR__ . '/Group.php';
 
 class AndGroup extends Group
 {
-    public function __construct($filters = [])
+    public function __construct(...$filters)
     {
-        parent::__construct("AND", $filters);
+        parent::__construct("AND", ...$filters);
     }
 }

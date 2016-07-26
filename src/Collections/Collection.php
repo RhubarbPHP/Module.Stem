@@ -7,6 +7,7 @@ use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
@@ -533,15 +534,37 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param  Filter $filter
      * @return $this
      */
-    public function filter(Filter $filter)
+    public function filter(...$filters)
     {
-        if (is_null($this->filter)) {
-            $this->filter = $filter;
-        } else {
-            $this->filter = new AndGroup([$filter, $this->filter]);
+        if(sizeof($filters) == 0){
+            return;
         }
 
-        $this->invalidate();
+        $andGroup = new AndGroup();
+
+        if (is_array($filters[0])){
+            $filters = $filters[0];
+        }
+
+        foreach ($filters as $filter) {
+            if (!($filter instanceof Filter)){
+                throw new FilterNotSupportedException('One or more of the parameters, or one or more elements of an array parameter, was not of the Filter Class');
+            }
+
+            $andGroup->addFilters($filter);
+        }
+        
+        if (sizeof($filters) == 1){
+            $andGroup = $filters[0];
+        }
+        
+        if (is_null($this->filter)) {
+            $this->filter = $andGroup;
+        } else {
+            $this->filter = new AndGroup([$andGroup, $this->filter]);
+        }
+
+        $this->invalidateList();
 
         return $this;
     }

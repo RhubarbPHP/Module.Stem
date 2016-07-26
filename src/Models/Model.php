@@ -29,6 +29,7 @@ use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Filter;
+use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\ModelValueInitialiserInterface;
 use Rhubarb\Stem\Schema\ModelSchema;
@@ -396,17 +397,12 @@ abstract class Model extends ModelState
      * @param Filter $filter
      * @return RepositoryCollection|static[]
      */
-    public static function find(Filter $filter = null)
+    public static function find(Filter ...$filters)
     {
         $modelClass = get_called_class();
-
-        $collections = new RepositoryCollection($modelClass);
-
-        if ($filter !== null) {
-            $collections->filter($filter);
-        }
-
-        return $collections;
+        $collection = new RepositoryCollection($modelClass);
+        $collection->filter(...$filters);
+        return $collection;
     }
 
     /**
