@@ -110,6 +110,10 @@ class MySqlCursor extends CollectionCursor
      */
     private function processHydration(&$row)
     {
+        if (!count($this->hydrationMappings)){
+            return;
+        }
+        
         $reposFields = [];
 
         foreach($row as $key => $value){

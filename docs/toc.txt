@@ -14,7 +14,7 @@ Data Storage and Typing:
     . Repositories:repositories
     . Data Typing and Data Transforms:data-typing
 Advanced Techniques:
-    . Intersections:intersections
+    . Joins and Intersections:joins-and-intersections
     . Aggregates:aggregates
     . Model Events:events
     . Updating DocBlock comments:custard/update-comments

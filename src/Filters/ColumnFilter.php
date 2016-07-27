@@ -21,7 +21,7 @@ namespace Rhubarb\Stem\Filters;
 require_once __DIR__ . '/Filter.php';
 
 use Rhubarb\Stem\Collections\Collection;
-use Rhubarb\Stem\Collections\Intersection;
+use Rhubarb\Stem\Collections\CollectionJoin;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;

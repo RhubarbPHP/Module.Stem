@@ -20,18 +20,16 @@ namespace Rhubarb\Stem\Repositories\MySql;
 
 require_once __DIR__ . "/../PdoRepository.php";
 
-use Rhubarb\Crown\DateTime\RhubarbDateTime;
-use Rhubarb\Crown\Logging\Log;
+use Rhubarb\Stem\Collections\CollectionJoin;
+use Rhubarb\Stem\Collections\JoinType;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
-use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\MySql\Collections\MySqlCursor;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
-use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Sql\GroupExpression;
 use Rhubarb\Stem\Sql\Join;
@@ -319,36 +317,43 @@ class MySql extends PdoRepository
 
         $hydrationMappings = [];
 
-        foreach($collection->getIntersections() as $intersection){
+        foreach($collection->getIntersections() as $collectionJoin){
 
-            if (!($intersection->collection instanceof RepositoryCollection)){
+            if (!($collectionJoin->collection instanceof RepositoryCollection)){
                 $allIntersected = false;
                 continue;
             }
 
-            if (!$intersection->collection->canBeFilteredByRepository()){
+            if (!$collectionJoin->collection->canBeFilteredByRepository()){
                 $allIntersected = false;
                 continue;
             }
 
             $join = new Join();
 
-            $intersectionRepository = $intersection->collection->getRepository();
+            $intersectionRepository = $collectionJoin->collection->getRepository();
 
-            $join->statement = $intersectionRepository->getSqlStatementForCollection($intersection->collection, $namedParams, $intersection->intersectionColumnName);
-            $join->joinType = Join::JOIN_TYPE_INNER;
-            $join->parentColumn = $intersection->sourceColumnName;
-            $join->childColumn = $intersection->intersectionColumnName;
+            $join->statement = $intersectionRepository->getSqlStatementForCollection($collectionJoin->collection, $namedParams, $collectionJoin->targetColumnName);
+            if($collectionJoin->joinType == CollectionJoin::JOIN_TYPE_INTERSECTION)
+            {
+                $join->joinType = Join::JOIN_TYPE_INNER;
+            }
+            else if($collectionJoin->joinType == CollectionJoin::JOIN_TYPE_ATTACH)
+            {
+                $join->joinType = Join::JOIN_TYPE_LEFT;
+            }
+            $join->parentColumn = $collectionJoin->sourceColumnName;
+            $join->childColumn = $collectionJoin->targetColumnName;
 
             $sqlStatement->joins[] = $join;
 
-            $intersectionCollectionColumns = $intersection->collection->getModelSchema()->getColumns();
+            $intersectionCollectionColumns = $collectionJoin->collection->getModelSchema()->getColumns();
 
             foreach($intersectionCollectionColumns as $columnName => $column){
                 $intersectionColumnAliases[$columnName] = $join->statement->getAlias();
             }
 
-            foreach($intersection->columnsToPullUp as $column => $alias){
+            foreach($collectionJoin->columnsToPullUp as $column => $alias){
                 if (is_numeric($column)){
                     $column = $alias;
                 }
@@ -380,7 +385,7 @@ class MySql extends PdoRepository
             }
 
             // If we need to auto hydrate, select the columns in the outer query.
-            if ($intersection->autoHydrate){
+            if ($collectionJoin->autoHydrate){
                 $intersectionColumns = $intersectionRepository->getModelSchema()->getColumns();
                 $primaryKey = $intersectionRepository->getModelSchema()->uniqueIdentifierColumnName;
                 foreach($intersectionColumns as $hydrateColumn){
@@ -394,7 +399,7 @@ class MySql extends PdoRepository
                 }
             }
 
-            $intersection->intersected = true;
+            $collectionJoin->intersected = true;
         }
 
         $sqlStatement->potentialHydrationMappings = $hydrationMappings;

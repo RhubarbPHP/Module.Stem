@@ -97,4 +97,10 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
     {
         $this->testLargeComplexIntersectionTest();
     }
+
+    public function testAttachOnMySql()
+    {
+        $this->testAttachOn();
+    }
+
 }

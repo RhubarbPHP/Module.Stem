@@ -15,11 +15,13 @@ use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Filters\Not;
 use Rhubarb\Stem\Filters\OrGroup;
 use Rhubarb\Stem\Repositories\MySql\MySql;
+use Rhubarb\Stem\Tests\unit\Fixtures\Account;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestDeclaration;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestDonation;
+use Rhubarb\Stem\Tests\unit\Fixtures\User;
 
 class RepositoryCollectionTest extends ModelUnitTestCase
 {
@@ -796,7 +798,8 @@ class RepositoryCollectionTest extends ModelUnitTestCase
             "ContactID"
         );
 
-        $this->assertEquals(9, sizeof($donations), "We should have 9 by filtering then intersecting (above was intersect then filter)");
+        $this->assertEquals(9, sizeof($donations),
+            "We should have 9 by filtering then intersecting (above was intersect then filter)");
 
         $string = "";
         foreach ($donations as $donation) {
@@ -812,5 +815,68 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertNotFalse(strpos($string, "[DonationID:12]"), "\$donation12 should be found");
         $this->assertNotFalse(strpos($string, "[DonationID:13]"), "\$donation13 should be found");
         $this->assertNotFalse(strpos($string, "[DonationID:14]"), "\$donation14 should be found");
+    }
+
+    public function testAttachOn()
+    {
+        MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        MySql::executeStatement("TRUNCATE TABLE tblUser");
+
+        $user1 = new User();
+        $user2 = new User();
+        $user3 = new User();
+
+        $user1->Forename = "Cow";
+        $user2->Forename = "Goat";
+        $user3->Forename = "Penguin";
+
+        $user1->Surname = "Cowington";
+        $user2->Surname = "Goatington";
+        $user3->Surname = "Soldier";
+
+        $user1->Active = true;
+        $user2->Active = true;
+        $user3->Active = true;
+
+        $company1 = new Company();
+        $company1->CompanyName = "Animal Farm";
+        $company1->Active = true;
+        $company1->Balance = 100000;
+        $company1->save();
+
+        $company2 = new Company();
+        $company2->CompanyName = "Airforce";
+        $company2->Active = true;
+        $company2->Balance = 400000;
+        $company2->save();
+
+        $user1->CompanyID = 0;
+        $user2->CompanyID = $company1->CompanyID;
+        $user3->CompanyID = $company2->CompanyID;
+
+        $user1->save();
+        $user2->save();
+        $user3->save();
+
+
+        $users = User::all();
+
+        $companies = Company::all();
+
+        $this->assertEquals(3, sizeof($users), "There should be three users");
+
+        $users->joinWith($companies,
+            "CompanyID",
+            "CompanyID",
+            [
+                "CompanyName",
+                "Balance"
+            ], true);
+
+        $this->assertEquals(3, sizeof($users), "After performing the attachment, we should still have three records");
+
+        $this->assertEquals("", $users[0]->CompanyName, "\$User1 should still be there, but have no company attached");
+        $this->assertEquals("Animal Farm", $users[1]->CompanyName, "\$User2 should have had the correct company attached to them");
+        $this->assertEquals("Airforce", $users[2]->CompanyName, "\$User3 should have had the correct company attached to them");
     }
 }
