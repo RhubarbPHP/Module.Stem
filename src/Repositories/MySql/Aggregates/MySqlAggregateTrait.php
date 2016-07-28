@@ -18,13 +18,14 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Aggregates;
 
+use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 trait MySqlAggregateTrait
 {
-    protected static function canAggregateInMySql(Repository $repository, $columnName, &$relationshipsToAutoHydrate)
+    protected static function canAggregateInMySql(Repository $repository, $columnName)
     {
         $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
@@ -33,33 +34,14 @@ trait MySqlAggregateTrait
             return true;
         }
 
-        if (strpos($columnName, ".") !== false) {
-            // If the column name contains a dot, the part before the dot is the name of a relationship to another model, or the name of this model's table
-            list($tableName, $columnName) = explode(".", $columnName, 2);
-
-            if ($tableName == $schema->schemaName) {
-                return true;
-            }
-
-            // It wasn't the name of this model's table, so it must be the name of a relationship
-            $relationship = $tableName;
-            $relationships = SolutionSchema::getAllRelationshipsForModel($repository->getModelClass());
-
-            // Check for the name being that of a relationship
-            if (isset($relationships[$relationship]) && ($relationships[$relationship] instanceof OneToMany)) {
-                $targetModelName = $relationships[$relationship]->getTargetModelName();
-                $targetSchema = SolutionSchema::getModelSchema($targetModelName);
-
-                $targetColumns = $targetSchema->getColumns();
-
-                // Check for the column name in the schema of the related model
-                if (isset($targetColumns[$columnName])) {
-                    $relationshipsToAutoHydrate[] = $relationship;
-                    return true;
-                }
-            }
-        }
-
         return false;
+    }
+
+    protected static function canCalculateByRepository(
+        Repository $repository,
+        Aggregate $originalAggregate
+    )
+    {
+        return self::canAggregateInMySql($repository,$originalAggregate->getAggregateColumnName());
     }
 }

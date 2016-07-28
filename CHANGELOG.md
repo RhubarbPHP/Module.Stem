@@ -1,5 +1,13 @@
 # Change Log
 
+### 1.2.0
+
+* Added:    Much better repository support for complicated joins, aggregates and filters through intersectWith() and
+            joinWith()
+* Added:    Concept of cursors to optimise iteration performance with repository connected collections
+* Added:    Collection::all() as an alias of find() with no arguments.
+* Added:    RepositoryCollection
+
 ### 1.1.x
 
 * Change: Group now accepts passing in of filters as parameters as well as in an array.

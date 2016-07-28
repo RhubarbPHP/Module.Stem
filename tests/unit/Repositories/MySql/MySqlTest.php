@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql;
 
 use Rhubarb\Stem\Aggregates\Sum;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Filters\Contains;
@@ -62,7 +62,7 @@ class MySqlTest extends MySqlTestCase
             $company->save();
         }
 
-        $collection = new Collection(Company::class);
+        $collection = new RepositoryCollection(Company::class);
         $collection->setRange(10, 4);
 
         // Need to trigger a normal population of the list otherwise count is optimised
@@ -159,11 +159,11 @@ class MySqlTest extends MySqlTestCase
         $company->CompanyName = "GCD";
         $company->save();
 
-        $this->assertCount(1, new Collection("Company"));
+        $this->assertCount(1, new RepositoryCollection("Company"));
 
         $company->delete();
 
-        $this->assertCount(0, new Collection("Company"));
+        $this->assertCount(0, new RepositoryCollection("Company"));
     }
 
     public function testRepositoryFilters()
@@ -171,42 +171,43 @@ class MySqlTest extends MySqlTestCase
         $group = new Group();
         $group->addFilters(new Equals("CompanyName", "GCD"));
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($group);
 
-        $list->fetchList();
+        count($list);
 
-        $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", MySql::getPreviousStatement());
+        $this->assertRegExp("/SELECT .+\\.\\* FROM `tblCompany` .+ WHERE .+`CompanyName` = :/", MySql::getPreviousStatement());
         $this->assertTrue($group->wasFilteredByRepository());
 
         $group = new Group();
         $group->addFilters(new Equals("CompanyName", "GCD"));
         $group->addFilters(new Equals("Test", "GCD"));
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($group);
 
-        $list->fetchList();
+        count($list);
 
         $statement = MySql::getPreviousStatement();
 
-        $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` = :", $statement);
+        $this->assertRegExp("/SELECT .+\\.\\* FROM `tblCompany` .+WHERE .+\\`CompanyName` = :/", $statement);
         $this->assertFalse($group->wasFilteredByRepository());
 
         $group = new Group();
         $group->addFilters(new Contains("CompanyName", "GCD"));
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($group);
 
-        $list->fetchList();
+        count($list);
 
-        $this->assertStringStartsWith("SELECT `tblCompany`.* FROM `tblCompany` WHERE ( `tblCompany`.`CompanyName` LIKE :", MySql::getPreviousStatement());
+        $this->assertRegExp("/SELECT .+\\.\\* FROM `tblCompany` .+WHERE .+\\`CompanyName` LIKE :/", MySql::getPreviousStatement());
     }
 
     public function testAutoHydration()
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
+        MySql::executeStatement("TRUNCATE TABLE tblUser");
 
         $company = new Company();
         $company->CompanyName = "GCD";
@@ -218,36 +219,49 @@ class MySqlTest extends MySqlTestCase
 
         $company->Users->append($user);
 
+        $company = new Company();
+        $company->CompanyName = "UTV";
+        $company->save();
+
+        $user = new User();
+        $user->Forename = "Bob";
+        $user->save();
+
+        $company->Users->append($user);
+
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
 
-        $users = new Collection(User::class);
+        $users = new RepositoryCollection(User::class);
         $users->filter(new Equals("Company.CompanyName", "GCD"));
 
-        $users->fetchList();
+        count($users);
 
-        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` WHERE `Company`.`CompanyName` = :",
+        $this->assertEquals("SELECT `User`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` AS `User` INNER JOIN (SELECT `Company`.* FROM `tblCompany` AS `Company` WHERE `Company`.`CompanyName` = :CompanyName GROUP BY `Company`.`CompanyID`) AS `Company` ON `User`.`CompanyID` = `Company`.`CompanyID`",
             MySql::getPreviousStatement());
 
         $company->getRepository()->clearObjectCache();
         $user->getRepository()->clearObjectCache();
 
-        $users = new Collection(User::class);
+        $users = new RepositoryCollection(User::class);
         $users->replaceSort("Company.CompanyName", true);
 
-        $users->fetchList();
+        count($users);
 
-        $this->assertStringStartsWith("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` GROUP BY `tblUser`.`UserID` ORDER BY `Company`.`CompanyName` ASC",
+        $this->assertEquals('SELECT `User2`.*, `Company2`.CompanyName AS `CompanyName2`, `Company2`.`CompanyID` AS `Company2CompanyID`, `Company2`.`CompanyName` AS `Company2CompanyName`, `Company2`.`Balance` AS `Company2Balance`, `Company2`.`InceptionDate` AS `Company2InceptionDate`, `Company2`.`LastUpdatedDate` AS `Company2LastUpdatedDate`, `Company2`.`KnockOffTime` AS `Company2KnockOffTime`, `Company2`.`BlueChip` AS `Company2BlueChip`, `Company2`.`ProjectCount` AS `Company2ProjectCount`, `Company2`.`CompanyData` AS `Company2CompanyData`, `Company2`.`Active` AS `Company2Active`, `Company2`.`UUID` AS `Company2UUID` FROM `tblUser` AS `User2` INNER JOIN (SELECT `Company2`.* FROM `tblCompany` AS `Company2` GROUP BY `Company2`.`CompanyID`) AS `Company2` ON `User2`.`CompanyID` = `Company2`.`CompanyID` GROUP BY `User2`.`UserID` ORDER BY `Company2`.`CompanyName`',
             MySql::getPreviousStatement());
 
         $user = $users[0];
 
-        $this->assertCount(9, $user->exportRawData(), "The user model should only have 9 columns. More means that the joined tables aren't being removed after the join.");
+        $this->assertCount(10, $user->exportRawData(), "The user model should only have 10 columns. More means that the joined tables aren't being removed after the join.");
 
-        $this->assertArrayHasKey($company->CompanyID, $company->getRepository()->cachedObjectData,
+        $user = $users[1];
+
+        $data = $company->getRepository()->cachedObjectData;
+        $this->assertArrayHasKey($company->CompanyID, $data,
             "After an auto hydrated fetch the auto hydrated relationship should now be cached and ready for use in the repository");
         $this->assertCount(11, $company->getRepository()->cachedObjectData[$company->CompanyID],
-            "The company model should only have 9 columns. More means that the joined tables aren't properly being broken up into their respective models.");
+            "The company model should only have 11 columns. More means that the joined tables aren't properly being broken up into their respective models.");
     }
 
     public function testManyToManyRelationships()
@@ -304,19 +318,36 @@ class MySqlTest extends MySqlTestCase
 
         $this->assertEquals("UTV", $category2->Companies[0]->CompanyName);
 
-        $this->assertStringStartsWith("SELECT `tblCompany`.*, `CategoriesRaw`.`CompanyCategoryID` AS `CompanyCategoryCompanyCategoryID`, `CategoriesRaw`.`CompanyID` AS `CompanyCategoryCompanyID`, `CategoriesRaw`.`CategoryID` AS `CompanyCategoryCategoryID` FROM `tblCompany` LEFT JOIN `tblCompanyCategory` AS `CategoriesRaw` ON `tblCompany`.`CompanyID` = `CategoriesRaw`.`CompanyID` WHERE ( `CategoriesRaw`.`CategoryID` = :",
+        $this->assertEquals('SELECT `Company3`.*, `CompanyCategory5`.`CompanyCategoryID` AS `CompanyCategory5CompanyCategoryID`, `CompanyCategory5`.`CompanyID` AS `CompanyCategory5CompanyID`, `CompanyCategory5`.`CategoryID` AS `CompanyCategory5CategoryID` FROM `tblCompany` AS `Company3` INNER JOIN (SELECT `CompanyCategory5`.* FROM `tblCompanyCategory` AS `CompanyCategory5` WHERE `CompanyCategory5`.`CategoryID` = :CategoryID3 GROUP BY `CompanyCategory5`.`CompanyID`) AS `CompanyCategory5` ON `Company3`.`CompanyID` = `CompanyCategory5`.`CompanyID` WHERE `Company3`.`Active` = :Active3',
             MySql::getPreviousStatement());
     }
 
     public function testManualAutoHydration()
     {
-        $users = new Collection(User::class);
+        $company = new Company();
+        $company->CompanyName = "GCD";
+        $company->save();
+
+        $user = new User();
+        $user->Forename = "Andrew";
+        $user->save();
+
+        $company->Users->append($user);
+
+        $users = new RepositoryCollection(User::class);
         $users->autoHydrate("Company");
 
-        $users->fetchList();
+        count($users);
 
-        $this->assertEquals("SELECT `tblUser`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` LEFT JOIN `tblCompany` AS `Company` ON `tblUser`.`CompanyID` = `Company`.`CompanyID` GROUP BY `tblUser`.`UserID`",
+        $this->assertEquals('SELECT `User`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` AS `User` INNER JOIN (SELECT `Company`.* FROM `tblCompany` AS `Company` GROUP BY `Company`.`CompanyID`) AS `Company` ON `User`.`CompanyID` = `Company`.`CompanyID` GROUP BY `User`.`UserID`',
             MySql::getPreviousStatement());
+
+        $user = $users[0];
+
+        $data = $company->getRepository()->cachedObjectData;
+
+        $this->assertArrayHasKey($company->CompanyID, $data,
+            "After a manual hydration the relationship data should now be cached and ready for use in the repository");
     }
 
 
@@ -346,7 +377,7 @@ class MySqlTest extends MySqlTestCase
         $company4->CompanyName = "5";
         $company4->save();
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->filter(new OneOf("CompanyName", ["1", "3", "5"]));
 
         $this->assertCount(3, $companies);
@@ -382,7 +413,7 @@ class MySqlTest extends MySqlTestCase
         $user4->Wage = 400;
         $company2->Users->append($user4);
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.Wage"));
 
         $results = [];
@@ -391,14 +422,13 @@ class MySqlTest extends MySqlTestCase
             $results[] = $company->SumOfUsersWage;
         }
 
-        $this->assertEquals([300, 700], $results);
-
         $sql = MySql::getPreviousStatement();
 
-        $this->assertEquals("SELECT `tblCompany`.*, SUM( `Users`.`Wage` ) AS `SumOfUsersWage` FROM `tblCompany` LEFT JOIN `tblUser` AS `Users` ON `tblCompany`.`CompanyID` = `Users`.`CompanyID` GROUP BY `tblCompany`.`CompanyID`",
+        $this->assertEquals('SELECT `Company`.*, `UnitTestUser`.SumOfUsersWage AS `SumOfUsersWage`, `UnitTestUser`.`UserID` AS `UnitTestUserUserID`, `UnitTestUser`.`CompanyID` AS `UnitTestUserCompanyID`, `UnitTestUser`.`UserType` AS `UnitTestUserUserType`, `UnitTestUser`.`Username` AS `UnitTestUserUsername`, `UnitTestUser`.`Forename` AS `UnitTestUserForename`, `UnitTestUser`.`Surname` AS `UnitTestUserSurname`, `UnitTestUser`.`Password` AS `UnitTestUserPassword`, `UnitTestUser`.`Active` AS `UnitTestUserActive`, `UnitTestUser`.`Wage` AS `UnitTestUserWage` FROM `tblCompany` AS `Company` INNER JOIN (SELECT `UnitTestUser`.*, SUM( `UnitTestUser`.`Wage`) AS `SumOfUsersWage` FROM `tblUser` AS `UnitTestUser` GROUP BY `UnitTestUser`.`CompanyID`) AS `UnitTestUser` ON `Company`.`CompanyID` = `UnitTestUser`.`CompanyID` GROUP BY `Company`.`CompanyID`',
             $sql);
+        $this->assertEquals([300, 700], $results);
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->addAggregateColumn(new Sum("Users.BigWage"));
 
         $results = [];
@@ -418,12 +448,12 @@ class MySqlTest extends MySqlTestCase
         $company->CompanyName = "GCD";
         $company->save();
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->filter(new Equals("CompanyName", null));
 
         $this->assertEquals(0, $companies->count());
 
-        $companies = new Collection(Company::class);
+        $companies = new RepositoryCollection(Company::class);
         $companies->filter(new Equals("ProjectCount", null));
 
         $this->assertEquals(1, $companies->count());

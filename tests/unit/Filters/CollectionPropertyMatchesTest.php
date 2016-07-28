@@ -24,7 +24,9 @@ class CollectionPropertyMatchesTest extends ModelUnitTestCase
 
         $company->Categories->append($category);
 
-        $this->assertCount(1, $company->Categories);
+        $categories = $company->Categories;
+        $categories->count();
+        $this->assertCount(1, $categories );
 
         $this->assertEquals($company->CompanyID, $companyCategory->getRepository()->cachedObjectData[1]["CompanyID"]);
         $this->assertEquals($category->CategoryID, $companyCategory->getRepository()->cachedObjectData[1]["CategoryID"]);

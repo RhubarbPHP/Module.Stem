@@ -20,16 +20,16 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 
 class Min extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
-        return "MinOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "MinOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
-    public function calculateByIteration(Collection $collection)
+    public function calculateByIteration(RepositoryCollection $collection)
     {
         $min = null;
         foreach ($collection as $model) {

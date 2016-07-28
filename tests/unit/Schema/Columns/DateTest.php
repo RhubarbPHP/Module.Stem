@@ -3,13 +3,13 @@
 namespace Rhubarb\Stem\Tests\unit\Schema\Columns;
 
 use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 
 class DateTest extends RhubarbTestCase
 {
     public function testTransforms()
     {
-        $example = new Example();
+        $example = new TestContact();
         $example->DateOfBirth = "2012-10-01";
 
         $rawData = $example->exportRawData();
@@ -46,7 +46,7 @@ class DateTest extends RhubarbTestCase
 
     public function testDateIsCloned()
     {
-        $example = new Example();
+        $example = new TestContact();
         $example->DateOfBirth = "2012-10-01";
 
         $example->DateOfBirth->modify("+1 day");

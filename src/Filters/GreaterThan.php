@@ -20,7 +20,8 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Data filter used to keep all records with a variable which is greater than (or optionally equal to) a particular variable.
@@ -62,42 +63,36 @@ class GreaterThan extends ColumnFilter
         return new self($settings["columnName"], $settings["greaterThan"], $settings["inclusive"]);
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function evaluate(Model $model)
     {
-        $ids = [];
-
         $placeHolder = $this->detectPlaceHolder($this->greaterThan);
 
         if (!$placeHolder) {
-            $greaterThan = $this->getTransformedComparisonValue($this->greaterThan, $list);
+            $greaterThan = $this->getTransformedComparisonValue($this->greaterThan, $model);
+
+            if (is_string($greaterThan)) {
+                $greaterThan = strtolower($greaterThan);
+            }
+        } else {
+            $greaterThan = $this->getTransformedComparisonValue($model[$placeHolder], $model);
 
             if (is_string($greaterThan)) {
                 $greaterThan = strtolower($greaterThan);
             }
         }
 
-        foreach ($list as $item) {
-            if ($placeHolder) {
-                $greaterThan = $this->getTransformedComparisonValue($item[$placeHolder], $list);
+        $valueToTest = $model[$this->columnName];
 
-                if (is_string($greaterThan)) {
-                    $greaterThan = strtolower($greaterThan);
-                }
-            }
-
-            $valueToTest = $item[$this->columnName];
-
-            if (is_string($valueToTest)) {
-                $valueToTest = strtolower($valueToTest);
-            }
-
-            if (($valueToTest < $greaterThan)
-                || ($this->inclusive == false && $valueToTest == $greaterThan)
-            ) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+        if (is_string($valueToTest)) {
+            $valueToTest = strtolower($valueToTest);
         }
 
-        return $ids;
+        if (($valueToTest < $greaterThan)
+            || ($this->inclusive == false && $valueToTest == $greaterThan)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }

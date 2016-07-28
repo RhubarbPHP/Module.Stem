@@ -23,6 +23,7 @@ require_once __DIR__ . "/../Repository.php";
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
+use Rhubarb\Stem\Schema\Columns\CompositeColumn;
 
 class Offline extends Repository
 {
@@ -37,6 +38,22 @@ class Offline extends Repository
                 // Assign an auto number as a unique identifier.
                 $this->autoNumberCount++;
                 $object->UniqueIdentifier = $this->autoNumberCount;
+            }
+        }
+
+        /**
+         * When 'storing' models with composite columns we try and match the behaviour of database based
+         * repositories in that the column values are 'flattened' so that we can filter in unit tests on
+         * the sub parts of composite columns.
+         */
+
+        $schema = $this->getModelSchema();
+        $columns = $schema->getColumns();
+
+        foreach($columns as $column){
+            if ($column instanceof CompositeColumn){
+                $transform = $column->getTransformIntoRepository();
+                $object->mergeRawData($transform($object));
             }
         }
 

@@ -19,7 +19,9 @@
 namespace Rhubarb\Stem\Repositories;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RangeLimitedCursor;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Collections\UniqueIdentifierListCursor;
 use Rhubarb\Stem\Exceptions\ModelException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
@@ -220,29 +222,12 @@ abstract class Repository
     }
 
     /**
-     * Get's an array of unique identifiers for the given DataFilter
-     *
-     * Used normally to hydrate data lists with their data.
-     *
-     * @param  Collection $list
-     * @param  int $unfetchedRowCount An output parameter containing the number of rows left unfetched (if ranging)
-     * @param  array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
-     *                                                             try to auto hydrate (if supported)
-     * @return array
-     */
-    public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
-    {
-        // For now just returning all items in the collection.
-        return array_keys($this->cachedObjectData);
-    }
-
-    /**
      * Commits changes to the repository in batch against a collection.
      *
-     * @param Collection $collection
+     * @param RepositoryCollection $collection
      * @param $propertyPairs
      */
-    public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
+    public function batchCommitUpdatesFromCollection(RepositoryCollection $collection, $propertyPairs)
     {
         foreach ($collection as $item) {
             $item->mergeRawData($propertyPairs);
@@ -251,145 +236,36 @@ abstract class Repository
     }
 
     /**
-     * Returns the repository-specific command so it can be used externally for other operations.
-     * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
-     *
-     * @param Collection $collection
-     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we try to auto hydrate (if supported)
-     *                                                                  try to auto hydrate (if supported)
-     * @param array $namedParams Named parameters to be used in execution of the command
-     *
-     * @return string|null
-     */
-    public function getRepositoryFetchCommandForDataList(Collection $collection, $relationshipNavigationPropertiesToAutoHydrate = [], &$namedParams)
-    {
-        return null;
-    }
-
-    /**
      * Computes the given aggregates and returns an array of answers
      *
      * An answer will be null if the repository is unable to answer it.
      *
      * @param  Aggregate[] $aggregates
-     * @param  Collection $collection
+     * @param  RepositoryCollection $collection
      * @return array
      */
-    public function calculateAggregates($aggregates, Collection $collection)
+    public function calculateAggregates($aggregates, RepositoryCollection $collection)
     {
         return [];
     }
 
-    public function canFilterExclusivelyByRepository(Collection $collection)
+    public function canFilterExclusivelyByRepository(RepositoryCollection $collection)
     {
         return false;
     }
 
     /**
-     * Returns the sorts needed for manual sorting.
-     *
-     * @param  Collection $list
-     * @return array
-     */
-    protected function getManualSortsRequiredForList(Collection $list)
-    {
-        return $list->getSorts();
-    }
-
-    /**
      * Get's a sorted list of unique identifiers for the supplied list.
      *
-     * @param  Collection $list
+     * @param  RepositoryCollection $collection
      * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
      * @return array
      */
-    public function getSortedUniqueIdentifiersForDataList(Collection $list)
+    public function createCursorForCollection(RepositoryCollection $collection)
     {
-        $sorts = $this->getManualSortsRequiredForList($list);
+        $ids = array_keys($this->cachedObjectData);
 
-        if (sizeof($sorts) == 0) {
-            return false;
-        }
-
-        $schema = $list->getModelSchema();
-        $columns = $schema->getColumns();
-
-        $arrays = [];
-        $directions = [];
-        $types = [];
-
-        $ids = [];
-
-        $count = 0;
-
-        $list->disableRanging();
-
-        foreach ($list as $item) {
-            $ids[$count] = $item->getUniqueIdentifier();
-            $count++;
-        }
-
-        foreach ($sorts as $columnName => $ascending) {
-            $arrays[$columnName] = [];
-
-            $type = SORT_STRING;
-
-            $column = null;
-
-            if (isset($columns[$columnName])) {
-                $column = $columns[$columnName];
-
-                if ($column instanceof IntegerColumn || $column instanceof FloatColumn) {
-                    $type = SORT_NUMERIC;
-                } elseif ($column instanceof DateColumn) {
-                    $type = SORT_REGULAR;
-                }
-            } else {
-                $type = SORT_REGULAR;
-            }
-
-            $types[$columnName] = $type;
-            $directions[$columnName] = ($ascending) ? SORT_ASC : SORT_DESC;
-
-            $count = 0;
-
-            foreach ($list as $item) {
-                if (!isset($item[$columnName])) {
-                    // If the 'column' contains a dot, we are accessing a relationship or a magical
-                    // method. It is then not appropriate to say that we can't sort just because the first
-                    // (or any) row doesn't have the value. Instead set the value to an empty string.
-
-                    if (strpos($columnName, ".") !== false) {
-                        $itemValue = "";
-                    } else {
-                        throw new SortNotValidException($columnName);
-                    }
-                } else {
-                    $itemValue = $item[$columnName];
-                }
-
-                $arrays[$columnName][$count] = $itemValue;
-                $count++;
-            }
-        }
-
-        $list->enableRanging();
-
-        if (sizeof($arrays)) {
-            $params = [];
-
-            foreach ($arrays as $column => $data) {
-                $params[] = &$arrays[$column];
-                $params[] = $directions[$column];
-                $params[] = $types[$column];
-            }
-
-            $params[] = &$ids;
-
-            call_user_func_array("array_multisort", $params);
-        }
-
-        return array_values($ids);
+        return new UniqueIdentifierListCursor(array_values($ids), $this->modelClassName);
     }
 
     /**
@@ -563,6 +439,14 @@ abstract class Repository
         return false;
     }
 
+    /**
+     * Delete's a model from the repository.
+     *
+     * Calls onObjectDeleted afterwards which most repositories extend to do the actual deletion.
+     *
+     * @see onObjectDeleted()
+     * @param Model $object
+     */
     final public function deleteObject(Model $object)
     {
         if ($object->isNewRecord()) {

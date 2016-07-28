@@ -1,67 +1,45 @@
-# Group
+Grouping
+========
 
-Group Filters are used to combine multiple filters, and make them behave as one filter. Multiple filters can be combined using "AND"
-(meaning all filters must match), or "Or" where you require Models matching any of the grouped criteria are included. All examples are
-taken from the corresponding Unit Test.
+To combine multiple filters we use the GroupFilter, or more specifically the AndGroup and OrGroup filters.
+Group filters are constructed with any number of filter objects and they will be AND'ed or OR'ed together.
 
-##The AddFilters Method
+## Creating a group
 
-The add filters method can take any number of filters, and add them into the Group Filter. This can be called multiple times in
-the same groupFilter object, but must be called at least once. This method will only accept valid Filter classes.
+Simple construct an AndGroup or an OrGroup object and pass any number of filter objects as separate parameters:
 
-## Examples
+``` php
+// Filter to find John Smith
+new AndGroup(
+    new Equals("Forename", "John",
+    new Equals("Surname", "Smith")
+    );
 
-### Simple "And" example
-The example below will match all Models with a Forename containing "Jo" and a Surname containing "Johnson".
-There is no real advantage for doing this over simply using two separate Contains Filters, unless you wish to take that
-group filter and do something more complex with it later on.
-
-```php
-<?php
-$filterGroup = new \Gcd\Core\Modelling\Filters\Group( "And" );
-$filterGroup->AddFilters(
-	new \Gcd\Core\Modelling\Filters\Contains( "Forename", "Jo", true ),
-	new \Gcd\Core\Modelling\Filters\Contains( "Surname", "Johnson", true )
-);
-$this->list->Filter( $filterGroup );
+// Filter to find people called John OR with a surname of Smith
+new OrGroup(
+    new Equals("Forename", "John",
+    new Equals("Surname", "Smith")
+    );
 ```
 
-### Simple "Or" example
-The example below will match all Models with a Forename containing "Jo" OR a Surname containing "Johnson".
+For complex expressions, simply nest groups as arguments to parent groups:
 
-```php
-<?php
-$filterGroup = new \Gcd\Core\Modelling\Filters\Group( "Or" );
-$filterGroup->AddFilters(
-	new \Gcd\Core\Modelling\Filters\Contains( "Forename", "Jo", true ),
-	new \Gcd\Core\Modelling\Filters\Contains( "Surname", "Johnson", true )
-);
-$this->list->Filter( $filterGroup );
+``` php
+// Filter to find all John Smiths who either have a salary greater than 30,000 OR have a job title of "Developer"
+new AndGroup(
+    new Equals("Forename", "John",
+    new Equals("Surname", "Smith",
+    new OrGroup(
+        new GreaterThan("Salary", 30000),
+        new Equals("JobTitle", "Developer"
+        )
+    );
 ```
 
-### Example Involving group
-As the group filter is an entirely normal filter, which behaves exactly as any other filter, it can operate on another group
-filter - as in this example:
+### Adding additional filters
 
-```php
-<?php
-$filterGroup1 = new \Gcd\Core\Modelling\Filters\Group( "And" );
-$filterGroup1->AddFilters(
-	new \Gcd\Core\Modelling\Filters\Contains( "Forename", "Jo", true ),
-	new \Gcd\Core\Modelling\Filters\Contains( "Surname", "Jo", true )
-);
+With an existing group object you can call `addFilters` to add additional filters to the group.
 
-$filterGroup2 = new \Gcd\Core\Modelling\Filters\Group( "Or" );
-$filterGroup2->AddFilters(
-	new \Gcd\Core\Modelling\Filters\Contains( "Surname", "Luc", true ),
-	new \Gcd\Core\Modelling\Filters\LessThan( "DateOfBirth", "1980-01-01", true )
-);
-
-$filterGroup = new \Gcd\Core\Modelling\Filters\Group( "Or" );
-$filterGroup->AddFilters(
-	$filterGroup1,
-	$filterGroup2
-);
-$this->list->Filter( $filterGroup );
+``` php
+$group->addFilters(new Equals("HairColour", "Brown"));
 ```
-

@@ -23,7 +23,7 @@ require_once __DIR__ . '/../Schema/ModelSchema.php';
 
 use Rhubarb\Crown\Application;
 use Rhubarb\Crown\Modelling\ModelState;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Decorators\DataDecorator;
 use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
@@ -258,22 +258,6 @@ abstract class Model extends ModelState
     private static $modelDataTransforms = [];
 
     /**
-     * Contains an array of relationship names that should be automatically hydrated when loading this model.
-     *
-     * Designed to be set by the child class in it's constructor.
-     *
-     * Auto hydrating relationships allows for faster sorting and filtering on collections where the sort or
-     * filter is on a related model column. However it does result in larger data sets being stored in memory
-     * so it is worth performing bench marks to be sure the auto hydration is in fact having a positive rather
-     * than negative impact.
-     *
-     * NOT YET IMPLEMENTED
-     *
-     * @var array
-     */
-    protected $autoHydratedRelationships = [];
-
-    /**
      * Returns the cached repository and generates one if it doesn't exist.
      *
      * @see DataObject::createRepository()
@@ -396,16 +380,27 @@ abstract class Model extends ModelState
         return $results[0];
     }
 
+
+    /**
+     * Returns a Collection containing all the models
+     * 
+     * @return RepositoryCollection|static[]
+     */
+    public static function all()
+    {
+        return static::find();
+    }
+
     /**
      * Returns the Collection of models matching the given filter.
      *
      * @param Filter $filter
-     * @return Collection|static[]
+     * @return RepositoryCollection|static[]
      */
     public static function find(Filter ...$filters)
     {
         $modelClass = get_called_class();
-        $collection = new Collection($modelClass);
+        $collection = new RepositoryCollection($modelClass);
         $collection->filter(...$filters);
         return $collection;
     }

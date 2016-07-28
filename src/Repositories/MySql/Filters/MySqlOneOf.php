@@ -20,9 +20,12 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . '/../../../Filters/OneOf.php';
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\OneOf;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlOneOf extends OneOf
 {
@@ -31,39 +34,45 @@ class MySqlOneOf extends OneOf
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
-     * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
-     * @param  array $params
-     * @param  $relationshipsToAutoHydrate
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
+     * @param array $params
      * @return string|void
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$relationshipsToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
 
         $columnName = $originalFilter->columnName;
 
-        if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
-            $originalFilter->filteredByRepository = true;
+        if (self::canFilter($collection, $repository, $columnName)) {
 
-            $paramName = uniqid() . str_replace(".", "", $columnName);
+            $aliases = $collection->getPulledUpAggregatedColumns();
+            $isAlias = in_array($columnName, $aliases);
 
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
-            } else {
-                $columnName = str_replace('.', '`.`', $columnName);
-            }
+            $columnName = self::getRealColumnName($originalFilter, $collection);
+            $toAlias = self::getTableAlias($originalFilter, $collection);
 
             if (count($originalFilter->oneOf) == 0) {
                 // When a one of has nothing to filter - it should return no matches, rather than all matches.
+                $whereExpressionCollector->addWhereExpression(
+                    new ColumnWhereExpression(
+                        "1",
+                        "=0",
+                        false)
+                );
+
                 return " 1 = 0 ";
             }
 
             $oneOfParams = [];
+            $paramName = uniqid() . $columnName;
 
             foreach ($originalFilter->oneOf as $key => $oneOf) {
                 $key = preg_replace("/[^[:alnum:]]/", "", $key);
@@ -71,11 +80,7 @@ class MySqlOneOf extends OneOf
                 $oneOfParams[] = ':' . $paramName . $key;
             }
 
-            if (sizeof($originalFilter->oneOf) > 0) {
-                return "`{$columnName}` IN ( " . implode(", ", $oneOfParams) . " )";
-            }
-
-            return " 1 = 0 ";
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IN ( " . implode(", ", $oneOfParams) . " )", $isAlias, $toAlias));
         }
     }
 }
