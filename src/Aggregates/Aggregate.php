@@ -91,10 +91,16 @@ abstract class Aggregate
      */
     public final function aggregateWithRepository(Repository $repository, &$relationshipsToAutoHydrate)
     {
-        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+        $namespace = $repository->getAggregatesNamespace();
 
-        // Get the repository specific implementation of the aggregate.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Aggregates\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
+        if (!$namespace) {
+            return "";
+        }
+
+        $parts = explode('\\', $namespace);
+
+        // Get the provider specific implementation of the filter.
+        $className = rtrim($namespace, '\\') . '\\' . $parts[count($parts) - 2] . basename(str_replace("\\", "/", get_class($this)));
 
         if (class_exists($className)) {
             return call_user_func_array($className . "::calculateByRepository",

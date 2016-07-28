@@ -213,6 +213,11 @@ class MySql extends PdoRepository
         return 'Rhubarb\Stem\Repositories\MySql\Filters';
     }
 
+    public function getAggregatesNamespace()
+    {
+        return 'Rhubarb\Stem\Repositories\MySql\Aggregates';
+    }
+
     public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
     {
         $filter = $collection->getFilter();

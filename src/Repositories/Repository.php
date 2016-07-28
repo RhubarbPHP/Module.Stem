@@ -538,6 +538,18 @@ abstract class Repository
         return false;
     }
 
+    /**
+     * If this Repository has it's own compliment of aggregatess the namespace stub should be returned here.
+     *
+     * Returns false if the Repository doesn't have any.
+     *
+     * @return bool|string
+     */
+    public function getAggregatesNamespace()
+    {
+        return false;
+    }
+
     public final function deleteObject(Model $object)
     {
         if ($object->isNewRecord()) {
