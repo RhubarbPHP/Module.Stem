@@ -21,19 +21,22 @@ namespace Rhubarb\Stem\Filters;
 require_once __DIR__ . '/Equals.php';
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
-class CollectionPropertyMatches extends Equals
+class CollectionPropertyMatches extends ColumnFilter
 {
     protected $matchesFilter;
+    protected $equalTo;
     protected $collectionProperty;
 
     public function __construct($collectionProperty, $columnName, $equalTo)
     {
-        parent::__construct($columnName, $equalTo);
-
+        parent::__construct($columnName);
+        $this->equalTo = $equalTo;
         $this->collectionProperty = $collectionProperty;
     }
 
@@ -57,40 +60,6 @@ class CollectionPropertyMatches extends Equals
         return $newModel;
     }
 
-    /**
-     * Implement to return an array of unique identifiers to filter from the list.
-     *
-     * @param  Collection $list The data list to filter.
-     * @return array
-     */
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
-    {
-        $ids = [];
-
-        foreach ($list as $item) {
-            $collection = $item[$this->collectionProperty];
-
-            if ($collection == null){
-                $ids[] = $item->UniqueIdentifier;
-                continue;
-            }
-
-            $filter = new Group("AND");
-            $filter->addFilters(
-                $collection->getFilter(),
-                new Equals($this->columnName, $this->equalTo)
-            );
-
-            $collection->filter($filter);
-
-            if (!sizeof($collection)) {
-                $ids[] = $item->UniqueIdentifier;
-            }
-        }
-
-        return $ids;
-    }
-
     public function getSettingsArray()
     {
         $settings = parent::getSettingsArray();
@@ -101,5 +70,26 @@ class CollectionPropertyMatches extends Equals
     public static function fromSettingsArray($settings)
     {
         return new self($settings["collectionProperty"], $settings["columnName"], $settings["equalTo"]);
+    }
+
+    public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
+    {
+        $collection = $createIntersectionCallback([$this->collectionProperty]);
+        $collection->filter(new Equals($this->columnName, $this->equalTo));
+
+        throw new CreatedIntersectionException();
+    }
+
+    /**
+     * Chooses whether to remove the model from the list or not
+     *
+     * Returns true to remove it, false to keep it.
+     *
+     * @param Model $model
+     * @return array
+     */
+    public function evaluate(Model $model)
+    {
+        // Not used by this filter.
     }
 }

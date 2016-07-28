@@ -20,9 +20,13 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/GreaterThan.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
  * Adds MySql repository support for the Equals filter.
@@ -34,53 +38,28 @@ class MySqlGreaterThan extends GreaterThan
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
+     * @param Collection $collection
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
      * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
-     * @param  array $relationshipsToAutoHydrate
      * @return string|void
+     * @internal param $relationshipsToAutoHydrate
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$relationshipsToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
-
-        $columnName = $originalFilter->columnName;
-
-        if (self::canFilter($repository, $columnName, $relationshipsToAutoHydrate)) {
-            $paramName = uniqid() . str_replace(".", "", $columnName);
-
-            $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->greaterThan);
-
-            $originalFilter->filteredByRepository = true;
-
-            if (!$placeHolder) {
-                $params[$paramName] = self::getTransformedComparisonValueForRepository(
-                    $columnName,
-                    $originalFilter->greaterThan,
-                    $repository
-                );
-                $paramName = ":" . $paramName;
-            } else {
-                $paramName = $placeHolder;
-            }
-
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
-            } else {
-                $columnName = str_replace('.', '`.`', $columnName);
-            }
-
-            if ($originalFilter->inclusive) {
-                return "`{$columnName}` >= {$paramName}";
-            } else {
-                return "`{$columnName}` > {$paramName}";
-            }
-        }
-
-        parent::doFilterWithRepository($repository, $originalFilter, $object, $params);
+        return self::createColumnWhereClauseExpression(
+            ($originalFilter->inclusive) ? ">=" : ">",
+            $originalFilter->greaterThan,
+            $collection,
+            $repository,
+            $originalFilter,
+            $whereExpressionCollector,
+            $params);
     }
 }

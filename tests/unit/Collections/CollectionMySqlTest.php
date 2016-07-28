@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
 use Rhubarb\Stem\Filters\Equals;
@@ -36,7 +36,8 @@ class CollectionMySqlTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement();
 
-        $this->assertStringStartsWith("UPDATE `tblCompany` SET `CompanyName` = :UpdateCompanyName WHERE `tblCompany`.`Active` = ", $lastStatement);
+        $this->assertContains("SET `CompanyName` =", $lastStatement);
+        $this->assertContains("`Active` =", $lastStatement);
 
         $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company'");
 
@@ -80,27 +81,27 @@ class CollectionMySqlTest extends MySqlTestCase
         $company->CompanyName = "Goats Boats";
         $company->save();
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
 
         $this->assertCount(3, $list);
 
         $repository = $company->getRepository();
         $repository->clearObjectCache();
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
 
         $this->assertCount(3, $list);
         $this->assertEquals("Unit Design", $list[1]->CompanyName);
 
         $filter = new Equals("CompanyName", "Unit Design");
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($filter);
 
         $this->assertCount(1, $list);
         $this->assertEquals("Unit Design", $list[0]->CompanyName);
 
         $filter = new Equals("CompanyIDSquared", $company->CompanyID * $company->CompanyID);
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->filter($filter);
 
         $this->assertCount(1, $list);
@@ -145,40 +146,31 @@ class CollectionMySqlTest extends MySqlTestCase
         $company->Balance = 1;
         $company->save();
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->addSort("CompanyName", true);
 
-        // Trigger list fetching by count.
-        sizeof($list);
+        // Trigger list fetching by counting.
+        $list->count();
 
         $sql = Mysql::getPreviousStatement();
 
-        $this->assertNotContains("ORDER BY `CompanyName` ASC", $sql);
-
-        $list->invalidateList();
-
-        // Trigger list fetching by item.
-        $list->fetchList();
-
-        $sql = Mysql::getPreviousStatement();
-
-        $this->assertContains("ORDER BY `CompanyName` ASC", $sql);
+        $this->assertEquals(1, preg_match("/ORDER BY .+\\.`CompanyName`$/", $sql));
 
         $list->addSort("Balance", false);
 
         // Trigger list fetching.
-        $list->fetchList();
+        $list->count();
 
         $sql = Mysql::getPreviousStatement();
 
-        $this->assertContains("ORDER BY `CompanyName` ASC, `Balance` DESC", $sql);
+        $this->assertEquals(1, preg_match("/ORDER BY .+\\.`CompanyName`,.+`Balance` DESC$/", $sql));
 
         // this should not affect our order by clause as this column isn't in our schema.
         $list->addSort("NonExistant", false);
 
         try {
             // Trigger list fetching.
-            $list->fetchList();
+            $list->count();
         } catch (SortNotValidException $er) {
         }
 
@@ -186,14 +178,14 @@ class CollectionMySqlTest extends MySqlTestCase
 
         // As NonExistant is at the end of the sort collection we can't use any back end performance
         // optimisation (as the manual sorting will destroy it)
-        $this->assertNotContains("ORDER BY", $sql);
+        $this->assertNotContains("NonExistant", $sql);
 
         $list->replaceSort(
             ["CompanyName" => false, "Balance" => true]
         );
 
         // Trigger list fetching.
-        $list->fetchList();
+        $list->count();
 
         $this->assertEquals("D", $list[0]->CompanyName);
         $this->assertEquals("C", $list[1]->CompanyName);
@@ -211,7 +203,7 @@ class CollectionMySqlTest extends MySqlTestCase
         );
 
         // Trigger list fetching.
-        $list->fetchList();
+        $list->count();
 
         $this->assertEquals(3, $list[2]->Balance);
         $this->assertEquals(4, $list[3]->Balance);
@@ -250,7 +242,7 @@ class CollectionMySqlTest extends MySqlTestCase
         $company->CompanyName = "D";
         $company->save();
 
-        $list = new Collection(Company::class);
+        $list = new RepositoryCollection(Company::class);
         $list->setRange(2, 6);
 
         $this->assertCount(6, $list);
@@ -261,11 +253,12 @@ class CollectionMySqlTest extends MySqlTestCase
 
         // Sorting by a computed column should mean that limits are no longer used.
         $list->addSort("CompanyIDSquared", true);
+        $list->count();
 
         $this->assertCount(6, $list);
+        $sql = MySql::getPreviousStatement();
         $this->assertEquals("C", $list[2]->CompanyName);
 
-        $sql = MySql::getPreviousStatement();
         $this->assertNotContains("LIMIT 2, 6", $sql);
 
         $sql = MySql::getPreviousStatement(true);

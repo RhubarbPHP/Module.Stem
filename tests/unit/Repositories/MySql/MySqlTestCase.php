@@ -3,8 +3,11 @@
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql;
 
 use Rhubarb\Crown\Logging\Log;
+use Rhubarb\Crown\Logging\PhpLog;
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\MySql\MySql;
+use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -24,7 +27,12 @@ class MySqlTestCase extends ModelUnitTestCase
 
         self::setDefaultConnectionSettings();
 
-        Log::disableLogging();
+        Log::attachLog(new PhpLog(Log::ALL));
+        Log::enableLogging();
+        //Log::disableLogging();
+
+        Collection::clearUniqueReferencesUsed();
+        PdoRepository::resetPdoParamAliases();
 
         $unitTestingSolutionSchema = new UnitTestingSolutionSchema();
         $unitTestingSolutionSchema->checkModelSchemas();

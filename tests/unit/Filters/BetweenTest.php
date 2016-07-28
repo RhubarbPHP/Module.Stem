@@ -2,15 +2,15 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Between;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class BetweenTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -20,34 +20,34 @@ class BetweenTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->FavouriteNumber = 10;
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->FavouriteNumber = 15;
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->FavouriteNumber = 30;
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Jimmy";
         $example->Surname = "Joe";
         $example->FavouriteNumber = 5;
         $example->DateOfBirth = "1976-05-10";
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     public function testBetweenNumbers()

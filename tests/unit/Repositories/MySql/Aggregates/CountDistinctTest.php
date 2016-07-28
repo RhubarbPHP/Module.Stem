@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Aggregates;
 
 use Rhubarb\Stem\Aggregates\CountDistinct;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
@@ -42,14 +42,14 @@ class CountDistinctTest extends MySqlTestCase
 
     public function testSumIsCalculatedOnRepository()
     {
-        $examples = new Collection("Company");
+        $examples = new RepositoryCollection("Company");
 
         list($sumTotal) = $examples->calculateAggregates(new CountDistinct("CompanyName"));
+        $lastStatement = MySql::getPreviousStatement(false);
 
         $this->assertEquals(2, $sumTotal);
 
-        $lastStatement = MySql::getPreviousStatement(false);
-
-        $this->assertContains("COUNT( DISTINCT `tblCompany`.`CompanyName` ) AS `DistinctCountOfCompanyName`", $lastStatement);
+        $this->assertContains("COUNT( DISTINCT `", $lastStatement);
+        $this->assertContains("DistinctCountOfCompanyName", $lastStatement);
     }
 }

@@ -34,4 +34,27 @@ class CollectionTest extends ModelUnitTestCase
             $this->assertEquals("d", $company->CompanyName);
         }
     }
+
+    public function testFindModelByUniqueIdentifier()
+    {
+        $a = new Company();
+        $a->CompanyName = "a";
+        $a->Active = true;
+        $a->save();
+
+        $b = new Company();
+        $b->CompanyName = "b";
+        $b->Active = true;
+        $b->save();
+
+        $c = new Company();
+        $c->CompanyName = "c";
+        $c->Active = true;
+        $c->save();
+
+        $companies = Company::all();
+        $company = $companies->findModelByUniqueIdentifier(2);
+
+        $this->assertEquals("b", $company->CompanyName);
+    }
 }

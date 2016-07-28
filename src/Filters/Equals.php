@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 
 /**
@@ -54,28 +54,22 @@ class Equals extends ColumnFilter
         return new self($settings["columnName"], $settings["equalsTo"]);
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function evaluate(Model $model)
     {
-        $ids = [];
-
         $placeHolder = $this->detectPlaceHolder($this->equalTo);
 
         if (!$placeHolder) {
-            $equalTo = $this->getTransformedComparisonValue($this->equalTo, $list);
+            $equalTo = $this->getTransformedComparisonValue($this->equalTo, $model);
+        } else {
+            $equalTo = $model[$placeHolder];
+            $equalTo = $this->getTransformedComparisonValue($equalTo, $model);
         }
 
-        foreach ($list as $item) {
-            if ($placeHolder) {
-                $equalTo = $item[$placeHolder];
-                $equalTo = $this->getTransformedComparisonValue($equalTo, $list);
-            }
-
-            if ($item[$this->columnName] != $equalTo) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+        if ($model[$this->columnName] != $equalTo) {
+            return true;
         }
 
-        return $ids;
+        return false;
     }
 
     public function setFilterValuesOnModel(Model $model)

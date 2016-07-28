@@ -2,11 +2,11 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\NumberEquals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 /**
@@ -15,7 +15,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class NumberEqualsTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -73,7 +73,7 @@ class NumberEqualsTest extends ModelUnitTestCase
     public function testSetFilterValue()
     {
         $filter = new Equals("CompanyID", 1);
-        $model = new Example();
+        $model = new TestContact();
 
         $filter->setFilterValuesOnModel($model);
 

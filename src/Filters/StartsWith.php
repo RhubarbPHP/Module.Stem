@@ -20,7 +20,8 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Keeps all records with a value that starts with a given value.
@@ -65,24 +66,28 @@ class StartsWith extends ColumnFilter
         return new self($settings["columnName"], $settings["startsWith"], $settings["caseSensitive"]);
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function evaluate(Model $model)
     {
-        $ids = [];
+        $placeHolder = $this->detectPlaceHolder($this->startsWith);
 
-        foreach ($list as $item) {
-            if (!$this->caseSensitive) {
-                $columnValue = strtolower($item[$this->columnName]);
-                $startsWith = strtolower($this->startsWith);
-            } else {
-                $columnValue = $item[$this->columnName];
-                $startsWith = $this->startsWith;
-            }
-
-            if (substr($columnValue, 0, strlen($startsWith)) != $startsWith) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+        if (!$placeHolder) {
+            $startsWith = $this->getTransformedComparisonValue($this->startsWith, $model);
+        } else {
+            $startsWith = $model[$placeHolder];
+            $startsWith = $this->getTransformedComparisonValue($startsWith, $model);
         }
 
-        return $ids;
+        if (!$this->caseSensitive) {
+            $columnValue = strtolower($model[$this->columnName]);
+            $startsWith = strtolower($startsWith);
+        } else {
+            $columnValue = $model[$this->columnName];
+        }
+
+        if (substr($columnValue, 0, strlen($startsWith)) != $startsWith) {
+            return true;
+        }
+
+        return false;
     }
 }

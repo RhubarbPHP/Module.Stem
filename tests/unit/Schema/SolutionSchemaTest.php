@@ -87,7 +87,7 @@ class SolutionSchemaTest extends ModelUnitTestCase
 
         $this->assertNull($relationship);
 
-        $relationship = $schema->getRelationship("Example", "ExampleRelationshipName");
+        $relationship = $schema->getRelationship("TestContact", "ExampleRelationshipName");
 
         $this->assertInstanceOf(OneToOne::class, $relationship);
 

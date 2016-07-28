@@ -2,12 +2,13 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Contains;
+use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Filters\Not;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 /**
@@ -16,7 +17,7 @@ use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 class NotTest extends ModelUnitTestCase
 {
     /**
-     * @var Collection
+     * @var RepositoryCollection
      */
     private $list;
 
@@ -26,51 +27,51 @@ class NotTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->Surname = "Joe";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Johnson";
         $example->DateOfBirth = "1988-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Luc";
         $example->DateOfBirth = "1990-01-01";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->Surname = "Smithe";
         $example->DateOfBirth = "1980-06-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "James";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
         $example->ContactID = 6;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Higgins";
         $example->DateOfBirth = "1996-05-09";
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     function testFiltersSimple()
@@ -147,5 +148,54 @@ class NotTest extends ModelUnitTestCase
         $this->list->filter($filterXor);
         $this->assertCount(2, $this->list);
         $this->assertContains("Luc", $this->list[0]->Surname);
+    }
+
+    function testNotFilteringAFilteredList()
+    {
+        $filter = new Contains("Forename", "Jo", true);
+        $notFilter = new Not($filter);
+
+        $listOne = new RepositoryCollection(TestContact::class);
+
+        $this->assertCount(7, $listOne, "The list starts off with the size of 7");
+
+        $this->list->filter($filter);
+        $listOne->filter($notFilter);
+
+        $this->assertCount(4, $this->list, "The list with the filter \$filter applied to it should be length 4");
+        $this->assertCount(3, $listOne, "The list with the filter \$notFilter should be length 3, (7-4 = 3)");
+
+        $listTwo = new RepositoryCollection(TestContact::class);
+        $filterTwo = new Contains("Surname", "Thu", true);
+        $listTwo->filter($filterTwo);
+
+        $this->assertCount(1, $listTwo, "\$filterTwo applied to \$listTwo should make it's length 2");
+
+        /*
+        foreach($listOne as $x)
+        {
+            echo $x->Forename . " " . $x->Surname . "\n";
+        }
+        */
+
+        $listOneArray = $listOne->toArray();
+
+        foreach($listTwo as $ltItem)
+        {
+            if(in_array($ltItem, $listOneArray))
+            {
+                // echo "Trying to filter records where Surname is NOT equal to " . $ltItem->Surname . "\n";
+                $listOne->filter(new Not(new Equals("Surname", $ltItem->Surname)));
+            }
+        }
+
+        /*
+        foreach ($listOne as $x) {
+            echo $x->Forename . " " . $x->Surname . "\n";
+        }
+        */
+
+        $this->assertCount(2, $listOne, "There should be two records");
+        $this->assertEquals("Mary", $listOne[0]->Forename, "The first records forename is Mary");
     }
 }

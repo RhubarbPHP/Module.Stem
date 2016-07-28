@@ -20,29 +20,72 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . '/../../../Filters/Not.php';
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\Not;
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\AndExpression;
+use Rhubarb\Stem\Sql\NotExpression;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlNot extends Not
 {
+    use MySqlFilterTrait;
+
+    /**
+     * Return true if the repository can handle this filter.
+     *
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @return bool
+     */
+    protected static function doCanFilterWithRepository(
+        Collection $collection,
+        Repository $repository,
+        Filter $originalFilter
+    ) {
+        if (!$originalFilter->filter->canFilterWithRepository($collection, $repository)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns the SQL fragment needed to filter where a column equals a given value.
+     *
+     * @param Collection $collection
+     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
+     * @param  array $params
+     * @return string|void
+     * @internal param $relationshipsToAutoHydrate
+     */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
 
+        $interceptingCollector = new AndExpression();
         /**
          * @var MySqlNot $not
          */
         $not = $originalFilter;
 
-        $internalSql = $not->filter->filterWithRepository($repository, $params, $propertiesToAutoHydrate);
+        $not->filter->filterWithRepository($collection, $repository, $interceptingCollector, $params);
 
-        if ($internalSql) {
-            $originalFilter->filteredByRepository = true;
-            return "!(" . $internalSql . ")";
+        if (count($interceptingCollector->whereExpressions)==1){
+
+            $expression = $interceptingCollector->whereExpressions[0];
+            $whereExpressionCollector->addWhereExpression(new NotExpression($expression));
+
+            return true;
         }
 
         return false;

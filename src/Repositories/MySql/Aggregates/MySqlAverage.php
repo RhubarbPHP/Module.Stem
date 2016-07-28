@@ -23,25 +23,22 @@ require_once __DIR__ . '/../../../Aggregates/Average.php';
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Average;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SelectExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlAverage extends Average
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, &$relationshipsToAutoHydrate)
+    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
     {
-        $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
-
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName, $relationshipsToAutoHydrate)) {
+        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
             $aliasName = $originalAggregate->getAlias();
 
-            $originalAggregate->aggregatedByRepository = true;
+            $originalAggregate->calculated = true;
 
-            $prefix = (strpos($columnName, '.') === false) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
-
-            return "AVG( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
+            $sqlStatement->columns[] = new SelectExpression("AVG( `".$sqlStatement->getAlias()."`.`".
+                $originalAggregate->aggregatedColumnName."`) AS `".$aliasName."`");
         }
-
-        return "";
     }
 }

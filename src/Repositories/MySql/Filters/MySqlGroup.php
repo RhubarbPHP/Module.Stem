@@ -20,34 +20,73 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/Group.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\AndExpression;
+use Rhubarb\Stem\Sql\OrExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlGroup extends Group
 {
+    /**
+     * Return true if the repository can handle this filter.
+     *
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @return bool
+     */
+    protected static function doCanFilterWithRepository(
+        Collection $collection,
+        Repository $repository,
+        Filter $originalFilter
+    ){
+        /**
+         * @var Filter[] $filters
+         */
+        $filters = $originalFilter->getFilters();
+
+        foreach ($filters as $filter) {
+            if (!$filter->canFilterWithRepository($collection, $repository)){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
 
+        switch ($originalFilter->booleanType){
+            case "OR":
+                $group = new OrExpression();
+                break;
+            default:
+                $group = new AndExpression();
+                break;
+        }
+
+        /**
+         * @var Filter[] $filters
+         */
         $filters = $originalFilter->getFilters();
         $filterSql = [];
 
         foreach ($filters as $filter) {
-            $thisFilterSql = $filter->filterWithRepository($repository, $params, $propertiesToAutoHydrate);
-
-            if ($thisFilterSql != "") {
-                $filterSql[] = $thisFilterSql;
-            }
+            $filter->filterWithRepository($collection, $repository, $group, $params);
         }
 
-        if (sizeof($filterSql) > 0) {
-            return "( " . implode(" " . $originalFilter->booleanType . " ", $filterSql) . " )";
+        if (sizeof($group->whereExpressions) > 0) {
+            $whereExpressionCollector->addWhereExpression($group);
         }
-
-        return "";
     }
 }

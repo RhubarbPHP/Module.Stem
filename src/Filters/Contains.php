@@ -20,7 +20,8 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Filter items containing a given value.
@@ -54,23 +55,20 @@ class Contains extends ColumnFilter
 
     /**
      *
-     * @param Collection $list The data list to filter.
+     * @param Model $model
      * @return array
      */
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    public function evaluate(Model $model)
     {
-        $ids = [];
-
         $searchMethod = $this->caseSensitive ? 'strpos' : 'stripos';
-        foreach ($list as $item) {
-            if (strlen($item[$this->columnName]) < strlen($this->contains)
-                || $searchMethod($item[$this->columnName], $this->contains) === false
-            ) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+
+        if (strlen($model[$this->columnName]) < strlen($this->contains)
+            || $searchMethod($model[$this->columnName], $this->contains) === false
+        ) {
+            return true;
         }
 
-        return $ids;
+        return false;
     }
 
     public function getSettingsArray()

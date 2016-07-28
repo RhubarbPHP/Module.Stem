@@ -60,7 +60,7 @@ abstract class Relationship
      *
      * @param  string $collectionClassName
      * @param  \Rhubarb\Stem\Filters\Filter|null $filter
-     * @return \Rhubarb\Stem\Collections\Collection
+     * @return \Rhubarb\Stem\Collections\RepositoryCollection
      */
     protected function getRelationshipCollection($collectionClassName, $filter = null)
     {

@@ -21,7 +21,7 @@ namespace Rhubarb\Stem\Tests\unit\Filters;
 use Rhubarb\Stem\Filters\ColumnIntersectsCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class IntersectsCollectionTest extends ModelUnitTestCase
@@ -32,13 +32,13 @@ class IntersectsCollectionTest extends ModelUnitTestCase
         $company->CompanyName = "GCD";
         $company->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "Andrew";
         $contact->save();
 
         $company->Contacts->append($contact);
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "Boris";
         $contact->save();
 
@@ -48,7 +48,7 @@ class IntersectsCollectionTest extends ModelUnitTestCase
         $company->CompanyName = "GCD 2";
         $company->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "Andrew";
         $contact->save();
 
@@ -58,19 +58,19 @@ class IntersectsCollectionTest extends ModelUnitTestCase
         $company->CompanyName = "GCD 3";
         $company->save();
 
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->Forename = "John";
         $contact->save();
 
         $company->Contacts->append($contact);
 
         $collection = Company::find();
-        $collection->filter(new ColumnIntersectsCollection("CompanyID", Example::find(new Equals("Forename", "Andrew"))));
+        $collection->filter(new ColumnIntersectsCollection("CompanyID", TestContact::find(new Equals("Forename", "Andrew"))));
 
         $this->assertCount(2, $collection);
 
         $collection = Company::find();
-        $collection->filter(new ColumnIntersectsCollection("CompanyID", Example::find(new Equals("Forename", "Boris"))));
+        $collection->filter(new ColumnIntersectsCollection("CompanyID", TestContact::find(new Equals("Forename", "Boris"))));
 
         $this->assertCount(1, $collection);
     }

@@ -3,7 +3,7 @@
 namespace Rhubarb\Stem\Tests\unit\Repositories\MySql\Aggregates;
 
 use Rhubarb\Stem\Aggregates\Count;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
@@ -37,7 +37,7 @@ class CountTest extends MySqlTestCase
 
     public function testSumIsCalculatedOnRepository()
     {
-        $examples = new Collection("Company");
+        $examples = new RepositoryCollection("Company");
 
         list($sumTotal) = $examples->calculateAggregates(new Count("Balance"));
 
@@ -45,6 +45,6 @@ class CountTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement(false);
 
-        $this->assertContains("COUNT( `tblCompany`.`Balance` ) AS `CountOfBalance`", $lastStatement);
+        $this->assertContains("COUNT(*) AS `CountOfBalance`", $lastStatement);
     }
 }
