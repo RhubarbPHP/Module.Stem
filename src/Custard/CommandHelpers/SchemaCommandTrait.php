@@ -9,7 +9,7 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 
 trait SchemaCommandTrait
 {
-    protected static $SETTINGS_PATH = "settings/default-schema.txt";
+    protected static $SETTINGS_PATH = __DIR__ . "../../../../../../../settings/default-schema.txt";
 
     /**
      * @return SolutionSchema
