@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 class Min extends Aggregate
 {
@@ -29,15 +29,15 @@ class Min extends Aggregate
         return "MinOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
-    public function calculateByIteration(RepositoryCollection $collection)
+    public function calculateByIteration(Model $model, $groupKey = "")
     {
-        $min = null;
-        foreach ($collection as $model) {
-            $value = $model->{$this->aggregatedColumnName};
-            if ($min === null || $min > $value) {
-                $min = $value;
-            }
+        if (!isset($this->groups[$groupKey])) {
+            $this->groups[$groupKey] = null;
         }
-        return $min;
+
+        $value = $model->{$this->aggregatedColumnName};
+        if ($this->groups[$groupKey] === null || $this->groups[$groupKey] > $value) {
+            $this->groups[$groupKey] = $value;
+        }
     }
 }

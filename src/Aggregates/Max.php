@@ -20,7 +20,7 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 class Max extends Aggregate
 {
@@ -29,15 +29,15 @@ class Max extends Aggregate
         return "MaxOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
-    public function calculateByIteration(RepositoryCollection $collection)
+    public function calculateByIteration(Model $model, $groupKey = "")
     {
-        $max = null;
-        foreach ($collection as $model) {
-            $value = $model->{$this->aggregatedColumnName};
-            if ($max === null || $max < $value) {
-                $max = $value;
-            }
+        if (!isset($this->groups[$groupKey])) {
+            $this->groups[$groupKey] = null;
         }
-        return $max;
+
+        $value = $model->{$this->aggregatedColumnName};
+        if ($this->groups[$groupKey] === null || $this->groups[$groupKey] < $value) {
+            $this->groups[$groupKey] = $value;
+        }
     }
 }
