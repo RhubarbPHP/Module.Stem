@@ -1,5 +1,7 @@
 # Change Log
 
+### 1.1.x
+
 ### 1.1.1
 
 * Change:   Group now accepts passing in of filters as parameters as well as in an array.
