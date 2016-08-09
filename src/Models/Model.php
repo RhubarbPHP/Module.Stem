@@ -334,7 +334,7 @@ abstract class Model extends ModelState
      */
     public static function findFirst(Filter $filter = null)
     {
-        $results = static::find($filter);
+        $results = $filter === null ? static::all() : static::find($filter);
 
         if (sizeof($results) == 0) {
             throw new RecordNotFoundException(get_called_class(), 0);
@@ -367,7 +367,7 @@ abstract class Model extends ModelState
      */
     public static function findLast(Filter $filter = null)
     {
-        $results = static::find($filter);
+        $results = $filter === null ? static::all() : static::find($filter);
         $modelClass = get_called_class();
         /** @var Model $model */
         $model = new $modelClass();
