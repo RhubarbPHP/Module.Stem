@@ -6,6 +6,7 @@ use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
+use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\ModelEventManager;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
@@ -451,5 +452,30 @@ class ModelTest extends ModelUnitTestCase
         $this->assertTrue($accountImport->isNewRecord());
         $accountImport->save();
         $this->assertFalse($accountImport->isNewRecord());
+    }
+
+    public function testFindFirst()
+    {
+        $account = new Account();
+        $account->AccountID = 'test1';
+        $account->AccountName = 'SAME';
+        $account->save();
+
+        $account2 = new Account();
+        $account2->AccountID = 'test2';
+        $account2->AccountName = 'SAME';
+        $account2->save();
+
+        $first = Account::findFirst();
+        $last = Account::findLast();
+
+        $this->assertEquals('test1', $first->AccountID);
+        $this->assertEquals('test2', $last->AccountID);
+
+        $first = Account::findFirst(new Equals("AccountName", "SAME"));
+        $last = Account::findLast(new Equals("AccountName", "SAME"));
+
+        $this->assertEquals('test1', $first->AccountID);
+        $this->assertEquals('test2', $last->AccountID);
     }
 }
