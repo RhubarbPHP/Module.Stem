@@ -328,13 +328,13 @@ abstract class Model extends ModelState
     /**
      * Finds the first model matching the given filters.
      *
-     * @param Filter $filter
+     * @param \Rhubarb\Stem\Filters\Filter[] $filters
      * @throws RecordNotFoundException
      * @return Model|static
      */
-    public static function findFirst(Filter $filter = null)
+    public static function findFirst(Filter ...$filters)
     {
-        $results = $filter === null ? static::all() : static::find($filter);
+        $results = static::find(...$filters);
 
         if (sizeof($results) == 0) {
             throw new RecordNotFoundException(get_called_class(), 0);
@@ -361,13 +361,13 @@ abstract class Model extends ModelState
     /**
      * Finds the last model matching the given filters.
      *
-     * @param Filter $filter
+     * @param \Rhubarb\Stem\Filters\Filter[] $filters
      * @throws RecordNotFoundException
-     * @return static
+     * @return Model|static
      */
-    public static function findLast(Filter $filter = null)
+    public static function findLast(Filter ...$filters)
     {
-        $results = $filter === null ? static::all() : static::find($filter);
+        $results = static::find(...$filters);
         $modelClass = get_called_class();
         /** @var Model $model */
         $model = new $modelClass();
@@ -394,7 +394,7 @@ abstract class Model extends ModelState
     /**
      * Returns the Collection of models matching the given filter.
      *
-     * @param Filter $filter
+     * @param \Rhubarb\Stem\Filters\Filter[] $filters
      * @return RepositoryCollection|static[]
      */
     public static function find(Filter ...$filters)
