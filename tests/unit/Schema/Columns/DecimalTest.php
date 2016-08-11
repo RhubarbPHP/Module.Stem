@@ -3,13 +3,13 @@
 namespace Rhubarb\Stem\Tests\unit\Schema\Columns;
 
 use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 
 class DecimalTest extends RhubarbTestCase
 {
     public function testDataTransforms()
     {
-        $example = new Example();
+        $example = new TestContact();
 
         // Test the min and max limits of the range
         $example->CreditLimit = 1000000000000000000;

@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\AndGroup;
 use Rhubarb\Stem\Filters\Contains;
 use Rhubarb\Stem\Filters\Equals;
@@ -10,7 +10,7 @@ use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Filters\Group;
 use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Filters\OrGroup;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
 class GroupTest extends ModelUnitTestCase
@@ -23,7 +23,7 @@ class GroupTest extends ModelUnitTestCase
 
         parent::setUp();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->getRepository()->clearObjectCache();
         $example->Forename = "John";
         $example->Surname = "Joe";
@@ -31,35 +31,35 @@ class GroupTest extends ModelUnitTestCase
         $example->ContactID = 1;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Johnson";
         $example->DateOfBirth = "1988-01-01";
         $example->ContactID = 2;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "John";
         $example->Surname = "Luc";
         $example->DateOfBirth = "1990-01-01";
         $example->ContactID = 3;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Mary";
         $example->Surname = "Smithe";
         $example->DateOfBirth = "1980-06-09";
         $example->ContactID = 4;
         $example->save();
 
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Tom";
         $example->Surname = "Thumb";
         $example->DateOfBirth = "1976-05-09";
         $example->ContactID = 5;
         $example->save();
 
-        $this->list = new Collection(Example::class);
+        $this->list = new RepositoryCollection(TestContact::class);
     }
 
     public function testFiltersAnd()
@@ -133,14 +133,14 @@ class GroupTest extends ModelUnitTestCase
             $subGroup
         );
 
-        $model = new Example();
+        $model = new TestContact();
         $andGroup->setFilterValuesOnModel($model);
 
         $this->assertEquals(1, $model->CompanyID);
         $this->assertEquals("Cuthbert", $model->Surname);
         $this->assertEquals("Andrew", $model->Forename);
 
-        $model = new Example();
+        $model = new TestContact();
         $orGroup->setFilterValuesOnModel($model);
 
         $this->assertNotEquals(1, $model->CompanyID);
@@ -151,23 +151,23 @@ class GroupTest extends ModelUnitTestCase
     public function testAndOrGroupsParametersNotAsArray()
     {
         $andGroup = new AndGroup(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
-        $contacts = Example::find($andGroup);
+        $contacts = TestContact::find($andGroup);
         $model = $contacts[0];
         $this->assertEquals("John", $model->Forename);
         $this->assertEquals("Luc", $model->Surname);
 
         $orGroup = new OrGroup(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
-        $contacts = Example::find($orGroup);
+        $contacts = TestContact::find($orGroup);
         $model = $contacts[0];
         $this->assertEquals("John", $model->Forename);
         $this->assertEquals("Joe", $model->Surname);
 
-        $contacts = Example::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
+        TestContact::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
     }
 
     public function testFindAutomaticAndFilterForSeveralParameters()
     {
-        $contacts = Example::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
+        $contacts = TestContact::find(new Equals("Forename", "John"), new Equals("Surname", "Luc"));
         $model = $contacts[0];
         $this->assertEquals("John", $model->Forename);
         $this->assertEquals("Luc", $model->Surname);

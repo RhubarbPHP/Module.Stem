@@ -2,7 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -41,7 +41,7 @@ class FilterTest extends ModelUnitTestCase
 
         $gcd->Users->append($example);
 
-        $list = new Collection(User::class);
+        $list = new RepositoryCollection(User::class);
         $list->filter(new Equals("Company.CompanyName", "GCD"));
 
         $this->assertCount(2, $list);

@@ -21,7 +21,7 @@ namespace Rhubarb\Stem\UrlHandlers;
 use Rhubarb\Crown\Exceptions\CollectionUrlException;
 use Rhubarb\Crown\UrlHandlers\CollectionUrlHandling;
 use Rhubarb\Crown\UrlHandlers\UrlHandler;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -46,11 +46,11 @@ abstract class ModelCollectionHandler extends UrlHandler
     /**
      * Return's an instance of the model collection.
      *
-     * @return \Rhubarb\Stem\Collections\Collection
+     * @return \Rhubarb\Stem\Collections\RepositoryCollection
      */
     public function getModelCollection()
     {
-        return new Collection($this->modelName);
+        return new RepositoryCollection($this->modelName);
     }
 
     public function getModelObject()

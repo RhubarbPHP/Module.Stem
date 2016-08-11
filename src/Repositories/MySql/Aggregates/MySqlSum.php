@@ -23,24 +23,22 @@ require_once __DIR__ . '/../../../Aggregates/Sum.php';
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SelectExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlSum extends Sum
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, &$relationshipsToAutoHydrate)
+    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
     {
-        $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
-
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName, $relationshipsToAutoHydrate)) {
+        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
             $aliasName = $originalAggregate->getAlias();
 
-            $originalAggregate->aggregatedByRepository = true;
-            $prefix = (strpos($columnName, '.') === false) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
+            $originalAggregate->calculated = true;
 
-            return "SUM( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
+            $sqlStatement->columns[] = new SelectExpression("SUM( `".$sqlStatement->getAlias()."`.`".
+                $originalAggregate->aggregatedColumnName."`) AS `".$aliasName."`");
         }
-
-        return "";
     }
 }

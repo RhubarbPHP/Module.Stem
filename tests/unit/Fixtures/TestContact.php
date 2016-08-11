@@ -22,7 +22,7 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $Surname
  * @property \Date $DateOfBirth
  */
-class Example extends Model
+class TestContact extends Model
 {
     public $loaded = false;
 
@@ -31,7 +31,7 @@ class Example extends Model
         $schema = new ModelSchema("tblContact");
 
         $schema->addColumn(
-            new AutoIncrementColumn("ContactID"),
+            new AutoIncrementColumn("ContactID"),         
             new IntegerColumn("CompanyID", 0),
             new DateColumn("DateOfBirth"),
             new DateTimeColumn("CreatedDate"),
@@ -40,7 +40,9 @@ class Example extends Model
             new BooleanColumn("KeyContact"),
             new TimeColumn("CoffeeTime"),
             new DecimalColumn("CreditLimit", 10, 2),
-            new DecimalColumn("Balance", 8, 4)
+            new DecimalColumn("Balance", 8, 4),
+            new StringColumn("Postcode", 50),
+            new StringColumn("AddressLine1", 50)
         );
 
         $schema->uniqueIdentifierColumnName = "ContactID";

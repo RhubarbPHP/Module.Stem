@@ -20,40 +20,41 @@ namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 require_once __DIR__ . "/../../../Filters/StartsWith.php";
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\StartsWith;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlStartsWith extends StartsWith
 {
     use MySqlFilterTrait;
 
+    /**
+     * Returns the SQL fragment needed to filter where a column equals a given value.
+     *
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param Equals|Filter $originalFilter
+     * @param WhereExpressionCollector $whereExpressionCollector
+     * @param array $params
+     * @return string|void
+     */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
-
-        $columnName = $originalFilter->columnName;
-
-        if (self::canFilter($repository, $columnName, $propertiesToAutoHydrate)) {
-            $paramName = uniqid() . str_replace(".", "", $columnName);
-
-            $params[$paramName] = "" . $originalFilter->startsWith . "%";
-
-            $originalFilter->filteredByRepository = true;
-
-            if (strpos($columnName, ".") === false) {
-                $schema = $repository->getRepositorySchema();
-                $columnName = $schema->schemaName . "`.`" . $columnName;
-            } else {
-                $columnName = str_replace('.', '`.`', $columnName);
-            }
-
-            return "`{$columnName}` LIKE :{$paramName}";
-        }
-
-        parent::doFilterWithRepository($repository, $originalFilter, $object, $params, $propertiesToAutoHydrate);
+        return self::createColumnWhereClauseExpression(
+            "LIKE",
+            $originalFilter->startsWith."%",
+            $collection,
+            $repository,
+            $originalFilter,
+            $whereExpressionCollector,
+            $params);
     }
 }

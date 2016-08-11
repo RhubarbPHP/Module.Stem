@@ -20,20 +20,22 @@ namespace Rhubarb\Stem\Aggregates;
 
 require_once __DIR__ . "/Aggregate.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 class Count extends Aggregate
 {
-    public function getAlias()
+    protected function createAlias()
     {
-        return "CountOf" . str_replace(".", "", $this->aggregatedColumnName);
+        return "CountOf" . str_replace(".", "", $this->getAliasDerivedColumn());
     }
 
-    public function calculateByIteration(Collection $collection)
+    public function calculateByIteration(Model $model, $groupKey = "")
     {
-        // If the list hasn't been fetched, sizeof() will still calculate it with an Aggregate,
-        // so we need for force the list to be fetched now so the sizeof() can calculate by iteration
-        $collection->fetchList();
-        return sizeof($collection);
+        if (!isset($this->groups[$groupKey])){
+            $this->groups[$groupKey] = 0;
+        }
+        
+        $this->groups[$groupKey] += 1;
     }
 }

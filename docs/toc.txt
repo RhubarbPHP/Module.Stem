@@ -1,12 +1,12 @@
 Basic Concepts:
     . Models and Schemas:models-and-schemas
     . Collections:collections
-    . Filters:filters/index
-        . Simple Filters:filters/simple
+    . Filtering:filters/
         . Groups:filters/group
-        . Inverting Filters:filters/not
+        . Inverting Filters (not):filters/not
+        . Back references:filters/back-references
+        . Advanced Filters:filters/advanced
         . Creating Your Own Filter:filters/create-a-filter
-        . A Complex Example - XOR:filters/complex-example
         . Default Filters:filters/prefiltering
     . Relationships:relationships
     . Data Decorators:decorators
@@ -14,7 +14,9 @@ Data Storage and Typing:
     . Repositories:repositories
     . Data Typing and Data Transforms:data-typing
 Advanced Techniques:
+    . Joins and Intersections:joins-and-intersections
     . Aggregates:aggregates
     . Model Events:events
+    . Updating DocBlock comments:custard/update-comments
 Common Patterns and Anti-Patterns:
     . Inter-Model Strategies:inter-model

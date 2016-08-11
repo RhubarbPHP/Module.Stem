@@ -20,8 +20,12 @@ namespace Rhubarb\Stem\Filters;
 
 use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\SqlStatement;
+use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
  * The base class for all DataFilters.
@@ -41,34 +45,28 @@ abstract class Filter
     protected $filteredByRepository = false;
 
     /**
-     * Implement to return an array of unique identifiers to filter from the list.
+     * Chooses whether to remove the model from the list or not
+     * 
+     * Returns true to remove it, false to keep it.
      *
-     * @param  Collection $list The data list to filter.
+     * @param Model $model
      * @return array
      */
-    abstract public function doGetUniqueIdentifiersToFilter(Collection $list);
+    abstract public function evaluate(Model $model);
 
     /**
-     * Returns an array of unique identifiers to filter from the list.
+     * Returns true if the list should remove this model from the list because it doesn't match the criteria.
      *
-     * This will be an empty array if a repository has used this filter to do it's filtering.
-     *
-     * @param  Collection $list The data list to filter.
+     * @param  Model $model The model to evaluate
      * @return array
      */
-    final public function getUniqueIdentifiersToFilter(Collection $list)
+    final public function shouldFilter(Model $model)
     {
         if ($this->wasFilteredByRepository()) {
             return [];
         }
 
-        $list->disableRanging();
-
-        $filtered = $this->doGetUniqueIdentifiersToFilter($list);
-
-        $list->enableRanging();
-
-        return $filtered;
+        return $this->evaluate($model);
     }
 
     public function detectPlaceHolder($value)
@@ -94,35 +92,45 @@ abstract class Filter
      *
      * Rhubarb\Stem\Repositories\MySql\Filters\Equals
      *
-     * @param \Rhubarb\Stem\Repositories\Repository $repository
+     * @param Repository $repository
+     * @param Collection $collection
      * @param Filter $originalFilter The base filter containing the settings we need.
+     * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param $propertiesToAutoHydrate
+     * @return bool True if repository filtering was possible
      */
     protected static function doFilterWithRepository(
+        Collection $collection,
         Repository $repository,
         Filter $originalFilter,
-        &$params,
-        &$propertiesToAutoHydrate
+        WhereExpressionCollector $whereExpressionCollector,
+        &$params
     ) {
-
-
+        return false;
     }
 
     /**
-     * Returns A string containing information needed for a repository to use a filter directly.
+     * Return true if the repository can handle this filter.
      *
-     * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
-     * @param  array $propertiesToAutoHydrate An array of properties that need auto hydrated for performance.
-     * @return string
+     * @param Colleciton $collection
+     * @param Repository $repository
+     * @param Filter $originalFilter
+     * @return bool
      */
-    final public function filterWithRepository(Repository $repository, &$params, &$propertiesToAutoHydrate)
+    protected static function doCanFilterWithRepository(
+        Collection $collection,
+        Repository $repository,
+        Filter $originalFilter
+    ){
+        return false;
+    }
+
+    final public function canFilterWithRepository(Collection $collection, Repository $repository)
     {
         $namespace = $repository->getFiltersNamespace();
 
         if (!$namespace) {
-            return "";
+            return false;
         }
 
         $parts = explode('\\', $namespace);
@@ -132,12 +140,45 @@ abstract class Filter
 
         if (class_exists($className)) {
             return call_user_func_array(
-                $className . "::doFilterWithRepository",
-                [$repository, $this, &$params, &$propertiesToAutoHydrate]
+                $className . "::doCanFilterWithRepository",
+                [$collection, $repository, $this]
             );
         }
 
-        return "";
+        return false;
+    }
+
+    /**
+     * Returns A string containing information needed for a repository to use a filter directly.
+     *
+     * @param Collection $collection
+     * @param Repository $repository
+     * @param WhereExpressionCollector $sqlStatement
+     * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
+     */
+    final public function filterWithRepository(Collection $collection, Repository $repository, WhereExpressionCollector $sqlStatement, &$params)
+    {
+        $namespace = $repository->getFiltersNamespace();
+
+        if (!$namespace) {
+            return;
+        }
+
+        $parts = explode('\\', $namespace);
+
+        // Get the provider specific implementation of the filter.
+        $className = rtrim($namespace, '\\') . '\\' . $parts[count($parts) - 2] . basename(str_replace("\\", "/", get_class($this)));
+
+        if (class_exists($className)) {
+            $filtered = call_user_func_array(
+                $className . "::doFilterWithRepository",
+                [$collection, $repository, $this, $sqlStatement, &$params]
+            );
+
+            if ($filtered){
+                $this->filteredByRepository = true;
+            }
+        }
     }
 
     /**
@@ -198,6 +239,7 @@ abstract class Filter
      * Create's a filter object of the correct type from the settings array.
      *
      * @param $settings
+     * @return mixed
      */
     final public static function speciateFromSettingsArray($settings)
     {
@@ -206,4 +248,14 @@ abstract class Filter
 
         return $filter;
     }
+
+    /**
+     * An opportunity for implementors to create intersections on the collection.
+     *
+     * @param Collection $collection
+     * @param $createIntersectionCallback
+     * @throws CreatedIntersectionException
+     * @return void
+     */
+    abstract public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback);
 }

@@ -5,7 +5,7 @@ namespace Rhubarb\Stem\Custard\CommandHelpers;
 use phpDocumentor\Reflection\DocBlock;
 use Rhubarb\Crown\Exceptions\RhubarbException;
 use Rhubarb\Crown\String\StringTools;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Relationships\ManyToMany;
@@ -250,7 +250,7 @@ class ReflectionModel extends \ReflectionClass
         }
 
         if ($collectionType) {
-            $types = [$type . '[]', '\\' . Collection::class];
+            $types = [$type . '[]', '\\' . RepositoryCollection::class];
         } else {
             $types = [$type];
         }

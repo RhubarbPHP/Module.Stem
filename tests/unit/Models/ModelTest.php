@@ -2,10 +2,11 @@
 
 namespace Rhubarb\Stem\Tests\unit\Models;
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\DeleteModelException;
 use Rhubarb\Stem\Exceptions\ModelConsistencyValidationException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
+use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\ModelEventManager;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
@@ -13,7 +14,7 @@ use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Tests\unit\Fixtures\Account;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\UnitTestingSolutionSchema;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;
@@ -22,7 +23,7 @@ class ModelTest extends ModelUnitTestCase
 {
     public function testModelLabelReturnedInToString()
     {
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "George";
 
         $this->assertEquals("George", (string)$example);
@@ -30,7 +31,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testHasSchema()
     {
-        $example = new Example();
+        $example = new TestContact();
         $schema = $example->generateSchema();
 
         // Make sure we have a schema
@@ -42,7 +43,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testHasUniqueIdentifierColumnName()
     {
-        $example = new Example();
+        $example = new TestContact();
 
         $this->assertEquals("ContactID", $example->getUniqueIdentifierColumnName());
         $this->assertEquals("ContactID", $example->UniqueIdentifierColumnName);
@@ -79,7 +80,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testNewRecordIsFlaggedAndObjectCanBeLoadedByIdentifier()
     {
-        $test = new Example();
+        $test = new TestContact();
 
         $this->assertTrue($test->isNewRecord());
 
@@ -89,14 +90,14 @@ class ModelTest extends ModelUnitTestCase
 
         $id = $test->ContactID;
 
-        $test2 = new Example($id);
+        $test2 = new TestContact($id);
 
         $this->assertFalse($test2->isNewRecord());
     }
 
     public function testModelImportsData()
     {
-        $test = new Example();
+        $test = new TestContact();
         $test->Forename = "Andrew";
         $test->Town = "Belfast";
 
@@ -118,19 +119,19 @@ class ModelTest extends ModelUnitTestCase
     {
         $this->setExpectedException(RecordNotFoundException::class);
 
-        new Example(55);
+        new TestContact(55);
     }
 
     public function testLoadingZeroRecordThrowException()
     {
         $this->setExpectedException(RecordNotFoundException::class);
 
-        new Example(0);
+        new TestContact(0);
     }
 
     public function testDataCanPersist()
     {
-        $test = new Example();
+        $test = new TestContact();
         $test->Forename = "Andrew";
         $test->save();
 
@@ -141,14 +142,14 @@ class ModelTest extends ModelUnitTestCase
 
     public function testSupportsGetters()
     {
-        $model = new Example();
+        $model = new TestContact();
 
         $this->assertEquals("TestValue", $model->MyTestValue);
     }
 
     public function testSupportsSetters()
     {
-        $model = new Example();
+        $model = new TestContact();
         $model->Name = "Andrew Cuthbert";
 
         $this->assertEquals("ANDREW CUTHBERT", $model->Name);
@@ -271,7 +272,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testPublicProperties()
     {
-        $example = new Example();
+        $example = new TestContact();
         $example->ContactID = 3;
         $example->Forename = "abc";
         $example->Surname = "123";
@@ -286,34 +287,34 @@ class ModelTest extends ModelUnitTestCase
     public function testModelsCanBeDeleted()
     {
 
-        $example = new Example();
+        $example = new TestContact();
 
         $repository = $example->getRepository();
         $repository->clearObjectCache();
 
         $example->save();
 
-        $this->assertCount(1, new Collection("Example"));
+        $this->assertCount(1, new RepositoryCollection("TestContact"));
 
         $example->delete();
 
-        $this->assertCount(0, new Collection("Example"));
+        $this->assertCount(0, new RepositoryCollection("TestContact"));
 
         // Test that deleting a new model throws an exception.
 
         $this->setExpectedException(DeleteModelException::class);
 
-        $example = new Example();
+        $example = new TestContact();
         $example->delete();
     }
 
     public function testModelEventing()
     {
-        $example = new Example();
+        $example = new TestContact();
 
         $product = 0;
 
-        ModelEventManager::attachEventHandler("Example", "Test", function ($model, $x, $y, $z) use (&$product) {
+        ModelEventManager::attachEventHandler("TestContact", "Test", function ($model, $x, $y, $z) use (&$product) {
             $product = $x * $y * $z;
         });
 
@@ -341,12 +342,12 @@ class ModelTest extends ModelUnitTestCase
 
     public function testModelThrowsSaveEvent()
     {
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Bob";
 
         $saved = false;
 
-        ModelEventManager::attachEventHandler('Example', 'AfterSave', function () use (&$saved) {
+        ModelEventManager::attachEventHandler('TestContact', 'AfterSave', function () use (&$saved) {
             $saved = true;
         });
 
@@ -357,13 +358,13 @@ class ModelTest extends ModelUnitTestCase
 
     public function testModelDoesntSaveIfHasntChanged()
     {
-        $example = new Example();
+        $example = new TestContact();
         $example->Forename = "Bob";
         $example->save();
 
         $saved = false;
 
-        ModelEventManager::attachEventHandler('Example', 'AfterSave', function () use (&$saved) {
+        ModelEventManager::attachEventHandler('TestContact', 'AfterSave', function () use (&$saved) {
             $saved = true;
         });
 
@@ -374,7 +375,7 @@ class ModelTest extends ModelUnitTestCase
 
     public function testGetColumnSchema()
     {
-        $example = new Example();
+        $example = new TestContact();
 
         $schema = $example->getModelColumnSchemaForColumnReference("Forename");
 
@@ -388,18 +389,18 @@ class ModelTest extends ModelUnitTestCase
 
     public function testOnLoad()
     {
-        $example = new Example();
+        $example = new TestContact();
 
         $this->assertFalse($example->loaded);
 
         $example->save();
 
-        $example = new Example($example->UniqueIdentifier);
+        $example = new TestContact($example->UniqueIdentifier);
         $this->assertTrue($example->loaded);
 
 
         // This is the old, bad pattern. Unless this can be justified - importing into a new record is NOT loading.
-        $example = new Example();
+        $example = new TestContact();
         $example->importRawData(["a" => "b"]);
 
         $this->assertFalse($example->loaded);
@@ -411,14 +412,14 @@ class ModelTest extends ModelUnitTestCase
 
     public function testModelGetsDefaultValues()
     {
-        $example = new Example();
+        $example = new TestContact();
 
         $this->assertTrue(0 === $example->CompanyID);
     }
 
     public function testModelCanBeCloned()
     {
-        $contact = new Example();
+        $contact = new TestContact();
         $contact->save();
 
         $newContact = clone $contact;
@@ -451,5 +452,30 @@ class ModelTest extends ModelUnitTestCase
         $this->assertTrue($accountImport->isNewRecord());
         $accountImport->save();
         $this->assertFalse($accountImport->isNewRecord());
+    }
+
+    public function testFindFirst()
+    {
+        $account = new Account();
+        $account->AccountID = 'test1';
+        $account->AccountName = 'SAME';
+        $account->save();
+
+        $account2 = new Account();
+        $account2->AccountID = 'test2';
+        $account2->AccountName = 'SAME';
+        $account2->save();
+
+        $first = Account::findFirst();
+        $last = Account::findLast();
+
+        $this->assertEquals('test1', $first->AccountID);
+        $this->assertEquals('test2', $last->AccountID);
+
+        $first = Account::findFirst(new Equals("AccountName", "SAME"));
+        $last = Account::findLast(new Equals("AccountName", "SAME"));
+
+        $this->assertEquals('test1', $first->AccountID);
+        $this->assertEquals('test2', $last->AccountID);
     }
 }

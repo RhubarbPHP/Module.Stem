@@ -13,7 +13,7 @@ use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\Index;
 use Rhubarb\Stem\Schema\ModelSchema;
-use Rhubarb\Stem\Tests\unit\Fixtures\Example;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Repositories\MySql\MySqlTestCase;
 
 class MySqlSchemaTest extends MySqlTestCase
@@ -43,7 +43,7 @@ class MySqlSchemaTest extends MySqlTestCase
 
         $schema = MySqlModelSchema::fromGenericSchema($schema);
 
-        $schema->checkSchema(Repository::getNewDefaultRepository(new Example()));
+        $schema->checkSchema(Repository::getNewDefaultRepository(new TestContact()));
 
         $newSchema = MySqlComparisonSchema::fromTable("tblExample");
         $columns = $newSchema->columns;
@@ -72,7 +72,7 @@ class MySqlSchemaTest extends MySqlTestCase
 
         $schema = MySqlModelSchema::fromGenericSchema($schema);
 
-        $schema->checkSchema(Repository::getNewDefaultRepository(new Example()));
+        $schema->checkSchema(Repository::getNewDefaultRepository(new TestContact()));
 
         $newSchema = MySqlComparisonSchema::fromTable("tblExample");
 

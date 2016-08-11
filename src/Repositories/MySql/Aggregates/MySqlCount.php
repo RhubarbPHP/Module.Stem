@@ -23,25 +23,26 @@ require_once __DIR__ . '/../../../Aggregates/Count.php';
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Sql\GroupExpression;
+use Rhubarb\Stem\Sql\SelectColumn;
+use Rhubarb\Stem\Sql\SelectExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 
 class MySqlCount extends Count
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, &$relationshipsToAutoHydrate)
+    protected static function canAggregateInMySql(Repository $repository, $columnName)
     {
-        $columnName = str_replace('.', '`.`', $originalAggregate->aggregatedColumnName);
+        return true;
+    }
 
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName, $relationshipsToAutoHydrate)) {
-            $aliasName = $originalAggregate->getAlias();
+    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
+    {
+        $aliasName = $originalAggregate->getAlias();
 
-            $originalAggregate->aggregatedByRepository = true;
+        $originalAggregate->calculated = true;
 
-            $prefix = (strpos($columnName, '.') === false) ? "`{$repository->getRepositorySchema()->schemaName}`." : "";
-
-            return "COUNT( {$prefix}`{$columnName}` ) AS `{$aliasName}`";
-        }
-
-        return "";
+        $sqlStatement->columns[] = new SelectExpression("COUNT(*) AS `{$aliasName}`");
     }
 }

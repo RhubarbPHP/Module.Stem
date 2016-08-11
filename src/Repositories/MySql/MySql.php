@@ -20,18 +20,23 @@ namespace Rhubarb\Stem\Repositories\MySql;
 
 require_once __DIR__ . "/../PdoRepository.php";
 
-use Rhubarb\Crown\DateTime\RhubarbDateTime;
-use Rhubarb\Crown\Logging\Log;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\CollectionJoin;
+use Rhubarb\Stem\Collections\JoinType;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
-use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\MySql\Collections\MySqlCursor;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
-use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Sql\GroupExpression;
+use Rhubarb\Stem\Sql\Join;
+use Rhubarb\Stem\Sql\SelectColumn;
+use Rhubarb\Stem\Sql\SelectExpression;
+use Rhubarb\Stem\Sql\SortExpression;
+use Rhubarb\Stem\Sql\SqlStatement;
 use Rhubarb\Stem\StemSettings;
 
 class MySql extends PdoRepository
@@ -89,6 +94,7 @@ class MySql extends PdoRepository
      * Crafts and executes an SQL statement to update the object in MySQL
      *
      * @param \Rhubarb\Stem\Models\Model $object
+     * @return int|void
      */
     private function updateObject(Model $object)
     {
@@ -219,329 +225,273 @@ class MySql extends PdoRepository
         return 'Rhubarb\Stem\Repositories\MySql\Filters';
     }
 
-    public function batchCommitUpdatesFromCollection(Collection $collection, $propertyPairs)
+    public function batchCommitUpdatesFromCollection(RepositoryCollection $collection, $propertyPairs)
     {
-        $filter = $collection->getFilter();
-
         $namedParams = [];
-        $propertiesToAutoHydrate = [];
-        $whereClause = "";
 
-        $filteredExclusivelyByRepository = true;
-
-        if ($filter !== null) {
-            $filterSql = $filter->filterWithRepository($this, $namedParams, $propertiesToAutoHydrate);
-
-            if ($filterSql != "") {
-                $whereClause .= " WHERE " . $filterSql;
-            }
-
-            $filteredExclusivelyByRepository = $filter->wasFilteredByRepository();
-        }
-
-        if (!$filteredExclusivelyByRepository || sizeof($propertiesToAutoHydrate)) {
+        if (!$collection->getFilter()->canFilterWithRepository($collection, $this)){
             throw new BatchUpdateNotPossibleException();
         }
 
-        $schema = $this->reposSchema;
-        $table = $schema->schemaName;
-        $sets = [];
+        $statement = $this->getSqlStatementForCollection($collection, $namedParams);
 
-        foreach ($propertyPairs as $key => $value) {
-            $paramName = "Update" . $key;
-
-            $namedParams[$paramName] = $value;
-            $sets[] = "`" . $key . "` = :" . $paramName;
-
-        }
-
-        $sql = "UPDATE `{$table}` SET " . implode(",", $sets) . $whereClause;
-
-        MySql::executeStatement($sql, $namedParams);
-    }
-
-    /**
-     * Gets the unique identifiers required for the matching filters and loads the data into
-     * the cache for performance reasons.
-     *
-     * @param  Collection $list
-     * @param  int $unfetchedRowCount
-     * @param  array $relationshipNavigationPropertiesToAutoHydrate
-     * @return array
-     */
-    public function getUniqueIdentifiersForDataList(Collection $list, &$unfetchedRowCount = 0, $relationshipNavigationPropertiesToAutoHydrate = [])
-    {
-        $this->lastSortsUsed = [];
-
-        $schema = $this->reposSchema;
-
-        $sql = $this->getRepositoryFetchCommandForDataList($list, $relationshipNavigationPropertiesToAutoHydrate, $namedParams, $joinColumns, $joinOriginalToAliasLookup, $joinColumnsByModel, $ranged);
-
-        $statement = self::executeStatement($sql, $namedParams);
-
-        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-        $uniqueIdentifiers = [];
-
-        if (sizeof($joinColumns)) {
-            foreach ($joinColumnsByModel as $joinModel => $modelJoinedColumns) {
-                $model = SolutionSchema::getModel($joinModel);
-                $repository = $model->getRepository();
-
-                foreach ($results as &$result) {
-                    $aliasedUniqueIdentifierColumnName = $joinOriginalToAliasLookup[$joinModel . "." . $model->UniqueIdentifierColumnName];
-
-                    if (isset($result[$aliasedUniqueIdentifierColumnName]) && !isset($repository->cachedObjectData[$result[$aliasedUniqueIdentifierColumnName]])) {
-                        $joinedData = array_intersect_key($result, $modelJoinedColumns);
-
-                        $modelData = array_combine($modelJoinedColumns, $joinedData);
-
-                        $repository->cachedObjectData[$modelData[$model->UniqueIdentifierColumnName]] = $modelData;
-                    }
-
-                    $result = array_diff_key($result, $modelJoinedColumns);
-                }
-                unset($result);
+        foreach($collection->getIntersections() as $intersection){
+            if (!$intersection->intersected){
+                throw new BatchUpdateNotPossibleException();
+                break;
             }
         }
 
-        foreach ($results as $result) {
-            $uniqueIdentifier = $result[$schema->uniqueIdentifierColumnName];
-
-            $result = $this->transformDataFromRepository($result);
-
-            // Store the data in the cache and add the unique identifier to our list.
-            $this->cachedObjectData[$uniqueIdentifier] = $result;
-
-            $uniqueIdentifiers[] = $uniqueIdentifier;
+        foreach ($propertyPairs as $key => $value) {
+            $paramName = "Update" . $key;
+            $namedParams[$paramName] = $value;
         }
 
-        if ($ranged) {
-            $foundRows = Mysql::returnSingleValue("SELECT FOUND_ROWS()");
+        $sql = $statement->getUpdateSql(array_keys($propertyPairs));
 
-            $unfetchedRowCount = $foundRows - sizeof($uniqueIdentifiers);
+        static::executeStatement($sql, $namedParams);
+    }
+
+    /**
+     * Get's a sorted list of unique identifiers for the supplied list.
+     *
+     * @param  RepositoryCollection $collection
+     * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
+     * @return array
+     */
+    public function createCursorForCollection(RepositoryCollection $collection)
+    {
+        $params = [];
+
+        $sqlStatement = $this->getSqlStatementForCollection($collection, $params);
+        $hasLimit = $sqlStatement->hasLimit();
+
+        $sql = (string)$sqlStatement;
+
+        if ($hasLimit){
+            $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
         }
 
-        if ($list->getFilter() && !$list->getFilter()->wasFilteredByRepository()) {
-            Log::warning("A query wasn't completely filtered by the repository", "STEM", $sql);
+        $statement = static::executeStatement((string)$sql, $params);
+
+        $count = $statement->rowCount();
+
+        if ($hasLimit){
+            $count = static::returnSingleValue("SELECT FOUND_ROWS()");
         }
 
-        return $uniqueIdentifiers;
+        $cursor = new MySqlCursor($statement, $this, $count);
+        $cursor->setHydrationMappings($sqlStatement->potentialHydrationMappings);
+        return $cursor;
     }
 
     /**
      * Returns the repository-specific command so it can be used externally for other operations.
      * This method should be used internally by @see GetUniqueIdentifiersForDataList() to avoid duplication of code.
      *
-     * @param Collection $collection
-     * @param array $relationshipNavigationPropertiesToAutoHydrate An array of property names the caller suggests we
-     *                                                                  try to auto hydrate (if supported)
-     * @param array $namedParams Named parameters to be used in execution of the command Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more than just the SQL command to be returned from this method.
-     *
-     * Remaining parameters are passed by reference, only necessary for internal usage by @see GetUniqueIdentifiersForDataList() which requires more
-     * than just the SQL command to be returned from this method.
-     *
-     * @param array $joinColumns
-     * @param array $joinOriginalToAliasLookup
-     * @param array $joinColumnsByModel
-     * @param bool $ranged
-     *
-     * @return string The SQL command to be executed
+     * @param RepositoryCollection $collection
+     * @param string[] $namedParams
+     * @param string $intersectionColumnName If the collection is an intersection, we pass the column within the collection
+     *                                       used for the joins. This is essential to allow aggregate expressions to group
+     *                                       correctly.
+     * @return SqlStatement The SQL command to be executed
      */
-    public function getRepositoryFetchCommandForDataList(
-        Collection $collection,
-        $relationshipNavigationPropertiesToAutoHydrate = [],
-        &$namedParams = null,
-        &$joinColumns = null,
-        &$joinOriginalToAliasLookup = null,
-        &$joinColumnsByModel = null,
-        &$ranged = null
-    ) {
-        $schema = $this->reposSchema;
-        $table = $schema->schemaName;
-
-        $whereClause = "";
-
-        $filter = $collection->getFilter();
-
-        $namedParams = [];
-        $propertiesToAutoHydrate = $relationshipNavigationPropertiesToAutoHydrate;
-
-        $filteredExclusivelyByRepository = true;
-
-        if ($filter !== null) {
-            $filterSql = $filter->filterWithRepository($this, $namedParams, $propertiesToAutoHydrate);
-
-            if ($filterSql != "") {
-                $whereClause .= " WHERE " . $filterSql;
-            }
-
-            $filteredExclusivelyByRepository = $filter->wasFilteredByRepository();
-        }
-
-        $relationships = SolutionSchema::getAllRelationshipsForModel($this->getModelClass());
-
-        $aggregateColumnClause = "";
-        $aggregateColumnClauses = [];
-        $aggregateColumnAliases = [];
-
-        $aggregateRelationshipPropertiesToAutoHydrate = [];
-
-        foreach ($collection->getAggregates() as $aggregate) {
-            $clause = $aggregate->aggregateWithRepository($this, $aggregateRelationshipPropertiesToAutoHydrate);
-
-            if ($clause != "") {
-                $aggregateColumnClauses[] = $clause;
-                $aggregateColumnAliases[] = $aggregate->getAlias();
-            }
-        }
-
-        if (sizeof($aggregateColumnClauses) > 0) {
-            $aggregateColumnClause = ", " . implode(", ", $aggregateColumnClauses);
-        }
-
-        $aggregateRelationshipPropertiesToAutoHydrate = array_unique($aggregateRelationshipPropertiesToAutoHydrate);
-
-        $joins = [];
-        $groups = [];
-
-        foreach ($aggregateRelationshipPropertiesToAutoHydrate as $joinRelationship) {
-            /**
-             * @var OneToMany $relationship
-             */
-            $relationship = $relationships[$joinRelationship];
-
-            $targetModelName = $relationship->getTargetModelName();
-            $targetModelClass = SolutionSchema::getModelClass($targetModelName);
-
-            /**
-             * @var Model $targetModel
-             */
-            $targetModel = new $targetModelClass();
-            $targetSchema = $targetModel->getSchema();
-
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
-            $groups[] = "`{$table}`.`" . $relationship->getSourceColumnName() . '`';
-        }
-
-        $joinColumns = [];
-        $joinOriginalToAliasLookup = [];
-        $joinColumnsByModel = [];
-
-        $sorts = $collection->getSorts();
-        $possibleSorts = [];
+    public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
+    {
+        $model = $collection->getModelClassName();
+        $schema = SolutionSchema::getModelSchema($model);
         $columns = $schema->getColumns();
 
-        foreach ($sorts as $columnName => $ascending) {
-            if (!isset($columns[$columnName])) {
-                // If this is a one to one relationship we can still sort by using auto hydration.
-                $parts = explode(".", $columnName);
-                $relationshipProperty = $parts[0];
-                $escapedColumnName = '`' . implode('`.`', $parts) . '`';
+        $sqlStatement = new SqlStatement();
+        $sqlStatement->setAlias($collection->getUniqueReference());
+        $sqlStatement->schemaName = $schema->schemaName;
+        $sqlStatement->columns[] = new SelectExpression("`".$sqlStatement->getAlias()."`.*");
 
-                if (isset($relationships[$relationshipProperty]) && ($relationships[$relationshipProperty] instanceof OneToOne)) {
-                    $propertiesToAutoHydrate[] = $relationshipProperty;
+        $allIntersected = true;
 
-                    $possibleSorts[] = $escapedColumnName . " " . (($ascending) ? "ASC" : "DESC");
-                    $this->lastSortsUsed[] = $columnName;
-                } else {
-                    // If the request sorts contain any that we can't sort by we must only sort by those
-                    // after this column.
-                    $possibleSorts = [];
-                    $this->lastSortsUsed = [];
-                }
-            } else {
-                $possibleSorts[] = '`' . str_replace('.', '`.`', $columnName) . "` " . (($ascending) ? "ASC" : "DESC");
-                $this->lastSortsUsed[] = $columnName;
-            }
+        $intersectionColumnAliases = [];
+
+        foreach($columns as $columnName => $column){
+            $intersectionColumnAliases[$columnName] = $sqlStatement->getAlias();
         }
 
-        $propertiesToAutoHydrate = array_unique($propertiesToAutoHydrate);
+        $hydrationMappings = [];
 
-        foreach ($propertiesToAutoHydrate as $joinRelationship) {
-            /**
-             * @var OneToMany $relationship
-             */
-            $relationship = $relationships[$joinRelationship];
+        foreach($collection->getIntersections() as $collectionJoin){
 
-            $targetModelName = $relationship->getTargetModelName();
-            $targetModelClass = SolutionSchema::getModelClass($targetModelName);
+            if (!($collectionJoin->collection instanceof RepositoryCollection)){
+                $allIntersected = false;
+                continue;
+            }
 
-            /**
-             * @var Model $targetModel
-             */
-            $targetModel = new $targetModelClass();
-            $targetSchema = $targetModel->getRepository()->getRepositorySchema();
+            if (!$collectionJoin->collection->canBeFilteredByRepository()){
+                $allIntersected = false;
+                continue;
+            }
 
-            $columns = $targetSchema->getColumns();
+            $join = new Join();
 
-            foreach ($columns as $column) {
-                $storageColumns = $column->getStorageColumns();
+            $intersectionRepository = $collectionJoin->collection->getRepository();
 
-                foreach ($storageColumns as $storageColumn) {
-                    $columnName = $storageColumn->columnName;
+            $join->statement = $intersectionRepository->getSqlStatementForCollection($collectionJoin->collection, $namedParams, $collectionJoin->targetColumnName);
+            if($collectionJoin->joinType == CollectionJoin::JOIN_TYPE_INTERSECTION)
+            {
+                $join->joinType = Join::JOIN_TYPE_INNER;
+            }
+            else if($collectionJoin->joinType == CollectionJoin::JOIN_TYPE_ATTACH)
+            {
+                $join->joinType = Join::JOIN_TYPE_LEFT;
+            }
+            $join->parentColumn = $collectionJoin->sourceColumnName;
+            $join->childColumn = $collectionJoin->targetColumnName;
 
-                    $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
-                    $joinOriginalToAliasLookup[$targetModelName . "." . $columnName] = $targetModelName . $columnName;
+            $sqlStatement->joins[] = $join;
 
-                    if (!isset($joinColumnsByModel[$targetModelName])) {
-                        $joinColumnsByModel[$targetModelName] = [];
+            $intersectionCollectionColumns = $collectionJoin->collection->getModelSchema()->getColumns();
+
+            foreach($intersectionCollectionColumns as $columnName => $column){
+                $intersectionColumnAliases[$columnName] = $join->statement->getAlias();
+            }
+
+            foreach($collectionJoin->columnsToPullUp as $column => $alias){
+                if (is_numeric($column)){
+                    $column = $alias;
+                }
+
+                // To pull this column up directly in the SQL we need to first make sure the column is in the select
+                // list of our query or a native column to the schema. Some aggregates may not be computable in SQL
+                // so may not be in the query yet.
+
+                $inQuery = false;
+
+                if (isset($intersectionCollectionColumns[$column])){
+                    $inQuery = true;
+                }
+
+                if (!$inQuery) {
+
+                    foreach ($join->statement->columns as $joinColumn) {
+                        if ($joinColumn instanceof SelectExpression) {
+                            if (strpos($joinColumn->expression, $alias)) {
+                                $inQuery = true;
+                            }
+                        }
                     }
+                }
 
-                    $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
+                if ($inQuery){
+                    $sqlStatement->columns[] = new SelectColumn("`" . $join->statement->getAlias() . "`." . $column, $alias);
                 }
             }
 
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
-        }
-
-        $joinString = "";
-        $joinColumnClause = "";
-
-        if (sizeof($joins)) {
-
-            if (!in_array("`{$table}`.`".$schema->uniqueIdentifierColumnName."`", $groups)){
-                $groups[] = "`{$table}`.`".$schema->uniqueIdentifierColumnName."`";
+            // If we need to auto hydrate, select the columns in the outer query.
+            if ($collectionJoin->autoHydrate){
+                $intersectionColumns = $intersectionRepository->getModelSchema()->getColumns();
+                $primaryKey = $intersectionRepository->getModelSchema()->uniqueIdentifierColumnName;
+                foreach($intersectionColumns as $hydrateColumn){
+                    $sqlStatement->columns[] = new SelectExpression("`".$join->statement->getAlias()."`.`".$hydrateColumn->columnName."` AS `".$join->statement->getAlias().$hydrateColumn->columnName."`");
+                    $hydrationMappings[$join->statement->getAlias().$hydrateColumn->columnName] =
+                        [
+                            $hydrateColumn->columnName,
+                            $primaryKey,
+                            $intersectionRepository
+                        ];
+                }
             }
 
-            $joinString = " " . implode(" ", $joins);
+            $collectionJoin->intersected = true;
+        }
 
-            $joinClauses = [];
+        $sqlStatement->potentialHydrationMappings = $hydrationMappings;
+        $filter = $collection->getFilter();
 
-            foreach ($joinColumns as $aliasName => $columnName) {
-                $joinClauses[] = "{$columnName} AS `{$aliasName}`";
+        $allFiltered = true;
+
+        if ($filter){
+            $filter->filterWithRepository($collection, $this, $sqlStatement, $namedParams);
+            $allFiltered = $filter->wasFilteredByRepository();
+        }
+
+        $sorts = $collection->getSorts();
+
+        $allSorted = true;
+
+        foreach($sorts as $sort){
+
+            $alias = false;
+
+            if (!isset($intersectionColumnAliases[$sort->columnName])) {
+                // Is this an alias?
+                foreach($sqlStatement->columns as $expression){
+                    if ($expression instanceof SelectColumn){
+                        if ($expression->alias == $sort->columnName){
+                            $alias = true;
+                        }
+                    }
+                }
+
+                if (!$alias) {
+                    // We can't sort this column - and therefore we can't sort any secondary sorts either.
+                    // We have to leave the remaining sorts to the manual iteration handled by the Collection class.
+                    $allSorted = false;
+                    break;
+                }
             }
 
-            if (sizeof($joinClauses)) {
-                $joinColumnClause = ", " . implode(", ", $joinClauses);
+            $sort->sorted = true;
+
+            if ($alias){
+                $sqlStatement->sorts[] = new SortExpression("`".$sort->columnName.'`', $sort->ascending);
+            } else {
+                $alias = $intersectionColumnAliases[$sort->columnName];
+                $sqlStatement->sorts[] = new SortExpression("`".$alias."`.`".$sort->columnName.'`', $sort->ascending);
             }
         }
 
-        $groupClause = "";
+        $aggregates = $collection->getAggregateColumns();
+        $allAggregated = true;
 
-        if (sizeof($groups)) {
-            $groupClause = " GROUP BY " . implode(", ", $groups);
-        }
-
-        $orderBy = "";
-        if (sizeof($possibleSorts)) {
-            $orderBy .= " ORDER BY " . implode(", ", $possibleSorts);
-        }
-
-        $sql = "SELECT `{$table}`.*{$joinColumnClause}{$aggregateColumnClause} FROM `{$table}`" . $joinString . $whereClause . $groupClause . $orderBy;
-
-        $ranged = false;
-
-        if ($filteredExclusivelyByRepository && (sizeof($possibleSorts) == sizeof($sorts))) {
-            $range = $collection->getRange();
-
-            if ($range != false) {
-                $ranged = true;
-                $sql .= " LIMIT " . $range[0] . ", " . $range[1];
-                $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
+        // If any of the aggregates can't happen in the repos, then NONE of them can, as the group by won't be
+        // added to the query and we'll be iterating through all the rows anyway for the sake of the one aggregate
+        // that can't be done in the query.
+        foreach ($aggregates as $aggregate) {
+            if (!$aggregate->canAggregateWithRepository($this)){
+                $allAggregated = false;
             }
         }
 
-        return $sql;
+        if ($allAggregated) {
+            foreach ($aggregates as $aggregate) {
+                $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
+                if (!$aggregate->wasAggregatedByRepository()) {
+                    $allAggregated = false;
+                }
+            }
+        }
+
+        if ($allAggregated) {
+            // If the aggregates didn't work, we can't group yet otherwise the rows will collapse and post query
+            // aggregates won't have all the rows to work on.
+            foreach ($collection->getGroups() as $group) {
+                $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
+            }
+        }
+
+        // Only if the repository was able to compute the whole collection in the back end should it
+        // put on a limit clause. Otherwise limiting is premature as the full set of rows hasn't been
+        // calculated yet.
+        if ($allAggregated && $allFiltered && $allSorted && $allIntersected) {
+            $rangeStart = $collection->getRangeStart();
+            $rangeEnd = $collection->getRangeEnd();
+
+            if ($rangeStart > 0 || $rangeEnd !== null) {
+                $sqlStatement->limit($rangeStart, $rangeEnd - $rangeStart + 1);
+
+                $collection->markRangeApplied();
+            }
+        }
+
+        return $sqlStatement;
     }
 
     /**
@@ -550,11 +500,11 @@ class MySql extends PdoRepository
      * An answer will be null if the repository is unable to answer it.
      *
      * @param \Rhubarb\Stem\Aggregates\Aggregate[] $aggregates
-     * @param \Rhubarb\Stem\Collections\Collection $collection
+     * @param \Rhubarb\Stem\Collections\RepositoryCollection $collection
      *
      * @return array
      */
-    public function calculateAggregates($aggregates, Collection $collection)
+    public function calculateAggregates($aggregates, RepositoryCollection $collection)
     {
         $propertiesToAutoHydrate = [];
         if (!$this->canFilterExclusivelyByRepository($collection, $namedParams, $propertiesToAutoHydrate)) {
@@ -678,7 +628,7 @@ class MySql extends PdoRepository
                     "mysql:host=" . $settings->host . ";port=" . $settings->port . ";dbname=" . $settings->database . ";charset=utf8",
                     $settings->username,
                     $settings->password,
-                    [\PDO::ERRMODE_EXCEPTION => true]
+                    [\PDO::ERRMODE_EXCEPTION => true, \PDO::MYSQL_ATTR_FOUND_ROWS => true]
                 );
 
                 $timeZone = $pdo->query("SELECT @@system_time_zone");

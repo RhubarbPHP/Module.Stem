@@ -20,7 +20,8 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . "/ColumnFilter.php";
 
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
+use Rhubarb\Stem\Models\Model;
 
 /**
  * Keeps all records which have a value matching one of the values in the given array
@@ -59,16 +60,20 @@ class OneOf extends ColumnFilter
         return new self($settings["columnName"], $settings["oneOf"]);
     }
 
-    public function doGetUniqueIdentifiersToFilter(Collection $list)
+    /**
+     * Chooses whether to remove the model from the list or not
+     *
+     * Returns true to remove it, false to keep it.
+     *
+     * @param Model $model
+     * @return array
+     */
+    public function evaluate(Model $model)
     {
-        $ids = [];
-
-        foreach ($list as $item) {
-            if (!in_array($item[$this->columnName], $this->oneOf)) {
-                $ids[] = $item->UniqueIdentifier;
-            }
+        if (!in_array($model[$this->columnName], $this->oneOf)) {
+            return true;
         }
 
-        return $ids;
+        return false;
     }
 }

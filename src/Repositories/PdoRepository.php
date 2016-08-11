@@ -21,7 +21,7 @@ namespace Rhubarb\Stem\Repositories;
 require_once __DIR__ . '/Repository.php';
 
 use Rhubarb\Crown\Logging\Log;
-use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
 use Rhubarb\Stem\Exceptions\RepositoryStatementException;
 use Rhubarb\Stem\Models\Model;
@@ -43,6 +43,37 @@ abstract class PdoRepository extends Repository
      * @var /PDO
      */
     protected static $defaultConnection = null;
+
+    private static $pdoParamAliasesUsed = [];
+
+    /**
+     * Resets the param aliases used in PDO - used when unit testing to verify query outputs consistantly.
+     */
+    public static function resetPdoParamAliases()
+    {
+        self::$pdoParamAliasesUsed = [];
+    }
+
+    /**
+     * Returns a guaranteed unique parameter name for the column
+     * @param $columnName
+     * @return string
+     */
+    public static function getPdoParamName($columnName)
+    {
+        $alias = $columnName;
+        $count = 1;
+
+        while(in_array($alias, self::$pdoParamAliasesUsed)){
+            $count++;
+
+            $alias = $columnName.$count;
+        }
+
+        self::$pdoParamAliasesUsed[] = $alias;
+
+        return $alias;
+    }
 
     /**
      * Return's the default connection.
@@ -104,7 +135,7 @@ abstract class PdoRepository extends Repository
         return self::$lastParams;
     }
 
-    public function canFilterExclusivelyByRepository(Collection $collection, &$namedParams = [], &$propertiesToAutoHydrate = [])
+    public function canFilterExclusivelyByRepository(RepositoryCollection $collection, &$namedParams = [], &$propertiesToAutoHydrate = [])
     {
         $filteredExclusivelyByRepository = true;
 
@@ -126,7 +157,7 @@ abstract class PdoRepository extends Repository
         $this->hydrateObject($object, $uniqueIdentifier);
     }
 
-    protected function getManualSortsRequiredForList(Collection $list)
+    protected function getManualSortsRequiredForList(RepositoryCollection $list)
     {
         $sorts = $list->getSorts();
 
