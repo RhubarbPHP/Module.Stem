@@ -35,4 +35,16 @@ class DateTimeColumn extends DateColumn
             return new RhubarbDateTime($data);
         };
     }
+
+    public function getTransformFromModelData()
+    {
+        // Ensure that dates get cloned on the way out or people will end up modifying models by mistake.
+        return function ($data) {
+            if ($data instanceof \DateTime) {
+                return clone $data;
+            }
+
+            return new RhubarbDateTime($data);
+        };
+    }
 }

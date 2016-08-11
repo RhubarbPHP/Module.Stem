@@ -3,6 +3,9 @@
 ### 1.2.x
 
 
+### 1.2.1
+
+* Fixed:    DateTimeColumn returns a DateTime object, not a Date object, which loses the time component 
 
 ### 1.2.0
 
