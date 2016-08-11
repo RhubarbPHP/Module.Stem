@@ -25,7 +25,9 @@ class GetterOrSetterMethod
         $methodName = $method->getName();
 
         if (stripos($methodName, 'get') === 0) {
-            $wrapper->readable = true;
+            if ($method->getNumberOfRequiredParameters() == 0) {
+                $wrapper->readable = true;
+            }
         } elseif (stripos($methodName, 'set') === 0) {
             $wrapper->writable = true;
         } else {

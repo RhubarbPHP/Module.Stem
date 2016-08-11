@@ -10,9 +10,12 @@
 
 ### 1.1.x
 
-* Change: Group now accepts passing in of filters as parameters as well as in an array.
-* Change: Model::find() now accepts multiple filters as parameters -> will make an 'And' Group of the filters.
-* Change: Collection::filter() now accepts multiple filters as parameters -> will make an 'And' Group of the filters.
+### 1.1.1
+
+* Change:   Group now accepts passing in of filters as parameters as well as in an array.
+* Change:   Model::find() now accepts multiple filters as parameters -> will make an 'And' Group of the filters.
+* Change:   Collection::filter() now accepts multiple filters as parameters -> will make an 'And' Group of the filters.
+* Fix:      Fixed issue with deleteRepositories not accessing static scope
 
 ### 1.1.0
 
