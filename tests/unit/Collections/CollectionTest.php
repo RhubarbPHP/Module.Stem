@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
+use Rhubarb\Stem\Aggregates\Count;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 
@@ -56,5 +57,11 @@ class CollectionTest extends ModelUnitTestCase
         $company = $companies->findModelByUniqueIdentifier(2);
 
         $this->assertEquals("b", $company->CompanyName);
+    }
+
+    public function testCalculateAggregateOnEmptyCollection()
+    {
+        Company::find()->deleteAll();
+        $this->assertEquals([null], Company::find()->calculateAggregates([new Count('ComanyName')]));
     }
 }

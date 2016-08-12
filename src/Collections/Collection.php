@@ -483,8 +483,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $results = [];
 
+        $hasDataToAggregate = $this->count() > 0;
         foreach ($aggregates as $aggregate) {
-            $results[] = $this[0][$aggregate->getAlias()];
+            $results[] = $hasDataToAggregate ? $this[0][$aggregate->getAlias()] : null;
         }
 
         $this->aggregateColumns = $oldAggregates;
