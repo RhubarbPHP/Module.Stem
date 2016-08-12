@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.2.x
+
+
 ### 1.2.2
 
 * Fixed:    Fixed missing transforms when using the MysqlCursor!
