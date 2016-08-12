@@ -114,7 +114,8 @@ class MySqlCursor extends CollectionCursor
             return;
         }
         
-        $reposFields = [];
+        $primaryFields = [];
+        $rawData = [];
 
         foreach($row as $key => $value){
             if (isset($this->hydrationMappings[$key])){
@@ -127,18 +128,31 @@ class MySqlCursor extends CollectionCursor
                  * @var Repository $repos
                  */
                 $repos = $this->hydrationMappings[$key][2];
+                $reposClass = $repos->getModelClass();
+
+                if (!isset($rawData[$reposClass])){
+                    $rawData[$reposClass] = [ "repos" => $repos, "data" => []];
+                }
 
                 if ($field == $primary){
-                    $reposFields[$repos->getModelClass()] = $value;
+                    $primaryFields[$reposClass] = $value;
                 }
 
-                if (isset($reposFields[$repos->getModelClass()])){
-                    if (!isset($repos->cachedObjectData[$reposFields[$repos->getModelClass()]])){
-                        $repos->cachedObjectData[$reposFields[$repos->getModelClass()]] = [];
+                if (isset($primaryFields[$reposClass])){
+                    if (!isset($rawData[$reposClass]["data"][$primaryFields[$reposClass]])){
+                        $rawData[$reposClass]["data"][$primaryFields[$reposClass]] = [];
                     }
 
-                    $repos->cachedObjectData[$reposFields[$repos->getModelClass()]][$primary] = $value;
+                    $rawData[$reposClass]["data"][$primaryFields[$reposClass]][$primary] = $value;
                 }
+            }
+        }
+
+        foreach($rawData as $reposClass => $reposDetails){
+            $repos = $reposDetails["repos"];
+            $data = $reposDetails["data"];
+            foreach($data as $id => $rawRow){
+                $repos->cachedObjectData[$id] = $repos->transformDataFromRepository($rawRow);
             }
         }
     }
@@ -160,7 +174,8 @@ class MySqlCursor extends CollectionCursor
                 $this->currentRow = $row;
 
                 // Populate the modelling repository data
-                $this->repository->cachedObjectData[$row[$this->uniqueIdentifier]] = $row;
+                $this->repository->cachedObjectData[$row[$this->uniqueIdentifier]] =
+                    $this->repository->transformDataFromRepository($row);
 
                 // Remember we've already been here.
                 $this->rowsFetched[$this->lastFetchedRow] = $row[$this->uniqueIdentifier];

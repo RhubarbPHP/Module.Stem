@@ -11,6 +11,7 @@ use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\BooleanColumn;
 use Rhubarb\Stem\Schema\Columns\DecimalColumn;
 use Rhubarb\Stem\Schema\Columns\ForeignKeyColumn;
+use Rhubarb\Stem\Schema\Columns\JsonColumn;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Schema\ModelSchema;
 
@@ -22,6 +23,7 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $Surname
  * @property string $Password
  * @property bool $Active
+ * @property mixed $ProfileData
  */
 class User extends Model
 {
@@ -43,7 +45,8 @@ class User extends Model
             new StringColumn("Surname", 40),
             new StringColumn("Password", 120),
             new BooleanColumn("Active", false),
-            new DecimalColumn("Wage", 8, 2, 0)
+            new DecimalColumn("Wage", 8, 2, 0),
+            new JsonColumn("ProfileData", null, true)
         );
 
         $schema->uniqueIdentifierColumnName = "UserID";

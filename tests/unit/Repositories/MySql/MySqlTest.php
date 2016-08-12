@@ -119,6 +119,21 @@ class MySqlTest extends MySqlTestCase
         $this->assertEquals("test", $company2->CompanyName);
     }
 
+    public function testDataTransforms()
+    {
+        $user = new User();
+        $user->ProfileData = ["a" => 1];
+        $user->Active = true;
+        $user->save();
+
+        User::clearObjectCache();
+
+        $user = User::findLast();
+
+        $this->assertEquals(["a" => 1], $user->ProfileData, "If transforms were working ProfileData would be an array");
+
+    }
+
     public function testDatabaseStorage()
     {
         MySql::executeStatement("TRUNCATE TABLE tblCompany");
@@ -253,7 +268,7 @@ class MySqlTest extends MySqlTestCase
 
         $user = $users[0];
 
-        $this->assertCount(10, $user->exportRawData(), "The user model should only have 10 columns. More means that the joined tables aren't being removed after the join.");
+        $this->assertCount(11, $user->exportRawData(), "The user model should only have 10 columns. More means that the joined tables aren't being removed after the join.");
 
         $user = $users[1];
 
@@ -424,7 +439,7 @@ class MySqlTest extends MySqlTestCase
 
         $sql = MySql::getPreviousStatement();
 
-        $this->assertEquals('SELECT `Company`.*, `UnitTestUser`.SumOfUsersWage AS `SumOfUsersWage`, `UnitTestUser`.`UserID` AS `UnitTestUserUserID`, `UnitTestUser`.`CompanyID` AS `UnitTestUserCompanyID`, `UnitTestUser`.`UserType` AS `UnitTestUserUserType`, `UnitTestUser`.`Username` AS `UnitTestUserUsername`, `UnitTestUser`.`Forename` AS `UnitTestUserForename`, `UnitTestUser`.`Surname` AS `UnitTestUserSurname`, `UnitTestUser`.`Password` AS `UnitTestUserPassword`, `UnitTestUser`.`Active` AS `UnitTestUserActive`, `UnitTestUser`.`Wage` AS `UnitTestUserWage` FROM `tblCompany` AS `Company` INNER JOIN (SELECT `UnitTestUser`.*, SUM( `UnitTestUser`.`Wage`) AS `SumOfUsersWage` FROM `tblUser` AS `UnitTestUser` GROUP BY `UnitTestUser`.`CompanyID`) AS `UnitTestUser` ON `Company`.`CompanyID` = `UnitTestUser`.`CompanyID` GROUP BY `Company`.`CompanyID`',
+        $this->assertEquals('SELECT `Company`.*, `UnitTestUser`.SumOfUsersWage AS `SumOfUsersWage`, `UnitTestUser`.`UserID` AS `UnitTestUserUserID`, `UnitTestUser`.`CompanyID` AS `UnitTestUserCompanyID`, `UnitTestUser`.`UserType` AS `UnitTestUserUserType`, `UnitTestUser`.`Username` AS `UnitTestUserUsername`, `UnitTestUser`.`Forename` AS `UnitTestUserForename`, `UnitTestUser`.`Surname` AS `UnitTestUserSurname`, `UnitTestUser`.`Password` AS `UnitTestUserPassword`, `UnitTestUser`.`Active` AS `UnitTestUserActive`, `UnitTestUser`.`Wage` AS `UnitTestUserWage`, `UnitTestUser`.`ProfileData` AS `UnitTestUserProfileData` FROM `tblCompany` AS `Company` INNER JOIN (SELECT `UnitTestUser`.*, SUM( `UnitTestUser`.`Wage`) AS `SumOfUsersWage` FROM `tblUser` AS `UnitTestUser` GROUP BY `UnitTestUser`.`CompanyID`) AS `UnitTestUser` ON `Company`.`CompanyID` = `UnitTestUser`.`CompanyID` GROUP BY `Company`.`CompanyID`',
             $sql);
         $this->assertEquals([300, 700], $results);
 

@@ -2,6 +2,7 @@
 
 ### 1.2.x
 
+* Fixed:    Fixed missing transforms when using the MysqlCursor!
 
 ### 1.2.1
 

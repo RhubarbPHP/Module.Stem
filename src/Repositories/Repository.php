@@ -127,7 +127,7 @@ abstract class Repository
      * @param  $modelData
      * @return mixed
      */
-    protected function transformDataFromRepository($modelData)
+    public function transformDataFromRepository($modelData)
     {
         foreach ($this->columnTransforms as $columnName => $transforms) {
             if ($transforms[0] !== null) {
