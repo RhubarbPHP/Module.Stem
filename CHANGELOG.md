@@ -1,8 +1,10 @@
 # Change Log
 
-### 1.2.x
+### 1.2.3
 
 * Change:   Changed MySqlLongStringColumn to store as an SQL 'LONGTEXT' column rather than a shorter 'TEXT' column
+* Fixed:    ColumnIntersectsCollection didn't work if not using the unique identifer on both sides of the intersection
+* Fixed:    ColumnIntersectsCollection wasn't 'not'able.
 
 ### 1.2.2
 

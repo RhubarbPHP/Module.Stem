@@ -92,15 +92,4 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         Log::attachLog(new PhpLog(Log::PERFORMANCE_LEVEL));
     }
-
-    public function testLargeComplexIntersectionTestMySql()
-    {
-        $this->testLargeComplexIntersectionTest();
-    }
-
-    public function testAttachOnMySql()
-    {
-        $this->testAttachOn();
-    }
-
 }
