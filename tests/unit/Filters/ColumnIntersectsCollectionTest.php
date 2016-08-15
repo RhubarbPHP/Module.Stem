@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Tests\unit\Filters;
 
 use Rhubarb\Stem\Filters\ColumnIntersectsCollection;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Filters\Not;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
@@ -73,5 +74,31 @@ class IntersectsCollectionTest extends ModelUnitTestCase
         $collection->filter(new ColumnIntersectsCollection("CompanyID", TestContact::find(new Equals("Forename", "Boris"))));
 
         $this->assertCount(1, $collection);
+
+        $contact = new TestContact();
+        $contact->Forename = "Bob";
+        $contact->save();
+
+        $company->Contacts->append($contact);
+
+        $collection = Company::find();
+        $collection->filter(new ColumnIntersectsCollection("CompanyID", TestContact::find(new Equals("Forename", "Bob"))));
+
+        $this->assertCount(1, $collection, "Not using the primary key should still work.");
+
+        $contact = new TestContact();
+        $contact->Forename = "Mary";
+        $contact->save();
+
+        $company = new Company();
+        $company->CompanyName = "GCD 4";
+        $company->save();
+
+        $company->Contacts->append($contact);
+
+        $collection = Company::find();
+        $collection->filter(new Not(new ColumnIntersectsCollection("CompanyID", TestContact::find(new Equals("Forename", "Bob")))));
+
+        $this->assertCount(3, $collection, "Inverse filter should still work, 3 companies don't have bobs.");
     }
 }
