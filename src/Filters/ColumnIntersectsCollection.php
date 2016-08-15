@@ -23,7 +23,7 @@ use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
 
-class ColumnIntersectsCollection extends Filter
+class ColumnIntersectsCollection extends Equals
 {
     /**
      * @var RepositoryCollection
@@ -36,19 +36,8 @@ class ColumnIntersectsCollection extends Filter
     {
         $this->columnName = $columnName;
         $this->collection = $collectionToCheckForIntersection;
-    }
 
-    /**
-     * Chooses whether to remove the model from the list or not
-     *
-     * Returns true to remove it, false to keep it.
-     *
-     * @param Model $model
-     * @return array
-     */
-    public function evaluate(Model $model)
-    {
-        // Not used.
+        parent::__construct($columnName, "@{".$collectionToCheckForIntersection->getUniqueReference().$columnName."}");
     }
 
     /**
@@ -61,8 +50,9 @@ class ColumnIntersectsCollection extends Filter
      */
     public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
     {
-        $collection->intersectWith($this->collection, $this->columnName, $this->collection->getRepository()->getModelSchema()->uniqueIdentifierColumnName);
-
-        throw new CreatedIntersectionException();
+        // While this behaviour could (and perhaps more efficiently) be achieved using `intersectWith` we instead
+        // do a `joinWith` and pull the target column up so that we can filter in the normal way.
+        // This allows this filter to be combined with the 'not' filter and behave as expected.
+        $collection->joinWith($this->collection, $this->columnName, $this->columnName, [$this->columnName => $this->collection->getUniqueReference().$this->columnName]);
     }
 }
