@@ -164,7 +164,31 @@ SolutionSchema::registerSolutionSchema('myapp', MyAppSolutionSchema::class);
 
 Again the schema has an alias allowing whole solutions schemas to be replaced.
 
-## Saving and Loading Records
+## Creating or migrating the repository schema
+
+If you continually bump up the version numbers of individual models or the overall schema then
+the repository schema could be migrated automatically when the schema is next used
+depending on the features of Stem actually used.
+
+For greater control over migration you should consider running the [update-schemas](custard/update-schemas) custard command
+directly when you know the schema needs migrated. When deploying applications to production
+especially using a continuous delivery approach the custard command is the preferred way
+to do the migration.
+
+### What can and cannot be migrated:
+
+The migration system is conservative in that if Models or columns have been removed
+they will not be removed from the back end data store. This is a safe guard against
+irreversible accidents but can itself lead to undesirable situations in some cases.
+
+Changes to column types, lengths and defaults will all be effected even if they are
+destructive.
+
+Occasionally a schema change cannot be effected because of existing data that no longer
+meets the new constraints. In this case an exception will be thrown - it pays to invest
+in a staging platform for our application to case this (rare) situation.
+
+## Saving and loading records
 
 To store ('save') a model into the repository simply call the `save()` function.
 

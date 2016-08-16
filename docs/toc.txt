@@ -17,6 +17,8 @@ Advanced Techniques:
     . Joins and Intersections:joins-and-intersections
     . Aggregates:aggregates
     . Model Events:events
-    . Updating DocBlock comments:custard/update-comments
+Custard Commands:
+    . Updating DocBlock comments:custard/document-models
+    . Migrating Schemas:custard/update-schemas
 Common Patterns and Anti-Patterns:
     . Inter-Model Strategies:inter-model
