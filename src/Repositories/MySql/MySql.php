@@ -308,7 +308,14 @@ class MySql extends PdoRepository
         }
 
         $cursor = new MySqlCursor($statement, $this, $count);
+        $filter = $collection->getFilter();
+
+        if ($filter){
+            $cursor->filtered = $filter->wasFilteredByRepository();
+        }
+
         $cursor->setHydrationMappings($sqlStatement->potentialHydrationMappings);
+
         return $cursor;
     }
 

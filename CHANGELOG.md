@@ -3,6 +3,7 @@
 ### 1.3.0
 
 * Change:   Overhauled how filters and aggregates find their repository specific versions.
+* Fixed:    Issue where repository filters would still cause iteration of the collection.
 
 ### 1.2.4
 

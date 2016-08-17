@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Stem\Collections;
 
+use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
@@ -832,6 +833,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
          * will be handled by filterCursor()
          */
         if (!$this->collectionCursor->filtered) {
+            Log::warning("A collection for ".$this->getModelClassName()." was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
             $this->filterCursor();
         }
 
