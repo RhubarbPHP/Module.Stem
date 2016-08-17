@@ -25,6 +25,7 @@ use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Filters\OneOf;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\ColumnWhereExpression;
+use Rhubarb\Stem\Sql\LiteralWhereExpression;
 use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlOneOf extends OneOf
@@ -62,10 +63,8 @@ class MySqlOneOf extends OneOf
             if (count($originalFilter->oneOf) == 0) {
                 // When a one of has nothing to filter - it should return no matches, rather than all matches.
                 $whereExpressionCollector->addWhereExpression(
-                    new ColumnWhereExpression(
-                        "1",
-                        "=0",
-                        false)
+                    new LiteralWhereExpression(
+                        "1=0")
                 );
 
                 return " 1 = 0 ";
