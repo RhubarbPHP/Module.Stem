@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.2.x
+
+
 ### 1.2.4
 
 Fixed:	    Fix for MySqlOneOf when no options supplied
