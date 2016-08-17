@@ -32,35 +32,41 @@ class MySqlOneOf extends OneOf
 {
     use MySqlFilterTrait;
 
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var OneOf $filter
+         */
+        return new static($filter->columnName, $filter->oneOf);
+    }
+
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params
      * @return string|void
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
 
-        $columnName = $originalFilter->columnName;
+        $columnName = $this->columnName;
 
         if (self::canFilter($collection, $repository, $columnName)) {
 
             $aliases = $collection->getPulledUpAggregatedColumns();
             $isAlias = in_array($columnName, $aliases);
 
-            $columnName = self::getRealColumnName($originalFilter, $collection);
-            $toAlias = self::getTableAlias($originalFilter, $collection);
+            $columnName = self::getRealColumnName($this, $collection);
+            $toAlias = self::getTableAlias($this, $collection);
 
-            if (count($originalFilter->oneOf) == 0) {
+            if (count($this->oneOf) == 0) {
                 // When a one of has nothing to filter - it should return no matches, rather than all matches.
                 $whereExpressionCollector->addWhereExpression(
                     new LiteralWhereExpression(
@@ -73,7 +79,7 @@ class MySqlOneOf extends OneOf
             $oneOfParams = [];
             $paramName = uniqid() . $columnName;
 
-            foreach ($originalFilter->oneOf as $key => $oneOf) {
+            foreach ($this->oneOf as $key => $oneOf) {
                 $key = preg_replace("/[^[:alnum:]]/", "", $key);
                 $params[$paramName . $key] = $oneOf;
                 $oneOfParams[] = ':' . $paramName . $key;

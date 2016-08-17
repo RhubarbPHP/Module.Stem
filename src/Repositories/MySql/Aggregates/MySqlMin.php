@@ -22,20 +22,21 @@ require_once __DIR__ . '/../../../Aggregates/Max.php';
 
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Max;
+use Rhubarb\Stem\Aggregates\Min;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\SelectExpression;
 use Rhubarb\Stem\Sql\SqlStatement;
 
-class MySqlMin extends Max
+class MySqlMin extends Min
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
-            $originalAggregate->calculated = true;
+        if ($this->canAggregateInMySql($repository)) {
+            $this->calculated = true;
             $sqlStatement->columns[] = new SelectExpression(
-                "MIN( `{$sqlStatement->getAlias()}`.`{$originalAggregate->aggregatedColumnName}` ) AS `{$originalAggregate->getAlias()}`"
+                "MIN( `{$sqlStatement->getAlias()}`.`{$this->aggregatedColumnName}` ) AS `{$this->getAlias()}`"
             );
         }
     }

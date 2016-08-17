@@ -20,12 +20,14 @@ namespace Rhubarb\Stem\Repositories\MySql;
 
 require_once __DIR__ . "/../PdoRepository.php";
 
+use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Collections\CollectionJoin;
 use Rhubarb\Stem\Collections\JoinType;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\RepositoryConnectionException;
+use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\MySql\Collections\MySqlCursor;
 use Rhubarb\Stem\Repositories\PdoRepository;
@@ -60,6 +62,31 @@ class MySql extends PdoRepository
             ["primary" => $object->UniqueIdentifier]
         );
     }
+
+    public function getRepositorySpecificFilter(Filter $filter)
+    {
+        // Get the provider specific implementation of the filter.
+        $className = __NAMESPACE__ . "\\Filters\\MySql" . basename(str_replace("\\", "/", get_class($filter)));
+
+        if (class_exists($className)) {
+            return $className::fromGenericFilter($filter);
+        }
+
+        return false;
+    }
+
+    public function getRepositorySpecificAggregate(Aggregate $aggregate)
+    {
+        // Get the provider specific implementation of the filter.
+        $className = __NAMESPACE__ . "\\Aggregates\\MySql" . basename(str_replace("\\", "/", get_class($aggregate)));
+
+        if (class_exists($className)) {
+            return $className::fromGenericAggregate($aggregate);
+        }
+
+        return false;
+    }
+
 
     /**
      * Fetches the data for a given unique identifier.

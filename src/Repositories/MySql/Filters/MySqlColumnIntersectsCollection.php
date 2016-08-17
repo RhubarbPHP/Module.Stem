@@ -14,13 +14,20 @@ class MySqlColumnIntersectsCollection extends ColumnIntersectsCollection
 {
     use MySqlFilterTrait;
 
-    protected static function doCanFilterWithRepository(
+    protected function doCanFilterWithRepository(
         Collection $collection,
-        Repository $repository,
-        Filter $originalFilter
+        Repository $repository
     )
     {
         return true;
+    }
+
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var ColumnIntersectsCollection $filter
+         */
+        return new static($filter->columnName, $filter->collection);
     }
 
     /**
@@ -28,22 +35,20 @@ class MySqlColumnIntersectsCollection extends ColumnIntersectsCollection
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param self|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params
      * @return string|void
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-        $columnName = self::getRealColumnName($originalFilter, $collection);
-        $toAlias = self::getTableAlias($originalFilter, $collection);
+        $columnName = self::getRealColumnName($this, $collection);
+        $toAlias = self::getTableAlias($this, $collection);
 
-        $placeHolder = $originalFilter->detectPlaceHolder($originalFilter->equalTo);
+        $placeHolder = $this->detectPlaceHolder($this->equalTo);
         // The placeholder will contain an _ to denote the alias given to it in ColumnIntersectsCollection. We
         // need to do a normal where clause on it here, rather than a having clause so we need to explode this
         // and create a direct reference to the column.

@@ -19,29 +19,39 @@
 namespace Rhubarb\Stem\Repositories\MySql\Aggregates;
 
 use Rhubarb\Stem\Aggregates\Aggregate;
+use Rhubarb\Stem\Aggregates\Average;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
 trait MySqlAggregateTrait
 {
-    protected static function canAggregateInMySql(Repository $repository, $columnName)
+    protected function canAggregateInMySql(Repository $repository)
     {
         $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
 
-        if (isset($columns[$columnName])) {
+        if (isset($columns[$this->getAggregateColumnName()])) {
             return true;
         }
 
         return false;
     }
 
-    protected static function canCalculateByRepository(
-        Repository $repository,
-        Aggregate $originalAggregate
+    public static function fromGenericAggregate(Aggregate $aggregate)
+    {
+        /**
+         * @var $aggregate Average
+         */
+        $newAggregate = new static($aggregate->aggregatedColumnName, $aggregate->alias);
+        $newAggregate->aliasDerivedFromColumn = $aggregate->aliasDerivedFromColumn;
+        return $newAggregate;
+    }
+
+    protected function canCalculateByRepository(
+        Repository $repository
     )
     {
-        return self::canAggregateInMySql($repository,$originalAggregate->getAggregateColumnName());
+        return $this->canAggregateInMySql($repository);
     }
 }

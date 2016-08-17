@@ -30,15 +30,15 @@ class MySqlSum extends Sum
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
-            $aliasName = $originalAggregate->getAlias();
+        if ($this->canAggregateInMySql($repository)) {
+            $aliasName = $this->getAlias();
 
-            $originalAggregate->calculated = true;
+            $this->calculated = true;
 
             $sqlStatement->columns[] = new SelectExpression("SUM( `".$sqlStatement->getAlias()."`.`".
-                $originalAggregate->aggregatedColumnName."`) AS `".$aliasName."`");
+                $this->aggregatedColumnName."`) AS `".$aliasName."`");
         }
     }
 }

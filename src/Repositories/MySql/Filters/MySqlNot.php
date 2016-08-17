@@ -33,20 +33,26 @@ class MySqlNot extends Not
 {
     use MySqlFilterTrait;
 
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var Not $filter
+         */
+        return new static($filter->filter);
+    }
+
     /**
      * Return true if the repository can handle this filter.
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param Filter $originalFilter
      * @return bool
      */
-    protected static function doCanFilterWithRepository(
+    protected function doCanFilterWithRepository(
         Collection $collection,
-        Repository $repository,
-        Filter $originalFilter
+        Repository $repository
     ) {
-        if (!$originalFilter->filter->canFilterWithRepository($collection, $repository)) {
+        if (!$this->filter->canFilterWithRepository($collection, $repository)) {
             return false;
         }
 
@@ -58,16 +64,14 @@ class MySqlNot extends Not
      *
      * @param Collection $collection
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
      * @return string|void
      * @internal param $relationshipsToAutoHydrate
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
@@ -76,7 +80,7 @@ class MySqlNot extends Not
         /**
          * @var MySqlNot $not
          */
-        $not = $originalFilter;
+        $not = $this;
 
         $not->filter->filterWithRepository($collection, $repository, $interceptingCollector, $params);
 

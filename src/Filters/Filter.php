@@ -94,15 +94,13 @@ abstract class Filter
      *
      * @param Repository $repository
      * @param Collection $collection
-     * @param Filter $originalFilter The base filter containing the settings we need.
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params An array of output parameters that might be need by the repository, named parameters for PDO for example.
      * @return bool True if repository filtering was possible
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
@@ -112,37 +110,22 @@ abstract class Filter
     /**
      * Return true if the repository can handle this filter.
      *
-     * @param Colleciton $collection
+     * @param Collection $collection
      * @param Repository $repository
-     * @param Filter $originalFilter
      * @return bool
      */
-    protected static function doCanFilterWithRepository(
+    protected function doCanFilterWithRepository(
         Collection $collection,
-        Repository $repository,
-        Filter $originalFilter
+        Repository $repository
     ){
         return false;
     }
 
     final public function canFilterWithRepository(Collection $collection, Repository $repository)
     {
-        $namespace = $repository->getFiltersNamespace();
-
-        if (!$namespace) {
-            return false;
-        }
-
-        $parts = explode('\\', $namespace);
-
-        // Get the provider specific implementation of the filter.
-        $className = rtrim($namespace, '\\') . '\\' . $parts[count($parts) - 2] . basename(str_replace("\\", "/", get_class($this)));
-
-        if (class_exists($className)) {
-            return call_user_func_array(
-                $className . "::doCanFilterWithRepository",
-                [$collection, $repository, $this]
-            );
+        $speciatedFilter = $repository->getRepositorySpecificFilter($this);
+        if ($speciatedFilter) {
+            return $speciatedFilter->doCanFilterWithRepository($collection, $repository);
         }
 
         return false;
@@ -158,27 +141,24 @@ abstract class Filter
      */
     final public function filterWithRepository(Collection $collection, Repository $repository, WhereExpressionCollector $sqlStatement, &$params)
     {
-        $namespace = $repository->getFiltersNamespace();
+        $speciatedFilter = $repository->getRepositorySpecificFilter($this);
+        if ($speciatedFilter) {
+            $filtered = $speciatedFilter->doFilterWithRepository($collection, $repository, $sqlStatement, $params);
 
-        if (!$namespace) {
-            return;
-        }
-
-        $parts = explode('\\', $namespace);
-
-        // Get the provider specific implementation of the filter.
-        $className = rtrim($namespace, '\\') . '\\' . $parts[count($parts) - 2] . basename(str_replace("\\", "/", get_class($this)));
-
-        if (class_exists($className)) {
-            $filtered = call_user_func_array(
-                $className . "::doFilterWithRepository",
-                [$collection, $repository, $this, $sqlStatement, &$params]
-            );
-
-            if ($filtered){
+            if ($filtered) {
                 $this->filteredByRepository = true;
             }
         }
+    }
+
+    /**
+     * Implement to return an instance based upon a generic filter.
+     * @param Filter $filter The generic filter to create from.
+     * @return bool|Filter
+     */
+    public static function fromGenericFilter(Filter $filter)
+    {
+        return false;
     }
 
     /**

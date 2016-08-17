@@ -111,20 +111,23 @@ abstract class Aggregate
         return $this->calculated;
     }
 
-    protected static function calculateByRepository(
+    /**
+     * Update $sqlStatement with the repository specific details for aggregating
+     *
+     * @param Repository $repository
+     * @param SqlStatement $sqlStatement
+     * @param $namedParams
+     */
+    protected function calculateByRepository(
         Repository $repository,
-        Aggregate $originalAggregate,
         SqlStatement $sqlStatement,
         &$namedParams
     )
     {
-
-
     }
 
-    protected static function canCalculateByRepository(
-        Repository $repository,
-        Aggregate $originalAggregate
+    protected function canCalculateByRepository(
+        Repository $repository
     )
     {
         return false;
@@ -140,16 +143,10 @@ abstract class Aggregate
      */
     final public function canAggregateWithRepository(Repository $repository)
     {
-        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+        $specificAggregate = $repository->getRepositorySpecificAggregate($this);
 
-        // Get the repository specific implementation of the aggregate.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Aggregates\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
-
-        if (class_exists($className)) {
-            return call_user_func_array(
-                $className . "::canCalculateByRepository",
-                [$repository, $this]
-            );
+        if ($specificAggregate) {
+            return $specificAggregate->canCalculateByRepository($repository);
         }
 
         return false;
@@ -168,20 +165,27 @@ abstract class Aggregate
      */
     final public function aggregateWithRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
-        $reposName = basename(str_replace("\\", "/", get_class($repository)));
+        $specificAggregate = $repository->getRepositorySpecificAggregate($this);
 
-        // Get the repository specific implementation of the aggregate.
-        $className = "\Rhubarb\Stem\Repositories\\" . $reposName . "\\Aggregates\\" . $reposName . basename(str_replace("\\", "/", get_class($this)));
+        if ($specificAggregate) {
+            $specificAggregate->calculateByRepository($repository, $sqlStatement, $namedParams);
 
-        if (class_exists($className)) {
-            return call_user_func_array(
-                $className . "::calculateByRepository",
-                [$repository, $this, $sqlStatement, &$namedParams]
-            );
+            if ($specificAggregate->calculated){
+                $this->calculated = true;
+            }
         }
-
-        return "";
     }
+
+    /**
+     * Implement to return an instance based upon a generic aggregate.
+     * @param Aggregate $aggregate The generic aggregate to create from.
+     * @return bool|Aggregate
+     */
+    public static function fromGenericAggregate(Aggregate $aggregate)
+    {
+        return false;
+    }
+
 
     /**
      * Override to return a suggested alias for the aggregate.

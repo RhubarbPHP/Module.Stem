@@ -32,25 +32,32 @@ class MySqlNumberEquals extends NumberEquals
 {
     use MySqlFilterTrait;
 
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var NumberEquals $filter
+         */
+        return new static($filter->columnName, $filter->equalTo);
+    }
+
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params
      * @return string|void
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-        if ($originalFilter->isNumeric) {
-            return MySqlEquals::doFilterWithRepository($collection, $repository, $originalFilter, $whereExpressionCollector, $params);
+        if ($this->isNumeric) {
+            $equals = new MySqlEquals($this->columnName, $this->equalTo);
+            return $equals->doFilterWithRepository($collection, $repository, $whereExpressionCollector, $params);
         }
 
         return true;

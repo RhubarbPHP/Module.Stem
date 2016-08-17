@@ -30,12 +30,12 @@ class MySqlMax extends Max
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
-            $originalAggregate->calculated = true;
+        if ($this->canAggregateInMySql($repository)) {
+            $this->calculated = true;
             $sqlStatement->columns[] = new SelectExpression(
-                "MAX( `{$sqlStatement->getAlias()}`.`{$originalAggregate->aggregatedColumnName}` ) AS `{$originalAggregate->getAlias()}`"
+                "MAX( `{$sqlStatement->getAlias()}`.`{$this->aggregatedColumnName}` ) AS `{$this->getAlias()}`"
             );
         }
     }

@@ -1,11 +1,12 @@
 # Change Log
 
-### 1.2.x
+### 1.3.0
 
+* Change:   Overhauled how filters and aggregates find their repository specific versions.
 
 ### 1.2.4
 
-Fixed:	    Fix for MySqlOneOf when no options supplied
+* Fixed:    Fix for MySqlOneOf when no options supplied
 
 ### 1.2.3
 

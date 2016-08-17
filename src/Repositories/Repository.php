@@ -25,6 +25,7 @@ use Rhubarb\Stem\Collections\UniqueIdentifierListCursor;
 use Rhubarb\Stem\Exceptions\ModelException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Exceptions\SortNotValidException;
+use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Offline\Offline;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
@@ -119,6 +120,26 @@ abstract class Repository
                         $storageColumn->getTransformIntoRepository() : $this->columnTransforms[$storageColumn->columnName][1];
             }
         }
+    }
+
+    /**
+     * Returns the a new Aggregate object specific to this repository for the passed generic aggregate.
+     * @param Aggregate $aggregate
+     * @return bool|Aggregate
+     */
+    public function getRepositorySpecificAggregate(Aggregate $aggregate)
+    {
+        return false;
+    }
+
+    /**
+     * Returns the a new Filter object specific to this repository for the passed generic filter.
+     * @param Filter $filter
+     * @return bool|Filter
+     */
+    public function getRepositorySpecificFilter(Filter $filter)
+    {
+        return false;
     }
 
     /**

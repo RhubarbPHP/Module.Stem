@@ -17,7 +17,6 @@
 
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
-
 class MySqlBetween extends MySqlGroup
 {
 

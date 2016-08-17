@@ -32,29 +32,34 @@ class MySqlContains extends Contains
 {
     use MySqlFilterTrait;
 
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var Contains $filter
+         */
+        return new static($filter->columnName, $filter->contains, $filter->caseSensitive);
+    }
+
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params
      * @return string|void
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-        return self::createColumnWhereClauseExpression(
+        return $this->createColumnWhereClauseExpression(
             "LIKE",
-            "%".$originalFilter->contains."%",
+            "%".$this->contains."%",
             $collection,
             $repository,
-            $originalFilter,
             $whereExpressionCollector,
             $params);
     }

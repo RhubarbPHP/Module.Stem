@@ -30,13 +30,13 @@ class MySqlCountDistinct extends CountDistinct
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
-            $aliasName = $originalAggregate->getAlias();
-            $columnName = $originalAggregate->getAggregateColumnName();
+        if ($this->canAggregateInMySql($repository)) {
+            $aliasName = $this->getAlias();
+            $columnName = $this->getAggregateColumnName();
 
-            $originalAggregate->calculated = true;
+            $this->calculated = true;
 
             $prefix = "`".$sqlStatement->getAlias()."`.";
 

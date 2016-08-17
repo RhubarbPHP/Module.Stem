@@ -97,25 +97,24 @@ trait MySqlFilterTrait
         return $columnName;
     }
 
-    protected static function createColumnWhereClauseExpression(
+    protected function createColumnWhereClauseExpression(
         $sqlOperator,
         $value,
         Collection $collection,
         Repository $repository,
-        ColumnFilter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     )
     {
-        $columnName = $originalFilter->columnName;
+        $columnName = $this->columnName;
 
         if (self::canFilter($collection, $repository, $columnName)) {
 
             $aliases = $collection->getPulledUpAggregatedColumns();
             $isAlias = in_array($columnName, $aliases);
 
-            $columnName = self::getRealColumnName($originalFilter, $collection);
-            $toAlias = self::getTableAlias($originalFilter, $collection);
+            $columnName = self::getRealColumnName($this, $collection);
+            $toAlias = self::getTableAlias($this, $collection);
 
             if ($value === null) {
                 if ($sqlOperator == "="){
@@ -125,7 +124,7 @@ trait MySqlFilterTrait
 
             $paramName = PdoRepository::getPdoParamName($columnName);
 
-            $placeHolder = $originalFilter->detectPlaceHolder($value);
+            $placeHolder = $this->detectPlaceHolder($value);
 
             if (!$placeHolder) {
                 if ($value === null){
@@ -155,16 +154,14 @@ trait MySqlFilterTrait
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param Filter $originalFilter
      * @return bool
      */
-    protected static function doCanFilterWithRepository(
+    protected function doCanFilterWithRepository(
         Collection $collection,
-        Repository $repository,
-        Filter $originalFilter
+        Repository $repository
     ){
-        if ($originalFilter instanceof ColumnFilter) {
-            return self::canFilter($collection, $repository, $originalFilter->getColumnName());
+        if ($this instanceof ColumnFilter) {
+            return self::canFilter($collection, $repository, $this->getColumnName());
         }
 
         return false;

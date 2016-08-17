@@ -35,30 +35,35 @@ class MySqlGreaterThan extends GreaterThan
 {
     use MySqlFilterTrait;
 
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var GreaterThan $filter
+         */
+        return new static($filter->columnName, $filter->greaterThan, $filter->inclusive);
+    }
+    
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param Collection $collection
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
      * @return string|void
      * @internal param $relationshipsToAutoHydrate
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-        return self::createColumnWhereClauseExpression(
-            ($originalFilter->inclusive) ? ">=" : ">",
-            $originalFilter->greaterThan,
+        return $this->createColumnWhereClauseExpression(
+            ($this->inclusive) ? ">=" : ">",
+            $this->greaterThan,
             $collection,
             $repository,
-            $originalFilter,
             $whereExpressionCollector,
             $params);
     }

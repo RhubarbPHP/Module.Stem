@@ -31,23 +31,29 @@ use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 class MySqlGroup extends Group
 {
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var Group $filter
+         */
+        return new static($filter->booleanType, ...$filter->getFilters());
+    }
+
     /**
      * Return true if the repository can handle this filter.
      *
      * @param Collection $collection
      * @param Repository $repository
-     * @param Filter $originalFilter
      * @return bool
      */
-    protected static function doCanFilterWithRepository(
+    protected function doCanFilterWithRepository(
         Collection $collection,
-        Repository $repository,
-        Filter $originalFilter
+        Repository $repository
     ){
         /**
          * @var Filter[] $filters
          */
-        $filters = $originalFilter->getFilters();
+        $filters = $this->getFilters();
 
         foreach ($filters as $filter) {
             if (!$filter->canFilterWithRepository($collection, $repository)){
@@ -58,15 +64,14 @@ class MySqlGroup extends Group
         return true;
     }
 
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
 
-        switch ($originalFilter->booleanType){
+        switch ($this->booleanType){
             case "OR":
                 $group = new OrExpression();
                 break;
@@ -78,8 +83,7 @@ class MySqlGroup extends Group
         /**
          * @var Filter[] $filters
          */
-        $filters = $originalFilter->getFilters();
-        $filterSql = [];
+        $filters = $this->getFilters();
 
         foreach ($filters as $filter) {
             $filter->filterWithRepository($collection, $repository, $group, $params);

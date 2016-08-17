@@ -30,15 +30,15 @@ class MySqlAverage extends Average
 {
     use MySqlAggregateTrait;
 
-    protected static function calculateByRepository(Repository $repository, Aggregate $originalAggregate, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
     {
-        if (self::canAggregateInMySql($repository, $originalAggregate->aggregatedColumnName)) {
-            $aliasName = $originalAggregate->getAlias();
+        if (self::canAggregateInMySql($repository, $this->aggregatedColumnName)) {
+            $aliasName = $this->getAlias();
 
-            $originalAggregate->calculated = true;
+            $this->calculated = true;
 
             $sqlStatement->columns[] = new SelectExpression("AVG( `".$sqlStatement->getAlias()."`.`".
-                $originalAggregate->aggregatedColumnName."`) AS `".$aliasName."`");
+                $this->aggregatedColumnName."`) AS `".$aliasName."`");
         }
     }
 }

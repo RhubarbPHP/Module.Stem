@@ -22,40 +22,46 @@ require_once __DIR__ . "/../../../Filters/LessThan.php";
 
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Filter;
+use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\WhereExpressionCollector;
 
 /**
  * Adds MySql repository support for the Equals filter.
  */
-class MySqlLessThan extends \Rhubarb\Stem\Filters\LessThan
+class MySqlLessThan extends LessThan
 {
     use MySqlFilterTrait;
+
+    public static function fromGenericFilter(Filter $filter)
+    {
+        /**
+         * @var LessThan $filter
+         */
+        return new static($filter->columnName, $filter->lessThan, $filter->inclusive);
+    }
 
     /**
      * Returns the SQL fragment needed to filter where a column equals a given value.
      *
      * @param Collection $collection
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param  \Rhubarb\Stem\Filters\Equals|Filter $originalFilter
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param  array $params
      * @return string|void
      * @internal param $relationshipsToAutoHydrate
      */
-    protected static function doFilterWithRepository(
+    protected function doFilterWithRepository(
         Collection $collection,
         Repository $repository,
-        Filter $originalFilter,
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-        return self::createColumnWhereClauseExpression(
-            ($originalFilter->inclusive) ? "<=" : "<",
-            $originalFilter->lessThan,
+        return $this->createColumnWhereClauseExpression(
+            ($this->inclusive) ? "<=" : "<",
+            $this->lessThan,
             $collection,
             $repository,
-            $originalFilter,
             $whereExpressionCollector,
             $params);
     }
