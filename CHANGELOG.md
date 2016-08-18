@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.1
+
+* Fixed:    MysqlCount caused a PHP warning due to a function signature incompatibility
+
 ### 1.3.0
 
 * Change:   Overhauled how filters and aggregates find their repository specific versions.

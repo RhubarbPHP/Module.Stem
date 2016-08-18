@@ -32,7 +32,7 @@ class MySqlCount extends Count
 {
     use MySqlAggregateTrait;
 
-    protected function canAggregateInMySql(Repository $repository, $columnName)
+    protected function canAggregateInMySql(Repository $repository)
     {
         return true;
     }
