@@ -1,5 +1,6 @@
 Basic Concepts:
     . Models and Schemas:models-and-schemas
+        . Column Types:columns
     . Collections:collections
     . Filtering:filters/
         . Groups:filters/group

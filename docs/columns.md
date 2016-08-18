@@ -103,7 +103,7 @@ rewritten to include the repository type as part of the class name).
 ## Creating your own column types
 
 Column types are a great solution to the challenge of allowing a model to present a particular data type (an object
-or array etc.) without requiring user code or the mode to perform the translation of that data ready for
+or array etc.) without requiring application code or even the model to perform the translation of that data ready for
 storage.
 
 You may also need to create a column type if you are creating a new repository type.
@@ -150,7 +150,7 @@ getTranformFromRepository()
     and should return a single transformed value for the column.
 
 getStorageColumns()
-:   Returns an array of lower level columns used to store the columns data. This allows two neat tricks.
+:   Returns an array of lower level columns used to store the column's data. This allows two neat tricks.
 
     1. Some generic column types perform useful data transformations making our life as a developer a lot easier,
     for example the Json column. Ultimately the Json column stores it's data in a simple string column type.

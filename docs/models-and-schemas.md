@@ -92,7 +92,7 @@ class Customer extends ModelObject
 
 		$schema->addColumn(
 			new AutoIncrementColumn( "CustomerID" ),
-			new ForeignKeyColumn( "CustomerID" ),
+			new ForeignKeyColumn( "MainContactID" ),
 			new StringColumn( "Forename", 200 ),
 			new StringColumn( "Surname", 200 ),
 			new IntegerColumn( "LastOrderID" )
@@ -328,6 +328,38 @@ results.
 
 A delete does *not* cascade through relationships so you should be careful not to orphan records in other
 model types.
+
+## Model Labels
+
+Most model records have a field would could be considered a label for the record. For example a Customer
+model might have a "CustomerName" field. When representing the model it would make sense to show
+this field as the user readable handle.
+
+Some parts of Rhubarb rely on the fact that models can have a **"label"**, for example when populating
+a drop down list with items using models. To give a model a label you should set the `$labelColumnName`
+property of the model's schema object to the name of the correct column.
+
+``` php highlight[12]
+class Customer extends ModelObject
+{
+	public function createSchema()
+	{
+		$schema = new ModelSchema( "tblCustomer" );
+
+		$schema->addColumn(
+			new AutoIncrementColumn( "CustomerID" ),
+			new StringColumn( "CustomerName", 200 ),
+		);
+
+        $schema->labelColumnName = "CustomerName";
+
+		return $schema;
+	}
+}
+```
+
+This can be a computed column, or if you need more control you can instead override the
+`getLabel()` function in your model class.
 
 ## Tracking Changes
 
