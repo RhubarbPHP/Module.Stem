@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.3.x
+
+
 ### 1.3.1
 
 * Fixed:    MysqlCount caused a PHP warning due to a function signature incompatibility
