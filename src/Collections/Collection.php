@@ -562,6 +562,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    public function clearFilter()
+    {
+        $this->filter = null;
+        $this->invalidate();
+
+        return $this;
+    }
+
+
     /**
      * filter the existing list using the supplied DataFilter.
      *
