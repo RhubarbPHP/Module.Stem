@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.3.x
+
+
 ### 1.3.2
 
 Added:	    Collection::clearFilter() to allow removal of a filter on a collection.
