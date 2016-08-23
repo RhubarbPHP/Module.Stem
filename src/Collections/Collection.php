@@ -798,16 +798,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             return;
         }
 
-        // If we have intersections AND we are not the top most statement we need to protect against getting
-        // multiple occurrences of our models in the collection so we add a group by on our unique identifier.
-
-        if (count($this->intersections) > 0 && !$this->isIntersection) {
-            $uniqueIdentifier = $this->getModelSchema()->uniqueIdentifierColumnName;
-            if (!in_array($uniqueIdentifier, $this->groups)) {
-                $this->groups[] = $uniqueIdentifier;
-            }
-        }
-
         // Before we prepare the cursor we should ask all of our filters, sorts and aggregates to
         // check if they have any dot notations that need expanded into intersections.
 
@@ -822,6 +812,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                 $filter->checkForRelationshipIntersections($this, $createIntersectionCallback);
             } catch (CreatedIntersectionException $ex) {
                 $this->filter = null;
+            }
+        }
+
+        // If we have intersections AND we are not the top most statement we need to protect against getting
+        // multiple occurrences of our models in the collection so we add a group by on our unique identifier.
+
+        if (count($this->intersections) > 0 && !$this->isIntersection) {
+            $uniqueIdentifier = $this->getModelSchema()->uniqueIdentifierColumnName;
+            if (!in_array($uniqueIdentifier, $this->groups)) {
+                $this->groups[] = $uniqueIdentifier;
             }
         }
 

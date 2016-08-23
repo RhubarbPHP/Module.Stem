@@ -1,7 +1,8 @@
 # Change Log
 
-### 1.3.x
+### 1.3.3
 
+Fixed:	    Filters creating intersections caused collections with a missing group resulting in multiple rows.
 
 ### 1.3.2
 
