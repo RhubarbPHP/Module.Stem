@@ -150,11 +150,29 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     private static $uniqueReferencesUsed = [];
 
+    /**
+     * True if intersections can cause multiple models to be returned with the same unique identifier
+     *
+     * @var bool
+     */
+    private $allowDuplicates = false;
+
     public function __construct($modelClassName)
     {
         $this->modelClassName = $modelClassName;
     }
 
+    /**
+     * Sets if intersections can cause multiple models to be returned with the same unique identifier
+     *
+     * @param bool $allowDuplicates True if intersections can cause multiple models to be returned with the same unique identifier
+     */
+    public function setAllowDuplicates($allowDuplicates)
+    {
+        $this->allowDuplicates = $allowDuplicates;
+
+        return $this;
+    }
     /**
      * Clears the unique reference counters.
      *
@@ -815,12 +833,12 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
         }
 
-        // If we have intersections AND we are not the top most statement we need to protect against getting
+        // If we have intersections AND we are the top most statement we need to protect against getting
         // multiple occurrences of our models in the collection so we add a group by on our unique identifier.
 
         if (count($this->intersections) > 0 && !$this->isIntersection) {
             $uniqueIdentifier = $this->getModelSchema()->uniqueIdentifierColumnName;
-            if (!in_array($uniqueIdentifier, $this->groups)) {
+            if (!in_array($uniqueIdentifier, $this->groups) && !$this->allowDuplicates) {
                 $this->groups[] = $uniqueIdentifier;
             }
         }
