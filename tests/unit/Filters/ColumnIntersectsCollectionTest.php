@@ -100,5 +100,11 @@ class IntersectsCollectionTest extends ModelUnitTestCase
         $collection->filter(new Not(new ColumnIntersectsCollection("CompanyID", TestContact::find(new Equals("Forename", "Bob")))));
 
         $this->assertCount(3, $collection, "Inverse filter should still work, 3 companies don't have bobs.");
+
+        // Check using the collection twice doesn't cause two intersections
+        $collection->addSort("CompanyID", false);
+        count($collection);
+
+        $this->assertCount(1, $collection->getIntersections(), "Intersections shouldn't double up");
     }
 }

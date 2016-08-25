@@ -1,7 +1,8 @@
 # Change Log
 
-### 1.3.x
+### 1.3.4
 
+Fixed:	    Fixed bug with ColumnIntersectsCollection doubling up intersections if the collection was modified and reused.
 
 ### 1.3.3
 

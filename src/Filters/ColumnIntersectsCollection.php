@@ -40,6 +40,8 @@ class ColumnIntersectsCollection extends Equals
         parent::__construct($columnName, "@{".$collectionToCheckForIntersection->getUniqueReference()."_".$columnName."}");
     }
 
+    private $intersectionCreated = false;
+
     /**
      * An opportunity for implementors to create intersections on the collection.
      *
@@ -50,9 +52,15 @@ class ColumnIntersectsCollection extends Equals
      */
     public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
     {
+        if ($this->intersectionCreated) {
+            return;
+        }
+
         // While this behaviour could (and perhaps more efficiently) be achieved using `intersectWith` we instead
         // do a `joinWith` and pull the target column up so that we can filter in the normal way.
         // This allows this filter to be combined with the 'not' filter and behave as expected.
-        $collection->joinWith($this->collection, $this->columnName, $this->columnName, [$this->columnName => $this->collection->getUniqueReference()."_".$this->columnName]);
+        $collection->joinWith($this->collection, $this->columnName, $this->columnName, [$this->columnName => $this->collection->getUniqueReference() . "_" . $this->columnName]);
+
+        $this->intersectionCreated = true;
     }
 }
