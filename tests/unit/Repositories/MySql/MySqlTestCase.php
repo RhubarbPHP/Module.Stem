@@ -27,9 +27,9 @@ class MySqlTestCase extends ModelUnitTestCase
 
         self::setDefaultConnectionSettings();
 
-        Log::attachLog(new PhpLog(Log::ALL));
-        Log::enableLogging();
-        //Log::disableLogging();
+        //Log::attachLog(new PhpLog(Log::ALL));
+        //Log::enableLogging();
+        Log::disableLogging();
 
         Collection::clearUniqueReferencesUsed();
         PdoRepository::resetPdoParamAliases();

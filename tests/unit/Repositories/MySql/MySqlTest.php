@@ -252,7 +252,7 @@ class MySqlTest extends MySqlTestCase
 
         count($users);
 
-        $this->assertEquals("SELECT `User`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` AS `User` INNER JOIN (SELECT `Company`.* FROM `tblCompany` AS `Company` WHERE `Company`.`CompanyName` = :CompanyName GROUP BY `Company`.`CompanyID`) AS `Company` ON `User`.`CompanyID` = `Company`.`CompanyID`",
+        $this->assertEquals("SELECT `User`.*, `Company`.`CompanyID` AS `CompanyCompanyID`, `Company`.`CompanyName` AS `CompanyCompanyName`, `Company`.`Balance` AS `CompanyBalance`, `Company`.`InceptionDate` AS `CompanyInceptionDate`, `Company`.`LastUpdatedDate` AS `CompanyLastUpdatedDate`, `Company`.`KnockOffTime` AS `CompanyKnockOffTime`, `Company`.`BlueChip` AS `CompanyBlueChip`, `Company`.`ProjectCount` AS `CompanyProjectCount`, `Company`.`CompanyData` AS `CompanyCompanyData`, `Company`.`Active` AS `CompanyActive`, `Company`.`UUID` AS `CompanyUUID` FROM `tblUser` AS `User` INNER JOIN (SELECT `Company`.* FROM `tblCompany` AS `Company` WHERE `Company`.`CompanyName` = :CompanyName GROUP BY `Company`.`CompanyID`) AS `Company` ON `User`.`CompanyID` = `Company`.`CompanyID` GROUP BY `User`.`UserID`",
             MySql::getPreviousStatement());
 
         $company->getRepository()->clearObjectCache();
@@ -333,7 +333,7 @@ class MySqlTest extends MySqlTestCase
 
         $this->assertEquals("UTV", $category2->Companies[0]->CompanyName);
 
-        $this->assertEquals('SELECT `Company3`.*, `CompanyCategory5`.`CompanyCategoryID` AS `CompanyCategory5CompanyCategoryID`, `CompanyCategory5`.`CompanyID` AS `CompanyCategory5CompanyID`, `CompanyCategory5`.`CategoryID` AS `CompanyCategory5CategoryID` FROM `tblCompany` AS `Company3` INNER JOIN (SELECT `CompanyCategory5`.* FROM `tblCompanyCategory` AS `CompanyCategory5` WHERE `CompanyCategory5`.`CategoryID` = :CategoryID3 GROUP BY `CompanyCategory5`.`CompanyID`) AS `CompanyCategory5` ON `Company3`.`CompanyID` = `CompanyCategory5`.`CompanyID` WHERE `Company3`.`Active` = :Active3',
+        $this->assertEquals('SELECT `Company3`.*, `CompanyCategory5`.`CompanyCategoryID` AS `CompanyCategory5CompanyCategoryID`, `CompanyCategory5`.`CompanyID` AS `CompanyCategory5CompanyID`, `CompanyCategory5`.`CategoryID` AS `CompanyCategory5CategoryID` FROM `tblCompany` AS `Company3` INNER JOIN (SELECT `CompanyCategory5`.* FROM `tblCompanyCategory` AS `CompanyCategory5` WHERE `CompanyCategory5`.`CategoryID` = :CategoryID3 GROUP BY `CompanyCategory5`.`CompanyID`) AS `CompanyCategory5` ON `Company3`.`CompanyID` = `CompanyCategory5`.`CompanyID` WHERE `Company3`.`Active` = :Active3 GROUP BY `Company3`.`CompanyID`',
             MySql::getPreviousStatement());
     }
 
