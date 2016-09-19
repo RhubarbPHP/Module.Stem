@@ -2,18 +2,19 @@
 
 ### 1.3.x
 
+* Fixed:    Offline repo correctly reduces grouped collections (when not grouping due to intersection)
 
 ### 1.3.4
 
-Fixed:	    Fixed bug with ColumnIntersectsCollection doubling up intersections if the collection was modified and reused.
+* Fixed:	    Fixed bug with ColumnIntersectsCollection doubling up intersections if the collection was modified and reused.
 
 ### 1.3.3
 
-Fixed:	    Filters creating intersections caused collections with a missing group resulting in multiple rows.
+* Fixed:	    Filters creating intersections caused collections with a missing group resulting in multiple rows.
 
 ### 1.3.2
 
-Added:	    Collection::clearFilter() to allow removal of a filter on a collection.
+* Added:	    Collection::clearFilter() to allow removal of a filter on a collection.
 
 ### 1.3.1
 

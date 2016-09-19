@@ -12,6 +12,13 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
     public $filtered = false;
 
     /**
+     * True if the cursor has been grouped
+     *
+     * @var bool
+     */
+    public $grouped = false;
+
+    /**
      * The augmentation data.
      *
      * @see setAugmentationData()

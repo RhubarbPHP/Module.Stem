@@ -15,6 +15,9 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class MySqlCursor extends CollectionCursor
 {
+
+    public $grouped = true;
+
     /**
      * @var \PDOStatement
      */
