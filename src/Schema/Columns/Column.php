@@ -120,7 +120,6 @@ class Column
                 return $superType;
             }
         }
-
         return $this;
     }
 
