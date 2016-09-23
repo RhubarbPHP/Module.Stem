@@ -15,7 +15,6 @@ use Rhubarb\Stem\Filters\LessThan;
 use Rhubarb\Stem\Filters\Not;
 use Rhubarb\Stem\Filters\OrGroup;
 use Rhubarb\Stem\Repositories\MySql\MySql;
-use Rhubarb\Stem\Tests\unit\Fixtures\Account;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
@@ -112,6 +111,25 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
         $this->assertCount(1, $collection);
         $this->assertEquals(3, $collection[0]->CountOfContacts);
+    }
+
+    public function testGroupingRemovesItemsFromResultsSet()
+    {
+        $companies = [];
+        foreach (TestContact::all() as $contact) {
+            if (isset($companies[$contact->CompanyID])) {
+                $companies[$contact->CompanyID] += $contact->CompanyID;
+            } else {
+                $companies[$contact->CompanyID] = $contact->CompanyID;
+            }
+        }
+
+        $results = TestContact::all()->addAggregateColumn(new Sum('CompanyID'))->addGroup("CompanyID");
+        self::assertCount(count($companies), $results);
+
+        foreach ($results as $result) {
+            self::assertEquals($companies[$result->CompanyID], $result->SumOfCompanyID);
+        }
     }
 
     public function testLimits()

@@ -192,16 +192,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         if ($this->uniqueReference === null) {
 
-            $alias = $modelName = basename(str_replace("\\", "/", $this->getModelClassName()));
-            $count = 1;
+            $modelName = basename(str_replace("\\", "/", $this->getModelClassName()));
 
-            while (in_array($alias, self::$uniqueReferencesUsed)) {
-                $count++;
-                $alias = $modelName . $count;
+            if (!isset(self::$uniqueReferencesUsed[$modelName])){
+                self::$uniqueReferencesUsed[$modelName] = 0;
             }
 
-            $this->uniqueReference = $alias;
-            Collection::$uniqueReferencesUsed[] = $alias;
+            self::$uniqueReferencesUsed[$modelName]++;
+
+            $this->uniqueReference = $modelName.self::$uniqueReferencesUsed[$modelName];
         }
 
         return $this->uniqueReference;
@@ -881,6 +880,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $this->collectionCursor->deDupe();
 
+        if (!$this->collectionCursor->grouped) {
+            Log::warning("A collection for "
+                . $this->getModelClassName()
+                . " was not grouped in a repository. Performance may degrade significantly.", "STEM");
+            $this->reduceCursorForGroups();
+        }
+
         /** Some cursors handle sorts. Any that couldn't be handled are processed here */
         $sortsToProcess = [];
         foreach ($this->sorts as $sort) {
@@ -1177,6 +1183,27 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
 
             $this->collectionCursor->filterModelsByIdentifier($uniqueIdentifiersToFilter);
+        }
+    }
+
+    /**
+     * Removes results which should be collapsed into a single grouped result
+     */
+    private function reduceCursorForGroups()
+    {
+        $reduceForGroups = $groupKeys = [];
+        foreach ($this->collectionCursor as $model) {
+            $groupKey = $this->getGroupKeyForModel($model);
+            if ($groupKey != '') {
+                if (!in_array($groupKey, $groupKeys)) {
+                    $groupKeys[] = $groupKey;
+                } else {
+                    $reduceForGroups[] = $model->getUniqueIdentifier();
+                }
+            }
+        }
+        if (count($reduceForGroups) > 0) {
+            $this->collectionCursor->filterModelsByIdentifier($reduceForGroups);
         }
     }
 
