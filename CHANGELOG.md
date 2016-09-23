@@ -2,6 +2,7 @@
 
 ### 1.3.x
 
+* Fixed:    Collection column aliasing no longer get progressively slower with each unique reference used
 * Fixed:    Offline repo correctly reduces grouped collections (when not grouping due to intersection)
 
 ### 1.3.4

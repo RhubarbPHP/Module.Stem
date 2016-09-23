@@ -192,16 +192,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         if ($this->uniqueReference === null) {
 
-            $alias = $modelName = basename(str_replace("\\", "/", $this->getModelClassName()));
-            $count = 1;
+            $modelName = basename(str_replace("\\", "/", $this->getModelClassName()));
 
-            while (in_array($alias, self::$uniqueReferencesUsed)) {
-                $count++;
-                $alias = $modelName . $count;
+            if (!isset(self::$uniqueReferencesUsed[$modelName])){
+                self::$uniqueReferencesUsed[$modelName] = 0;
             }
 
-            $this->uniqueReference = $alias;
-            Collection::$uniqueReferencesUsed[] = $alias;
+            self::$uniqueReferencesUsed[$modelName]++;
+
+            $this->uniqueReference = $modelName.self::$uniqueReferencesUsed[$modelName];
         }
 
         return $this->uniqueReference;
