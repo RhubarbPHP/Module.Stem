@@ -200,7 +200,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
             self::$uniqueReferencesUsed[$modelName]++;
 
-            $this->uniqueReference = $modelName.self::$uniqueReferencesUsed[$modelName];
+            $this->uniqueReference = $modelName.(self::$uniqueReferencesUsed[$modelName]>1 ? self::$uniqueReferencesUsed[$modelName] : "");
         }
 
         return $this->uniqueReference;
