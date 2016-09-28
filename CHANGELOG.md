@@ -2,6 +2,8 @@
 
 ### 1.3.x
 
+* Fixed:    Pull ups of columns now respect types when filtering in MySql
+
 ### 1.3.5
 
 * Added:    BinaryDataColumn (mysql longblob)
@@ -10,15 +12,15 @@
 
 ### 1.3.4
 
-* Fixed:	    Fixed bug with ColumnIntersectsCollection doubling up intersections if the collection was modified and reused.
+* Fixed:	Fixed bug with ColumnIntersectsCollection doubling up intersections if the collection was modified and reused.
 
 ### 1.3.3
 
-* Fixed:	    Filters creating intersections caused collections with a missing group resulting in multiple rows.
+* Fixed:	Filters creating intersections caused collections with a missing group resulting in multiple rows.
 
 ### 1.3.2
 
-* Added:	    Collection::clearFilter() to allow removal of a filter on a collection.
+* Added:	Collection::clearFilter() to allow removal of a filter on a collection.
 
 ### 1.3.1
 

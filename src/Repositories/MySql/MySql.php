@@ -307,7 +307,7 @@ class MySql extends PdoRepository
             $count = static::returnSingleValue("SELECT FOUND_ROWS()");
         }
 
-        $cursor = new MySqlCursor($statement, $this, $count);
+        $cursor = new MySqlCursor($statement, $this, $count, $collection->additionalColumns);
         $filter = $collection->getFilter();
 
         if ($filter){
@@ -400,6 +400,9 @@ class MySql extends PdoRepository
 
                 if (isset($intersectionCollectionColumns[$column])){
                     $inQuery = true;
+                    $columnDef = $intersectionCollectionColumns[$column];
+                    $columnDef->columnName = $alias;
+                    $collection->additionalColumns[$alias] = $columnDef->getRepositorySpecificColumn(self::class);
                 }
 
                 if (!$inQuery) {

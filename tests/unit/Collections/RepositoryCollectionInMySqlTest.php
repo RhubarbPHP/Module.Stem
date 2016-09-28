@@ -2,9 +2,12 @@
 
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
+use Rhubarb\Crown\DateTime\RhubarbDate;
+use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\Logging\PhpLog;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -84,6 +87,27 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         $sql = MySql::getPreviousStatement();
 
         $this->assertContains("HAVING", $sql);
+    }
+
+    public function testPullUpsHaveCorrectTypes()
+    {
+        $collection = Company::all();
+        $collection->intersectWith(
+            TestContact::all()
+                ->addGroup("CompanyID"),
+            "CompanyID",
+            "CompanyID",
+            ["DateOfBirth"]);
+
+        $this->assertInstanceOf(RhubarbDate::class, $collection[1]->DateOfBirth);
+
+        $collection->filter(new GreaterThan("DateOfBirth", new RhubarbDate("2016-01-01")));
+
+        count($collection);
+
+        $params = MySql::getPreviousParameters();
+
+        $this->assertEquals("2016-01-01", $params["DateOfBirth"]);
     }
 
     protected function setupData()

@@ -381,6 +381,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $contact = new TestContact();
         $contact->Forename = "John";
         $contact->CompanyID = 1;
+        $contact->DateOfBirth = "now";
         $contact->save();
 
         $contact = new TestContact();

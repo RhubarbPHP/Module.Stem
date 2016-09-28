@@ -5,6 +5,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Collections;
 use Rhubarb\Stem\Collections\CollectionCursor;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -79,7 +80,14 @@ class MySqlCursor extends CollectionCursor
      */
     private $hydrationMappings = [];
 
-    public function __construct(\PDOStatement $statement, Repository $repository, $totalCount)
+    /**
+     * An array of column objects for columns not in the direct model but pulled up from others.
+     *
+     * @var Column[]
+     */
+    private $additionalColumns = [];
+
+    public function __construct(\PDOStatement $statement, Repository $repository, $totalCount, $additionalColumns = [])
     {
         $this->statement = $statement;
         $this->repository = $repository;
@@ -88,6 +96,7 @@ class MySqlCursor extends CollectionCursor
         $this->uniqueIdentifier = $this->schema->uniqueIdentifierColumnName;
         $this->rowCount = $statement->rowCount();
         $this->totalCount = $totalCount;
+        $this->additionalColumns = $additionalColumns;
     }
 
     /**
@@ -175,6 +184,15 @@ class MySqlCursor extends CollectionCursor
 
                 // Keep a handle on the current row.
                 $this->currentRow = $row;
+
+                foreach($this->additionalColumns as $columnName => $column){
+                    if (isset($row[$columnName])){
+                        $transform = $column->getTransformFromRepository();
+                        if ($transform) {
+                            $row[$columnName] = $transform($row);
+                        }
+                    }
+                }
 
                 // Populate the modelling repository data
                 $this->repository->cachedObjectData[$row[$this->uniqueIdentifier]] =

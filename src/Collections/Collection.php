@@ -13,6 +13,7 @@ use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
+use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
@@ -156,6 +157,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @var bool
      */
     private $allowDuplicates = false;
+
+    /**
+     * Stores a list of column types for pull ups from intersections.
+     *
+     * @var Column[]
+     */
+    public $additionalColumns = [];
 
     public function __construct($modelClassName)
     {

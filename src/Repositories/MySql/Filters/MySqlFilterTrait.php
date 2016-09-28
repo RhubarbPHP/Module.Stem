@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Filters\ColumnFilter;
 use Rhubarb\Stem\Filters\Filter;
@@ -133,7 +134,8 @@ trait MySqlFilterTrait
                     $params[$paramName] = self::getTransformedComparisonValueForRepository(
                         $columnName,
                         $value,
-                        $repository
+                        $repository,
+                        $collection
                     );
                     $paramName = ":" . $paramName;
                 }
@@ -167,11 +169,15 @@ trait MySqlFilterTrait
         return false;
     }
 
-    protected final static function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository)
+    protected final static function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository, Collection $collection)
     {
         $exampleObject = SolutionSchema::getModel($repository->getModelClass());
 
-        $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($columnName);
+        if (isset($collection->additionalColumns[$columnName])){
+            $columnSchema = $collection->additionalColumns[$columnName];
+        } else {
+            $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($columnName);
+        }
 
         if ($columnSchema != null) {
             // Transform the value first into model data. This function should sanitise the value as
