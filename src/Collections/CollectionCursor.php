@@ -19,6 +19,18 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
     public $grouped = false;
 
     /**
+     * The indexes of rows to skip because they have been deduped by manual grouping.
+     * @var array
+     */
+    protected $filteredIndexes = [];
+    
+    /**
+     * The number of rows being filtered by index.
+     * @var int
+     */
+    protected $filteredIndexCount = 0;
+
+    /**
      * The augmentation data.
      *
      * @see setAugmentationData()
@@ -29,6 +41,17 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
     protected $duplicatedRows = [];
 
     public abstract function filterModelsByIdentifier($uniqueIdentifiers);
+
+    /**
+     * Excludes the array of indexes from the list of selected rows.
+     *
+     * @param int[] $indexes
+     */
+    public function filterModelsByIndex($indexes)
+    {
+        $this->filteredIndexes = array_merge($this->filteredIndexes, $indexes);
+        $this->filteredIndexCount = count($this->filteredIndexes);
+    }
 
     /**
      * Sets the augmentation data for the collection.

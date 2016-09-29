@@ -174,7 +174,7 @@ trait MySqlFilterTrait
         $exampleObject = SolutionSchema::getModel($repository->getModelClass());
 
         if (isset($collection->additionalColumns[$columnName])){
-            $columnSchema = $collection->additionalColumns[$columnName];
+            $columnSchema = $collection->additionalColumns[$columnName]["column"];
         } else {
             $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($columnName);
         }

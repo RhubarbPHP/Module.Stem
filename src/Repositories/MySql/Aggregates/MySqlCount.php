@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../../Aggregates/Count.php';
 
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Count;
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\GroupExpression;
 use Rhubarb\Stem\Sql\SelectColumn;
@@ -37,7 +38,7 @@ class MySqlCount extends Count
         return true;
     }
 
-    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, Collection $collection, &$namedParams)
     {
         $aliasName = $this->getAlias();
 

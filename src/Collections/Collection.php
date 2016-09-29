@@ -888,7 +888,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $this->collectionCursor->deDupe();
 
-        if (!$this->collectionCursor->grouped) {
+        if (!$this->collectionCursor->grouped && count($this->groups)) {
             Log::warning("A collection for "
                 . $this->getModelClassName()
                 . " was not grouped in a repository. Performance may degrade significantly.", "STEM");
@@ -1200,18 +1200,21 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     private function reduceCursorForGroups()
     {
         $reduceForGroups = $groupKeys = [];
+        $x = 0;
         foreach ($this->collectionCursor as $model) {
             $groupKey = $this->getGroupKeyForModel($model);
             if ($groupKey != '') {
                 if (!in_array($groupKey, $groupKeys)) {
                     $groupKeys[] = $groupKey;
                 } else {
-                    $reduceForGroups[] = $model->getUniqueIdentifier();
+                    $reduceForGroups[] = $x;
                 }
             }
+            $x++;
         }
+        
         if (count($reduceForGroups) > 0) {
-            $this->collectionCursor->filterModelsByIdentifier($reduceForGroups);
+            $this->collectionCursor->filterModelsByIndex($reduceForGroups);
         }
     }
 

@@ -59,7 +59,7 @@ class RepositoryCollection extends Collection
         }
 
         foreach($this->getAggregateColumns() as $aggregateColumn){
-            if (!$aggregateColumn->canAggregateWithRepository($repository)){
+            if (!$aggregateColumn->canAggregateWithRepository($repository, $this)){
                 return false;
             }
         }

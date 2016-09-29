@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../../Aggregates/CountDistinct.php';
 
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\CountDistinct;
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\SelectExpression;
 use Rhubarb\Stem\Sql\SqlStatement;
@@ -30,15 +31,15 @@ class MySqlCountDistinct extends CountDistinct
 {
     use MySqlAggregateTrait;
 
-    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, Collection $collection, &$namedParams)
     {
-        if ($this->canAggregateInMySql($repository)) {
+        if ($this->canAggregateInMySql($repository, $collection)) {
             $aliasName = $this->getAlias();
             $columnName = $this->getAggregateColumnName();
 
             $this->calculated = true;
 
-            $prefix = "`".$sqlStatement->getAlias()."`.";
+            $prefix = "`".$this->getSourceTableAlias($collection)."`.";
 
             $sqlStatement->columns[] = new SelectExpression("COUNT( DISTINCT {$prefix}`{$columnName}` ) AS `{$aliasName}`");
         }

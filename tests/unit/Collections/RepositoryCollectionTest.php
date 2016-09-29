@@ -384,10 +384,22 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $contact->DateOfBirth = "now";
         $contact->save();
 
+        $declaration = new TestDeclaration();
+        $declaration->ContactID = $contact->ContactID;
+        $declaration->save();
+
+        $declaration = new TestDeclaration();
+        $declaration->ContactID = $contact->ContactID;
+        $declaration->save();
+
         $contact = new TestContact();
         $contact->Forename = "Mary";
         $contact->CompanyID = 2;
         $contact->save();
+
+        $declaration = new TestDeclaration();
+        $declaration->ContactID = $contact->ContactID;
+        $declaration->save();
 
         $contact = new TestContact();
         $contact->Forename = "Jule";
@@ -673,7 +685,7 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
 
         $allDeclarations = TestDeclaration::all();
-        $this->assertEquals(17, sizeof($allDeclarations), "There should be 17 declarations");
+        $this->assertEquals(20, sizeof($allDeclarations), "There should be 17 declarations");
 
         // Find all of our donations within the date range
         $startDate = new RhubarbDate("2016-01-01");

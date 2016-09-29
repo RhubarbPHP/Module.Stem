@@ -308,6 +308,12 @@ class MySql extends PdoRepository
         }
 
         $cursor = new MySqlCursor($statement, $this, $count, $collection->additionalColumns);
+        // If the number of groups in the statement match those demanded by the collection we can then
+        // assume that all grouping has executed in the repository. If not then we set the flag accordingly
+        // so that the Collection class can manually group the rows later.
+        $cursor->grouped = count($collection->getGroups()) == count($sqlStatement->groups);
+
+
         $filter = $collection->getFilter();
 
         if ($filter){
@@ -398,11 +404,20 @@ class MySql extends PdoRepository
 
                 $inQuery = false;
 
+                // Native columns
                 if (isset($intersectionCollectionColumns[$column])){
                     $inQuery = true;
-                    $columnDef = $intersectionCollectionColumns[$column];
+                    $columnDef = clone $intersectionCollectionColumns[$column];
                     $columnDef->columnName = $alias;
-                    $collection->additionalColumns[$alias] = $columnDef->getRepositorySpecificColumn(self::class);
+                    $collection->additionalColumns[$alias] = ["column" => $columnDef->getRepositorySpecificColumn(self::class), "collection" => $collectionJoin->collection];
+                }
+
+                // Nested pull ups of native columns
+                if (isset($collectionJoin->collection->additionalColumns[$column])){
+                    $inQuery = true;
+                    $columnDef = clone $collectionJoin->collection->additionalColumns[$column]["column"];
+                    $columnDef->columnName = $alias;
+                    $collection->additionalColumns[$alias] = ["column" => $columnDef->getRepositorySpecificColumn(self::class), "collection" => $collectionJoin->collection];
                 }
 
                 if (!$inQuery) {
@@ -492,14 +507,14 @@ class MySql extends PdoRepository
         // added to the query and we'll be iterating through all the rows anyway for the sake of the one aggregate
         // that can't be done in the query.
         foreach ($aggregates as $aggregate) {
-            if (!$aggregate->canAggregateWithRepository($this)){
+            if (!$aggregate->canAggregateWithRepository($this, $collection)){
                 $allAggregated = false;
             }
         }
 
         if ($allAggregated) {
             foreach ($aggregates as $aggregate) {
-                $aggregate->aggregateWithRepository($this, $sqlStatement, $namedParams);
+                $aggregate->aggregateWithRepository($this, $sqlStatement, $collection, $namedParams);
                 if (!$aggregate->wasAggregatedByRepository()) {
                     $allAggregated = false;
                 }
@@ -609,7 +624,7 @@ class MySql extends PdoRepository
         foreach ($aggregates as $aggregate) {
             $index++;
 
-            $clause = $aggregate->aggregateWithRepository($this, $relationships);
+            $clause = $aggregate->aggregateWithRepository($this, $relationships, $collection);
 
             if ($clause != "") {
                 $count++;

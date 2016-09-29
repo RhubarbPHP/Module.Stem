@@ -16,9 +16,6 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class MySqlCursor extends CollectionCursor
 {
-
-    public $grouped = true;
-
     /**
      * @var \PDOStatement
      */
@@ -185,7 +182,8 @@ class MySqlCursor extends CollectionCursor
                 // Keep a handle on the current row.
                 $this->currentRow = $row;
 
-                foreach($this->additionalColumns as $columnName => $column){
+                foreach($this->additionalColumns as $columnName => $columnSpec){
+                    $column = $columnSpec["column"];
                     if (isset($row[$columnName])){
                         $transform = $column->getTransformFromRepository();
                         if ($transform) {
@@ -201,6 +199,10 @@ class MySqlCursor extends CollectionCursor
                 // Remember we've already been here.
                 $this->rowsFetched[$this->lastFetchedRow] = $row[$this->uniqueIdentifier];
             }
+        }
+
+        if (in_array($index, $this->filteredIndexes)){
+            return $this->offsetGet($index+1);
         }
 
         $id = $this->rowsFetched[$index];
@@ -307,7 +309,7 @@ class MySqlCursor extends CollectionCursor
      */
     public function offsetExists($offset)
     {
-        return ($offset < ($this->rowCount - $this->filteredCount) && $offset >= 0);
+        return ($offset < ($this->rowCount - $this->filteredCount- $this->filteredIndexCount) && $offset >= 0);
     }
 
     /**
@@ -354,6 +356,6 @@ class MySqlCursor extends CollectionCursor
      */
     public function count()
     {
-        return $this->totalCount - $this->filteredCount;
+        return $this->totalCount - $this->filteredCount - $this->filteredIndexCount;
     }
 }

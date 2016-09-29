@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../../Aggregates/Sum.php';
 
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Aggregates\Sum;
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Sql\SelectExpression;
 use Rhubarb\Stem\Sql\SqlStatement;
@@ -30,14 +31,14 @@ class MySqlSum extends Sum
 {
     use MySqlAggregateTrait;
 
-    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, Collection $collection, &$namedParams)
     {
-        if ($this->canAggregateInMySql($repository)) {
+        if ($this->canAggregateInMySql($repository, $collection)) {
             $aliasName = $this->getAlias();
 
             $this->calculated = true;
 
-            $sqlStatement->columns[] = new SelectExpression("SUM( `".$sqlStatement->getAlias()."`.`".
+            $sqlStatement->columns[] = new SelectExpression("SUM( `".$this->getSourceTableAlias($collection)."`.`".
                 $this->aggregatedColumnName."`) AS `".$aliasName."`");
         }
     }

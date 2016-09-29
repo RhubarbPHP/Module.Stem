@@ -6,6 +6,9 @@ use Rhubarb\Crown\DateTime\RhubarbDate;
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\Logging\PhpLog;
+use Rhubarb\Stem\Aggregates\Count;
+use Rhubarb\Stem\Aggregates\CountDistinct;
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Filters\GreaterThan;
 use Rhubarb\Stem\Repositories\MySql\MySql;
@@ -14,6 +17,7 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\StemSettings;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestDeclaration;
 
 class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 {
@@ -22,6 +26,8 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         Log::clearLogs();
 
         parent::setUp();
+
+        Collection::clearUniqueReferencesUsed();
 
         Log::clearLogs();
 
@@ -47,7 +53,6 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
 
         $this->setupData();
     }
-
 
     public function testCollectionsNotFilterableInRepository()
     {
@@ -108,12 +113,39 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         $params = MySql::getPreviousParameters();
 
         $this->assertEquals("2016-01-01", $params["DateOfBirth"]);
+
+        // If column types aren't registered properly stem thinks it can't aggregate on a value
+        // which kicks it into manual aggregation and grouping hitting performance hard. Here
+        // we check it is able to understand that pull ups can style be aggregated.
+
+        $collection = Company::all();
+        $collection->intersectWith(
+            TestContact::all()
+                ->intersectWith(
+                    TestDeclaration::all(),
+                    "ContactID",
+                    "ContactID",
+                    [
+                        "DeclarationID"
+                    ]),
+            "CompanyID",
+            "CompanyID",
+            ["DeclarationID"])
+        ->addAggregateColumn(new CountDistinct("DeclarationID"));
+
+        $this->assertCount(2, $collection);
+        $this->assertEquals(2, $collection[0]["DistinctCountOfDeclarationID"]);
+        $this->assertEquals(1, $collection[1]["DistinctCountOfDeclarationID"]);
+
+        $statement = MySql::getPreviousStatement();
+
+        $this->assertContains("COUNT( DISTINCT `TestContact2`.`DeclarationID`", $statement);
     }
 
     protected function setupData()
     {
         parent::setupData();
 
-        Log::attachLog(new PhpLog(Log::PERFORMANCE_LEVEL));
+        Log::attachLog(new PhpLog(Log::PERFORMANCE_LEVEL | Log::WARNING_LEVEL));
     }
 }

@@ -113,7 +113,7 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function offsetExists($offset)
     {
-        return ($offset < $this->count() && $offset >= 0);
+        return ($offset < ($this->count() - $this->filteredIndexCount) && $offset >= 0);
     }
 
     /**
@@ -127,6 +127,10 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function offsetGet($offset)
     {
+        if (in_array($offset, $this->filteredIndexes)){
+            return $this->offsetGet($offset+1);
+        }
+
         if($offset >= count($this->uniqueIdentifiers))
         {
             $newoffset = $offset - count($this->uniqueIdentifiers);
@@ -195,7 +199,7 @@ class UniqueIdentifierListCursor extends CollectionCursor
      */
     public function count()
     {
-        return count($this->uniqueIdentifiers) + count($this->duplicatedRows);
+        return count($this->uniqueIdentifiers) + count($this->duplicatedRows) - $this->filteredIndexCount;
     }
 
     public function deDupe()

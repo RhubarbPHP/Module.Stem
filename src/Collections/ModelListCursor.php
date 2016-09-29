@@ -111,7 +111,7 @@ class ModelListCursor extends CollectionCursor
      */
     public function offsetExists($offset)
     {
-        return ($offset < $this->count() && $offset >= 0);
+        return ($offset < ($this->count() - $this->filteredIndexCount) && $offset >= 0);
     }
 
     /**
@@ -125,6 +125,10 @@ class ModelListCursor extends CollectionCursor
      */
     public function offsetGet($offset)
     {
+        if (in_array($offset, $this->filteredIndexes)){
+            return $this->offsetGet($offset+1);
+        }
+
         $object = $this->models[$offset];
         $id = $object->UniqueIdentifier;
 
@@ -179,6 +183,6 @@ class ModelListCursor extends CollectionCursor
      */
     public function count()
     {
-        return count($this->models);
+        return count($this->models) - $this->filteredIndexCount;
     }
 }

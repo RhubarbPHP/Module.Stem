@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem\Aggregates;
 
+use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
@@ -116,18 +117,21 @@ abstract class Aggregate
      *
      * @param Repository $repository
      * @param SqlStatement $sqlStatement
+     * @param Collection $collection
      * @param $namedParams
      */
     protected function calculateByRepository(
         Repository $repository,
         SqlStatement $sqlStatement,
+        Collection $collection,
         &$namedParams
     )
     {
     }
 
     protected function canCalculateByRepository(
-        Repository $repository
+        Repository $repository,
+        Collection $collection
     )
     {
         return false;
@@ -137,16 +141,17 @@ abstract class Aggregate
      * Checks if this aggregate can be calculated using it's repository
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
-     * @param SqlStatement $sqlStatement
-     * @param $namedParams
+     * @param Collection $collection
      * @return mixed|string
+     * @internal param SqlStatement $sqlStatement
+     * @internal param $namedParams
      */
-    final public function canAggregateWithRepository(Repository $repository)
+    final public function canAggregateWithRepository(Repository $repository, Collection $collection)
     {
         $specificAggregate = $repository->getRepositorySpecificAggregate($this);
 
         if ($specificAggregate) {
-            return $specificAggregate->canCalculateByRepository($repository);
+            return $specificAggregate->canCalculateByRepository($repository, $collection);
         }
 
         return false;
@@ -160,15 +165,16 @@ abstract class Aggregate
      *
      * @param  \Rhubarb\Stem\Repositories\Repository $repository
      * @param SqlStatement $sqlStatement
+     * @param Collection $collection
      * @param $namedParams
      * @return mixed|string
      */
-    final public function aggregateWithRepository(Repository $repository, SqlStatement $sqlStatement, &$namedParams)
+    final public function aggregateWithRepository(Repository $repository, SqlStatement $sqlStatement, Collection $collection, &$namedParams)
     {
         $specificAggregate = $repository->getRepositorySpecificAggregate($this);
 
         if ($specificAggregate) {
-            $specificAggregate->calculateByRepository($repository, $sqlStatement, $namedParams);
+            $specificAggregate->calculateByRepository($repository, $sqlStatement, $collection, $namedParams);
 
             if ($specificAggregate->calculated){
                 $this->calculated = true;
