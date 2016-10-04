@@ -61,18 +61,15 @@ abstract class PdoRepository extends Repository
      */
     public static function getPdoParamName($columnName)
     {
-        $alias = $columnName;
-        $count = 1;
+        if (isset(self::$pdoParamAliasesUsed[$columnName])) {
+            self::$pdoParamAliasesUsed[$columnName]++;
 
-        while(in_array($alias, self::$pdoParamAliasesUsed)){
-            $count++;
+            return $columnName . self::$pdoParamAliasesUsed[$columnName];
+        } else {
+            self::$pdoParamAliasesUsed[$columnName] = 1;
 
-            $alias = $columnName.$count;
+            return $columnName;
         }
-
-        self::$pdoParamAliasesUsed[] = $alias;
-
-        return $alias;
     }
 
     /**
