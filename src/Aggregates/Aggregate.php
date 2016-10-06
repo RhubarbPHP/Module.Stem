@@ -22,6 +22,7 @@ use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
+use Rhubarb\Stem\Schema\Columns\StringColumn;
 use Rhubarb\Stem\Sql\SqlStatement;
 
 /**
@@ -178,6 +179,12 @@ abstract class Aggregate
 
             if ($specificAggregate->calculated){
                 $this->calculated = true;
+
+                $collection->additionalColumns[$specificAggregate->getAlias()] =
+                    [
+                        "column" => new StringColumn($specificAggregate->getAlias(),50),
+                        "collection" => $collection
+                    ];
             }
         }
     }
