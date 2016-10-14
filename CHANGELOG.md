@@ -1,7 +1,16 @@
 # Change Log
 
-### 1.3.x
+### 1.3.9
 
+* Fixed:    Aggregates of nested intersections now populates additional column data on collections correctly. 
+
+### 1.3.8
+
+* Added:    Adding a JSON contains filter and removing a static final method
+
+### 1.3.7
+
+* Change:   Speed improvement by using isset instead of in_array
 
 ### 1.3.6
 
