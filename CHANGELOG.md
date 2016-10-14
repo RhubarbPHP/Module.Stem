@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.3.x
+
+
 ### 1.3.9
 
 * Fixed:    Aggregates of nested intersections now populates additional column data on collections correctly. 
