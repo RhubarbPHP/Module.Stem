@@ -1,6 +1,8 @@
 # Change Log
 
-### 1.3.x
+### 1.3.12
+
+* Fixed:    MySql Timezone handling - Ensuring repo sets timezone from MySql database before Column uses it
 
 ### 1.3.11
 
