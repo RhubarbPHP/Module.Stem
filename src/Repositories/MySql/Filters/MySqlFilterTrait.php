@@ -131,7 +131,7 @@ trait MySqlFilterTrait
                 if ($value === null){
                     $paramName = "NULL";
                 } else {
-                    $params[$paramName] = self::getTransformedComparisonValueForRepository(
+                    $params[$paramName] = $this->getTransformedComparisonValueForRepository(
                         $columnName,
                         $value,
                         $repository,
