@@ -50,7 +50,9 @@ abstract class ModelCollectionHandler extends UrlHandler
      */
     public function getModelCollection()
     {
-        return new RepositoryCollection($this->modelName);
+        $modelClassName = SolutionSchema::getModelClass($this->modelName);
+
+        return $modelClassName::all();
     }
 
     public function getModelObject()
