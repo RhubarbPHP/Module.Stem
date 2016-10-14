@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.3.x
+### 1.3.11
 
 * Added:    Support for batch updating with intersections
 
