@@ -186,7 +186,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         foreach ($fieldsToUpdate as $key) {
             $paramName = "Update" . $key;
 
-            $sets[] = "`" . $key . "` = :" . $paramName;
+            $sets[] = "`".$this->getAlias()."`.`" . $key . "` = :" . $paramName;
         }
 
         $sql .= " SET ".implode(",", $sets);
