@@ -2,6 +2,11 @@
 
 ### 1.3.x
 
+* Added:    Support for batch updating with intersections
+
+### 1.3.10
+
+* Fixed:    ModelCollectionUrlHandler now uses Model::all() so that base filters are respected
 
 ### 1.3.9
 
