@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql\Schema\Columns;
 
 use Rhubarb\Crown\DateTime\RhubarbDateTime;
 use Rhubarb\Stem\Repositories\MySql\MySql;
+use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateTimeColumn;
 use Rhubarb\Stem\StemSettings;
@@ -64,8 +65,10 @@ class MySqlDateTimeColumn extends DateTimeColumn
                 $settings = StemSettings::singleton();
 
                 if (!$settings->repositoryTimeZone) {
-                    MySql::getDefaultConnection();
-                }
+                    // Ensure a connection to the DB has been established so that we can
+                    // use the server's time zone as a base reference.
+                    $repository = Repository::getDefaultRepositoryClassName();
+                    $repository::getDefaultConnection();                }
 
                 if ($settings->repositoryTimeZone) {
                     // Normalise timezones to default system timezone when stored in DB

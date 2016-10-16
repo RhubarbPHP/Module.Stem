@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.13
+
+* Fixed:    MySql Timezone handling fix introduced issue with SaasMySqlRepository
+
 ### 1.3.12
 
 * Fixed:    MySql Timezone handling - Ensuring repo sets timezone from MySql database before Column uses it
