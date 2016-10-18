@@ -36,7 +36,7 @@ class CollectionMySqlTest extends MySqlTestCase
 
         $lastStatement = MySql::getPreviousStatement();
 
-        $this->assertContains("SET `CompanyName` =", $lastStatement);
+        $this->assertContains("SET `Company`.`CompanyName` =", $lastStatement);
         $this->assertContains("`Active` =", $lastStatement);
 
         $count = MySql::returnSingleValue("SELECT COUNT(*) FROM tblCompany WHERE CompanyName = 'Test Company'");
