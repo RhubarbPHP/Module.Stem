@@ -169,7 +169,7 @@ trait MySqlFilterTrait
         return false;
     }
 
-    protected final static function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository, Collection $collection)
+    protected function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository, Collection $collection)
     {
         $exampleObject = SolutionSchema::getModel($repository->getModelClass());
 

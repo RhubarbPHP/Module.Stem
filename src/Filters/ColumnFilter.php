@@ -21,14 +21,8 @@ namespace Rhubarb\Stem\Filters;
 require_once __DIR__ . '/Filter.php';
 
 use Rhubarb\Stem\Collections\Collection;
-use Rhubarb\Stem\Collections\CollectionJoin;
-use Rhubarb\Stem\Collections\RepositoryCollection;
-use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
-use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\Relationships\OneToMany;
-use Rhubarb\Stem\Schema\SolutionSchema;
 
 /**
  * A base class for all filters that match a value against a single column in some way.
@@ -57,7 +51,6 @@ abstract class ColumnFilter extends Filter
 
         return $settings;
     }
-
 
     /**
      * Converts the comparison value used in the constructor to one which can be compared against that returned

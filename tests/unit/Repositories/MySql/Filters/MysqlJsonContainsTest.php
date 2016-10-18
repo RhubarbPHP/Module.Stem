@@ -2,6 +2,8 @@
 
 namespace Rhubarb\Stem\Tests\unit\Filters;
 
+use Rhubarb\Crown\Logging\Log;
+use Rhubarb\Crown\Logging\PhpLog;
 use Rhubarb\Stem\Filters\JsonContains;
 use Rhubarb\Stem\Repositories\MySql\MySql;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;
@@ -21,10 +23,12 @@ class MysqlJsonContainsTest extends MySqlTestCase
         $total = User::find(new JsonContains('ProfileData', 'foundyou'))->count();
 
         $user1 = new User();
+        $user1->Active = true;
         $user1->ProfileData = ['test', 'moretest', 'evenmore'];
         $user1->save();
 
         $user2 = new User();
+        $user2->Active = true;
         $user2->ProfileData = ['foundyou', 'test', 'supertests'];
         $user2->save();
 

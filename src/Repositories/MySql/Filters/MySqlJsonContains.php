@@ -46,7 +46,7 @@ class MySqlJsonContains extends JsonContains
             $params);
     }
 
-    public function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository)
+    public function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository, Collection $collection)
     {
         return $rawComparisonValue;
     }

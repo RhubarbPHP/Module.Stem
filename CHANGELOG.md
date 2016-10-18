@@ -2,6 +2,8 @@
 
 ### 1.3.x
 
+* Fixed:    Fixed unit tests - MySqlFilterTrait final static method made instance and non final
+
 ### 1.3.13
 
 * Fixed:    MySql Timezone handling fix introduced issue with SaasMySqlRepository
