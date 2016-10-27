@@ -1,8 +1,9 @@
 # Change Log
 
-### 1.3.x
+### 1.3.14
 
 * Fixed:    Fixed unit tests - MySqlFilterTrait final static method made instance and non final
+* Fixed:    Added MySqlFloatColumn to support the FloatColumn class
 
 ### 1.3.13
 
