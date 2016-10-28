@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.15
+
+* Fixed:    Placeholders now work with pull ups
+
 ### 1.3.14
 
 * Fixed:    Fixed unit tests - MySqlFilterTrait final static method made instance and non final
