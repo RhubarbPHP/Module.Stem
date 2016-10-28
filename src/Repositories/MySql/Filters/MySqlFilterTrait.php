@@ -140,7 +140,11 @@ trait MySqlFilterTrait
                     $paramName = ":" . $paramName;
                 }
             } else {
-                $paramName = "`".$collection->getUniqueReference()."`.`".$placeHolder."`";
+                if (isset($collection->additionalColumns[$placeHolder])){
+                    $paramName = "`" . $placeHolder . "`";
+                } else {
+                    $paramName = "`" . $collection->getUniqueReference() . "`.`" . $placeHolder . "`";
+                }
             }
 
             $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, $sqlOperator . " ".$paramName, $isAlias, $toAlias));

@@ -384,12 +384,18 @@ class MySql extends PdoRepository
             {
                 $join->joinType = Join::JOIN_TYPE_LEFT;
             }
+
             $join->parentColumn = $collectionJoin->sourceColumnName;
             $join->childColumn = $collectionJoin->targetColumnName;
 
             $sqlStatement->joins[] = $join;
 
-            $intersectionCollectionColumns = $collectionJoin->collection->getModelSchema()->getColumns();
+            $intersectionCollectionColumns = [];
+            $intersectionCollectionSchemaColumns = $collectionJoin->collection->getModelSchema()->getColumns();
+
+            foreach($intersectionCollectionSchemaColumns as $column){
+                $intersectionCollectionColumns = array_merge($intersectionCollectionColumns,$column->getStorageColumns());
+            }
 
             foreach($intersectionCollectionColumns as $columnName => $column){
                 $intersectionColumnAliases[$columnName] = $join->statement->getAlias();
