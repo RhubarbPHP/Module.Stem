@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.16
+
+* Fixed:    Offline repo stores identifier value regardless of column type
+
 ### 1.3.15
 
 * Fixed:    Placeholders now work with pull ups
