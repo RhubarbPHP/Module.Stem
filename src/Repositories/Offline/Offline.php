@@ -37,7 +37,9 @@ class Offline extends Repository
             if ($object->getSchema()->getColumns()[$columnName] instanceof AutoIncrementColumn) {
                 // Assign an auto number as a unique identifier.
                 $this->autoNumberCount++;
-                $object->UniqueIdentifier = $this->autoNumberCount;
+                $object->setUniqueIdentifier($this->autoNumberCount);
+            } else {
+                $object->setUniqueIdentifier($object->$columnName);
             }
         }
 
