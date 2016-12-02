@@ -190,12 +190,24 @@ abstract class Repository
         return $modelData;
     }
 
+    /**
+     * The repository to use when creating the repo specific schema. This is useful if you have a custom repo which
+     * extends an existing repo and inherits it's columns and filters
+     *
+     * @return string
+     */
+    protected function getModelSchemaRepoClassName()
+    {
+        return static::class;
+    }
+
     private function getRepositorySpecificSchema(ModelSchema $genericSchema)
     {
-        $reposName = basename(str_replace("\\", "/", get_class($this)));
+        $schemaRepoClassName = $this->getModelSchemaRepoClassName();
+        $reposName = basename(str_replace("\\", "/", $schemaRepoClassName));
 
         // Get the provider specific implementation of the column.
-        $className = "\\" . str_replace("/", "\\", dirname(str_replace("\\", "/", get_class($this)))) . "\\Schema\\" . $reposName . "ModelSchema";
+        $className = "\\" . str_replace("/", "\\", dirname(str_replace("\\", "/", $schemaRepoClassName))) . "\\Schema\\" . $reposName . "ModelSchema";
 
         $superType = $genericSchema;
 
