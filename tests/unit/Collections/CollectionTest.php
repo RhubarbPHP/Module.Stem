@@ -95,5 +95,8 @@ class CollectionTest extends ModelUnitTestCase
             Company::all()->setRange(1, 10)[0]->getUniqueIdentifier(),
             'direct access of ranges should start from the right place'
         );
+        $this->assertCount(9, Company::all()->setRange(1, 10));
+        $this->assertCount(2, Company::all()->setRange(8, 2));
+        $this->assertCount(2, Company::all()->setRange(8, 15));
     }
 }
