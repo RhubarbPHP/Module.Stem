@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.*
+
+* Fixed:    Limited ranges can be correctly iterated using the cursor (instead of the repository)
+
 ### 1.3.17
 
 * Added:    Model schemas can be created from a specific repo determined by via Repository::getModelSchemaRepoClassName()

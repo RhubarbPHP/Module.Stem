@@ -64,4 +64,36 @@ class CollectionTest extends ModelUnitTestCase
         Company::find()->deleteAll();
         $this->assertEquals([null], Company::find()->calculateAggregates([new Count('ComanyName')]));
     }
+
+    public function testRangeLimitedCursor()
+    {
+        $this->assertCount(0, Company::all());
+        $company = new Company();
+        $company->CompanyName = 'a';
+        $company->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+        (clone $company)->save();
+
+        $this->assertCount(10, Company::all());
+
+        $this->assertCount(10, Company::all()->setRange(0, 10));
+        $this->assertCount(10, Company::all()->setRange(0, 15));
+        $this->assertEquals(1, Company::all()[0]->getUniqueIdentifier());
+        $id = 2;
+        foreach(Company::all()->setRange(1, 10) as $company) {
+            $this->assertEquals($id++, $company->getUniqueIdentifier(), 'limited ranges must be iterable');
+        }
+        $this->assertEquals(
+            2,
+            Company::all()->setRange(1, 10)[0]->getUniqueIdentifier(),
+            'direct access of ranges should start from the right place'
+        );
+    }
 }

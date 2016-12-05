@@ -81,7 +81,7 @@ class RangeLimitedCursor extends CollectionCursor
      */
     public function rewind()
     {
-        $this->index = $this->rangeStart;
+        $this->index = 0;
     }
 
     /**
@@ -163,6 +163,10 @@ class RangeLimitedCursor extends CollectionCursor
      */
     public function count()
     {
-        return count($this->baseCursor);
+        if($this->rangeEnd !== false) {
+            return min(count($this->baseCursor), $this->rangeEnd - $this->rangeStart + 1);
+        } else {
+            return count($this->baseCursor);
+        }
     }
 }
