@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.3.*
+### 1.3.18
 
 * Fixed:    Money and decimal fields are now numerically sorted by the collection
 * Fixed:    Limited ranges can be correctly iterated using the cursor (instead of the repository)
