@@ -20,7 +20,7 @@ class RangeLimitedCursor extends CollectionCursor
         $this->baseCursor = $baseCursor;
         $this->rangeEnd = $rangeEnd;
         $this->rangeStart = $rangeStart;
-        $this->index = $rangeStart - 1;
+        $this->index = -1;
     }
 
     public function filterModelsByIdentifier($uniqueIdentifiersToFilter)
@@ -101,10 +101,10 @@ class RangeLimitedCursor extends CollectionCursor
         $count = $this->count();
 
         $rangeEnd = ($this->rangeEnd !== false) ?
-            min($this->rangeEnd + 1, $count ) - $this->rangeStart
+            min($this->rangeEnd + 1, $count )
             : $count;
 
-        return ($offset >= 0 && $offset < $rangeEnd);
+        return ($offset >= 0 && $offset < $rangeEnd - $this->rangeStart);
     }
 
     /**
@@ -163,10 +163,6 @@ class RangeLimitedCursor extends CollectionCursor
      */
     public function count()
     {
-        if($this->rangeEnd !== false) {
-            return min(count($this->baseCursor), $this->rangeEnd - $this->rangeStart + 1);
-        } else {
-            return count($this->baseCursor);
-        }
+        return count($this->baseCursor);
     }
 }

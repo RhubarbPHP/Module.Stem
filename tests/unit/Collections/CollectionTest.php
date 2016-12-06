@@ -87,7 +87,7 @@ class CollectionTest extends ModelUnitTestCase
         $this->assertCount(10, Company::all()->setRange(0, 15));
         $this->assertEquals(1, Company::all()[0]->getUniqueIdentifier());
         $id = 2;
-        foreach(Company::all()->setRange(1, 10) as $company) {
+        foreach (Company::all()->setRange(1, 10) as $company) {
             $this->assertEquals($id++, $company->getUniqueIdentifier(), 'limited ranges must be iterable');
         }
         $this->assertEquals(
@@ -95,9 +95,10 @@ class CollectionTest extends ModelUnitTestCase
             Company::all()->setRange(1, 10)[0]->getUniqueIdentifier(),
             'direct access of ranges should start from the right place'
         );
-        $this->assertCount(9, Company::all()->setRange(1, 10));
-        $this->assertCount(2, Company::all()->setRange(8, 2));
-        $this->assertCount(2, Company::all()->setRange(8, 15));
+
+        $this->assertCount(9, Company::all()->setRange(1, 10)->toArray());
+        $this->assertCount(2, Company::all()->setRange(8, 2)->toArray());
+        $this->assertCount(2, Company::all()->setRange(8, 15)->toArray());
     }
 
     public function testMoneyFieldSortingInCollection()
