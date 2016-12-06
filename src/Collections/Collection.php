@@ -15,6 +15,7 @@ use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Columns\Column;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
+use Rhubarb\Stem\Schema\Columns\DecimalColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
@@ -955,7 +956,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             if (isset($columns[$columnName])) {
                 $column = $columns[$columnName];
 
-                if ($column instanceof IntegerColumn || $column instanceof FloatColumn) {
+                if (
+                    $column instanceof IntegerColumn
+                    || $column instanceof FloatColumn
+                    || $column instanceof DecimalColumn
+                ) {
                     $type = SORT_NUMERIC;
                 } elseif ($column instanceof DateColumn) {
                     $type = SORT_REGULAR;

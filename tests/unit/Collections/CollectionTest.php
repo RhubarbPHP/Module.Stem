@@ -99,4 +99,25 @@ class CollectionTest extends ModelUnitTestCase
         $this->assertCount(2, Company::all()->setRange(8, 2));
         $this->assertCount(2, Company::all()->setRange(8, 15));
     }
+
+    public function testMoneyFieldSortingInCollection()
+    {
+        $first = $company = new Company();
+        $company->CompanyName = 'a';
+        $company->Balance = 1000;
+        $company->save();
+
+        $last = $company = clone $company;
+        $company->Balance = 800;
+        $company->save();
+
+        $this->assertEquals(
+            $last->getUniqueIdentifier(),
+            Company::all()->addSort('Balance')[0]->getUniqueIdentifier()
+        );
+        $this->assertEquals(
+            $first->getUniqueIdentifier(),
+            Company::all()->addSort('Balance', false)[0]->getUniqueIdentifier()
+        );
+    }
 }
