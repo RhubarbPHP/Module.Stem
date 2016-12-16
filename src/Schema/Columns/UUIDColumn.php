@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Andrew
- * Date: 09/10/2015
- * Time: 12:08
- */
 
 namespace Rhubarb\Stem\Schema\Columns;
 
@@ -14,7 +8,7 @@ class UUIDColumn extends StringColumn implements ModelValueInitialiserInterface
 {
     public function __construct($columnName = 'UUID')
     {
-        parent::__construct($columnName, 100, null);
+        parent::__construct($columnName, 100);
     }
 
     /**
