@@ -23,6 +23,8 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
      */
     private static $seeders = [];
 
+    private static $enableTruncating = true;
+
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
         parent::executeWithConnection($input, $output);
@@ -44,11 +46,14 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             /** @var Model $model */
             $model = new $modelClass();
             $schema = $model->getSchema();
-            $repository = $model->getRepository();
 
-            $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
+            if (self::$enableTruncating) {
+                $repository = $model->getRepository();
 
-            $repository->clearRepositoryData();
+                $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
+
+                $repository->clearRepositoryData();
+            }
         }
 
         $this->writeNormal("", true);
@@ -74,6 +79,11 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         $this->writeNormal("", true);
 
         $this->writeNormal("Seeding Complete", true);
+    }
+
+    public static function setEnableTruncating($enableTruncating)
+    {
+        self::$enableTruncating = $enableTruncating;
     }
 
     public static function registerDemoDataSeeder(DemoDataSeederInterface $demoDataSeeder)
