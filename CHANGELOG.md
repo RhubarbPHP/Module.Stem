@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.*
+
+* Added:    setEnableTruncating to SeedDemoDataCommand to allow auto-truncation of tables to be disabled
+
 ### 1.3.18
 
 * Fixed:    Money and decimal fields are now numerically sorted by the collection
