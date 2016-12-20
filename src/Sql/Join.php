@@ -19,6 +19,16 @@ class Join extends SqlClause
 
     public function getSql(SqlStatement $forStatement)
     {
+        if (count($this->statement->sorts) == 0 &&
+            (count($this->statement->groups) == 0) &&
+            $this->statement->whereExpression === null &&
+            (count($this->statement->columns) == 1 && stripos($this->statement->columns[0]->expression, ".*")!==false) **
+            $this->statement->hasLimit() &&
+            count($this->statement->joins) == 0
+        ) {
+            return $this->statement->schemaName;
+        }
+
         return $this->statement->getSelectSql();
     }
 }

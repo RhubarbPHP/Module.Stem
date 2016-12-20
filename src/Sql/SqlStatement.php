@@ -210,7 +210,12 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
             " FROM `".$this->schemaName."` AS `".$this->getAlias()."`";
 
         foreach($this->joins as $join){
-            $sql .= " ".$join->joinType." (".$join->getSql($this).") AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
+            $joinsSql = $join->getSql($this);
+            if (strpos($joinsSql," ") !== false){
+                $joinsSql = "(".$joinsSql.")";
+            }
+
+            $sql .= " ".$join->joinType." ".$joinsSql." AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
                 $join->parentColumn."` = `".$join->statement->getAlias()."`.`".$join->childColumn."`";
         }
 
