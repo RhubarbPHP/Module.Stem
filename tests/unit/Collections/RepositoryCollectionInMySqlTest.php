@@ -54,6 +54,21 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         $this->setupData();
     }
 
+    public function testSimpleIntersections()
+    {
+        $collection = Company::all()->intersectWith(
+            TestContact::all(),
+            "CompanyID",
+            "CompanyID"
+        );
+
+        count($collection);
+
+        $sql = MySql::getPreviousStatement();
+
+        $this->assertContains("INNER JOIN tblContact AS", $sql, "For simple inner selections (e.g. SELECT * FROM [table]) it should revert to a simple join.");
+    }
+
     public function testCollectionsNotFilterableInRepository()
     {
         $collection = Company::find(
