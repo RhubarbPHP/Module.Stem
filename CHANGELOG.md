@@ -1,7 +1,8 @@
 # Change Log
 
-### 1.3.*
+### 1.3.19
 
+* Change:   Now simple intersections and joins to unfiltered, unsorted, ungrouped, unjoined collections go through as simple joins to the other table.    
 * Added:    setEnableTruncating to SeedDemoDataCommand to allow auto-truncation of tables to be disabled
 
 ### 1.3.18
