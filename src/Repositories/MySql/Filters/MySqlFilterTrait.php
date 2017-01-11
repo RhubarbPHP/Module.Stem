@@ -65,6 +65,17 @@ trait MySqlFilterTrait
                 return true;
             }
 
+            $aggregates = $collection->getAggregateColumns();
+
+            foreach($aggregates as $aggregateColumn){
+                if ($columnName == $aggregateColumn->getAlias()){
+                    // The column we're filtering on is actually an aggregate. We can still filter this
+                    // with a having column.
+                    return true;
+                }
+            }
+
+
             return false;
         }
 
@@ -112,7 +123,20 @@ trait MySqlFilterTrait
         if (self::canFilter($collection, $repository, $columnName)) {
 
             $aliases = $collection->getPulledUpAggregatedColumns();
-            $isAlias = in_array($columnName, $aliases);
+            $isAlias = false;
+
+            if (in_array($columnName, $aliases)){
+                $isAlias = true;
+            } else {
+                $aggregates = $collection->getAggregateColumns();
+
+                foreach($aggregates as $aggregate){
+                    if ($aggregate->getAlias() == $columnName){
+                        $isAlias = true;
+                        break;
+                    }
+                }
+            }
 
             $columnName = self::getRealColumnName($this, $collection);
             $toAlias = self::getTableAlias($this, $collection);

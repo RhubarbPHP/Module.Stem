@@ -69,6 +69,11 @@ abstract class Filter
         return $this->evaluate($model);
     }
 
+    public function requiresAggregation(Collection $collection)
+    {
+        return false;
+    }
+
     public function detectPlaceHolder($value)
     {
         if (is_string($value) && strpos($value, "@{") === 0) {

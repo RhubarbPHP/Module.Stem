@@ -116,6 +116,17 @@ class Group extends Filter
         return $this->filters;
     }
 
+    public function requiresAggregation(Collection $collection)
+    {
+        foreach ($this->filters as $filter) {
+            if ($filter->requiresAggregation($collection)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function evaluate(Model $model)
     {
         $or = true;

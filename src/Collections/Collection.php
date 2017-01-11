@@ -479,7 +479,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             return $this;
         }
 
-        $this->aggregateColumns[] = $aggregate;
+        $this->aggregateColumns[$aggregate->getAlias()] = $aggregate;
         $this->invalidate();
 
         return $this;
@@ -889,6 +889,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $this->collectionCursor->deDupe();
 
+        if (!$this->collectionCursor->filtered) {
+            Log::warning("A collection for ".$this->getModelClassName()." was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
+            $this->filterCursor(true);
+        }
+
         if (!$this->collectionCursor->grouped && count($this->groups)) {
             Log::warning("A collection for "
                 . $this->getModelClassName()
@@ -1181,16 +1186,20 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Filters the collection manually if it wasn't able to filter itself.
      */
-    private function filterCursor()
+    private function filterCursor($postAggregates = false)
     {
         $filter = $this->getFilter();
 
         if ($filter) {
 
+            if ($filter->requiresAggregation($this) && !$postAggregates){
+                return;
+            }
+
             $uniqueIdentifiersToFilter = [];
 
             foreach ($this->collectionCursor as $model) {
-                if ($filter->shouldFilter($model)) {
+                if ($filter->shouldFilter($model, $this, $postAggregates)) {
                     $uniqueIdentifiersToFilter[] = $model->uniqueIdentifier;
                 }
             }

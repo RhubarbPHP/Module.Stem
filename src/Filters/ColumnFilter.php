@@ -52,6 +52,18 @@ abstract class ColumnFilter extends Filter
         return $settings;
     }
 
+    public function requiresAggregation(Collection $collection)
+    {
+        $aggregates = $collection->getAggregateColumns();
+
+        if (isset($aggregates[$this->columnName])){
+            return true;
+        }
+
+        return false;
+    }
+
+
     /**
      * Converts the comparison value used in the constructor to one which can be compared against that returned
      * by the relevant model.
@@ -74,6 +86,8 @@ abstract class ColumnFilter extends Filter
 
         return $rawComparisonValue;
     }
+
+
 
     public function checkForRelationshipIntersections(Collection $collection, $createIntersectionCallback)
     {

@@ -72,6 +72,17 @@ class RepositoryCollectionTest extends ModelUnitTestCase
 
     public function testAggregates()
     {
+        $collection = Company::find(new GreaterThan("SumOfBalance", 2));
+        $collection->addAggregateColumn(
+            new Sum("Balance")
+        );
+        $collection->addGroup("CompanyID");
+        $this->assertEquals(3, $collection[0]->SumOfBalance);
+        $this->assertCount(1, $collection);
+    }
+
+    public function testAggregatesOnIntersections()
+    {
         $collection = Company::all();
         $collection->intersectWith(
             TestContact::all()
