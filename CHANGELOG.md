@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.21
+
+* Fixed:    Schema version comparison bug when creating a schema
+
 ### 1.3.20
 
 * Fix:      Properly supported filtering on aggregates (without intersections) in MySql and offline.

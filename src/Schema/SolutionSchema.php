@@ -687,7 +687,9 @@ abstract class SolutionSchema
         }
         
         $versionFile = $cachePath . "schema-versions/" . $this->getVersionFileName();
-        $fileVersion = 0;
+        // It's very important that this is a string, otherwise hashes who's first numeric character is zero might
+        // equate to this and never update thanks to php's amazing loosely typed int/string comparison behaviour
+        $fileVersion = '0';
 
         if (file_exists($versionFile)) {
             $fileVersion = file_get_contents($versionFile);
