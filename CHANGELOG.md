@@ -1,5 +1,11 @@
 # Change Log
 
+### 1.3.*
+
+### 1.3.22
+
+* Fixed:    Issue with the OneOf Filter not being applied to the Query
+
 ### 1.3.21
 
 * Fixed:    Schema version comparison bug when creating a schema

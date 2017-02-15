@@ -47,7 +47,7 @@ class MySqlOneOf extends OneOf
      * @param Repository $repository
      * @param WhereExpressionCollector $whereExpressionCollector
      * @param array $params
-     * @return string|void
+     * @return bool
      */
     protected function doFilterWithRepository(
         Collection $collection,
@@ -55,11 +55,9 @@ class MySqlOneOf extends OneOf
         WhereExpressionCollector $whereExpressionCollector,
         &$params
     ) {
-
         $columnName = $this->columnName;
 
         if (self::canFilter($collection, $repository, $columnName)) {
-
             $aliases = $collection->getPulledUpAggregatedColumns();
             $isAlias = in_array($columnName, $aliases);
 
@@ -69,23 +67,26 @@ class MySqlOneOf extends OneOf
             if (count($this->oneOf) == 0) {
                 // When a one of has nothing to filter - it should return no matches, rather than all matches.
                 $whereExpressionCollector->addWhereExpression(
-                    new LiteralWhereExpression(
-                        "1=0")
+                    new LiteralWhereExpression("1=0")
                 );
 
-                return " 1 = 0 ";
+                return true;
             }
 
             $oneOfParams = [];
             $paramName = uniqid() . $columnName;
 
             foreach ($this->oneOf as $key => $oneOf) {
-                $key = preg_replace("/[^[:alnum:]]/", "", $key);
+                $key = preg_replace("/[^[:alnum:]]/", "", $key) . '_';
                 $params[$paramName . $key] = $oneOf;
                 $oneOfParams[] = ':' . $paramName . $key;
             }
 
             $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, " IN ( " . implode(", ", $oneOfParams) . " )", $isAlias, $toAlias));
+
+            return true;
         }
+
+        return false;
     }
 }
