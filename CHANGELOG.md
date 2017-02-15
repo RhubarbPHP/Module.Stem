@@ -2,6 +2,10 @@
 
 ### 1.3.*
 
+### 1.3.23
+
+* Fixed:    Updated Codeception version
+
 ### 1.3.22
 
 * Fixed:    Issue with the OneOf Filter not being applied to the Query
