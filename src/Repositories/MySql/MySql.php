@@ -295,6 +295,8 @@ class MySql extends PdoRepository
 
                         $modelData = array_combine($modelJoinedColumns, $joinedData);
 
+                        $modelData = $repository->transformDataFromRepository($modelData);
+
                         $repository->cachedObjectData[$modelData[$model->UniqueIdentifierColumnName]] = $modelData;
                     }
 
