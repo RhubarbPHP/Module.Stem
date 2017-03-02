@@ -26,6 +26,7 @@ namespace Rhubarb\Stem;
  * @property string $Username
  * @property string $Password
  * @property string $Database
+ * @property string $Charset
  * @property \DateTimeZone $RepositoryTimeZone
  * @property \DateTimeZone $ProjectTimeZone
  */
@@ -36,6 +37,7 @@ class StemSettings extends \Rhubarb\Crown\Settings
         parent::initialiseDefaultValues();
 
         $this->Port = 3306;
+        $this->Charset = 'utf8';
         $this->ProjectTimeZone = new \DateTimeZone(date_default_timezone_get());
     }
 }

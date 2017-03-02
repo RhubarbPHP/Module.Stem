@@ -672,7 +672,7 @@ class MySql extends PdoRepository
         if (!isset(PdoRepository::$connections[$connectionHash])) {
             try {
                 $pdo = new \PDO(
-                    "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
+                    "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=" . $settings->Charset,
                     $settings->Username,
                     $settings->Password,
                     [\PDO::ERRMODE_EXCEPTION => true]
