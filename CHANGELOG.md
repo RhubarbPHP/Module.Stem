@@ -1,6 +1,8 @@
 # Change Log
 
-### 1.3.*
+### 1.3.24
+
+* Fixed:    calculateAggregates on an intersection now removes groups
 
 ### 1.3.23
 

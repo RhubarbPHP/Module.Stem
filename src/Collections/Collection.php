@@ -506,6 +506,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->addAggregateColumn($aggregate);
         }
 
+
+        // If there are intersections on the collection a group may be added. This
+        // causes meaningless data as calculateAggregates should work on the ungrouped
+        // collection and is what the user will expect. To stop the group being added
+        // we set isintersection to true which causes prepareCursor() not be tricked into
+        // not adding the group.
+        $this->isIntersection = true;
+
         $this->invalidate();
 
         $results = [];

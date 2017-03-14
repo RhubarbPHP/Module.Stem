@@ -3,8 +3,10 @@
 namespace Rhubarb\Stem\Tests\unit\Collections;
 
 use Rhubarb\Stem\Aggregates\Count;
+use Rhubarb\Stem\Aggregates\Sum;
 use Rhubarb\Stem\Tests\unit\Fixtures\Company;
 use Rhubarb\Stem\Tests\unit\Fixtures\ModelUnitTestCase;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestContact;
 
 class CollectionTest extends ModelUnitTestCase
 {
@@ -63,6 +65,38 @@ class CollectionTest extends ModelUnitTestCase
     {
         Company::find()->deleteAll();
         $this->assertEquals([null], Company::find()->calculateAggregates([new Count('ComanyName')]));
+    }
+
+    public function testCalculateAggregatesRemovesGroup()
+    {
+        $company = new Company();
+        $company->CompanyName = uniqid();
+        $company->Balance = 1000;
+        $company->save();
+
+        $contact = new TestContact();
+        $contact->CompanyID = $company->CompanyID;
+        $contact->save();
+
+        $company = new Company();
+        $company->CompanyName = uniqid();
+        $company->Balance = 2000;
+        $company->save();
+
+        $contact = new TestContact();
+        $contact->CompanyID = $company->CompanyID;
+        $contact->save();
+
+        $list = Company::all()
+            ->intersectWith(
+                TestContact::all(),
+                "CompanyID",
+                "CompanyID"
+            );
+
+        list($totalBalance) = $list->calculateAggregates(new Sum("Balance"));
+
+        $this->assertEquals(3000, $totalBalance);
     }
 
     public function testRangeLimitedCursor()
