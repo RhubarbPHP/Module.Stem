@@ -102,8 +102,8 @@ class ModelLoginProvider extends LoginProvider
         $userPasswordHash = $activeUser[$this->passwordColumnName];
 
         if ($hashProvider->compareHash($password, $userPasswordHash)) {
-            $this->loggedIn = true;
-            $this->loggedInUserIdentifier = $activeUser->getUniqueIdentifier();
+            $this->LoggedIn = true;
+            $this->LoggedInUserIdentifier = $activeUser->getUniqueIdentifier();
 
             $this->storeSession();
 
