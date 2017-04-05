@@ -81,6 +81,7 @@ class ModelLoginProvider extends LoginProvider
         $existingActiveUsers = 0;
         foreach ($list as $user) {
             if ($this->isModelActive($user)) {
+                $activeUser = $user;
                 $existingActiveUsers++;
             }
 
@@ -90,29 +91,23 @@ class ModelLoginProvider extends LoginProvider
             }
         }
 
-        /**
-         * @var Model $user
-         */
-        $user = $list[0];
+        if (!isset($activeUser)) {
+            Log::debug("Login failed for {$username} - the user is disabled.", "LOGIN");
+            throw new LoginDisabledException();
+        }
 
-        $this->checkUserIsPermitted($user);
+        $this->checkUserIsPermitted($activeUser);
 
         // Test the password matches.
-        $userPasswordHash = $user[$this->passwordColumnName];
+        $userPasswordHash = $activeUser[$this->passwordColumnName];
 
         if ($hashProvider->compareHash($password, $userPasswordHash)) {
-            // Matching login - but is it enabled?
-            if ($this->isModelActive($user)) {
-                $this->LoggedIn = true;
-                $this->LoggedInUserIdentifier = $user->getUniqueIdentifier();
+            $this->loggedIn = true;
+            $this->loggedInUserIdentifier = $activeUser->getUniqueIdentifier();
 
-                $this->storeSession();
+            $this->storeSession();
 
-                return true;
-            } else {
-                Log::debug("Login failed for {$username} - the user is disabled.", "LOGIN");
-                throw new LoginDisabledException();
-            }
+            return true;
         }
 
         Log::debug("Login failed for {$username} - the password hash $userPasswordHash didn't match the stored hash.", "LOGIN");
