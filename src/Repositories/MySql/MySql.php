@@ -672,11 +672,17 @@ class MySql extends PdoRepository
         if (!isset(PdoRepository::$connections[$connectionHash])) {
             try {
                 $pdo = new \PDO(
-                    "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=" . $settings->Charset,
+                    "mysql:host=" . $settings->Host . ";port=" . $settings->Port . ";dbname=" . $settings->Database . ";charset=utf8",
                     $settings->Username,
                     $settings->Password,
                     [\PDO::ERRMODE_EXCEPTION => true]
                 );
+
+                if ($settings->Charset != 'utf8') {
+                    // Change charset if it's not the default
+                    $statement = $pdo->prepare("SET NAMES :charset");
+                    $statement->execute(['charset' => $settings->Charset]);
+                }
 
                 $timeZone = $pdo->query("SELECT @@system_time_zone");
                 if ($timeZone->rowCount()) {
