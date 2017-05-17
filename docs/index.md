@@ -1,4 +1,4 @@
-Modelling with Stem
+Modelling with Stem [packagist:rhubarbphp/module-stem]
 ===================
 
 Data modelling is the pattern of encapsulating data into objects and describing the relationships and
