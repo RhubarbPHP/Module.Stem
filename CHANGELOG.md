@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.25
+
+* Fixed:    sorting on columns clashing with intersected columns would not sort correctly
+
 ### 1.3.24
 
 * Fixed:    calculateAggregates on an intersection now removes groups

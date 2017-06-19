@@ -398,7 +398,9 @@ class MySql extends PdoRepository
             }
 
             foreach($intersectionCollectionColumns as $columnName => $column){
-                $intersectionColumnAliases[$columnName] = $join->statement->getAlias();
+                if (!isset($intersectionColumnAliases[$columnName])){
+                    $intersectionColumnAliases[$columnName] = $join->statement->getAlias();
+                }
             }
 
             foreach($collectionJoin->columnsToPullUp as $column => $alias){
