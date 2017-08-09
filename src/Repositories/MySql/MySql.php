@@ -451,13 +451,19 @@ class MySql extends PdoRepository
                 $intersectionColumns = $intersectionRepository->getModelSchema()->getColumns();
                 $primaryKey = $intersectionRepository->getModelSchema()->uniqueIdentifierColumnName;
                 foreach($intersectionColumns as $hydrateColumn){
-                    $sqlStatement->columns[] = new SelectExpression("`".$join->statement->getAlias()."`.`".$hydrateColumn->columnName."` AS `".$join->statement->getAlias().$hydrateColumn->columnName."`");
-                    $hydrationMappings[$join->statement->getAlias().$hydrateColumn->columnName] =
-                        [
-                            $hydrateColumn->columnName,
-                            $primaryKey,
-                            $intersectionRepository
-                        ];
+
+                    $storageColumns = $hydrateColumn->getStorageColumns();
+
+                    foreach($storageColumns as $storageColumn) {
+
+                        $sqlStatement->columns[] = new SelectExpression("`" . $join->statement->getAlias() . "`.`" . $storageColumn->columnName . "` AS `" . $join->statement->getAlias() . $storageColumn->columnName . "`");
+                        $hydrationMappings[$join->statement->getAlias() . $storageColumn->columnName] =
+                            [
+                                $storageColumn->columnName,
+                                $primaryKey,
+                                $intersectionRepository
+                            ];
+                    }
                 }
             }
 

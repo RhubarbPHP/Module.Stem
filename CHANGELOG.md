@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.26
+
+* Fixed:    Issue with intersections and autohydration in combination with composite columns
+
 ### 1.3.25
 
 * Fixed:    sorting on columns clashing with intersected columns would not sort correctly
