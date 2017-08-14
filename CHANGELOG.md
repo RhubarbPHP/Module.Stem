@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.27
+
+* Fixed:    Fixed bug with batchUpdate where SQL statements with AND/OR groups weren't correctly bracketed
+
 ### 1.3.26
 
 * Fixed:    Issue with intersections and autohydration in combination with composite columns
