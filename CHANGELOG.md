@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.28
+
+* Fixed:    Fixed bug with filtering on pulled up columns not transforming values correctly.
+
 ### 1.3.27
 
 * Fixed:    Fixed bug with batchUpdate where SQL statements with AND/OR groups weren't correctly bracketed

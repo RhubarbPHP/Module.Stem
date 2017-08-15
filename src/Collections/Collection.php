@@ -118,6 +118,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @var array
      */
+    private $aliasedColumnsToCollectionReference = [];
+
+    /**
+     * A map for aliases to their source collection
+     *
+     * @var array
+     */
     private $aliasedColumnsToCollection = [];
 
     /**
@@ -222,6 +229,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function getAliasedColumns()
     {
         return $this->aliasedColumns;
+    }
+
+    /**
+     * Gets the mapping of aliased columns to their source collection references.
+     * @return array
+     */
+    public function getAliasedColumnsToCollectionReference()
+    {
+        return $this->aliasedColumnsToCollectionReference;
     }
 
     /**
@@ -439,7 +455,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
 
             $this->aliasedColumns[$alias] = $column;
-            $this->aliasedColumnsToCollection[$column] = $collection->getUniqueReference();
+            $this->aliasedColumnsToCollectionReference[$column] = $collection->getUniqueReference();
+            $this->aliasedColumnsToCollection[$column] = $collection;
 
             foreach ($childAggregates as $aggregate) {
                 if ($aggregate->getAlias() == $column) {
