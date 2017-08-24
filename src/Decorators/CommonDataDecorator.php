@@ -20,7 +20,6 @@ namespace Rhubarb\Stem\Decorators;
 
 require_once __DIR__ . '/DataDecorator.php';
 
-use Rhubarb\Leaf\Presenters\Controls\DateTime\Date;
 use Rhubarb\Stem\Decorators\Formatters\DecimalFormatter;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\BooleanColumn;
@@ -38,14 +37,10 @@ class CommonDataDecorator extends DataDecorator
             return $booleanValue ? "Yes" : "No";
         });
 
-        $this->addTypeFormatter(MoneyColumn::class, function (Model $model, $value) {
-            return number_format($value, 2);
-        });
-
         $this->addTypeFormatter(DecimalColumn::class, new DecimalFormatter());
 
-        $this->addTypeFormatter(Date::class, function (Model $model, \DateTime $value) {
-            return $value->format("d-M-Y");
+        $this->addTypeFormatter(MoneyColumn::class, function (Model $model, $value) {
+            return number_format($value, 2);
         });
     }
 }
