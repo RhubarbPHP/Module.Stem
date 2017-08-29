@@ -46,7 +46,6 @@ class MySqlColumnIntersectsCollection extends ColumnIntersectsCollection
         &$params
     ) {
         $columnName = self::getRealColumnName($this, $collection);
-        $toAlias = self::getTableAlias($this, $collection);
 
         $placeHolder = $this->detectPlaceHolder($this->equalTo);
         // The placeholder will contain an _ to denote the alias given to it in ColumnIntersectsCollection. We
@@ -54,7 +53,7 @@ class MySqlColumnIntersectsCollection extends ColumnIntersectsCollection
         // and create a direct reference to the column.
         $parts = explode("_",$placeHolder);
         $target = "`".$collection->getUniqueReference()."`.`".$parts[1]."`";
-
+        $toAlias = $parts[0];
         $columnName = "`".$toAlias."`.`".$columnName."`";
 
         $whereExpressionCollector->addWhereExpression(
