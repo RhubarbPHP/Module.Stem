@@ -25,9 +25,40 @@ class GetterOrSetterMethod
         $methodName = $method->getName();
 
         if (stripos($methodName, 'get') === 0) {
+            $parameters = $method->getParameters();
+
             $wrapper->readable = true;
+            foreach ($parameters as $parameter) {
+                if (!$parameter->allowsNull()) {
+                    // If a "get" method has any non-nullable parameters, it's not a property getter
+                    $wrapper->readable = false;
+                    break;
+                }
+            }
+
+            if (!$wrapper->readable) {
+                return false;
+            }
         } elseif (stripos($methodName, 'set') === 0) {
-            $wrapper->writable = true;
+            $parameters = $method->getParameters();
+            $paramCount = count($parameters);
+
+            if ($paramCount > 0) {
+                // A "set" method must take a parameter to be a property setter
+                $wrapper->writable = true;
+
+                for ($i = 1; $i < $paramCount; $i++) {
+                    if (!$parameter->allowsNull()) {
+                        // If a "set" method has more than 1 non-nullable parameter, it's not a property setter
+                        $wrapper->writable = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!$wrapper->writable) {
+                return false;
+            }
         } else {
             // Neither a getter nor a setter
             return false;
