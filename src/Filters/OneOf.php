@@ -35,8 +35,15 @@ class OneOf extends ColumnFilter
      */
     protected $oneOf;
 
+    /**
+     * Used to determine whether to use in_arrayi or $this->in_arrayi()
+     *
+     * @var bool
+     */
+    protected $caseSensitive;
 
-    public function __construct($columnName, $oneOf = [])
+
+    public function __construct($columnName, $oneOf = [], $caseSensitive = true)
     {
         parent::__construct($columnName);
 
@@ -45,6 +52,7 @@ class OneOf extends ColumnFilter
         }
 
         $this->oneOf = $oneOf;
+        $this->caseSensitive = $caseSensitive;
     }
 
     public function getSettingsArray()
@@ -66,14 +74,24 @@ class OneOf extends ColumnFilter
      * Returns true to remove it, false to keep it.
      *
      * @param Model $model
-     * @return array
+     * @return bool
      */
     public function evaluate(Model $model)
     {
-        if (!in_array($model[$this->columnName], $this->oneOf)) {
-            return true;
+        if ($this->caseSensitive) {
+            if (!in_array($model[$this->columnName], $this->oneOf)) {
+                return true;
+            }
+        } else {
+            if (!$this->in_arrayi($model[$this->columnName], $this->oneOf)) {
+                return true;
+            }
         }
 
         return false;
+    }
+
+    protected function in_arrayi($needle, $haystack) {
+        return in_array(strtolower($needle), array_map('strtolower', $haystack));
     }
 }
