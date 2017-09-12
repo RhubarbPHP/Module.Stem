@@ -398,7 +398,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable
      * Where repository specific optimisation is available this will be leveraged to run the batch
      * update at the data source rather than iterating over the items.
      *
-     * @param  Array $propertyPairs An associative array of key value pairs to update
+     * @param  array $propertyPairs An associative array of key value pairs to update
      * @param  bool $fallBackToIteration If the repository can't perform the action directly, perform the update by iterating over all the models in the collection. You should only pass true if you know that the collection doesn't meet the criteria for an optimised update and the iteration of items won't cause problems
      *                                  iterating over all the models in the collection. You should only pass true
      *                                  if you know that the collection doesn't meet the criteria for an optimised
