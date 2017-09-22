@@ -548,7 +548,7 @@ class MySql extends PdoRepository
         // Only if the repository was able to compute the whole collection in the back end should it
         // put on a limit clause. Otherwise limiting is premature as the full set of rows hasn't been
         // calculated yet.
-        if ($allAggregated && $allFiltered && $allSorted && $allIntersected) {
+        if ($allAggregated && $allFiltered && $allSorted && $allIntersected && $collection->isRangingEnabled()) {
             $rangeStart = $collection->getRangeStart();
             $rangeEnd = $collection->getRangeEnd();
 

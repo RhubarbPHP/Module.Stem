@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.3.27
+
+* Fixed:    disableRanging() wasn't actually working....
+
 ### 1.3.26
 
 * Fixed:    Issue with intersections and autohydration in combination with composite columns

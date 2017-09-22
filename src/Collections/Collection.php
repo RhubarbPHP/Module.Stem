@@ -171,6 +171,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->modelClassName = $modelClassName;
     }
 
+    public function isRangingEnabled()
+    {
+        return !$this->rangingDisabled;
+    }
+
     /**
      * Sets if intersections can cause multiple models to be returned with the same unique identifier
      *
@@ -651,6 +656,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function disableRanging()
     {
+        $this->invalidate();
         $this->rangingDisabled = true;
     }
 
@@ -923,7 +929,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
          * wrap the cursor in the RangeLimitedCursor to supply the required behaviour.
          */
 
-        if (!$this->rangeApplied && ($this->rangeStartIndex > 0 || $this->rangeEndIndex !== null)) {
+        if (!$this->rangeApplied && $this->isRangingEnabled() && ($this->rangeStartIndex > 0 || $this->rangeEndIndex !== null)) {
             $augmentationData = $this->collectionCursor->getAugmentationData();
             $this->collectionCursor = new RangeLimitedCursor(
                 $this->collectionCursor,
