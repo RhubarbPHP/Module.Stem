@@ -88,7 +88,7 @@ trait MySqlFilterTrait
 
         $columnName = self::getRealColumnName($originalFilter, $collection);
 
-        $aliases = $collection->getAliasedColumnsToCollection();
+        $aliases = $collection->getAliasedColumnsToCollectionReference();
 
         if (isset($aliases[$columnName])){
             $tableAlias = $aliases[$columnName];
@@ -199,7 +199,13 @@ trait MySqlFilterTrait
 
     protected function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository, Collection $collection)
     {
-        $exampleObject = SolutionSchema::getModel($repository->getModelClass());
+        $aliases = $collection->getAliasedColumnsToCollection();
+
+        if (isset($aliases[$columnName])){
+            $collection = $aliases[$columnName];
+        }
+
+        $exampleObject = SolutionSchema::getModel($collection->getModelClassName());
 
         if (isset($collection->additionalColumns[$columnName])){
             $columnSchema = $collection->additionalColumns[$columnName]["column"];

@@ -192,7 +192,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         $sql .= " SET ".implode(",", $sets);
 
         if ($this->whereExpression) {
-            $sql .= " WHERE ".$this->whereExpression->getSql($this);
+            $sql .= " WHERE ".$this->whereExpression->getWhereSql($this);
         }
 
         return $sql;

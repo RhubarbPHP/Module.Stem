@@ -1,8 +1,20 @@
 # Change Log
 
-### 1.3.27
+### 1.3.30
 
 * Fixed:    disableRanging() wasn't actually working....
+
+### 1.3.29
+
+* Fixed:    Fixed intersection bug with multiple joins to the same collection
+
+### 1.3.28
+
+* Fixed:    Fixed bug with filtering on pulled up columns not transforming values correctly.
+
+### 1.3.27
+
+* Fixed:    Fixed bug with batchUpdate where SQL statements with AND/OR groups weren't correctly bracketed
 
 ### 1.3.26
 
