@@ -682,6 +682,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function enableRanging()
     {
+        $this->invalidate();
         $this->rangingDisabled = false;
     }
 
@@ -973,7 +974,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $directions = [];
         $types = [];
 
-        $this->disableRanging();
+        $this->rangingDisabled = true;
 
         $sorts = $this->getSorts();
         $firstPass = true;
@@ -1028,7 +1029,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $firstPass = false;
         }
 
-        $this->enableRanging();
+        $this->rangingDisabled = false;
 
         if (sizeof($arrays)) {
             $params = [];
