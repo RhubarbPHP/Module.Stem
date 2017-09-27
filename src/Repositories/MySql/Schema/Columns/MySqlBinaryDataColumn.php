@@ -22,7 +22,6 @@ use Rhubarb\Stem\Repositories\MySql\Schema\Columns\MySqlColumn;
 use Rhubarb\Stem\Schema\Columns\BinaryDataColumn;
 use Rhubarb\Stem\Schema\Columns\Column;
 
-require_once __DIR__ . "/MySqlColumn.php";
 require_once __DIR__ . "/../../../../Schema/Columns/BinaryDataColumn.php";
 
 /**
@@ -31,16 +30,9 @@ require_once __DIR__ . "/../../../../Schema/Columns/BinaryDataColumn.php";
  */
 class MySqlBinaryDataColumn extends BinaryDataColumn
 {
-    use MySqlColumn;
-
-    public function __construct($columnName)
-    {
-        parent::__construct($columnName);
-    }
-
     public function getDefinition()
     {
-        return "`" . $this->columnName . "` longblob " . $this->getDefaultDefinition();
+        return "`" . $this->columnName . "` longblob";
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)

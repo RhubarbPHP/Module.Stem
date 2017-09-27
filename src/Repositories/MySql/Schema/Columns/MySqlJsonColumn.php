@@ -25,9 +25,14 @@ require_once __DIR__ . "/../../../../Schema/Columns/JsonColumn.php";
 
 class MySqlJsonColumn extends JsonColumn
 {
+    public function getDefaultDefinition()
+    {
+        return ($this->defaultValue === null) ? "DEFAULT NULL" : "NOT NULL";
+    }
+
     public function getDefinition()
     {
-        return "`" . $this->columnName . "` json";
+        return "`" . $this->columnName . "` json " . $this->getDefaultDefinition();
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)
