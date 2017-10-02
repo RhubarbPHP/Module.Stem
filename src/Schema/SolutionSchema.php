@@ -432,6 +432,24 @@ abstract class SolutionSchema
         }
     }
 
+    /**
+     * Defines one or more one-to-one relationships in an array structure.
+     *
+     * e.g.
+     *
+     * $this->declareOneToOneRelationships([
+     *     "FirstModel[.FirstModelColumnName - will use FirstModel's UniqueIdentifier Column if not specified]" => [
+     *         "NavigationPropertyName" => "SecondModel.SecondModelColumnName[:NavigationPropertyName - will use FirstModel's name if not specified]"
+     *     ],
+     *     "Staff" => [
+     *         "ManagingDirectorCompany" => "Company.ManagingDirectorID:ManagingDirector",
+     *         "FinancialDirectorCompany" => "Company.FinancialDirectorID:FinancialDirector"
+     *     ]
+     * ]);
+     *
+     * @param  array $relationships
+     * @throws \Rhubarb\Stem\Exceptions\RelationshipDefinitionException
+     */
     public function declareOneToOneRelationships($relationships)
     {
         if (!is_array($relationships)) {
@@ -685,7 +703,7 @@ abstract class SolutionSchema
         if ($application->unitTesting) {
             return;
         }
-        
+
         $versionFile = $cachePath . "schema-versions/" . $this->getVersionFileName();
         // It's very important that this is a string, otherwise hashes who's first numeric character is zero might
         // equate to this and never update thanks to php's amazing loosely typed int/string comparison behaviour
@@ -703,7 +721,7 @@ abstract class SolutionSchema
             file_put_contents($versionFile, $currentVersion);
         }
     }
-    
+
     protected function getVersionFileName()
     {
         return str_replace("\\", "_", get_class($this)) . ".txt";
