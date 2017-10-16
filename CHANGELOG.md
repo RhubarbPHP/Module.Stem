@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.4.0
+* Added:    Charset support for MySQL Repository
+
 ### 1.3.30
 
 * Fixed:    disableRanging() wasn't actually working....

@@ -703,6 +703,10 @@ class MySql extends PdoRepository
                 if ($timeZone->rowCount()) {
                     $settings->repositoryTimeZone = new \DateTimeZone($timeZone->fetchColumn());
                 }
+                if ($settings->charset) {
+                    $statement = $pdo->prepare("SET NAMES :charset");
+                    $statement->execute(['charset' => $settings->charset]);
+                }
             } catch (\PDOException $er) {
                 throw new RepositoryConnectionException("MySql", $er);
             }

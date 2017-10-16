@@ -42,6 +42,9 @@ class StemSettings extends Settings
      */
     public $repositoryTimeZone;
 
+    /** @var string Will be used by the PDO client */
+    public $charset;
+
     protected function initialiseDefaultValues()
     {
         parent::initialiseDefaultValues();
