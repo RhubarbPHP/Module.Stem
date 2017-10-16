@@ -899,7 +899,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
          * Some cursors will be able to perform the filtering internally. Those that can't
          * will be handled by filterCursor()
          */
-        if (!$this->collectionCursor->filtered) {
+        if (!$this->collectionCursor->filtered && $this->filter) {
             Log::warning("A collection for ".$this->getModelClassName()." was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
             $this->filterCursor();
         }
@@ -921,7 +921,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         $this->collectionCursor->deDupe();
 
-        if (!$this->collectionCursor->filtered) {
+        if (!$this->collectionCursor->filtered && $this->filter) {
             Log::warning("A collection for ".$this->getModelClassName()." was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
             $this->filterCursor(true);
         }
@@ -1258,7 +1258,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
             $x++;
         }
-        
+
         if (count($reduceForGroups) > 0) {
             $this->collectionCursor->filterModelsByIndex($reduceForGroups);
         }
