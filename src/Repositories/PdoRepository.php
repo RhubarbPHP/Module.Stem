@@ -195,7 +195,7 @@ abstract class PdoRepository extends Repository
                 // Note this is not attempting to make secure queries - this is purely illustrative for the logs
                 // However we do at least do addslashes so if you want to cut and paste a query from the log to
                 // try it - it should work in most cases.
-                $newStatement = str_replace(':' . $key, $connection->quote($value), $newStatement);
+                $newStatement = preg_replace('/(\:' . preg_quote($key) . ')([^\w]|$)/' , $connection->quote($value) . '$2', $newStatement);
             });
 
             return "Executing PDO statement " . $newStatement;
