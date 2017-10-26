@@ -19,7 +19,6 @@
 namespace Rhubarb\Stem\Aggregates;
 
 use Rhubarb\Stem\Collections\Collection;
-use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
@@ -101,7 +100,7 @@ abstract class Aggregate
 
     protected function getAliasDerivedColumn()
     {
-        if ($this->aliasDerivedFromColumn){
+        if ($this->aliasDerivedFromColumn) {
             return $this->aliasDerivedFromColumn;
         }
 
@@ -121,19 +120,11 @@ abstract class Aggregate
      * @param Collection $collection
      * @param $namedParams
      */
-    protected function calculateByRepository(
-        Repository $repository,
-        SqlStatement $sqlStatement,
-        Collection $collection,
-        &$namedParams
-    )
+    protected function calculateByRepository(Repository $repository, SqlStatement $sqlStatement, Collection $collection, &$namedParams)
     {
     }
 
-    protected function canCalculateByRepository(
-        Repository $repository,
-        Collection $collection
-    )
+    protected function canCalculateByRepository(Repository $repository, Collection $collection)
     {
         return false;
     }
@@ -141,11 +132,9 @@ abstract class Aggregate
     /**
      * Checks if this aggregate can be calculated using it's repository
      *
-     * @param  \Rhubarb\Stem\Repositories\Repository $repository
+     * @param \Rhubarb\Stem\Repositories\Repository $repository
      * @param Collection $collection
-     * @return mixed|string
-     * @internal param SqlStatement $sqlStatement
-     * @internal param $namedParams
+     * @return bool
      */
     final public function canAggregateWithRepository(Repository $repository, Collection $collection)
     {
@@ -168,7 +157,6 @@ abstract class Aggregate
      * @param SqlStatement $sqlStatement
      * @param Collection $collection
      * @param $namedParams
-     * @return mixed|string
      */
     final public function aggregateWithRepository(Repository $repository, SqlStatement $sqlStatement, Collection $collection, &$namedParams)
     {
@@ -177,14 +165,13 @@ abstract class Aggregate
         if ($specificAggregate) {
             $specificAggregate->calculateByRepository($repository, $sqlStatement, $collection, $namedParams);
 
-            if ($specificAggregate->calculated){
+            if ($specificAggregate->calculated) {
                 $this->calculated = true;
 
-                $collection->additionalColumns[$specificAggregate->getAlias()] =
-                    [
-                        "column" => new StringColumn($specificAggregate->getAlias(),50),
-                        "collection" => $collection
-                    ];
+                $collection->additionalColumns[$specificAggregate->getAlias()] = [
+                    "column" => new StringColumn($specificAggregate->getAlias(), 50),
+                    "collection" => $collection
+                ];
             }
         }
     }
@@ -205,9 +192,7 @@ abstract class Aggregate
      *
      * @return mixed
      */
-    protected abstract function createAlias();
-
-
+    abstract protected function createAlias();
 
     /**
      * Returns the alias to use for the aggregate, or if one isn't defined, creates ones.
@@ -216,14 +201,14 @@ abstract class Aggregate
      */
     final public function getAlias()
     {
-        if ($this->alias){
+        if ($this->alias) {
             return $this->alias;
         }
 
         return $this->createAlias();
     }
 
-    public function calculateByIteration(Model $model)
+    public function calculateByIteration(Model $model, $groupKey = "")
     {
         return null;
     }

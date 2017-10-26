@@ -7,6 +7,7 @@ class CollectionJoin
     const JOIN_TYPE_INTERSECTION = "Intersection";
     const JOIN_TYPE_ATTACH = "Attach";
 
+    /** @var Collection */
     public $collection;
 
     public $sourceColumnName;

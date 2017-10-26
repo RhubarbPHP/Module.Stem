@@ -187,6 +187,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * Sets if intersections can cause multiple models to be returned with the same unique identifier
      *
      * @param bool $allowDuplicates True if intersections can cause multiple models to be returned with the same unique identifier
+     * @return $this
      */
     public function setAllowDuplicates($allowDuplicates)
     {
@@ -194,6 +195,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
         return $this;
     }
+
     /**
      * Clears the unique reference counters.
      *
@@ -212,16 +214,15 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function getUniqueReference()
     {
         if ($this->uniqueReference === null) {
-
             $modelName = basename(str_replace("\\", "/", $this->getModelClassName()));
 
-            if (!isset(self::$uniqueReferencesUsed[$modelName])){
+            if (!isset(self::$uniqueReferencesUsed[$modelName])) {
                 self::$uniqueReferencesUsed[$modelName] = 0;
             }
 
             self::$uniqueReferencesUsed[$modelName]++;
 
-            $this->uniqueReference = $modelName.(self::$uniqueReferencesUsed[$modelName]>1 ? self::$uniqueReferencesUsed[$modelName] : "");
+            $this->uniqueReference = $modelName . (self::$uniqueReferencesUsed[$modelName] > 1 ? self::$uniqueReferencesUsed[$modelName] : "");
         }
 
         return $this->uniqueReference;
@@ -264,7 +265,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * Get's the repository used by the associated data object.
+     * Gets the repository used by the associated data object.
      *
      * @return \Rhubarb\Stem\Repositories\Repository
      */
@@ -293,7 +294,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param $columnName
      * @return $this
      */
-    public final function addGroup($columnName)
+    final public function addGroup($columnName)
     {
         $this->groups[] = $columnName;
 
@@ -308,7 +309,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @return $this
      * @throws FilterNotSupportedException
      */
-    public final function addSort($columnName, $ascending = true)
+    final public function addSort($columnName, $ascending = true)
     {
         $parts = explode(".", $columnName);
 
@@ -319,8 +320,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
             $relationships = array_slice($parts, 0, count($parts) - 1);
             $newColumnName = PdoRepository::getPdoParamName($columnName);
-            $intersectionCollection = $this->createIntersectionForRelationships($relationships,
-                [$columnName => $newColumnName]);
+            $intersectionCollection = $this->createIntersectionForRelationships($relationships, [$columnName => $newColumnName]);
             $sort->tableAlias = $intersectionCollection->getUniqueReference();
             $sort->alias = $newColumnName;
         } else {
@@ -346,7 +346,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param bool $ascending
      * @return $this
      */
-    public final function replaceSort($columnName, $ascending = true)
+    final public function replaceSort($columnName, $ascending = true)
     {
         if (!is_array($columnName)) {
             $sorts = [$columnName => $ascending];
@@ -405,7 +405,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      *                          repository will be unavoidable.
      * @return $this
      */
-    public final function intersectWith(Collection $collection, $sourceColumnName, $targetColumnName, $columnsToPullUp = [], $autoHydrate = false)
+    final public function intersectWith(Collection $collection, $sourceColumnName, $targetColumnName, $columnsToPullUp = [], $autoHydrate = false)
     {
         $collection->isIntersection = true;
         $collectionJoin = new CollectionJoin($collection, $sourceColumnName, $targetColumnName, $columnsToPullUp, $autoHydrate, CollectionJoin::JOIN_TYPE_INTERSECTION);
@@ -433,8 +433,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function joinWith(Collection $collection, $sourceColumnName, $targetColumnName, $columnsToPullUp = [], $autoHydrate = false)
     {
-        $collectionJoin = new CollectionJoin($collection, $sourceColumnName, $targetColumnName, $columnsToPullUp,
-            $autoHydrate, CollectionJoin::JOIN_TYPE_ATTACH);
+        $collectionJoin = new CollectionJoin($collection, $sourceColumnName, $targetColumnName, $columnsToPullUp, $autoHydrate, CollectionJoin::JOIN_TYPE_ATTACH);
         $this->intersections[] = $collectionJoin;
         return $this->prepareCollectionJoin($collectionJoin);
     }
@@ -454,7 +453,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         }
 
         foreach ($columnsToPullUp as $column => $alias) {
-
             if (is_numeric($column)) {
                 $column = $alias;
             }
@@ -479,12 +477,12 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * Adds the instruction to build an aggregate column.
      *
-     * Should be used in conjuction with group()
+     * Should be used in conjunction with group()
      *
      * @param Aggregate $aggregate
      * @return $this
      */
-    public final function addAggregateColumn(Aggregate $aggregate)
+    final public function addAggregateColumn(Aggregate $aggregate)
     {
         $parts = explode(".", $aggregate->getAggregateColumnName());
 
@@ -559,7 +557,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * update at the data source rather than iterating over the items.
      *
      * @param  array $propertyPairs An associative array of key value pairs to update
-     * @param  bool $fallBackToIteration If the repository can't perform the action directly, perform the update by iterating over all the models in the collection. You should only pass true if you know that the collection doesn't meet the criteria for an optimised update and the iteration of items won't cause problems
+     * @param  bool $fallBackToIteration If the repository can't perform the action directly, perform the update by
      *                                  iterating over all the models in the collection. You should only pass true
      *                                  if you know that the collection doesn't meet the criteria for an optimised
      *                                  update and the iteration of items won't cause problems
@@ -570,7 +568,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function batchUpdate($propertyPairs, $fallBackToIteration = false)
     {
         try {
-            $this->getRepository()->batchCommitUpdatesFromCollection($this, $propertyPairs);
+            if ($this instanceof RepositoryCollection) {
+                $this->getRepository()->batchCommitUpdatesFromCollection($this, $propertyPairs);
+            } else {
+                throw new BatchUpdateNotPossibleException();
+            }
         } catch (BatchUpdateNotPossibleException $er) {
             if ($fallBackToIteration) {
                 foreach ($this as $item) {
@@ -589,7 +591,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @return \Rhubarb\Stem\Aggregates\Aggregate[]
      */
-    public final function getAggregateColumns()
+    final public function getAggregateColumns()
     {
         return $this->aggregateColumns;
     }
@@ -630,13 +632,14 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     /**
      * filter the existing list using the supplied DataFilter.
      *
-     * @param  Filter $filter
+     * @param Filter[] $filters
      * @return $this
+     * @throws FilterNotSupportedException
      */
     public function filter(...$filters)
     {
         if (sizeof($filters) == 0) {
-            return;
+            return $this;
         }
 
         $andGroup = new AndGroup();
@@ -705,14 +708,13 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->rangeEndIndex;
     }
 
-
     /**
      * Limits the range of iteration from startIndex to startIndex + maxItems
      *
      * This can be used by the repository to employ limits but generally allows for easy paging of a list.
      *
-     * @param  int $startIndex
-     * @param  int $maxItems
+     * @param int $startIndex
+     * @param int $maxItems
      * @return $this
      */
     public function setRange($startIndex, $maxItems)
@@ -825,7 +827,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                 $parentColumn = $relationship->getSourceColumnName();
                 $childColumn = $relationship->getTargetColumnName();
 
-                $autoHydrate = ($collection == $this);
+                $autoHydrate = ($collection === $this);
 
                 $collection->intersectWith(
                     $newCollection = new RepositoryCollection($targetModel),
@@ -900,7 +902,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
          * will be handled by filterCursor()
          */
         if (!$this->collectionCursor->filtered && $this->filter) {
-            Log::warning("A collection for ".$this->getModelClassName()." was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
+            Log::warning("A collection for " . $this->getModelClassName() . " was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
             $this->filterCursor();
         }
 
@@ -922,7 +924,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->collectionCursor->deDupe();
 
         if (!$this->collectionCursor->filtered && $this->filter) {
-            Log::warning("A collection for ".$this->getModelClassName()." was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
+            Log::warning("A collection for " . $this->getModelClassName() . " was not filtered completely in a repository. Performance may degrade significantly.", "STEM");
             $this->filterCursor(true);
         }
 
@@ -938,7 +940,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         foreach ($this->sorts as $sort) {
             if (!$sort->sorted) {
                 $sortsToProcess[] = $sort;
-                $this->processSorts($sortsToProcess);
+                $this->processSorts();
             }
         }
 
@@ -952,7 +954,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $this->collectionCursor = new RangeLimitedCursor(
                 $this->collectionCursor,
                 $this->rangeStartIndex,
-                $this->rangeEndIndex);
+                $this->rangeEndIndex
+            );
             $this->collectionCursor->setAugmentationData($augmentationData);
         }
 
@@ -960,10 +963,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * @param Sort[] $sorts
      * @throws SortNotValidException
      */
-    private function processSorts($sorts)
+    private function processSorts()
     {
         $class = $this->getModelClassName();
         $schema = SolutionSchema::getModelSchema($class);
@@ -980,7 +982,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $firstPass = true;
 
         foreach ($sorts as $sort) {
-
             $columnName = $sort->alias;
             $ascending = $sort->ascending;
 
@@ -993,11 +994,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             if (isset($columns[$columnName])) {
                 $column = $columns[$columnName];
 
-                if (
-                    $column instanceof IntegerColumn
+                if ($column instanceof IntegerColumn
                     || $column instanceof FloatColumn
-                    || $column instanceof DecimalColumn
-                ) {
+                    || $column instanceof DecimalColumn) {
                     $type = SORT_NUMERIC;
                 } elseif ($column instanceof DateColumn) {
                     $type = SORT_REGULAR;
@@ -1045,7 +1044,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             call_user_func_array("array_multisort", $params);
         }
 
-        // Switch to the unique identifer list cursor now we have a set list of ids.
+        // Switch to the unique identifier list cursor now we have a set list of ids.
         $augmentationData = $this->collectionCursor->getAugmentationData();
         $this->collectionCursor = new UniqueIdentifierListCursor($ids, $class);
         $this->collectionCursor->setAugmentationData($augmentationData);
@@ -1088,7 +1087,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             $groups = $aggregate->getGroups();
 
             foreach ($this->collectionCursor as $model) {
-
                 $id = $model->UniqueIdentifier;
                 $groupKey = $this->getGroupKeyForModel($model);
 
@@ -1131,7 +1129,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         // First scan through the collection and make the models easily addressable in an array indexed by the
         // intersection column name
         foreach ($collectionJoin->collection as $childModel) {
-
             $index = $childModel[$collectionJoin->targetColumnName];
 
             if (isset($childByIntersectColumn[$index])) {
@@ -1154,7 +1151,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         // Next scan through the nested collection and check to see if we need to double up rows in the parent
         // collection. Also pulls in any aggregate data from the nested collection.
         foreach ($this->collectionCursor as $parentModel) {
-
             $parentId = rtrim($parentModel->uniqueIdentifier, "_");
 
             if (isset($alreadyDone[$parentId])) {
@@ -1170,7 +1166,6 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
                 $firstRow = true;
                 foreach ($childRows as $childRow) {
-
                     $augmentationIndex = $parentModel->uniqueIdentifier;
 
                     if (!$firstRow) {
@@ -1217,21 +1212,21 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 
     /**
      * Filters the collection manually if it wasn't able to filter itself.
+     * @param bool $postAggregates
      */
     private function filterCursor($postAggregates = false)
     {
         $filter = $this->getFilter();
 
         if ($filter) {
-
-            if ($filter->requiresAggregation($this) && !$postAggregates){
+            if ($filter->requiresAggregation($this) && !$postAggregates) {
                 return;
             }
 
             $uniqueIdentifiersToFilter = [];
 
             foreach ($this->collectionCursor as $model) {
-                if ($filter->shouldFilter($model, $this, $postAggregates)) {
+                if ($filter->shouldFilter($model)) {
                     $uniqueIdentifiersToFilter[] = $model->uniqueIdentifier;
                 }
             }
@@ -1246,17 +1241,17 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     private function reduceCursorForGroups()
     {
         $reduceForGroups = $groupKeys = [];
-        $x = 0;
+        $index = 0;
         foreach ($this->collectionCursor as $model) {
             $groupKey = $this->getGroupKeyForModel($model);
             if ($groupKey != '') {
                 if (!in_array($groupKey, $groupKeys)) {
                     $groupKeys[] = $groupKey;
                 } else {
-                    $reduceForGroups[] = $x;
+                    $reduceForGroups[] = $index;
                 }
             }
-            $x++;
+            $index++;
         }
 
         if (count($reduceForGroups) > 0) {
@@ -1264,7 +1259,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         }
     }
 
-    protected abstract function createCursor();
+    abstract protected function createCursor();
 
     /**
      * Return the current element
@@ -1287,7 +1282,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     public function next()
     {
         $this->prepareCursor();
-        return $this->collectionCursor->next();
+        $this->collectionCursor->next();
     }
 
     /**
