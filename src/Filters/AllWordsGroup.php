@@ -40,7 +40,7 @@ class AllWordsGroup extends Group
         $this->words = $words;
 
         if (!is_array($words)) {
-            $words = preg_split('/[\s,]+/', $words);
+            $words = preg_split('/[\s,]+/', trim($words));
         }
         $groups = [];
         foreach ($words as $word) {
