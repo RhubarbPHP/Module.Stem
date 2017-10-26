@@ -19,13 +19,10 @@
 namespace Rhubarb\Stem\Repositories\MySql\Filters;
 
 use Rhubarb\Stem\Collections\Collection;
-use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\FilterNotSupportedException;
 use Rhubarb\Stem\Filters\ColumnFilter;
-use Rhubarb\Stem\Filters\Filter;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Repositories\Repository;
-use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Rhubarb\Stem\Sql\ColumnWhereExpression;
 use Rhubarb\Stem\Sql\WhereExpressionCollector;
@@ -58,7 +55,7 @@ trait MySqlFilterTrait
         if (!isset($columns[$columnName])) {
             $aliases = $collection->getAliasedColumns();
 
-            if (in_array($columnName, $aliases) || array_key_exists($columnName, $aliases)){
+            if (in_array($columnName, $aliases) || array_key_exists($columnName, $aliases)) {
                 // While not a column in the underlying table, the filter is actually on an alias from
                 // an intersection or aggregate. We can handle this with a having clause so we'll
                 // say "yes - we can handle this".
@@ -67,14 +64,13 @@ trait MySqlFilterTrait
 
             $aggregates = $collection->getAggregateColumns();
 
-            foreach($aggregates as $aggregateColumn){
-                if ($columnName == $aggregateColumn->getAlias()){
+            foreach ($aggregates as $aggregateColumn) {
+                if ($columnName == $aggregateColumn->getAlias()) {
                     // The column we're filtering on is actually an aggregate. We can still filter this
                     // with a having column.
                     return true;
                 }
             }
-
 
             return false;
         }
@@ -90,7 +86,7 @@ trait MySqlFilterTrait
 
         $aliases = $collection->getAliasedColumnsToCollectionReference();
 
-        if (isset($aliases[$columnName])){
+        if (isset($aliases[$columnName])) {
             $tableAlias = $aliases[$columnName];
         }
 
@@ -102,36 +98,28 @@ trait MySqlFilterTrait
         $columnName = $originalFilter->columnName;
 
         $aliases = $collection->getAliasedColumns();
-        if (isset($aliases[$columnName])){
+        if (isset($aliases[$columnName])) {
             $columnName = $aliases[$columnName];
         }
 
         return $columnName;
     }
 
-    protected function createColumnWhereClauseExpression(
-        $sqlOperator,
-        $value,
-        Collection $collection,
-        Repository $repository,
-        WhereExpressionCollector $whereExpressionCollector,
-        &$params
-    )
+    protected function createColumnWhereClauseExpression($sqlOperator, $value, Collection $collection, Repository $repository, WhereExpressionCollector $whereExpressionCollector, &$params)
     {
         $columnName = $this->columnName;
 
         if (self::canFilter($collection, $repository, $columnName)) {
-
             $aliases = $collection->getPulledUpAggregatedColumns();
             $isAlias = false;
 
-            if (in_array($columnName, $aliases)){
+            if (in_array($columnName, $aliases)) {
                 $isAlias = true;
             } else {
                 $aggregates = $collection->getAggregateColumns();
 
-                foreach($aggregates as $aggregate){
-                    if ($aggregate->getAlias() == $columnName){
+                foreach ($aggregates as $aggregate) {
+                    if ($aggregate->getAlias() == $columnName) {
                         $isAlias = true;
                         break;
                     }
@@ -142,7 +130,7 @@ trait MySqlFilterTrait
             $toAlias = self::getTableAlias($this, $collection);
 
             if ($value === null) {
-                if ($sqlOperator == "="){
+                if ($sqlOperator == "=") {
                     $sqlOperator = "IS";
                 }
             }
@@ -152,7 +140,7 @@ trait MySqlFilterTrait
             $placeHolder = $this->detectPlaceHolder($value);
 
             if (!$placeHolder) {
-                if ($value === null){
+                if ($value === null) {
                     $paramName = "NULL";
                 } else {
                     $params[$paramName] = $this->getTransformedComparisonValueForRepository(
@@ -164,14 +152,14 @@ trait MySqlFilterTrait
                     $paramName = ":" . $paramName;
                 }
             } else {
-                if (isset($collection->additionalColumns[$placeHolder])){
+                if (isset($collection->additionalColumns[$placeHolder])) {
                     $paramName = "`" . $placeHolder . "`";
                 } else {
                     $paramName = "`" . $collection->getUniqueReference() . "`.`" . $placeHolder . "`";
                 }
             }
 
-            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, $sqlOperator . " ".$paramName, $isAlias, $toAlias));
+            $whereExpressionCollector->addWhereExpression(new ColumnWhereExpression($columnName, $sqlOperator . " " . $paramName, $isAlias, $toAlias));
 
             return true;
         }
@@ -186,10 +174,8 @@ trait MySqlFilterTrait
      * @param Repository $repository
      * @return bool
      */
-    protected function doCanFilterWithRepository(
-        Collection $collection,
-        Repository $repository
-    ){
+    protected function doCanFilterWithRepository(Collection $collection, Repository $repository)
+    {
         if ($this instanceof ColumnFilter) {
             return self::canFilter($collection, $repository, $this->getColumnName());
         }
@@ -201,13 +187,13 @@ trait MySqlFilterTrait
     {
         $aliases = $collection->getAliasedColumnsToCollection();
 
-        if (isset($aliases[$columnName])){
+        if (isset($aliases[$columnName])) {
             $collection = $aliases[$columnName];
         }
 
         $exampleObject = SolutionSchema::getModel($collection->getModelClassName());
 
-        if (isset($collection->additionalColumns[$columnName])){
+        if (isset($collection->additionalColumns[$columnName])) {
             $columnSchema = $collection->additionalColumns[$columnName]["column"];
         } else {
             $columnSchema = $exampleObject->getRepositoryColumnSchemaForColumnReference($columnName);
