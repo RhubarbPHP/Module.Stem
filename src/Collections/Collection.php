@@ -458,8 +458,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
             }
 
             $this->aliasedColumns[$alias] = $column;
-            $this->aliasedColumnsToCollectionReference[$column] = $collection->getUniqueReference();
-            $this->aliasedColumnsToCollection[$column] = $collection;
+            $this->aliasedColumnsToCollectionReference[$alias] = $collection->getUniqueReference();
+            $this->aliasedColumnsToCollection[$alias] = $collection;
 
             foreach ($childAggregates as $aggregate) {
                 if ($aggregate->getAlias() == $column) {

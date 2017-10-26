@@ -80,17 +80,13 @@ trait MySqlFilterTrait
 
     protected static function getTableAlias($originalFilter, Collection $collection)
     {
-        $tableAlias = null;
-
-        $columnName = self::getRealColumnName($originalFilter, $collection);
-
         $aliases = $collection->getAliasedColumnsToCollectionReference();
 
-        if (isset($aliases[$columnName])) {
-            $tableAlias = $aliases[$columnName];
+        if (isset($aliases[$originalFilter->columnName])) {
+            return $aliases[$originalFilter->columnName];
         }
 
-        return $tableAlias;
+        return null;
     }
 
     protected static function getRealColumnName($originalFilter, Collection $collection)
