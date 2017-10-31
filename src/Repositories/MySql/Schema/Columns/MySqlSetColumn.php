@@ -37,4 +37,29 @@ class MySqlSetColumn extends MySqlEnumColumn
 
         return "`" . $this->columnName . "` set(" . $possibleString . ") " . $this->getDefaultDefinition();
     }
+
+    public function getTransformIntoRepository()
+    {
+        return function ($data) {
+            if (is_array($data[$this->columnName])) {
+                array_walk($data[$this->columnName], function(&$value, $index) {
+                    str_replace(',', '-', $value);
+                });
+
+                return implode(',', $data[$this->columnName]);
+            }
+
+            return $data[$this->columnName];
+        };
+    }
+
+    public function getTransformFromRepository()
+    {
+        return function ($data) {
+            if (isset($data[$this->columnName])) {
+                return explode(',', $data[$this->columnName]);
+            }
+            return $data;
+        };
+    }
 }
