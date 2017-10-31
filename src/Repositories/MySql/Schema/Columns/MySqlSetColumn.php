@@ -59,7 +59,7 @@ class MySqlSetColumn extends MySqlEnumColumn
             if (isset($data[$this->columnName])) {
                 return explode(',', $data[$this->columnName]);
             }
-            return $data;
+            return [];
         };
     }
 }
