@@ -1,6 +1,27 @@
 # Change Log
 
+### 1.4.5
+
+* Added:    Adding a new ListContains filter to allow for Array filtering
+
+### 1.4.4
+
+* Added:    Adding support for MySql Literal filter
+
+### 1.4.3
+
+* Fixed:    MySqlSetColumn values need to be transformed when going in, and out of the database.
+
+### 1.4.2
+
+* Fixed:    AllWordsGroup needs to trim the search before splitting, otherwise a leading or trailing space will end up with an empty word in the array, which will match anything
+
+### 1.4.1
+
+* Fixed:    When attempting to filter on a collection with multiple columns of the same name, the filter could only be applied to the last one. It now uses aliases to allow you to specify the correct column by giving it a unique alias and referring to that.
+
 ### 1.4.0
+
 * Added:    Charset support for MySQL Repository
 
 ### 1.3.30
