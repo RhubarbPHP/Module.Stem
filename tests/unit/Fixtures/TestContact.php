@@ -5,6 +5,7 @@ namespace Rhubarb\Stem\Tests\unit\Fixtures;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\BooleanColumn;
+use Rhubarb\Stem\Schema\Columns\CommaSeparatedListColumn;
 use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\DateTimeColumn;
 use Rhubarb\Stem\Schema\Columns\DecimalColumn;
@@ -21,6 +22,7 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $Forename
  * @property string $Surname
  * @property \Date $DateOfBirth
+ * @property int[] $AgesOfFriends
  */
 class TestContact extends Model
 {
@@ -42,7 +44,8 @@ class TestContact extends Model
             new DecimalColumn("CreditLimit", 10, 2),
             new DecimalColumn("Balance", 8, 4),
             new StringColumn("Postcode", 50),
-            new StringColumn("AddressLine1", 50)
+            new StringColumn("AddressLine1", 50),
+            new CommaSeparatedListColumn('AgesOfFriends', 500, [], true)
         );
 
         $schema->uniqueIdentifierColumnName = "ContactID";
