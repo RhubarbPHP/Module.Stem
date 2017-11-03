@@ -26,4 +26,18 @@ class FloatColumn extends Column
     {
         return "float";
     }
+
+    public function getTransformIntoModelData()
+    {
+        return function ($value) {
+            return (float)$value;
+        };
+    }
+
+    public function getTransformFromRepository()
+    {
+        return function ($data) {
+            return (float)$data[$this->columnName];
+        };
+    }
 }

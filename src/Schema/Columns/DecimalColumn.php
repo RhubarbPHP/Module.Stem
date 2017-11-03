@@ -73,4 +73,11 @@ class DecimalColumn extends Column
             return $value;
         };
     }
+
+    public function getTransformFromRepository()
+    {
+        return function ($data) {
+            return (float)$data[$this->columnName];
+        };
+    }
 }

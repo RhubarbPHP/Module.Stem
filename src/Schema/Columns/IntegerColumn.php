@@ -26,4 +26,18 @@ class IntegerColumn extends Column
     {
         return "int";
     }
+
+    public function getTransformIntoModelData()
+    {
+        return function ($value) {
+            return (int)$value;
+        };
+    }
+
+    public function getTransformFromRepository()
+    {
+        return function ($data) {
+            return (int)$data[$this->columnName];
+        };
+    }
 }
