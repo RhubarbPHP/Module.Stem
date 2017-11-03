@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.4.6
+
+* Added:    IntegerColumn, FloatColumn and BooleanColumn all format repository values into the appropriate datatypes
+
 ### 1.4.5
 
 * Added:    Adding a new ListContains filter to allow for Array filtering
