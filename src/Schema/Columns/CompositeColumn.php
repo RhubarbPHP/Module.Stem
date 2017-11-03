@@ -40,9 +40,9 @@ abstract class CompositeColumn extends Column implements ModelValueInitialiserIn
         $object = $this->getNewContainerObject();
         $columns = $this->createStorageColumns();
 
-        foreach($this->getCompositeColumnsNames() as $columnName){
-            foreach($columns as $column){
-                if ($column->columnName == $this->columnName.$columnName){
+        foreach ($this->getCompositeColumnsNames() as $columnName) {
+            foreach ($columns as $column) {
+                if ($column->columnName == $this->columnName . $columnName) {
                     $object[$columnName] = $column->getDefaultValue();
                 }
             }
@@ -75,8 +75,6 @@ abstract class CompositeColumn extends Column implements ModelValueInitialiserIn
     {
         return new AllPublicModelState();
     }
-
-
 
     public function getTransformFromRepository()
     {

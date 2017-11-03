@@ -6,5 +6,5 @@ use Rhubarb\Stem\Models\Model;
 
 interface ModelValueInitialiserInterface
 {
-    function onNewModelInitialising(Model $model);
+    public function onNewModelInitialising(Model $model);
 }

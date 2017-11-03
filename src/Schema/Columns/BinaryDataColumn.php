@@ -19,6 +19,7 @@
 namespace Rhubarb\Stem\Schema\Columns;
 
 require_once __DIR__ . "/Column.php";
+
 class BinaryDataColumn extends Column
 {
     public function __construct($columnName)

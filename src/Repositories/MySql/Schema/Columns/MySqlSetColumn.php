@@ -24,6 +24,11 @@ class MySqlSetColumn extends MySqlEnumColumn
 {
     public $possibleValues = [];
 
+    public function getPhpType()
+    {
+        return "string[]";
+    }
+
     public function __construct($columnName, $defaultValue, $possibleValues)
     {
         parent::__construct($columnName, $defaultValue, $possibleValues);
