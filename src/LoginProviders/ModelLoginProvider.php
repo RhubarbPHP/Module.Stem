@@ -22,12 +22,14 @@ use Rhubarb\Crown\Encryption\HashProvider;
 use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
+use Rhubarb\Crown\LoginProviders\Exceptions\LoginExpiredException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
 use Rhubarb\Crown\LoginProviders\LoginProvider;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Equals;
+use Rhubarb\Stem\Interfaces\CheckExpiredModelInterface;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -90,6 +92,11 @@ class ModelLoginProvider extends LoginProvider
             if ($existingActiveUsers > 1) {
                 Log::debug("Login failed for {$username} - the username wasn't unique", "LOGIN");
                 throw new LoginFailedException();
+            }
+
+            if ($user instanceof CheckExpiredModelInterface && $user->hasModelExpired()) {
+                Log::debug("Login failed for {$username} - the login has now expired", "LOGIN");
+                throw new LoginExpiredException();
             }
         }
 
