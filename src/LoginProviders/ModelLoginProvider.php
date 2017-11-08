@@ -22,6 +22,7 @@ use Rhubarb\Crown\Encryption\HashProvider;
 use Rhubarb\Crown\Exceptions\ImplementationException;
 use Rhubarb\Crown\Logging\Log;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
+use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledFailedAttemptsException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginExpiredException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
@@ -29,7 +30,7 @@ use Rhubarb\Crown\LoginProviders\LoginProvider;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Filters\Equals;
-use Rhubarb\Stem\Interfaces\CheckExpiredModelInterface;
+use Rhubarb\Stem\Interfaces\ValidateLoginModelInterface;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
@@ -94,9 +95,16 @@ class ModelLoginProvider extends LoginProvider
                 throw new LoginFailedException();
             }
 
-            if ($user instanceof CheckExpiredModelInterface && $user->hasModelExpired()) {
-                Log::debug("Login failed for {$username} - the login has now expired", "LOGIN");
-                throw new LoginExpiredException();
+            if ($user instanceof ValidateLoginModelInterface) {
+                if ($user->isModelExpired()) {
+                    Log::debug("Login failed for {$username} - the login has now expired", "LOGIN");
+                    throw new LoginExpiredException();
+                }
+
+                if ($user->isModelDisabled()) {
+                    Log::debug("Login failed for {$username} - the login has been disabled due to numerous failed login attempts", "LOGIN");
+                    throw new LoginDisabledFailedAttemptsException();
+                }
             }
         }
 

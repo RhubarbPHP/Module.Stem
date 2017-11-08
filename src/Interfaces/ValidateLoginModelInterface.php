@@ -23,7 +23,9 @@ namespace Rhubarb\Stem\Interfaces;
  * has expired.
  * For example: It can be used to validate whether a users password has now expired
  */
-interface CheckExpiredModelInterface
+interface ValidateLoginModelInterface
 {
-    public function hasModelExpired();
+    public function isModelExpired();
+
+    public function isModelDisabled();
 }
