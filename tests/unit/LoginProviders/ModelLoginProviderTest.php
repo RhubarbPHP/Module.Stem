@@ -5,9 +5,12 @@ namespace Rhubarb\Stem\Tests\unit\LoginProviders;
 use Rhubarb\Crown\Encryption\HashProvider;
 use Rhubarb\Crown\Encryption\Sha512HashProvider;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
+use Rhubarb\Crown\LoginProviders\Exceptions\LoginExpiredException;
 use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
 use Rhubarb\Crown\Tests\Fixtures\TestCases\RhubarbTestCase;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestExpiredLoginProvider;
+use Rhubarb\Stem\Tests\unit\Fixtures\TestExpiredUser;
 use Rhubarb\Stem\Tests\unit\Fixtures\TestLoginProvider;
 use Rhubarb\Stem\Tests\unit\Fixtures\User;
 
@@ -116,5 +119,22 @@ class ModelLoginProviderTest extends RhubarbTestCase
 
         $this->assertTrue($testLoginProvider->isLoggedIn());
         $this->assertEquals($user->UniqueIdentifier, $testLoginProvider->getModel()->UniqueIdentifier);
+    }
+
+    public function testExpiredLogin()
+    {
+        $user = new TestExpiredUser();
+        $user->Username = "expiredlogin";
+        $user->Password = "password";
+        $user->save();
+
+        try {
+            $testLoginProvider = new TestExpiredLoginProvider();
+            $testLoginProvider->login($user->Username, $user->Password);
+
+            $this->fail("Expected User login to be expired");
+        } catch (LoginExpiredException $exception) {
+            $this->assertEquals("Sorry, your login has now expired. Please contact the system administrator to address this issue.", $exception->getPublicMessage());
+        }
     }
 }
