@@ -1223,15 +1223,27 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                 return;
             }
 
+            if (!$filter->requiresAggregation($this) && $postAggregates) {
+                return;
+            }
+
             $uniqueIdentifiersToFilter = [];
 
             foreach ($this->collectionCursor as $model) {
                 if ($filter->shouldFilter($model)) {
-                    $uniqueIdentifiersToFilter[] = $model->uniqueIdentifier;
+                    if (!isset($uniqueIdentifiersToFilter[$model->getUniqueIdentifier()])) {
+                        $uniqueIdentifiersToFilter[$model->uniqueIdentifier] = true;
+                    }
+                } else {
+                    $uniqueIdentifiersToFilter[$model->uniqueIdentifier] = false;
                 }
             }
 
-            $this->collectionCursor->filterModelsByIdentifier($uniqueIdentifiersToFilter);
+            $idsToFilter = array_keys(array_filter($uniqueIdentifiersToFilter, function($value, $key){
+                return $value;
+            }, ARRAY_FILTER_USE_BOTH));
+
+            $this->collectionCursor->filterModelsByIdentifier($idsToFilter);
         }
     }
 

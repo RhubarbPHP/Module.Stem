@@ -35,9 +35,9 @@ class UniqueIdentifierListCursor extends CollectionCursor
     {
         $this->uniqueIdentifiers = array_values(array_diff($this->uniqueIdentifiers, $uniqueIdentifiersToFilter));
 
-        if (count($this->duplicatedRows)){
-            foreach($uniqueIdentifiersToFilter as $id) {
-                unset($this->duplicatedRows[$id]);
+        foreach($this->duplicatedRows as $aid => $id) {
+            if (in_array($id, $uniqueIdentifiersToFilter)) {
+                unset($this->duplicatedRows[$aid]);
             }
         }
     }

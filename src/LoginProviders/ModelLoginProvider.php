@@ -35,86 +35,15 @@ use Rhubarb\Stem\Schema\SolutionSchema;
  */
 class ModelLoginProvider extends LoginProvider
 {
-    protected $usernameColumnName = "";
-    protected $passwordColumnName = "";
-    protected $activeColumnName = "";
     protected $modelClassName = "";
 
     public $loggedInUserIdentifier = "";
 
-    public function __construct($modelClassName, $usernameColumnName, $passwordColumnName, $activeColumnName = "")
+    public function __construct($modelClassName)
     {
         parent::__construct();
 
         $this->modelClassName = $modelClassName;
-        $this->usernameColumnName = $usernameColumnName;
-        $this->passwordColumnName = $passwordColumnName;
-        $this->activeColumnName = $activeColumnName;
-    }
-
-    protected function isModelActive($model)
-    {
-        return ($model[$this->activeColumnName] == true);
-    }
-
-    public function login($username, $password)
-    {
-        // We don't allow spaces around our usernames and passwords
-        $username = trim($username);
-        $password = trim($password);
-
-        if ($username == "") {
-            throw new LoginFailedException();
-        }
-
-        $list = new RepositoryCollection($this->modelClassName);
-        $list->filter(new Equals($this->usernameColumnName, $username));
-
-        if (!sizeof($list)) {
-            Log::debug("Login failed for {$username} - the username didn't match a user", "LOGIN");
-            throw new LoginFailedException();
-        }
-
-        $hashProvider = HashProvider::getProvider();
-
-        // There should only be one user matching the username. It would be possible to support
-        // unique *combinations* of username and password but it's a potential security issue and
-        // could trip us up when supporting the project.
-        $existingActiveUsers = 0;
-        foreach ($list as $user) {
-            if ($this->isModelActive($user)) {
-                $activeUser = $user;
-                $existingActiveUsers++;
-            }
-
-            if ($existingActiveUsers > 1) {
-                Log::debug("Login failed for {$username} - the username wasn't unique", "LOGIN");
-                throw new LoginFailedException();
-            }
-        }
-
-        if (!isset($activeUser)) {
-            Log::debug("Login failed for {$username} - the user is disabled.", "LOGIN");
-            throw new LoginDisabledException();
-        }
-
-        $this->checkUserIsPermitted($activeUser);
-
-        // Test the password matches.
-        $userPasswordHash = $activeUser[$this->passwordColumnName];
-
-        if ($hashProvider->compareHash($password, $userPasswordHash)) {
-            $this->loggedIn = true;
-            $this->loggedInUserIdentifier = $activeUser->getUniqueIdentifier();
-
-            $this->storeSession();
-
-            return true;
-        }
-
-        Log::debug("Login failed for {$username} - the password hash $userPasswordHash didn't match the stored hash.", "LOGIN");
-
-        throw new LoginFailedException();
     }
 
     /**
@@ -137,19 +66,6 @@ class ModelLoginProvider extends LoginProvider
         $this->loggedInUserIdentifier = $user->UniqueIdentifier;
 
         parent::forceLogin();
-    }
-
-    /**
-     * Provides an opportunity for extending classes to do additional checks on the user object before
-     * allowing them to login.
-     *
-     * You should throw an exception if you want to prevent the login.
-     *
-     * @param $user
-     */
-    protected function checkUserIsPermitted($user)
-    {
-
     }
 
     /**
@@ -181,11 +97,5 @@ class ModelLoginProvider extends LoginProvider
         unset($this->loggedInUserIdentifier);
 
         parent::onLogOut();
-    }
-
-    protected function getUsername()
-    {
-        $user = $this->getModel();
-        return $user->{$this->usernameColumnName};
     }
 }

@@ -1,5 +1,14 @@
 # Change Log
 
+### 1.5.0
+
+* Removed:  ModelLoginProvider no longer has a login method - it only includes support for knowing that a
+            particular model is 'logged in'. As nearly all login providers extend the scaffolded version
+            (where this has moved to) this should not be a breaking change for anybody.           
+* Fixed:    JSON unit tests all passing
+* Fixed:    Bug where offline filtering of intersections that joined 1 to many would not return the
+            expected results.
+
 ### 1.4.6
 
 * Added:    IntegerColumn, FloatColumn and BooleanColumn all format repository values into the appropriate datatypes

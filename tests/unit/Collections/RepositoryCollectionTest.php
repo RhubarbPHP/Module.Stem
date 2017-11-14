@@ -706,10 +706,11 @@ class RepositoryCollectionTest extends ModelUnitTestCase
             new Between("DonationDate", $startDate, $endDate)
         ]));
 
-
         $this->assertEquals(17, sizeof($donations), "We should find 17 donations between $startDate and $endDate
         (\$donation16 and \$donation17 shouldn't be found as they lie outside the date range)");
-
+        foreach($donations as $donation){
+            print $donation->UniqueIdentifier." ";
+        }
 
         /*
          * Find all the Declarations that aren't cancelled. Intersect this with $donations where either:
@@ -754,6 +755,11 @@ class RepositoryCollectionTest extends ModelUnitTestCase
                 )
             )
         );
+
+
+        foreach($donations as $donation){
+            print $donation->UniqueIdentifier." ";
+        }
 
         $this->assertEquals(14, sizeof($donations),
             "We should filter out 3 donations who don't have applicable declarations

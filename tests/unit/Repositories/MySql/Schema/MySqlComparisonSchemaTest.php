@@ -67,7 +67,7 @@ class MySqlComparisonSchemaTest extends MySqlTestCase
                 "Password" => "`Password` varchar(120) NOT NULL DEFAULT ''",
                 "Active" => "`Active` tinyint(1) NOT NULL DEFAULT '0'",
                 "Wage" => "`Wage` decimal(8,2) NOT NULL DEFAULT '0.00'",
-                "ProfileData" => "`ProfileData` longtext"
+                "ProfileData" => "`ProfileData` json DEFAULT NULL"
             ],
             $comparisonSchema->columns
         );

@@ -22,8 +22,7 @@ class ModelLoginProviderTest extends RhubarbTestCase
         HashProvider::setProviderClassName(Sha512HashProvider::class);
 
         $user = new User();
-        $user->Username = "billy";
-        $user->Password = '$6$rounds=10000$EQeQYSJmy6UAzGDb$7MoO7FLWXex8GDHkiY/JNk5ukXpUHDKfzs3S5Q04IdB8Xz.W2qp1zZ7/oVWrFZrCX7qKckJNeBDwRC.rmVR/Q1';
+        $user->Username = "billy";        $user->Password = '$6$rounds=10000$EQeQYSJmy6UAzGDb$7MoO7FLWXex8GDHkiY/JNk5ukXpUHDKfzs3S5Q04IdB8Xz.W2qp1zZ7/oVWrFZrCX7qKckJNeBDwRC.rmVR/Q1';
         $user->Active = false;
         $user->save();
 
@@ -43,78 +42,25 @@ class ModelLoginProviderTest extends RhubarbTestCase
         $user->save();
     }
 
-    public function testLoginChecksUsernameIsNotBlank()
-    {
-        $this->setExpectedException(LoginFailedException::class);
-
-        $testLoginProvider = new TestLoginProvider();
-        $testLoginProvider->login("", "");
-    }
-
-    public function testLoginChecksUsername()
-    {
-        $this->setExpectedException(LoginFailedException::class);
-
-        $testLoginProvider = new TestLoginProvider();
-        $testLoginProvider->login("noname", "nopassword");
-    }
-
-    public function testLoginChecksDisabled()
-    {
-        $this->setExpectedException(LoginDisabledException::class);
-
-        $testLoginProvider = new TestLoginProvider();
-        $testLoginProvider->login("billy", "abc123");
-    }
-
-    public function testLoginChecksPasswordAndThrows()
-    {
-        $this->setExpectedException(LoginFailedException::class);
-
-        $testLoginProvider = new TestLoginProvider();
-        $testLoginProvider->login("mdoe", "badpassword");
-    }
-
-    public function testLoginChecksPasswordReturnsModelAndLogsOut()
+    public function testForceLoginInLogOutAndGetModel()
     {
         $testLoginProvider = new TestLoginProvider();
 
-        try {
-            $testLoginProvider->login("mdoe", "badpassword");
-        } catch (LoginFailedException $er) {
-        }
+        $user = new User();
+        $user->Username = "billy";
+        $user->Active = false;
+        $user->save();
 
-        $this->assertFalse($testLoginProvider->isLoggedIn());
-
-        $result = $testLoginProvider->login("mdoe", "abc123");
-
-        $this->assertTrue($result);
+        $testLoginProvider->forceLogin($user);
         $this->assertTrue($testLoginProvider->isLoggedIn());
+        $this->assertEquals($user->UniqueIdentifier, $testLoginProvider->getModel()->UniqueIdentifier);
 
-        $model = $testLoginProvider->getModel();
-
-        $this->assertInstanceOf(User::class, $model);
-        $this->assertEquals("111222", $model->SecretProperty);
-
-        $testLoginProvider->LogOut();
+        $testLoginProvider->logOut();
 
         $this->assertFalse($testLoginProvider->isLoggedIn());
 
         $this->setExpectedException(NotLoggedInException::class);
 
         $model = $testLoginProvider->getModel();
-    }
-
-    public function testForceLogin()
-    {
-        $user = new User();
-        $user->Username = "flogin";
-        $user->save();
-
-        $testLoginProvider = new TestLoginProvider();
-        $testLoginProvider->forceLogin($user);
-
-        $this->assertTrue($testLoginProvider->isLoggedIn());
-        $this->assertEquals($user->UniqueIdentifier, $testLoginProvider->getModel()->UniqueIdentifier);
     }
 }

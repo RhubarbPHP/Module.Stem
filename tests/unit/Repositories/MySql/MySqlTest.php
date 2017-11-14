@@ -121,8 +121,11 @@ class MySqlTest extends MySqlTestCase
 
     public function testDataTransforms()
     {
+        $stdClass = new \stdClass();
+        $stdClass->a = 1;
+
         $user = new User();
-        $user->ProfileData = ["a" => 1];
+        $user->ProfileData = $stdClass;
         $user->Active = true;
         $user->save();
 
@@ -130,7 +133,7 @@ class MySqlTest extends MySqlTestCase
 
         $user = User::findLast();
 
-        $this->assertEquals(["a" => 1], $user->ProfileData, "If transforms were working ProfileData would be an array");
+        $this->assertEquals($stdClass, $user->ProfileData, "If transforms were working ProfileData would be an array");
 
     }
 
