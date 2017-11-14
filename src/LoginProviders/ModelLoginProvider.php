@@ -18,16 +18,10 @@
 
 namespace Rhubarb\Stem\LoginProviders;
 
-use Rhubarb\Crown\Encryption\HashProvider;
 use Rhubarb\Crown\Exceptions\ImplementationException;
-use Rhubarb\Crown\Logging\Log;
-use Rhubarb\Crown\LoginProviders\Exceptions\LoginDisabledException;
-use Rhubarb\Crown\LoginProviders\Exceptions\LoginFailedException;
 use Rhubarb\Crown\LoginProviders\Exceptions\NotLoggedInException;
 use Rhubarb\Crown\LoginProviders\LoginProvider;
-use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
-use Rhubarb\Stem\Filters\Equals;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 
