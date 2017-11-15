@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.1
+
+* Fixed:    MysqlJsonColumn now supports $decodeAsArrays
+
 ### 1.5.0
 
 * Removed:  ModelLoginProvider no longer has a login method - it only includes support for knowing that a

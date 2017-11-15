@@ -22,7 +22,7 @@ require_once __DIR__ . '/LongStringColumn.php';
 
 class JsonColumn extends LongStringColumn
 {
-    private $decodeAsArrays;
+    protected $decodeAsArrays;
 
     /**
      * @param $columnName

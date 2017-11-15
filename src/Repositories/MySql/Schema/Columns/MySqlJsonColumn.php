@@ -37,7 +37,7 @@ class MySqlJsonColumn extends JsonColumn
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new self($genericColumn->columnName);
+        return new self($genericColumn->columnName, $genericColumn->defaultValue, $genericColumn->decodeAsArrays );
     }
 
     public function createStorageColumns()
