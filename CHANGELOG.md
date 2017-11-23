@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.5.2
+
+* Added:    Read/Write connection splitting support
+* Added:    Read only connection stem settings
+
 ### 1.5.1
 
 * Fixed:    MysqlJsonColumn now supports $decodeAsArrays

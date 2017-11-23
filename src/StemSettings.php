@@ -32,6 +32,16 @@ class StemSettings extends Settings
     public $password = "";
     public $database = "";
 
+    // allows connections to be split so that reads and writes
+    public $readOnlyHost = "";
+    public $readOnlyPort = "";
+    public $readOnlyUsername = "";
+    public $readOnlyPassword = "";
+
+    // Useful if you intend to read immediately after writing and your read only connection has lag (eg replication).
+    // This will probably make read only connections pointless if writes happen throughout reads (eg db logging).
+    public $stickyWriteConnection = false;
+
     /**
      * @var \DateTimeZone
      */

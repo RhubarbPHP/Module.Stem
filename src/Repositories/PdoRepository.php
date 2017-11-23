@@ -44,6 +44,8 @@ abstract class PdoRepository extends Repository
      */
     protected static $defaultConnection = null;
 
+    protected static $readOnlyConnection = null;
+
     private static $pdoParamAliasesUsed = [];
 
     /**
@@ -81,9 +83,44 @@ abstract class PdoRepository extends Repository
             $databaseSettings = StemSettings::singleton();
 
             self::$defaultConnection = static::getConnection($databaseSettings);
+
+            if ($databaseSettings->stickyWriteConnection) {
+                self::$readOnlyConnection = self::$defaultConnection;
+            }
         }
 
         return self::$defaultConnection;
+    }
+
+    public static function getReadOnlyConnection()
+    {
+        if (self::$readOnlyConnection === null) {
+            $databaseSettings = StemSettings::singleton();
+
+            if (
+                // readonly port/host are different to default
+                $databaseSettings->readOnlyHost !== $databaseSettings->host
+                || $databaseSettings->readOnlyPort !== $databaseSettings->port
+            ) {
+                $readOnlySettings = clone StemSettings::singleton();
+                $readOnlyMap = [
+                    'host' => 'readOnlyHost',
+                    'port' => 'readOnlyPort',
+                    'username' => 'readOnlyUsername',
+                    'password' => 'readOnlyPassword',
+                ];
+                foreach ($readOnlyMap as $primaryProp => $readOnlyProp) {
+                    if ($readOnlySettings->$readOnlyProp) {
+                        $readOnlySettings->$primaryProp = $readOnlySettings->$readOnlyProp;
+                    }
+                }
+                self::$readOnlyConnection = static::getConnection($readOnlySettings);
+            } else {
+                self::$readOnlyConnection = self::getDefaultConnection();
+            }
+        }
+
+        return self::$readOnlyConnection;
     }
 
     /**
@@ -104,6 +141,13 @@ abstract class PdoRepository extends Repository
         self::$defaultConnection = null;
     }
 
+    /**
+     * Discards the default connection.
+     */
+    public static function resetReadOnlyConnection()
+    {
+        self::$readOnlyConnection = null;
+    }
 
     /**
      * A collection of PDO objects for each active connection.
@@ -231,7 +275,11 @@ abstract class PdoRepository extends Repository
      */
     public static function returnSingleValue($statement, $namedParameters = [], $connection = null)
     {
-        $statement = self::executeStatement($statement, $namedParameters, $connection);
+        $statement = self::executeStatement(
+            $statement,
+            $namedParameters,
+            $connection !== null ? $connection : self::getReadOnlyConnection()
+        );
 
         return $statement->fetchColumn(0);
     }
@@ -246,7 +294,11 @@ abstract class PdoRepository extends Repository
      */
     public static function returnFirstRow($statement, $namedParameters = [], $connection = null)
     {
-        $statement = self::executeStatement($statement, $namedParameters, $connection);
+        $statement = self::executeStatement(
+            $statement,
+            $namedParameters,
+            $connection !== null ? $connection : self::getReadOnlyConnection()
+        );
 
         return $statement->fetch(\PDO::FETCH_ASSOC);
     }
