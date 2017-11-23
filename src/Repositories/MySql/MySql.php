@@ -108,7 +108,7 @@ class MySql extends PdoRepository
         $data = self::returnFirstRow(
             "SELECT * FROM `" . $table . "` WHERE `{$schema->uniqueIdentifierColumnName}` = :id",
             ["id" => $uniqueIdentifier],
-            self::getReadOnlyConnection()
+            static::getReadOnlyConnection()
         );
 
         if ($data != null) {
@@ -302,7 +302,7 @@ class MySql extends PdoRepository
             $sql = preg_replace("/^SELECT /", "SELECT SQL_CALC_FOUND_ROWS ", $sql);
         }
 
-        $connection = self::getReadOnlyConnection();
+        $connection = static::getReadOnlyConnection();
         $statement = static::executeStatement((string)$sql, $params, $connection);
 
         $count = $statement->rowCount();

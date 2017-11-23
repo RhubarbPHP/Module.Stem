@@ -40,7 +40,7 @@ class StemSettings extends Settings
 
     // Useful if you intend to read immediately after writing and your read only connection has lag (eg replication).
     // This will probably make read only connections pointless if writes happen throughout reads (eg db logging).
-    public $stickyWriteConnection = false;
+    public $stickyWriteConnection = true;
 
     /**
      * @var \DateTimeZone

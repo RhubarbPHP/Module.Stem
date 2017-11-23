@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.5.3
+
+* Fixed:   LSB issue with pdo repository
+* Changed: write stickness setting defaults to true
+
 ### 1.5.2
 
 * Added:    Read/Write connection splitting support

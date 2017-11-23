@@ -116,7 +116,7 @@ abstract class PdoRepository extends Repository
                 }
                 self::$readOnlyConnection = static::getConnection($readOnlySettings);
             } else {
-                self::$readOnlyConnection = self::getDefaultConnection();
+                self::$readOnlyConnection = static::getDefaultConnection();
             }
         }
 
@@ -278,7 +278,7 @@ abstract class PdoRepository extends Repository
         $statement = self::executeStatement(
             $statement,
             $namedParameters,
-            $connection !== null ? $connection : self::getReadOnlyConnection()
+            $connection !== null ? $connection : static::getReadOnlyConnection()
         );
 
         return $statement->fetchColumn(0);
@@ -297,7 +297,7 @@ abstract class PdoRepository extends Repository
         $statement = self::executeStatement(
             $statement,
             $namedParameters,
-            $connection !== null ? $connection : self::getReadOnlyConnection()
+            $connection !== null ? $connection : static::getReadOnlyConnection()
         );
 
         return $statement->fetch(\PDO::FETCH_ASSOC);
