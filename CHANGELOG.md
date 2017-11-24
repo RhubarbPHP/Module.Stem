@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.4
+
+* Fixed:    Read/Write splitting broke everything not using splitting...
+
 ### 1.5.3
 
 * Fixed:   LSB issue with pdo repository

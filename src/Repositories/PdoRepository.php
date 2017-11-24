@@ -99,8 +99,8 @@ abstract class PdoRepository extends Repository
 
             if (
                 // readonly port/host are different to default
-                $databaseSettings->readOnlyHost !== $databaseSettings->host
-                || $databaseSettings->readOnlyPort !== $databaseSettings->port
+                (($databaseSettings->readOnlyHost !== '') && ($databaseSettings->readOnlyHost !== $databaseSettings->host))
+                || (($databaseSettings->readOnlyPort !== '') && ($databaseSettings->readOnlyPort !== $databaseSettings->port))
             ) {
                 $readOnlySettings = clone StemSettings::singleton();
                 $readOnlyMap = [
