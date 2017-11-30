@@ -25,6 +25,15 @@ require_once __DIR__ . "/../../../../Schema/Columns/JsonColumn.php";
 
 class MySqlJsonColumn extends JsonColumn
 {
+    protected $useMySqlJsonColumn = false;
+
+    public function __construct($columnName, $defaultValue = null, $decodeAsArrays = false, $useMySqlJsonColumn = true)
+    {
+        $this->useMySqlJsonColumn = $useMySqlJsonColumn;
+
+        parent::__construct($columnName, $defaultValue, $decodeAsArrays);
+    }
+
     public function getDefaultDefinition()
     {
         return ($this->defaultValue === null) ? "DEFAULT NULL" : "NOT NULL";
@@ -35,13 +44,21 @@ class MySqlJsonColumn extends JsonColumn
         return "`" . $this->columnName . "` json " . $this->getDefaultDefinition();
     }
 
+    /**
+     * @param Column|JsonColumn $genericColumn
+     * @return MySqlJsonColumn
+     */
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new self($genericColumn->columnName, $genericColumn->defaultValue, $genericColumn->decodeAsArrays );
+        return new self($genericColumn->columnName, $genericColumn->defaultValue, $genericColumn->decodeAsArrays, false);
     }
 
     public function createStorageColumns()
     {
-        return [$this];
+        if ($this->useMySqlJsonColumn) {
+            return [$this];
+        }
+
+        return parent::createStorageColumns();
     }
 }
