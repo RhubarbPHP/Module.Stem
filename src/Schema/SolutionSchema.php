@@ -688,7 +688,7 @@ abstract class SolutionSchema
      */
     public function checkModelSchemasIfNecessary()
     {
-        $cachePath = Application::current()->applicationRootPath."/cache/";
+        $cachePath = Application::current()->tempPath."/cache/";
 
         if (!file_exists($cachePath."schema-versions")) {
             mkdir($cachePath."schema-versions", 0777, true);
