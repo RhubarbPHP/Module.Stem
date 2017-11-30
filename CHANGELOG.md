@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.6
+
+* Changed:  Cache location for schema versions nows under TEMP_DIR
+
 ### 1.5.5
 
 * Changed:  MySqlJsonColumn must now be used specifically in schema to get "JSON" data type in MySql
