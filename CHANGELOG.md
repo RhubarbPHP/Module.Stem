@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.5
+
+* Changed:  MySqlJsonColumn must now be used specifically in schema to get "JSON" data type in MySql
+
 ### 1.5.4
 
 * Fixed:    Read/Write splitting broke everything not using splitting...
