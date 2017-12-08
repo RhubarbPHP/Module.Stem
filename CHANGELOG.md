@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.7
+
+* Fixed:    Bug where `$modelClassName` was accessed before it was initialised. 
+
 ### 1.5.6
 
 * Changed:  Cache location for schema versions nows under TEMP_DIR

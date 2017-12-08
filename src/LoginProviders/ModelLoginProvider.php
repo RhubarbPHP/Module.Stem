@@ -35,9 +35,9 @@ class ModelLoginProvider extends LoginProvider
 
     public function __construct($modelClassName)
     {
-        parent::__construct();
-
         $this->modelClassName = $modelClassName;
+
+        parent::__construct();
     }
 
     /**
