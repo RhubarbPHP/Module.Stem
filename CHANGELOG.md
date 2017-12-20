@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.8
+
+* Fixed:    Fenced added to prevent warning thrown by de-duping rows which have no augmentation data 
+
 ### 1.5.7
 
 * Fixed:    Bug where `$modelClassName` was accessed before it was initialised. 

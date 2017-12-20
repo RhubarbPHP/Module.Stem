@@ -89,7 +89,9 @@ abstract class CollectionCursor implements \ArrayAccess, \Iterator, \Countable
     {
         foreach($this->duplicatedRows as $augmentedId => $id)
         {
-            $this->augmentationData[$id] = $this->augmentationData[$augmentedId];
+            if (isset($this->augmentationData[$augmentedId])) {
+                $this->augmentationData[$id] = $this->augmentationData[$augmentedId];
+            }
         }
 
         $this->duplicatedRows = [];
