@@ -22,6 +22,12 @@ require_once __DIR__ . "/Column.php";
 
 class IntegerColumn extends Column
 {
+    /**
+     * @deprecated to be removed in v2
+     * @var bool
+     */
+    public static $cast = true;
+
     public function getPhpType()
     {
         return "int";
@@ -29,15 +35,19 @@ class IntegerColumn extends Column
 
     public function getTransformIntoModelData()
     {
-        return function ($value) {
-            return (int)$value;
-        };
+        return IntegerColumn::$cast
+            ? function ($value) {
+                return (int)$value;
+            }
+            : parent::getTransformIntoModelData();
     }
 
     public function getTransformFromRepository()
     {
-        return function ($data) {
-            return (int)$data[$this->columnName];
-        };
+        return IntegerColumn::$cast
+            ? function ($data) {
+                return (int)$data[$this->columnName];
+            }
+            : parent::getTransformFromRepository();
     }
 }

@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.10
+
+* Added:    Flag to disable casting in integer column - a temporary measure for backwards compatibility. 
+
 ### 1.5.9
 
 * Fixed:    Fenced added to prevent warning thrown by de-duping rows which have no augmentation data
