@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.5.11
+
+* Added:    PDO connection options to Mysql Repository 
+
 ### 1.5.10
 
 * Added:    Flag to disable casting in integer column - a temporary measure for backwards compatibility. 

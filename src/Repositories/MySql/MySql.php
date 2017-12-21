@@ -698,7 +698,10 @@ class MySql extends PdoRepository
                     "mysql:host=" . $settings->host . ";port=" . $settings->port . ";dbname=" . $settings->database . ";charset=utf8",
                     $settings->username,
                     $settings->password,
-                    [\PDO::ERRMODE_EXCEPTION => true, \PDO::MYSQL_ATTR_FOUND_ROWS => true]
+                    array_merge(
+                        [\PDO::ERRMODE_EXCEPTION => true, \PDO::MYSQL_ATTR_FOUND_ROWS => true],
+                        $settings->pdoOptions
+                    )
                 );
 
                 $timeZone = $pdo->query("SELECT @@system_time_zone");

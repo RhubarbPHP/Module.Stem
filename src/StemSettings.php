@@ -61,4 +61,6 @@ class StemSettings extends Settings
 
         $this->projectTimeZone = new \DateTimeZone(date_default_timezone_get());
     }
+
+    public $pdoOptions = [];
 }
