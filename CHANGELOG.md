@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.6
+
+* Changed:  Only check and update schemas in developer mode
+
 ### 1.5.11
 
 * Added:    PDO connection options to Mysql Repository 

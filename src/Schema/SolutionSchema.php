@@ -206,8 +206,10 @@ abstract class SolutionSchema
             self::$schemas[$schemaName] = $schema;
 
             $schema->defineRelationships();
-            $schema->checkModelSchemasIfNecessary();
 
+            if(Application::current()->developerMode) {
+                $schema->checkModelSchemasIfNecessary();
+            }
         }
 
         return self::$schemas[$schemaName];
