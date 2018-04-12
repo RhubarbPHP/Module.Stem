@@ -704,10 +704,16 @@ class MySql extends PdoRepository
                     )
                 );
 
-                $timeZone = $pdo->query("SELECT @@system_time_zone");
+                $timeZone = $pdo->query("SELECT @@time_zone as tz, @@system_time_zone as stz");
                 if ($timeZone->rowCount()) {
-                    $settings->repositoryTimeZone = new \DateTimeZone($timeZone->fetchColumn());
+                    $timezones = $timeZone->fetch(\PDO::FETCH_ASSOC);
+                    if($timezones['tz'] === 'SYSTEM'){
+                        $settings->repositoryTimeZone = new \DateTimeZone($timezones['stz']);
+                    } else {
+                        $settings->repositoryTimeZone = new \DateTimeZone($timezones['tz']);
+                    }
                 }
+
                 if ($settings->charset) {
                     $statement = $pdo->prepare("SET NAMES :charset");
                     $statement->execute(['charset' => $settings->charset]);
