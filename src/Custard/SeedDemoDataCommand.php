@@ -5,6 +5,7 @@ namespace Rhubarb\Stem\Custard;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -13,7 +14,9 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
     protected function configure()
     {
         $this->setName('stem:seed-data')
-            ->setDescription('Seeds the repositories with demo data');
+            ->setDescription('Seeds the repositories with demo data')
+        ->addOption("list", "l", null, "Lists the seeders available")
+        ->addArgument("seeder", InputArgument::OPTIONAL, "The name of the seeder to run, leave out for all");
 
         parent::configure();
     }
@@ -27,55 +30,95 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
-        parent::executeWithConnection($input, $output);
+        if ($input->getOption("list")!=null){
 
-        $this->writeNormal("Clearing existing data.", true);
+            $output->writeln("Listing possible seeders:");
+            $output->writeln("");
 
-        $schemas = SolutionSchema::getAllSchemas();
-        $modelSchemas = [];
+            foreach(self::$seeders as $seeder){
+                $output->writeln("\t" . basename(str_replace("\\", "/", get_class($seeder))));
+            }
 
-        foreach ($schemas as $schema) {
-            $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
+            $output->writeln("");
+            return;
         }
 
-        $progressBar = new ProgressBar($output, sizeof($modelSchemas));
+        parent::executeWithConnection($input, $output);
 
-        foreach ($modelSchemas as $alias => $modelClass) {
-            $progressBar->advance();
+        $this->writeNormal("Updating table schemas...", true);
 
-            /** @var Model $model */
-            $model = new $modelClass();
-            $schema = $model->getSchema();
+        $schemas = SolutionSchema::getAllSchemas();
+        foreach ($schemas as $schema) {
+            $schema->checkModelSchemas();
+        }
 
-            if (self::$enableTruncating) {
+        if (self::$enableTruncating) {
+
+            $this->writeNormal("Clearing existing data.", true);
+
+            $modelSchemas = [];
+
+            foreach ($schemas as $schema) {
+                $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
+            }
+
+            $progressBar = new ProgressBar($output, sizeof($modelSchemas));
+
+            foreach ($modelSchemas as $alias => $modelClass) {
+                $progressBar->advance();
+
+                /** @var Model $model */
+                $model = new $modelClass();
+                $schema = $model->getSchema();
+
                 $repository = $model->getRepository();
 
                 $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
 
                 $repository->clearRepositoryData();
-            }
-        }
 
-        $this->writeNormal("", true);
-        $this->writeNormal("", true);
+            }
+
+            $progressBar->finish();
+
+            $this->writeNormal("", true);
+            $this->writeNormal("", true);
+        }
 
         $this->writeNormal("Running seed scripts...", true);
 
-        $progressBar->finish();
+        if ($chosenSeeder = $input->getArgument("seeder")){
+            $found = false;
+            foreach (self::$seeders as $seeder) {
+                if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)){
+                    $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+                    $seeder->seedData($output);
+                    $found = true;
+                }
+            }
 
-        $progressBar = new ProgressBar($output, sizeof($modelSchemas));
+            if (!$found){
+                $output->writeln("No seeder matching `".$chosenSeeder."`");
+                $this->writeNormal("", true);
 
-        foreach (self::$seeders as $seeder) {
-            $progressBar->advance();
+                return;
+            }
 
-            $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+        } else {
+            $progressBar = new ProgressBar($output, sizeof(self::$seeders));
 
-            $seeder->seedData($output);
+            foreach (self::$seeders as $seeder) {
+                $progressBar->advance();
+
+                $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+
+                $seeder->seedData($output);
+            }
+
+            $progressBar->finish();
+
         }
 
-        $progressBar->finish();
-
-        $this->writeNormal("", true);
         $this->writeNormal("", true);
 
         $this->writeNormal("Seeding Complete", true);

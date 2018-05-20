@@ -1,4 +1,9 @@
 # Change Log
+
+### 1.7.0
+
+* Added:   Seeder improved to allow listing of possible seeders and execution of a single seeder.
+
 ### 1.6.1
 
 * Changed: When creating connection, use DB time_zone rather than system_time_zone to set repositoryDateTime setting.
