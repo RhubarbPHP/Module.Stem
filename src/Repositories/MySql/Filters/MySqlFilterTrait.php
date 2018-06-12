@@ -52,7 +52,17 @@ trait MySqlFilterTrait
         $schema = $repository->getRepositorySchema();
         $columns = $schema->getColumns();
 
-        if (!isset($columns[$columnName])) {
+        $realColumns = [];
+
+        foreach ($columns as $column) {
+            $storageColumns = $column->createStorageColumns();
+
+            foreach ($storageColumns as $storageColumn) {
+                $realColumns[$storageColumn->columnName] = $storageColumn;
+            }
+        }
+
+        if (!isset($realColumns[$columnName])) {
             $aliases = $collection->getAliasedColumns();
 
             if (in_array($columnName, $aliases) || array_key_exists($columnName, $aliases)) {

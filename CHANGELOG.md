@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.7.1
+
+* Fixed:   Stem now filters on composite columns in SQL for MySQL
+
 ### 1.7.0
 
 * Added:   Seeder improved to allow listing of possible seeders and execution of a single seeder.
