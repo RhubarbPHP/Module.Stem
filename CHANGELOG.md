@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.7.2
+
+* Added:   DescribedDemoDataSeederInterface for seeders that can self describe to the terminal the scenarios they've configured
+
 ### 1.7.1
 
 * Fixed:   Stem now filters on composite columns in SQL for MySQL
