@@ -4,6 +4,7 @@ namespace Rhubarb\Stem\Custard;
 
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,6 +31,10 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
+        $output->getFormatter()->setStyle('bold', new OutputFormatterStyle(null, null, ['bold']));
+        $output->getFormatter()->setStyle('blink', new OutputFormatterStyle(null, null, ['blink']));
+        $output->getFormatter()->setStyle('critical', new OutputFormatterStyle('red', null, ['bold']));
+
         if ($input->getOption("list")!=null){
 
             $output->writeln("Listing possible seeders:");
@@ -93,6 +98,13 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
                 if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)){
                     $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
                     $seeder->seedData($output);
+
+                    $output->writeln(['','']);
+
+                    if ($seeder instanceof DescribedDemoDataSeederInterface){
+                        $seeder->describeDemoData($output);
+                    }
+
                     $found = true;
                 }
             }
