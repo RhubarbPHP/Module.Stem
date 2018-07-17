@@ -97,14 +97,13 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             foreach (self::$seeders as $seeder) {
                 if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)){
                     $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
-                    $seeder->seedData($output);
+                    $output->writeln(['', '']);
 
-                    $output->writeln(['','']);
-
-                    if ($seeder instanceof DescribedDemoDataSeederInterface){
+                    if ($seeder instanceof DescribedDemoDataSeederInterface) {
                         $seeder->describeDemoData($output);
                     }
 
+                    $seeder->seedData($output);
                     $found = true;
                 }
             }

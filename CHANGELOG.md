@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.7.3
+
+* Added:   ScenarioDataSeeder for seeding scenarios
+* Added:   Example usage of ScenarioDataSeeder in the docs
+
 ### 1.7.2
 
 * Added:   DescribedDemoDataSeederInterface for seeders that can self describe to the terminal the scenarios they've configured
