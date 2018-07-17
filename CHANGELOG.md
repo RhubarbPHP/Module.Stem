@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.7.2
+### 1.7.3
 
 * Added:   ScenarioDataSeeder for seeding scenarios
 * Added:   Example usage of ScenarioDataSeeder in the docs
