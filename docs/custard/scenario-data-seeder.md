@@ -5,7 +5,7 @@ Scenario Data Seeding Example usage:
 
 * In your Application class, you will need to add the following line to `getCustardCommands()`
 ```php
-SeedDemoDataCommand::registerDemoDataSeeder(new MyDescribedSeeder());
+SeedDemoDataCommand::registerDemoDataSeeder(new MyDescribedDataSeeder());
 ```
 * Create your class 
 ```php

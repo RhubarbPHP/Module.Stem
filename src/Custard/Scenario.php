@@ -10,6 +10,7 @@ class Scenario
      * @var callable $seedScenario
      */
     private $seedScenario;
+
     /**
      * @var ScenarioDescription $scenarioDescription
      */
@@ -33,6 +34,10 @@ class Scenario
         $this->name = $name;
     }
 
+    /**
+     * @param OutputInterface $output
+     * Run the data seeder and describe what happened to $output
+     */
     public function run(OutputInterface $output)
     {
         $seedScenario = $this->seedScenario;
