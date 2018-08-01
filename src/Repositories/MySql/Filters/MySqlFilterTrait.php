@@ -192,9 +192,11 @@ trait MySqlFilterTrait
     protected function getTransformedComparisonValueForRepository($columnName, $rawComparisonValue, Repository $repository, Collection $collection)
     {
         $aliases = $collection->getAliasedColumnsToCollection();
+        $aliasMap = $collection->getAliasedColumns();
 
-        if (isset($aliases[$columnName])) {
-            $collection = $aliases[$columnName];
+        if (in_array($columnName, $aliasMap)) {
+            $aliasColumnName = array_search($columnName, $aliasMap);
+            $collection = $aliases[$aliasColumnName];
         }
 
         $exampleObject = SolutionSchema::getModel($collection->getModelClassName());

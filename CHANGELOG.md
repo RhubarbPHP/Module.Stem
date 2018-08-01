@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.7.4
+
+* Fixed:   Correct column type not used when filtering if filter applied to a pulled up column
+
 ### 1.7.3
 
 * Added:   ScenarioDataSeeder for seeding scenarios
