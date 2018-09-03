@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.7.5
+
+* Changed: Don't serialize propertyCache
+
 ### 1.7.4
 
 * Fixed:   Correct column type not used when filtering if filter applied to a pulled up column

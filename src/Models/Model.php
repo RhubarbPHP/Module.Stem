@@ -914,4 +914,9 @@ abstract class Model extends ModelState
         $repository->hydrateObject($this, $uniqueIdentifier);
         $this->onLoaded();
     }
+
+    public function __sleep()
+    {
+       $this->clearPropertyCache();
+    }
 }
