@@ -42,13 +42,18 @@ class MySqlEnumColumn extends Column
 
     public function __construct($columnName, $defaultValue, $enumValues)
     {
-        if ($defaultValue === null || !in_array($defaultValue, $enumValues)) {
-            throw new SchemaException("The enum column does not have a default matching one of the enum values.");
-        }
+        $this->checkDefaultValue($defaultValue, $enumValues);
 
         parent::__construct($columnName, $defaultValue);
 
         $this->enumValues = $enumValues;
+    }
+
+    protected function checkDefaultValue($defaultValue, $enumValues)
+    {
+        if ($defaultValue === null || !in_array($defaultValue, $enumValues)) {
+            throw new SchemaException("The enum column does not have a default matching one of the enum values.");
+        }
     }
 
     public function getDefinition()

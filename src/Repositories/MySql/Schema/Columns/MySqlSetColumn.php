@@ -36,6 +36,13 @@ class MySqlSetColumn extends MySqlEnumColumn
         $this->possibleValues = $possibleValues;
     }
 
+    protected function checkDefaultValue($defaultValue, $enumValues)
+    {
+        if ($defaultValue !== null && $defaultValue !== ''){
+            parent::checkDefaultValue($defaultValue,$enumValues);
+        }
+    }
+
     public function getDefinition()
     {
         $possibleString = "'" . implode("','", $this->possibleValues) . "'";
