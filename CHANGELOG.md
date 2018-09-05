@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.7.6
+
+* Changed: MysqlSetColumn supports null and empty.
+
 ### 1.7.5
 
 * Changed: Don't serialize propertyCache
@@ -12,10 +16,6 @@
 
 * Added:   ScenarioDataSeeder for seeding scenarios
 * Added:   Example usage of ScenarioDataSeeder in the docs
-
-### 1.7.3
-
-* Changed: MysqlSetColumn supports null and empty.
 
 ### 1.7.2
 
