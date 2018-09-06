@@ -336,6 +336,11 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    final public function addCustomSort(Sort $sort)
+    {
+        $this->sorts[] = $sort;
+    }
+
     /**
      * Removes current sorts and replaces with another.
      *

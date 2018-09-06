@@ -33,6 +33,7 @@ use Rhubarb\Stem\Repositories\MySql\Collections\MySqlCursor;
 use Rhubarb\Stem\Repositories\PdoRepository;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Rhubarb\Stem\Sql\ExpressesSqlInterface;
 use Rhubarb\Stem\Sql\GroupExpression;
 use Rhubarb\Stem\Sql\Join;
 use Rhubarb\Stem\Sql\SelectColumn;
@@ -490,31 +491,39 @@ class MySql extends PdoRepository
 
             $alias = false;
 
-            if (!isset($intersectionColumnAliases[$sort->columnName])) {
-                // Is this an alias?
-                foreach($sqlStatement->columns as $expression){
-                    if ($expression instanceof SelectColumn){
-                        if ($expression->alias == $sort->columnName){
-                            $alias = true;
+            if (!($sort instanceof ExpressesSqlInterface)) {
+                // Custom sorts that express SQL must be accepted
+
+                if (!isset($intersectionColumnAliases[$sort->columnName])) {
+                    // Is this an alias?
+                    foreach ($sqlStatement->columns as $expression) {
+                        if ($expression instanceof SelectColumn) {
+                            if ($expression->alias == $sort->columnName) {
+                                $alias = true;
+                            }
                         }
                     }
-                }
 
-                if (!$alias) {
-                    // We can't sort this column - and therefore we can't sort any secondary sorts either.
-                    // We have to leave the remaining sorts to the manual iteration handled by the Collection class.
-                    $allSorted = false;
-                    break;
+                    if (!$alias) {
+                        // We can't sort this column - and therefore we can't sort any secondary sorts either.
+                        // We have to leave the remaining sorts to the manual iteration handled by the Collection class.
+                        $allSorted = false;
+                        break;
+                    }
                 }
             }
 
             $sort->sorted = true;
 
-            if ($alias){
-                $sqlStatement->sorts[] = new SortExpression("`".$sort->columnName.'`', $sort->ascending);
+            if ($sort instanceof ExpressesSqlInterface){
+                $sqlStatement->sorts[] = new SortExpression($sort->getSqlExpression());
             } else {
-                $alias = $intersectionColumnAliases[$sort->columnName];
-                $sqlStatement->sorts[] = new SortExpression("`".$alias."`.`".$sort->columnName.'`', $sort->ascending);
+                if ($alias) {
+                    $sqlStatement->sorts[] = new SortExpression("`" . $sort->columnName . '`', $sort->ascending);
+                } else {
+                    $alias = $intersectionColumnAliases[$sort->columnName];
+                    $sqlStatement->sorts[] = new SortExpression("`" . $alias . "`.`" . $sort->columnName . '`', $sort->ascending);
+                }
             }
         }
 
