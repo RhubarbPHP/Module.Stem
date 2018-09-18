@@ -27,11 +27,11 @@ assume a parent knows all about their children.
 class Invoice extends Model
 {
 	// ...
-	public function ApplyDiscount( $percentage )
+	public function applyDiscount( $percentage )
 	{
 		foreach( $this->Lines as $line )
 		{
-			$line->ApplyDiscount( $percentage );
+			$line->applyDiscount( $percentage );
 		}
 	}
 	// ...
