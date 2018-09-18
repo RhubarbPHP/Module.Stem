@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.7.7
+
+* Added:   Custom sort objects
+* Added:   clearSortS() added to Collection
+
 ### 1.7.6
 
 * Changed: MysqlSetColumn supports null and empty.

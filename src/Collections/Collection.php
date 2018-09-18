@@ -336,6 +336,30 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this;
     }
 
+    /**
+     * Reports all sort directives.
+     */
+    final public function clearSorts()
+    {
+        $this->sorts = [];
+    }
+
+    /**
+     * Removes all sort directives and adds the custom sort passed.
+     *
+     * @param Sort $sort
+     */
+    final public function replaceCustomSort(Sort $sort)
+    {
+        $this->clearSorts();
+        $this->addCustomSort($sort);
+    }
+
+    /**
+     * Adds a custom sort to the list of sorts.
+     *
+     * @param Sort $sort
+     */
     final public function addCustomSort(Sort $sort)
     {
         $this->sorts[] = $sort;
@@ -350,6 +374,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      * @param $columnName
      * @param bool $ascending
      * @return $this
+     * @throws FilterNotSupportedException
      */
     final public function replaceSort($columnName, $ascending = true)
     {
