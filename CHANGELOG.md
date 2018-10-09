@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.7.8
+
+* Added:   Obliterate -o and Force -f options added to SeedDemoDataCommand
+* Added:   ScenarioSeeders can now override `getPreRequisiteSeeders` to return a list of other seeders to run first
+
 ### 1.7.7
 
 * Added:   Custom sort objects

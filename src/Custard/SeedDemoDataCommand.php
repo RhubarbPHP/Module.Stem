@@ -7,6 +7,7 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -17,6 +18,8 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         $this->setName('stem:seed-data')
             ->setDescription('Seeds the repositories with demo data')
         ->addOption("list", "l", null, "Lists the seeders available")
+        ->addOption("obliterate", "o", InputOption::VALUE_NONE, "Obliterate the entire database first")
+        ->addOption("force", "f", InputOption::VALUE_NONE, "Forces obliteration even if running only a single seeder")
         ->addArgument("seeder", InputArgument::OPTIONAL, "The name of the seeder to run, leave out for all");
 
         parent::configure();
@@ -48,6 +51,18 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             return;
         }
 
+        $chosenSeeder = $input->getArgument("seeder");
+
+
+        if (($input->getOption("obliterate")===true) && (!empty($chosenSeeder))){
+            // Running a single seeder after an obliteration makes no sense - this is probably
+            // a mistake.
+            if ($input->getOption("force")===false){
+                $output->writeln("<critical>Running a single seeder after obliteration is probably not sane. Use with -f to force.");
+                return;
+            }
+        }
+
         parent::executeWithConnection($input, $output);
 
         $this->writeNormal("Updating table schemas...", true);
@@ -57,7 +72,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             $schema->checkModelSchemas();
         }
 
-        if (self::$enableTruncating) {
+        if (($input->getOption("obliterate")===true) || self::$enableTruncating) {
 
             $this->writeNormal("Clearing existing data.", true);
 
@@ -92,7 +107,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
         $this->writeNormal("Running seed scripts...", true);
 
-        if ($chosenSeeder = $input->getArgument("seeder")){
+        if ($chosenSeeder){
             $found = false;
             foreach (self::$seeders as $seeder) {
                 if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)){
