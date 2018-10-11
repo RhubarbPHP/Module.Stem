@@ -51,7 +51,7 @@ class MySqlEnumColumn extends Column
 
     protected function checkDefaultValue($defaultValue, $enumValues)
     {
-        if ($defaultValue === null || !in_array($defaultValue, $enumValues)) {
+        if ($defaultValue !== null && !in_array($defaultValue, $enumValues)) {
             throw new SchemaException("The enum column does not have a default matching one of the enum values.");
         }
     }

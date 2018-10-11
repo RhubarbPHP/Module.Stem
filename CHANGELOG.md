@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.7.9
+
+* Changed: MysqlEnumColumn now supports null values.
+
 ### 1.7.8
 
 * Added:   Obliterate -o and Force -f options added to SeedDemoDataCommand
