@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.7.10
+
+* Fixed:   A many-2-many relationship didn't correctly define both 'Raw' relationships if
+           the same model was on both ends of the relationship
+
 ### 1.7.9
 
 * Changed: MysqlEnumColumn now supports null values.

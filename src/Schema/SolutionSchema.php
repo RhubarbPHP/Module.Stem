@@ -529,13 +529,18 @@ abstract class SolutionSchema
                     $this->declareOneToManyRelationships(
                         [
                             $leftModelName =>
-                                [
-                                    $leftNavigationName . "Raw" => $joiningModelName . "." . $joiningLeftColumnName
-                                ],
+                            [
+                                $leftNavigationName . "Raw" => $joiningModelName . "." . $joiningLeftColumnName
+                            ]
+                        ]
+                    );
+
+                    $this->declareOneToManyRelationships(
+                        [
                             $rightModelName =>
-                                [
-                                    $rightNavigationName . "Raw" => $joiningModelName . "." . $joiningRightColumnName
-                                ]
+                            [
+                                $rightNavigationName . "Raw" => $joiningModelName . "." . $joiningRightColumnName
+                            ]
                         ]
                     );
 
