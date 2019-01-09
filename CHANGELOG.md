@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.0
+
+* Changed: Removed automated schema updating when in developer mode.
+
 ### 1.7.10
 
 * Fixed:   A many-2-many relationship didn't correctly define both 'Raw' relationships if

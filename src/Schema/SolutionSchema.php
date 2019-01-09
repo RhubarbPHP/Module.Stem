@@ -206,10 +206,6 @@ abstract class SolutionSchema
             self::$schemas[$schemaName] = $schema;
 
             $schema->defineRelationships();
-
-            if(Application::current()->developerMode) {
-                $schema->checkModelSchemasIfNecessary();
-            }
         }
 
         return self::$schemas[$schemaName];
@@ -685,48 +681,6 @@ abstract class SolutionSchema
         }
 
         return $this->relationships[$modelName][$navigationName];
-    }
-
-    /**
-     * Checks the version number of the schema against that stored in the cache and updates the schema if it
-     * is out of date.
-     *
-     * @throws \Rhubarb\Crown\Exceptions\ImplementationException
-     */
-    public function checkModelSchemasIfNecessary()
-    {
-        $cachePath = Application::current()->tempPath."/cache/";
-
-        if (!file_exists($cachePath."schema-versions")) {
-            mkdir($cachePath."schema-versions", 0777, true);
-        }
-
-        if (!file_exists($cachePath."schema-versions")) {
-            throw new ImplementationException("The cache/schema-versions folder could not be created. Please check file permissions and ownership.");
-        }
-
-        $application = Application::current();
-
-        if ($application->unitTesting) {
-            return;
-        }
-
-        $versionFile = $cachePath . "schema-versions/" . $this->getVersionFileName();
-        // It's very important that this is a string, otherwise hashes who's first numeric character is zero might
-        // equate to this and never update thanks to php's amazing loosely typed int/string comparison behaviour
-        $fileVersion = '0';
-
-        if (file_exists($versionFile)) {
-            $fileVersion = file_get_contents($versionFile);
-        }
-
-        $currentVersion = $this->calculateVersion();
-
-        if ($fileVersion != $currentVersion) {
-            $this->checkModelSchemas($fileVersion);
-
-            file_put_contents($versionFile, $currentVersion);
-        }
     }
 
     protected function getVersionFileName()
