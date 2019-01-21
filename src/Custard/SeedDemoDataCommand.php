@@ -4,7 +4,10 @@ namespace Rhubarb\Stem\Custard;
 
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\SolutionSchema;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\ProgressBar;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -13,7 +16,11 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
     protected function configure()
     {
         $this->setName('stem:seed-data')
-            ->setDescription('Seeds the repositories with demo data');
+            ->setDescription('Seeds the repositories with demo data')
+        ->addOption("list", "l", null, "Lists the seeders available")
+        ->addOption("obliterate", "o", InputOption::VALUE_NONE, "Obliterate the entire database first")
+        ->addOption("force", "f", InputOption::VALUE_NONE, "Forces obliteration even if running only a single seeder")
+        ->addArgument("seeder", InputArgument::OPTIONAL, "The name of the seeder to run, leave out for all");
 
         parent::configure();
     }
@@ -23,57 +30,129 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
      */
     private static $seeders = [];
 
+    private static $enableTruncating = true;
+
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
+        $output->getFormatter()->setStyle('bold', new OutputFormatterStyle(null, null, ['bold']));
+        $output->getFormatter()->setStyle('blink', new OutputFormatterStyle(null, null, ['blink']));
+        $output->getFormatter()->setStyle('critical', new OutputFormatterStyle('red', null, ['bold']));
+
+        if ($input->getOption("list")!=null){
+
+            $output->writeln("Listing possible seeders:");
+            $output->writeln("");
+
+            foreach(self::$seeders as $seeder){
+                $output->writeln("\t" . basename(str_replace("\\", "/", get_class($seeder))));
+            }
+
+            $output->writeln("");
+            return;
+        }
+
+        $chosenSeeder = $input->getArgument("seeder");
+
+
+        if (($input->getOption("obliterate")===true) && (!empty($chosenSeeder))){
+            // Running a single seeder after an obliteration makes no sense - this is probably
+            // a mistake.
+            if ($input->getOption("force")===false){
+                $output->writeln("<critical>Running a single seeder after obliteration is probably not sane. Use with -f to force.");
+                return;
+            }
+        }
+
         parent::executeWithConnection($input, $output);
 
-        $this->writeNormal("Clearing existing data.", true);
+        $this->writeNormal("Updating table schemas...", true);
 
         $schemas = SolutionSchema::getAllSchemas();
-        $modelSchemas = [];
-
         foreach ($schemas as $schema) {
-            $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
+            $schema->checkModelSchemas();
         }
 
-        $progressBar = new ProgressBar($output, sizeof($modelSchemas));
+        if (($input->getOption("obliterate")===true) || self::$enableTruncating) {
 
-        foreach ($modelSchemas as $alias => $modelClass) {
-            $progressBar->advance();
+            $this->writeNormal("Clearing existing data.", true);
 
-            /** @var Model $model */
-            $model = new $modelClass();
-            $schema = $model->getSchema();
-            $repository = $model->getRepository();
+            $modelSchemas = [];
 
-            $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
+            foreach ($schemas as $schema) {
+                $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
+            }
 
-            $repository->clearRepositoryData();
+            $progressBar = new ProgressBar($output, sizeof($modelSchemas));
+
+            foreach ($modelSchemas as $alias => $modelClass) {
+                $progressBar->advance();
+
+                /** @var Model $model */
+                $model = new $modelClass();
+                $schema = $model->getSchema();
+
+                $repository = $model->getRepository();
+
+                $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
+
+                $repository->clearRepositoryData();
+
+            }
+
+            $progressBar->finish();
+
+            $this->writeNormal("", true);
+            $this->writeNormal("", true);
         }
-
-        $this->writeNormal("", true);
-        $this->writeNormal("", true);
 
         $this->writeNormal("Running seed scripts...", true);
 
-        $progressBar->finish();
+        if ($chosenSeeder){
+            $found = false;
+            foreach (self::$seeders as $seeder) {
+                if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)){
+                    $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+                    $output->writeln(['', '']);
 
-        $progressBar = new ProgressBar($output, sizeof($modelSchemas));
+                    if ($seeder instanceof DescribedDemoDataSeederInterface) {
+                        $seeder->describeDemoData($output);
+                    }
 
-        foreach (self::$seeders as $seeder) {
-            $progressBar->advance();
+                    $seeder->seedData($output);
+                    $found = true;
+                }
+            }
 
-            $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+            if (!$found){
+                $output->writeln("No seeder matching `".$chosenSeeder."`");
+                $this->writeNormal("", true);
 
-            $seeder->seedData($output);
+                return;
+            }
+
+        } else {
+            $progressBar = new ProgressBar($output, sizeof(self::$seeders));
+
+            foreach (self::$seeders as $seeder) {
+                $progressBar->advance();
+
+                $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
+
+                $seeder->seedData($output);
+            }
+
+            $progressBar->finish();
+
         }
 
-        $progressBar->finish();
-
-        $this->writeNormal("", true);
         $this->writeNormal("", true);
 
         $this->writeNormal("Seeding Complete", true);
+    }
+
+    public static function setEnableTruncating($enableTruncating)
+    {
+        self::$enableTruncating = $enableTruncating;
     }
 
     public static function registerDemoDataSeeder(DemoDataSeederInterface $demoDataSeeder)
