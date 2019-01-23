@@ -9,7 +9,6 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 
 trait SchemaCommandTrait
 {
-    protected static $SETTINGS_PATH = __DIR__ . "../../../../../../../settings/default-schema.txt";
 
     /**
      * @return SolutionSchema
@@ -19,7 +18,9 @@ trait SchemaCommandTrait
         // All schemas have to be looked up before getting 1, so that they are in the correct override order
         $schemaNames = array_keys(SolutionSchema::getAllSchemas());
 
-        $validator = function ($answer) use ($schemaNames) {
+        $settingsPath = TEMP_DIR."default-schema.txt";
+
+        $validator = function ($answer) use ($schemaNames, $settingsPath) {
             if (is_numeric($answer)) {
                 if (!isset($schemaNames[$answer])) {
                     throw new \Exception("Couldn't find schema at index \"$answer\"");
@@ -44,15 +45,16 @@ trait SchemaCommandTrait
 
             if ($application->developerMode) {
                 // Store default schema to make it faster next time
-                file_put_contents(self::$SETTINGS_PATH, $schemaName);
-                $this->output->writeln("Stored default schema \"$schemaName\" in " . realpath(self::$SETTINGS_PATH));
+                file_put_contents($settingsPath, $schemaName);
+                $this->output->writeln("Stored default schema \"$schemaName\" in " . realpath($settingsPath));
             }
 
             return $schema;
         };
 
-        if (file_exists(self::$SETTINGS_PATH)) {
-            $schemaName = file_get_contents(self::$SETTINGS_PATH);
+
+        if (file_exists($settingsPath)) {
+            $schemaName = file_get_contents($settingsPath);
             $defaultSchemaIndex = array_search($schemaName, $schemaNames) ?: null;
         } else {
             $defaultSchemaIndex = null;

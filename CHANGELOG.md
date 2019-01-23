@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.1
+
+* Fixed:   Stopped SchemaCommandTrait from trying to use the settings folder which might not exist.
+
 ### 1.8.0
 
 * Changed: Removed automated schema updating when in developer mode.
