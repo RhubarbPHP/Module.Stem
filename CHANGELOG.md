@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.2
+
+* Added:   Bulk flag added to seed command. BulkScenario added.
+
 ### 1.8.1
 
 * Fixed:   Stopped SchemaCommandTrait from trying to use the settings folder which might not exist.

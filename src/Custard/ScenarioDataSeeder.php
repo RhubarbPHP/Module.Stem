@@ -18,7 +18,7 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
         return [];
     }
 
-    public function seedData(OutputInterface $output)
+    public function seedData(OutputInterface $output, $includeBulk = false)
     {
         $class = get_class($this);
         if (in_array($class, self::$alreadyRan)){
@@ -32,11 +32,13 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
         }
 
         foreach ($this->getScenarios() as $scenario) {
-            $output->writeln("");
-            $output->writeln("Scenario ".self::$scenarioCount.": " . $scenario->getName());
-            $output->writeln("");
-            $scenario->run($output);
-            self::$scenarioCount++;
+            if ($includeBulk || !($scenario instanceof BulkScenario)) {
+                $output->writeln("");
+                $output->writeln("Scenario " . self::$scenarioCount . ": " . $scenario->getName());
+                $output->writeln("");
+                $scenario->run($output);
+                self::$scenarioCount++;
+            }
         }
     }
 
