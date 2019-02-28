@@ -3,6 +3,7 @@
 ### 1.8.2
 
 * Added:   Bulk flag added to seed command. BulkScenario added.
+* Changed: Truncation of data turned off by default when seeding.
 
 ### 1.8.1
 
