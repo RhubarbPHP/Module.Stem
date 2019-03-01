@@ -4,6 +4,7 @@
 
 * Added:   Bulk flag added to seed command. BulkScenario added.
 * Changed: Truncation of data turned off by default when seeding.
+* Added:   getPrerequisiteSeeders() can now return class names instead of seeding objects.
 
 ### 1.8.1
 
