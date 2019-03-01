@@ -148,7 +148,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         }
 
         $this->writeNormal("", true);
-        $this->writeNormal("Seeding Complete", true);
+        $this->writeNormal("<info>Seeding Complete</info>", true);
     }
 
     public static function setEnableTruncating($enableTruncating)

@@ -42,8 +42,8 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
         foreach ($this->getScenarios() as $scenario) {
             if ($includeBulk || !($scenario instanceof BulkScenario)) {
                 $output->writeln("");
-                $output->writeln("Scenario " . self::$scenarioCount . ": " . $scenario->getName());
-                $output->writeln("");
+                $output->writeln("<comment>Scenario " . self::$scenarioCount . ": <bold>" . $scenario->getName().'</bold></comment>');
+                $output->writeln(str_repeat('-', 11 + strlen(self::$scenarioCount) + strlen($scenario->getName())));
                 $scenario->run($output);
                 self::$scenarioCount++;
             }

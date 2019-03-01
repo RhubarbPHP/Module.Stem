@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.3
+
+* Added:   Some pretty colours when showing seeding titles.
+
 ### 1.8.2
 
 * Added:   Bulk flag added to seed command. BulkScenario added.
