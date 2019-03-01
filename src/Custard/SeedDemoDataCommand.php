@@ -19,6 +19,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             ->setDescription('Seeds the repositories with demo data')
         ->addOption("list", "l", null, "Lists the seeders available")
         ->addOption("obliterate", "o", InputOption::VALUE_NONE, "Obliterate the entire database first")
+        ->addOption("bulk", "b", InputOption::VALUE_NONE, "Include bulk seed sets")
         ->addOption("force", "f", InputOption::VALUE_NONE, "Forces obliteration even if running only a single seeder")
         ->addArgument("seeder", InputArgument::OPTIONAL, "The name of the seeder to run, leave out for all");
 
@@ -30,7 +31,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
      */
     private static $seeders = [];
 
-    private static $enableTruncating = true;
+    private static $enableTruncating = false;
 
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
@@ -52,7 +53,6 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         }
 
         $chosenSeeder = $input->getArgument("seeder");
-
 
         if (($input->getOption("obliterate")===true) && (!empty($chosenSeeder))){
             // Running a single seeder after an obliteration makes no sense - this is probably
@@ -107,6 +107,8 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
         $this->writeNormal("Running seed scripts...", true);
 
+        $includeBulk = ($input->getOption("bulk")===true);
+
         if ($chosenSeeder){
             $found = false;
             foreach (self::$seeders as $seeder) {
@@ -118,7 +120,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
                         $seeder->describeDemoData($output);
                     }
 
-                    $seeder->seedData($output);
+                    $seeder->seedData($output, $includeBulk);
                     $found = true;
                 }
             }
@@ -138,7 +140,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
                 $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
 
-                $seeder->seedData($output);
+                $seeder->seedData($output, $includeBulk);
             }
 
             $progressBar->finish();
@@ -146,7 +148,6 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
         }
 
         $this->writeNormal("", true);
-
         $this->writeNormal("Seeding Complete", true);
     }
 
