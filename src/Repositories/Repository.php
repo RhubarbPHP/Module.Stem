@@ -18,6 +18,7 @@
 
 namespace Rhubarb\Stem\Repositories;
 
+use Gcd\UseCases\Entity;
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Collections\RangeLimitedCursor;
 use Rhubarb\Stem\Collections\RepositoryCollection;
@@ -39,11 +40,6 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * A repository acts as an intermediary between data objects and the data providers. It thus
  * allows for caching and other data manipulations to occur either as part of the
  * default implementation or as a dependency injection.
- *
- * In addition to this base class, two implementations are of primary use to us:
- *
- * Offline - used where no backend storage is needed and for unit testing
- * MySql - used where mysql is required as the back end storage.
  *
  * @see \Rhubarb\Stem\Repositories\Offline\Offline
  * @see \Rhubarb\Stem\Repositories\MySql\MySql
@@ -88,8 +84,9 @@ abstract class Repository
 
     protected $modelClassName;
 
-    public function __construct(Model $model)
+    public function __construct()
     {
+        /*
         $this->modelClassName = get_class($model);
         $this->modelSchema = $model->generateSchema();
         $this->reposSchema = $this->getRepositorySpecificSchema($this->modelSchema);
@@ -120,6 +117,7 @@ abstract class Repository
                         $storageColumn->getTransformIntoRepository() : $this->columnTransforms[$storageColumn->columnName][1];
             }
         }
+        */
     }
 
     /**
@@ -460,87 +458,9 @@ abstract class Repository
         $this->cacheObjectData($object);
     }
 
-    /**
-     * If this Repository has it's own compliment of filters the namespace stub should be returned here.
-     *
-     * Returns false if the Repository doesn't have any.
-     *
-     * @return bool|string
-     */
-    public function getFiltersNamespace()
-    {
-        return false;
-    }
+    public abstract function getEntityByIdentifier($id): Entity;
 
-    /**
-     * Delete's a model from the repository.
-     *
-     * Calls onObjectDeleted afterwards which most repositories extend to do the actual deletion.
-     *
-     * @see onObjectDeleted()
-     * @param Model $object
-     */
-    final public function deleteObject(Model $object)
-    {
-        if ($object->isNewRecord()) {
-            return;
-        }
+    public abstract function storeEntity(Entity $entity);
 
-        $this->onObjectDeleted($object);
-
-        $this->deleteObjectFromCache($object);
-    }
-
-    /**
-     * Called just before an object is deleted in deleteObject()
-     *
-     * Normally used to perform the actual deletion in the back end
-     *
-     * @param Repository ::deleteObject()
-     * @param \Rhubarb\Stem\Models\Model $object
-     */
-    protected function onObjectDeleted(Model $object)
-    {
-
-    }
-
-    /**
-     * Called just before an object is saved in saveObject()
-     *
-     * Normally used to perform the actual storage in the back end and update the object
-     * with an auto number identifier if necessary.
-     *
-     * @param Repository ::saveObject()
-     * @param \Rhubarb\Stem\Models\Model $object
-     */
-    protected function onObjectSaved(Model $object)
-    {
-
-    }
-
-    /**
-     * Changes the default class name for new repositories.
-     *
-     * @see    Repository::getNewDefaultRepository();
-     * @throws ModelException When the class name doesn't exist.
-     * @param  $repositoryClassName
-     */
-    public static function setDefaultRepositoryClassName($repositoryClassName)
-    {
-        if (!class_exists($repositoryClassName)) {
-            throw new ModelException("Sorry the class name '$repositoryClassName' does not exist and so cannot be used as a default repository class name.", null);
-        }
-
-        self::$defaultRepositoryClassName = $repositoryClassName;
-    }
-
-    /**
-     * Get's the default repository class name being used.
-     *
-     * @return string
-     */
-    public static function getDefaultRepositoryClassName()
-    {
-        return self::$defaultRepositoryClassName;
-    }
+    public abstract function deleteEntity(Entity $entity);
 }

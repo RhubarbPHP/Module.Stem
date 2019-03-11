@@ -27,6 +27,7 @@
     "bin-dir": "bin/"
   },
   "require": {
+    "php": "^7.2",
     "rhubarbphp/rhubarb": "^1.6.8",
     "gcd/usecases": "dev-master"
   },

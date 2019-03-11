@@ -13,7 +13,7 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $AccountID
  * @property string $AccountName
  */
-class Account extends Model
+class Account extends ModelSchema
 {
 
     /**

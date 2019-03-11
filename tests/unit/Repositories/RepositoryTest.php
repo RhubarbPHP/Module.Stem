@@ -16,33 +16,9 @@ use Rhubarb\Stem\Tests\unit\Fixtures\User;
 
 class RepositoryTest extends ModelUnitTestCase
 {
-    public function testDefaultRepositoryIsOffline()
-    {
-        $repository = Repository::getNewDefaultRepository(new TestContact());
-
-        $this->assertInstanceOf(Offline::class, $repository);
-    }
-
-    public function testDefaultRepositoryCanBeChanged()
-    {
-        Repository::setDefaultRepositoryClassName(MySql::class);
-
-        $repository = Repository::getNewDefaultRepository(new TestContact());
-
-        $this->assertInstanceOf(MySql::class, $repository);
-
-        // Also check that non extant repositories throw an exception.
-        $this->setExpectedException(ModelException::class);
-
-        Repository::setDefaultRepositoryClassName('\Rhubarb\Stem\Repositories\Fictional\Fictional');
-
-        // Reset to the normal so we don't upset other unit tests.
-        Repository::setDefaultRepositoryClassName(Offline::class);
-    }
-
     public function testHydrationOfNonExtantObjectThrowsException()
     {
-        $offline = new Offline(new TestContact());
+        $offline = new Offline();
 
         $this->setExpectedException(RecordNotFoundException::class);
 

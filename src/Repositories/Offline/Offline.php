@@ -20,10 +20,13 @@ namespace Rhubarb\Stem\Repositories\Offline;
 
 require_once __DIR__ . "/../Repository.php";
 
+use Gcd\UseCases\Entity;
+use Rhubarb\Stem\Exceptions\RecordNotFoundException;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\CompositeColumn;
+use Rhubarb\Stem\Tests\unit\Fixtures\Entities\Account;
 
 class Offline extends Repository
 {
@@ -72,5 +75,20 @@ class Offline extends Repository
     public function clearRepositoryData()
     {
         $this->clearObjectCache();
+    }
+
+    public function getEntityByIdentifier($id): Entity
+    {
+        
+    }
+
+    public function storeEntity(Entity $entity)
+    {
+        // TODO: Implement storeEntity() method.
+    }
+
+    public function deleteEntity(Entity $entity)
+    {
+        // TODO: Implement deleteEntity() method.
     }
 }
