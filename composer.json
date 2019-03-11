@@ -17,22 +17,21 @@
       "Rhubarb\\Stem\\Tests\\": "tests/"
     }
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/gcdtech/php-usecase-pattern"
+    }
+  ],
   "config": {
     "bin-dir": "bin/"
   },
   "require": {
-    "rhubarbphp/rhubarb": "^1.5.2"
+    "rhubarbphp/rhubarb": "^1.6.8",
+    "gcd/usecases": "dev-master"
   },
   "require-dev": {
     "rhubarbphp/custard" : "^1.0.0",
-    "rhubarbphp/module-build-status-updater": "^1.0.4",
-    "tan-tan-kanarek/github-php-client": "^1.0.0",
-    "codeception/codeception": "^2.1.8",
-    "phploc/phploc": "^3.0.0",
-    "theseer/phpdox": "*",
-    "phpmd/phpmd": "^2.0.0",
-    "squizlabs/php_codesniffer": "^2.0.0",
-    "sebastian/phpcpd": "^2.0.0",
-    "pdepend/pdepend": "^2.0.0"
+    "codeception/codeception": "^2.1.8"
   }
 }

@@ -24,9 +24,9 @@ use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\Column;
 
 /**
- * A container of schema information for a single record type.
+ * A container of schema information for a single entity type.
  *
- * This generally represents a database table, but can be used for any purpose.
+ * This generally represents a database table.
  *
  * Note that there is no mention of indexes in this class. Indexes, while common,
  * are specific to each data store and not something our core data model needs to
