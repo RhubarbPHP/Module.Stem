@@ -243,7 +243,7 @@ class ReflectionModel extends \ReflectionClass
             throw new RhubarbException('Unsupported relationship type: ' . get_class($relationship));
         }
 
-        $type = SolutionSchema::getModelClass($modelName);
+        $type = SolutionSchema::getSchemaClass($modelName);
 
         if ($type == null) {
             throw new RhubarbException('Unregistered model used in relationship: ' . $modelName);

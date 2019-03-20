@@ -63,26 +63,13 @@ abstract class Repository
      */
     private static $defaultRepositoryClassName = Offline::class;
 
-    /**
-     * A collection of closures allowing data to processed in and out of the repository at a column level.
-     *
-     * Closures are used here for performance to avoid call methods for every column of every row if not required.
-     *
-     * @var array
-     */
-    protected $columnTransforms = [];
+    public abstract function store(Model $model);
 
     /**
-     * @var \Rhubarb\Stem\Schema\ModelSchema;
+     * @param $id
+     * @return static|Model
      */
-    protected $reposSchema;
-
-    /**
-     * @var \Rhubarb\Stem\Schema\ModelSchema;
-     */
-    protected $modelSchema;
-
-    protected $modelClassName;
+    public abstract function fetchByIdentifier($id): Model;
 
     public function __construct()
     {

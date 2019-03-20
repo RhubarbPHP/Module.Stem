@@ -29,7 +29,8 @@
   "require": {
     "php": "^7.2",
     "rhubarbphp/rhubarb": "^1.6.8",
-    "gcd/usecases": "dev-master"
+    "gcd/usecases": "dev-master",
+    "codeception/verify": "1.0.0"
   },
   "require-dev": {
     "rhubarbphp/custard" : "^1.0.0",

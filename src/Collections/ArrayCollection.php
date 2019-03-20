@@ -6,9 +6,9 @@ class ArrayCollection extends Collection
 {
     private $modelArray = [];
 
-    public function __construct($modelClassName, $modelArray = [])
+    public function __construct($schema, $modelArray = [])
     {
-        parent::__construct($modelClassName);
+        parent::__construct($schema);
 
         $this->modelArray = $modelArray;
     }

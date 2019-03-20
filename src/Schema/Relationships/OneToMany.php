@@ -55,7 +55,7 @@ class OneToMany extends Relationship
         $sourceColumnName = $this->sourceColumnName;
 
         if ($sourceColumnName == "") {
-            $sourceSchema = SolutionSchema::getModelSchema($this->sourceModelName);
+            $sourceSchema = SolutionSchema::getSchema($this->sourceModelName);
             $sourceColumnName = $sourceSchema->uniqueIdentifierColumnName;
         }
 

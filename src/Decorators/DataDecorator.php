@@ -150,7 +150,7 @@ abstract class DataDecorator implements \ArrayAccess
                 $decoratorClass = self::$decoratorClasses[$class];
             } else {
                 // Perhaps the decorated was registered with an alias instead?
-                $alias = SolutionSchema::getModelNameFromClass($class);
+                $alias = SolutionSchema::getSchemaNameFromClass($class);
 
                 if (isset(self::$decoratorClasses[$alias])) {
                     $decoratorClass = self::$decoratorClasses[$alias];

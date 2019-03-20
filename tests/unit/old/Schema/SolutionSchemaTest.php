@@ -21,14 +21,14 @@ class SolutionSchemaTest extends ModelUnitTestCase
     {
         $this->setExpectedException(SchemaNotFoundException::class);
 
-        SolutionSchema::getSchema("UnRegisteredSchema");
+        SolutionSchema::getSolutionSchema("UnRegisteredSchema");
     }
 
     public function testSchemaRegistration()
     {
         SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
-        $schema = SolutionSchema::getSchema("MySchema");
+        $schema = SolutionSchema::getSolutionSchema("MySchema");
 
         $this->assertInstanceOf(UnitTestingSolutionSchema::class, $schema);
     }
@@ -39,7 +39,7 @@ class SolutionSchemaTest extends ModelUnitTestCase
 
         $this->setExpectedException(SchemaRegistrationException::class);
 
-        SolutionSchema::getSchema("MyBadSchema");
+        SolutionSchema::getSolutionSchema("MyBadSchema");
     }
 
     public function testSchemaCache()
@@ -47,17 +47,17 @@ class SolutionSchemaTest extends ModelUnitTestCase
         SolutionSchema::clearSchemas();
         SolutionSchema::registerSchema("MySchema", UnitTestingSolutionSchema::class);
 
-        $schema = SolutionSchema::getSchema("MySchema");
+        $schema = SolutionSchema::getSolutionSchema("MySchema");
         $schema->test = true;
 
-        $schema = SolutionSchema::getSchema("MySchema");
+        $schema = SolutionSchema::getSolutionSchema("MySchema");
 
         $this->assertTrue($schema->test);
     }
 
     public function testGetModelSchema()
     {
-        $modelSchema = SolutionSchema::getModelSchema("UnitTestUser");
+        $modelSchema = SolutionSchema::getSchema("UnitTestUser");
         $user = new User();
 
         $this->assertEquals($user->getSchema(), $modelSchema);
@@ -152,13 +152,13 @@ class SolutionSchemaTest extends ModelUnitTestCase
     {
         SolutionSchema::registerSchema("SchemaA", __NAMESPACE__ . "\\SchemaA");
 
-        $class = SolutionSchema::getModelClass(__NAMESPACE__ . "\\ModelA");
+        $class = SolutionSchema::getSchemaClass(__NAMESPACE__ . "\\ModelA");
 
         $this->assertEquals('\\' . __NAMESPACE__ . "\\ModelA", $class);
 
         SolutionSchema::registerSchema("SchemaB", __NAMESPACE__ . "\\SchemaB");
 
-        $class = SolutionSchema::getModelClass(__NAMESPACE__ . "\\ModelA");
+        $class = SolutionSchema::getSchemaClass(__NAMESPACE__ . "\\ModelA");
 
         $this->assertEquals('\\' . __NAMESPACE__ . "\\ModelB", $class);
     }
@@ -186,7 +186,7 @@ class SchemaA extends SolutionSchema
     {
         parent::__construct($version);
 
-        $this->addModel("TestModel", __NAMESPACE__ . "\\ModelA");
+        $this->addModelSchema("TestModel", __NAMESPACE__ . "\\ModelA");
     }
 }
 
@@ -196,6 +196,6 @@ class SchemaB extends SolutionSchema
     {
         parent::__construct($version);
 
-        $this->addModel("TestModel", __NAMESPACE__ . "\\ModelB");
+        $this->addModelSchema("TestModel", __NAMESPACE__ . "\\ModelB");
     }
 }

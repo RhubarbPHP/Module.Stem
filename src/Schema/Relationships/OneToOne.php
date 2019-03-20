@@ -51,7 +51,7 @@ class OneToOne extends Relationship
 
     public function getCollection()
     {
-        $class = SolutionSchema::getModelClass($this->targetModelName);
+        $class = SolutionSchema::getSchemaClass($this->targetModelName);
 
         return new RepositoryCollection($class);
     }
@@ -64,7 +64,7 @@ class OneToOne extends Relationship
         $sourceColumnName = $this->sourceColumnName;
 
         if ($this->sourceColumnName == "") {
-            $sourceSchema = SolutionSchema::getModelSchema($this->sourceModelName);
+            $sourceSchema = SolutionSchema::getSchema($this->sourceModelName);
             $sourceColumnName = $sourceSchema->uniqueIdentifierColumnName;
         }
 
@@ -87,7 +87,7 @@ class OneToOne extends Relationship
         $targetColumnName = $this->targetColumnName;
 
         if ($this->targetColumnName == "") {
-            $sourceSchema = SolutionSchema::getModelSchema($this->targetModelName);
+            $sourceSchema = SolutionSchema::getSchema($this->targetModelName);
             $targetColumnName = $sourceSchema->uniqueIdentifierColumnName;
         }
 

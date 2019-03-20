@@ -27,7 +27,7 @@ class ModelEventManager
 {
     public static function dispatchModelEvent($event, Model $model)
     {
-        $event = SolutionSchema::getModelNameFromClass(get_class($model)) . ":" . $event;
+        $event = SolutionSchema::getSchemaNameFromClass(get_class($model)) . ":" . $event;
 
         if (!isset(self::$eventHandlers[$event])) {
             return null;

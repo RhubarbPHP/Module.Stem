@@ -75,7 +75,7 @@ class MySqlEnumColumn extends Column
      */
     public static function getEnumValues($modelName, $enumFieldName)
     {
-        $schema = SolutionSchema::getModelSchema($modelName);
+        $schema = SolutionSchema::getSchema($modelName);
         $enum = $schema->getColumns()[$enumFieldName];
         return $enum->enumValues;
     }

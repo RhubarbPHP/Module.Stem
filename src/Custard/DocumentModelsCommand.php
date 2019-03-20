@@ -40,7 +40,7 @@ class DocumentModelsCommand extends CustardCommand
 
         if ($schemaName) {
             try {
-                $schema = SolutionSchema::getSchema($schemaName);
+                $schema = SolutionSchema::getSolutionSchema($schemaName);
             } catch (SchemaNotFoundException $ex) {
                 $output->writeln("<error>Couldn't find schema named '$schemaName'</error>");
                 return;
@@ -60,7 +60,7 @@ class DocumentModelsCommand extends CustardCommand
 
         $changedModels = 0;
 
-        foreach ($schema->getAllModels() as $modelName => $modelClass) {
+        foreach ($schema->getAllModelSchemas() as $modelName => $modelClass) {
             $this->writeVerbose("Processing $modelName... ");
             /** @var Model $model */
             $model = new $modelClass();

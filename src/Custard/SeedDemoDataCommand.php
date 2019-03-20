@@ -79,7 +79,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             $modelSchemas = [];
 
             foreach ($schemas as $schema) {
-                $modelSchemas = array_merge($modelSchemas, $schema->getAllModels());
+                $modelSchemas = array_merge($modelSchemas, $schema->getAllModelSchemas());
             }
 
             $progressBar = new ProgressBar($output, sizeof($modelSchemas));

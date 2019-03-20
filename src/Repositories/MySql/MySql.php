@@ -344,7 +344,7 @@ class MySql extends PdoRepository
     public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
     {
         $model = $collection->getModelClassName();
-        $schema = SolutionSchema::getModelSchema($model);
+        $schema = SolutionSchema::getSchema($model);
         $columns = $schema->getColumns();
 
         $sqlStatement = new SqlStatement();
@@ -603,7 +603,7 @@ class MySql extends PdoRepository
             $relationship = $relationships[$joinRelationship];
 
             $targetModelName = $relationship->getTargetModelName();
-            $targetModelClass = SolutionSchema::getModelClass($targetModelName);
+            $targetModelClass = SolutionSchema::getSchemaClass($targetModelName);
 
             /**
              * @var Model $targetModel

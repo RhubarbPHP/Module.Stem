@@ -34,7 +34,7 @@ trait SchemaCommandTrait
             }
 
             try {
-                $schema = SolutionSchema::getSchema($schemaName);
+                $schema = SolutionSchema::getSolutionSchema($schemaName);
             } catch (SchemaNotFoundException $ex) {
                 throw new \Exception("Couldn't find schema named \"$schemaName\"");
             } catch (SchemaRegistrationException $ex) {

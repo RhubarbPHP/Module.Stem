@@ -1,6 +1,6 @@
 <?php
 
-namespace Rhubarb\Stem\Tests\unit\Fixtures;
+namespace Rhubarb\Stem\Tests\unit\Fixtures\Schemas;
 
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Schema\Columns\StringColumn;
@@ -13,7 +13,7 @@ use Rhubarb\Stem\Schema\ModelSchema;
  * @property string $AccountID
  * @property string $AccountName
  */
-class Account extends ModelSchema
+class AccountSchema extends ModelSchema
 {
 
     /**
@@ -26,6 +26,7 @@ class Account extends ModelSchema
             new StringColumn('AccountID', 50),
             new StringColumn('AccountName', 50)
         );
+
         $schema->uniqueIdentifierColumnName = 'AccountID';
 
         return $schema;

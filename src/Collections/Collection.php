@@ -18,6 +18,7 @@ use Rhubarb\Stem\Schema\Columns\DateColumn;
 use Rhubarb\Stem\Schema\Columns\DecimalColumn;
 use Rhubarb\Stem\Schema\Columns\FloatColumn;
 use Rhubarb\Stem\Schema\Columns\IntegerColumn;
+use Rhubarb\Stem\Schema\ModelSchema;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\SolutionSchema;
@@ -25,11 +26,11 @@ use Rhubarb\Stem\Schema\SolutionSchema;
 abstract class Collection implements \ArrayAccess, \Iterator, \Countable
 {
     /**
-     * The Model class used when spinning out items.
+     * The Schema object used to power this collection
      *
      * @var string
      */
-    protected $modelClassName;
+    protected $modelSchema;
 
     /**
      * The collection of model IDs represented in this collection.
@@ -173,9 +174,9 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public $additionalColumns = [];
 
-    public function __construct($modelClassName)
+    public function __construct(ModelSchema $schema)
     {
-        $this->modelClassName = $modelClassName;
+        $this->modelSchema = $schema;
     }
 
     public function isRangingEnabled()
@@ -271,7 +272,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function getRepository()
     {
-        $emptyObject = SolutionSchema::getModel($this->modelClassName);
+        $emptyObject = SolutionSchema::getModel($this->modelSchema);
 
         $repository = $emptyObject->getRepository();
 
@@ -285,7 +286,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     public function getModelSchema()
     {
-        return $this->getRepository()->getModelSchema();
+        return $this->modelSchema;
     }
 
     /**
@@ -633,7 +634,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      */
     final public function getModelClassName()
     {
-        return $this->modelClassName;
+        return $this->modelSchema;
     }
 
     /**
@@ -751,7 +752,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     {
         $changed = false;
         if (sizeof($this->sorts) == 0) {
-            $this->addSort(SolutionSchema::getModelSchema($this->getModelClassName())->uniqueIdentifierColumnName);
+            $this->addSort(SolutionSchema::getSchema($this->getModelClassName())->uniqueIdentifierColumnName);
         }
 
         if ($this->rangeStartIndex != $startIndex) {
@@ -998,7 +999,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     private function processSorts()
     {
         $class = $this->getModelClassName();
-        $schema = SolutionSchema::getModelSchema($class);
+        $schema = SolutionSchema::getSchema($class);
         $columns = $schema->getColumns();
 
         $ids = [];

@@ -29,7 +29,7 @@ class UpdateRepositorySchemasCommand extends RequiresRepositoryCommand
 
         if ($schemaName != null) {
             try {
-                $schema = SolutionSchema::getSchema($schemaName);
+                $schema = SolutionSchema::getSolutionSchema($schemaName);
             } catch (SchemaNotFoundException $ex) {
                 $output->writeln("<error>Couldn't find schema named '$schemaName'</error>");
                 return;

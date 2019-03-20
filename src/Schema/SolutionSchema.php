@@ -24,6 +24,7 @@ use Rhubarb\Stem\Exceptions\RelationshipDefinitionException;
 use Rhubarb\Stem\Exceptions\SchemaNotFoundException;
 use Rhubarb\Stem\Exceptions\SchemaRegistrationException;
 use Rhubarb\Stem\Models\Model;
+use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Relationships\ManyToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
@@ -43,28 +44,35 @@ abstract class SolutionSchema
      *
      * @var array
      */
-    private static $schemaClasses = [];
+    private static $solutionSchemaClasses = [];
 
     /**
      * An array of the initialised schema objects
      *
      * @var array
      */
-    private static $schemas = [];
+    private static $solutionSchemas = [];
 
     /**
      * A mapping of model names to model classes
      *
      * @var array
      */
-    protected $models = [];
+    protected $modelSchemaAliases = [];
+
+    /**
+     * A list of instantiated model schemas by alias name
+     *
+     * @var array
+     */
+    protected $modelSchemas = [];
 
     /**
      * A mapping of model classes to model names
      *
      * @var array
      */
-    private $modelClassNames = [];
+    private $modelSchemaClassNames = [];
 
     /**
      * A collection of relationships defined by this schema
@@ -81,27 +89,19 @@ abstract class SolutionSchema
     private static $relationshipCache = [];
 
     /**
-     * The version number of the schema.
-     *
-     * @var int
+     * @var Repository
      */
-    protected $version = 0;
+    private $repository;
 
-    /**
-     * The version numbers of each model in the schema.
-     *
-     * @var int[]
-     */
-    protected $versions = [];
 
     /**
      * SolutionSchema constructor.
      *
      * @param int $version
      */
-    public function __construct($version = 0)
+    public function __construct(Repository $repository)
     {
-        $this->version = $version;
+        $this->repository = $repository;
     }
 
     /**
@@ -115,11 +115,11 @@ abstract class SolutionSchema
      */
     public static function registerSchema($schemaName, $schemaClass)
     {
-        self::$schemaClasses[$schemaName] = $schemaClass;
+        self::$solutionSchemaClasses[$schemaName] = $schemaClass;
 
         // Invalidate the caches
-        self::$modelClassesCache = null;
-        self::$modelNamesCache = null;
+        self::$schemaClassesCache = null;
+        self::$schemaNamesCache = null;
         self::$relationshipCache = null;
     }
 
@@ -130,8 +130,8 @@ abstract class SolutionSchema
      */
     public static function clearSchemas()
     {
-        self::$schemaClasses = [];
-        self::$schemas = [];
+        self::$solutionSchemaClasses = [];
+        self::$solutionSchemas = [];
     }
 
     /**
@@ -147,9 +147,9 @@ abstract class SolutionSchema
      *
      * @return Model[]
      */
-    public function getAllModels()
+    public function getAllModelSchemas()
     {
-        return $this->models;
+        return $this->modelSchemaAliases;
     }
 
     /**
@@ -162,7 +162,7 @@ abstract class SolutionSchema
      */
     public static function getModel($modelName, $uniqueIdentifier = null)
     {
-        $class = self::getModelClass($modelName);
+        $class = self::getSchemaClass($modelName);
         $model = new $class($uniqueIdentifier);
 
         return $model;
@@ -171,44 +171,42 @@ abstract class SolutionSchema
     /**
      * Get's the schema for a particular model by name or class.
      *
-     * @param  string $modelName The name or class name of the model
+     * @param  string $schemaName The name or class name of the model
      * @return ModelSchema
      */
-    public static function getModelSchema($modelName)
+    public function getSchema($schemaName)
     {
-        $model = self::getModel($modelName);
-
-        return $model->getSchema();
+        return $this->modelSchemaAliases[$schemaName]->getSchema();
     }
 
     /**
      * Instantiates (if necessary) and returns an instance of a schema object matched by its name.
      *
-     * @param  $schemaName
+     * @param  $solutionSchemaName
      * @throws \Rhubarb\Stem\Exceptions\SchemaNotFoundException
      * @throws \Rhubarb\Stem\Exceptions\SchemaRegistrationException
      * @return SolutionSchema
      */
-    public static function getSchema($schemaName)
+    public static function getSolutionSchema($solutionSchemaName)
     {
-        if (!isset(self::$schemas[$schemaName])) {
-            if (!isset(self::$schemaClasses[$schemaName])) {
-                throw new SchemaNotFoundException($schemaName);
+        if (!isset(self::$solutionSchemas[$solutionSchemaName])) {
+            if (!isset(self::$solutionSchemaClasses[$solutionSchemaName])) {
+                throw new SchemaNotFoundException($solutionSchemaName);
             }
 
-            $schemaClass = self::$schemaClasses[$schemaName];
+            $schemaClass = self::$solutionSchemaClasses[$solutionSchemaName];
             $schema = new $schemaClass();
 
             if (!($schema instanceof SolutionSchema)) {
-                throw new SchemaRegistrationException($schemaName, $schemaClass);
+                throw new SchemaRegistrationException($solutionSchemaName, $schemaClass);
             }
 
-            self::$schemas[$schemaName] = $schema;
+            self::$solutionSchemas[$solutionSchemaName] = $schema;
 
             $schema->defineRelationships();
         }
 
-        return self::$schemas[$schemaName];
+        return self::$solutionSchemas[$solutionSchemaName];
     }
 
     /**
@@ -218,11 +216,11 @@ abstract class SolutionSchema
      */
     public static function getAllSchemas()
     {
-        foreach (self::$schemaClasses as $schemaName => $schemaClass) {
-            self::getSchema($schemaName);
+        foreach (self::$solutionSchemaClasses as $schemaName => $schemaClass) {
+            self::getSolutionSchema($schemaName);
         }
 
-        return self::$schemas;
+        return self::$solutionSchemas;
     }
 
     /**
@@ -233,7 +231,7 @@ abstract class SolutionSchema
      */
     public static function getAllRelationshipsForModel($modelClassName)
     {
-        $modelClassName = self::getModelClass($modelClassName);
+        $modelClassName = self::getSchemaClass($modelClassName);
 
         if (!isset(self::$relationshipCache[$modelClassName])) {
             $schemas = self::getAllSchemas();
@@ -273,97 +271,95 @@ abstract class SolutionSchema
         return $columnRelationships;
     }
 
-    private static $modelClassesCache = null;
-    private static $modelNamesCache = null;
+    private static $schemaClassesCache = null;
+    private static $schemaNamesCache = null;
 
     /**
      * Gets the full class name of a model using it's model name.
      *
-     * @param  $name
+     * @param  $schemaName
      * @return null
      */
-    public static function getModelClass($name)
+    public static function getSchemaClass($schemaName)
     {
         // If the name contains a backslash it is already fully qualified. However in some cases
         // a model might be replaced by a new class and so we must first look to see if this model is
         // mapped and if so return it's replacement instead.
-        if (stripos($name, "\\") !== false) {
-            $newName = self::getModelNameFromClass($name);
+        if (stripos($schemaName, "\\") !== false) {
+            $newName = self::getSchemaNameFromClass($schemaName);
 
             if ($newName === null) {
                 // $name hasn't been registered as a model object. Play safe and return the
                 // same class name passed to us.
-                return '\\' . ltrim($name, '\\');
+                return '\\' . ltrim($schemaName, '\\');
             }
 
-            $name = $newName;
+            $schemaName = $newName;
         }
 
-        if (self::$modelClassesCache == null) {
-            self::$modelClassesCache = [];
+        if (self::$schemaClassesCache == null) {
+            self::$schemaClassesCache = [];
 
             $schemas = self::getAllSchemas();
 
-            self::$modelNamesCache = [];
+            self::$schemaNamesCache = [];
 
             foreach ($schemas as $schema) {
-                self::$modelClassesCache = array_merge(self::$modelClassesCache, $schema->models);
-                self::$modelNamesCache = array_merge(self::$modelNamesCache, $schema->modelClassNames);
+                self::$schemaClassesCache = array_merge(self::$schemaClassesCache, $schema->modelSchemaAliases);
+                self::$schemaNamesCache = array_merge(self::$schemaNamesCache, $schema->modelSchemaClassNames);
             }
         }
 
-        if (isset(self::$modelClassesCache[$name])) {
-            return '\\' . ltrim(self::$modelClassesCache[$name], '\\');
+        if (isset(self::$schemaClassesCache[$schemaName])) {
+            return '\\' . ltrim(self::$schemaClassesCache[$schemaName], '\\');
         }
 
         return null;
     }
 
-    public static function getModelNameFromClass($class)
+    public static function getSchemaNameFromClass($class)
     {
-        if (self::$modelNamesCache == null) {
-            self::$modelNamesCache = [];
+        if (self::$schemaNamesCache == null) {
+            self::$schemaNamesCache = [];
 
             $schemas = self::getAllSchemas();
 
             foreach ($schemas as $schema) {
-                self::$modelNamesCache = array_merge(self::$modelNamesCache, $schema->modelClassNames);
+                self::$schemaNamesCache = array_merge(self::$schemaNamesCache, $schema->modelSchemaClassNames);
             }
         }
 
         $classNameWithNoLeadingSlash = ltrim($class, '\\');
 
-        if (isset(self::$modelNamesCache[$classNameWithNoLeadingSlash])) {
-            return self::$modelNamesCache[$classNameWithNoLeadingSlash];
+        if (isset(self::$schemaNamesCache[$classNameWithNoLeadingSlash])) {
+            return self::$schemaNamesCache[$classNameWithNoLeadingSlash];
         }
 
-        if (isset(self::$modelNamesCache['\\' . $classNameWithNoLeadingSlash])) {
-            return self::$modelNamesCache['\\' . $classNameWithNoLeadingSlash];
+        if (isset(self::$schemaNamesCache['\\' . $classNameWithNoLeadingSlash])) {
+            return self::$schemaNamesCache['\\' . $classNameWithNoLeadingSlash];
         }
 
         return null;
     }
 
-    protected function addModel($name, $modelClassName, $version = null)
+    protected function addModelSchema($schemaName, $schemaClassName): SolutionSchema
     {
         // Remove a leading "\" slash if it exists.
         // It will work for most things however in some places where comparisons are
         // drawn with the result of get_class() (which never has a leading slash) the
         // comparisons can fail.
 
-        $modelClassName = ltrim($modelClassName, "\\");
+        $schemaClassName = ltrim($schemaClassName, "\\");
 
-        $this->models[$name] = $modelClassName;
-        $this->modelClassNames[$modelClassName] = $name;
+        $this->modelSchemaAliases[$schemaName] = $schemaClassName;
+        $this->modelSchemaClassNames[$schemaClassName] = $schemaName;
 
-        if ($version !== null) {
-            $this->versions[$name] = $version;
-        }
+        return $this;
     }
 
     protected function addRelationship($modelName, $navigationPropertyName, Relationship $relationship)
     {
-        $modelName = self::getModelClass($modelName);
+        $modelName = self::getSchemaClass($modelName);
 
         if (!isset($this->relationships[$modelName])) {
             $this->relationships[$modelName] = [];
@@ -670,7 +666,7 @@ abstract class SolutionSchema
      */
     public function getRelationship($modelName, $navigationName)
     {
-        $modelName = $this->getModelClass($modelName);
+        $modelName = $this->getSchemaClass($modelName);
 
         if (!isset($this->relationships[$modelName])) {
             return null;
@@ -681,11 +677,6 @@ abstract class SolutionSchema
         }
 
         return $this->relationships[$modelName][$navigationName];
-    }
-
-    protected function getVersionFileName()
-    {
-        return str_replace("\\", "_", get_class($this)) . ".txt";
     }
 
     /**
@@ -703,7 +694,7 @@ abstract class SolutionSchema
         /**
          * @var Model $object
          */
-        foreach ($this->models as $class) {
+        foreach ($this->modelSchemaAliases as $class) {
             $object = new $class();
 
             $repository = $object->getRepository();
@@ -712,13 +703,5 @@ abstract class SolutionSchema
 
             $class::checkRecords($oldVersion, $this->version);
         }
-    }
-
-    protected function calculateVersion()
-    {
-        if (count($this->versions)) {
-            return sha1(serialize($this->versions));
-        }
-        return $this->version;
     }
 }

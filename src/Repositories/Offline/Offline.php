@@ -79,7 +79,7 @@ class Offline extends Repository
 
     public function getEntityByIdentifier($id): Entity
     {
-        
+
     }
 
     public function storeEntity(Entity $entity)

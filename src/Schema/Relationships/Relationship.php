@@ -64,7 +64,7 @@ abstract class Relationship
      */
     protected function getRelationshipCollection($collectionClassName, $filter = null)
     {
-        $class = SolutionSchema::getModelClass($collectionClassName);
+        $class = SolutionSchema::getSchemaClass($collectionClassName);
 
         return $class::find($filter);
     }

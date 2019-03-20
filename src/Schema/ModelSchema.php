@@ -18,7 +18,10 @@
 
 namespace Rhubarb\Stem\Schema;
 
+use Rhubarb\Stem\Collections\Collection;
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\SchemaException;
+use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
 use Rhubarb\Stem\Schema\Columns\Column;
@@ -83,12 +86,21 @@ class ModelSchema
     }
 
     /**
+     * @return Model[]|Collection
+     */
+    public function find(): Collection
+    {
+        return new RepositoryCollection($this);
+    }
+
+    /**
      * Adds a column to the column collection.
      *
      * @param Column $column
      * @param Column $column,... any number of columns to add
+     * @return ModelSchema
      */
-    public function addColumn(Column $column)
+    public function addColumn(Column $column): ModelSchema
     {
         $columns = func_get_args();
 
@@ -99,6 +111,8 @@ class ModelSchema
                 $this->uniqueIdentifierColumnName = $column->columnName;
             }
         }
+
+        return $this;
     }
 
     /**
@@ -156,9 +170,11 @@ class ModelSchema
      *
      * @param $index
      */
-    public function addIndex($index)
+    public function addIndex($index): ModelSchema
     {
         $this->indexes[$index->indexName] = $index;
+
+        return $this;
     }
 
     /**
