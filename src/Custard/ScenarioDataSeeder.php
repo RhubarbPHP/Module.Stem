@@ -18,6 +18,24 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
         return [];
     }
 
+    /**
+     * A hook for logic to run before each scenario
+     * @param Scenario $scenario
+     */
+    protected function beforeScenario(Scenario $scenario)
+    {
+
+    }
+
+    /**
+     * A hook for logic to run after each scenario
+     * @param Scenario $scenario
+     */
+    protected function afterScenario(Scenario $scenario)
+    {
+
+    }
+
     public function seedData(OutputInterface $output, $includeBulk = false)
     {
         $class = get_class($this);
@@ -41,11 +59,15 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
 
         foreach ($this->getScenarios() as $scenario) {
             if ($includeBulk || !($scenario instanceof BulkScenario)) {
+                $this->beforeScenario($scenario);
+
                 $output->writeln("");
                 $output->writeln("<comment>Scenario " . self::$scenarioCount . ": <bold>" . $scenario->getName().'</bold></comment>');
                 $output->writeln(str_repeat('-', 11 + strlen(self::$scenarioCount) + strlen($scenario->getName())));
                 $scenario->run($output);
                 self::$scenarioCount++;
+
+                $this->afterScenario($scenario);
             }
         }
     }

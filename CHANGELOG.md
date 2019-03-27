@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.4
+
+* Added:   beforeScenario and afterScenario hooks for improving scenario seeding
+
 ### 1.8.3
 
 * Added:   Some pretty colours when showing seeding titles.
