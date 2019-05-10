@@ -8,11 +8,11 @@
 
 * Added:   beforeScenario and afterScenario hooks for improving scenario seeding
 
- ### 1.8.3
+### 1.8.3
 
 * Added:   Some pretty colours when showing seeding titles.
 
- ### 1.8.2
+### 1.8.2
 
 * Added:   Bulk flag added to seed command. BulkScenario added.
 * Changed: Truncation of data turned off by default when seeding.
