@@ -6,16 +6,16 @@
 
 ### 1.8.4
 
- * Added:   beforeScenario and afterScenario hooks for improving scenario seeding
+* Added:   beforeScenario and afterScenario hooks for improving scenario seeding
 
- ### 1.8.3	
+ ### 1.8.3
 
- * Added:   Some pretty colours when showing seeding titles.	
+* Added:   Some pretty colours when showing seeding titles.
 
- ### 1.8.2	
+ ### 1.8.2
 
- * Added:   Bulk flag added to seed command. BulkScenario added.	
-* Changed: Truncation of data turned off by default when seeding.	
+* Added:   Bulk flag added to seed command. BulkScenario added.
+* Changed: Truncation of data turned off by default when seeding.
 * Added:   getPrerequisiteSeeders() can now return class names instead of seeding objects.
 
 ### 1.8.1
