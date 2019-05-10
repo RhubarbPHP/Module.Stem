@@ -388,6 +388,12 @@ class MySql extends PdoRepository
                 $join->joinType = Join::JOIN_TYPE_LEFT;
             }
 
+            if (!isset($columns[$collectionJoin->sourceColumnName]) && isset($intersectionColumnAliases[$collectionJoin->sourceColumnName])) {
+                $join->parentTableAlias = $intersectionColumnAliases[$collectionJoin->sourceColumnName];
+            } else {
+                $join->parentTableAlias = $sqlStatement->getAlias();
+            }
+
             $join->parentColumn = $collectionJoin->sourceColumnName;
             $join->childColumn = $collectionJoin->targetColumnName;
 
@@ -549,10 +555,21 @@ class MySql extends PdoRepository
         }
 
         if ($allAggregated) {
+            $columnAliases = $collection->getAliasedColumns();
+
             // If the aggregates didn't work, we can't group yet otherwise the rows will collapse and post query
             // aggregates won't have all the rows to work on.
             foreach ($collection->getGroups() as $group) {
-                $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
+                if (isset($columnAliases[$group])){
+                    $group = $columnAliases[$group];
+                }
+
+                if (!isset($columns[$group]) && isset($intersectionColumnAliases[$group])){
+                    $tableAlias = $intersectionColumnAliases[$group];
+                    $sqlStatement->groups[] = new GroupExpression("`" . $tableAlias . "`.`" . $group . "`");
+                } else {
+                    $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
+                }
             }
         }
 

@@ -8,6 +8,7 @@ class Join extends SqlClause
     const JOIN_TYPE_INNER = "INNER JOIN";
     const JOIN_TYPE_RIGHT = "RIGHT JOIN";
 
+    public $parentTableAlias = "";
     public $parentColumn = "";
     public $childColumn = "";
     public $joinType = self::JOIN_TYPE_INNER;
