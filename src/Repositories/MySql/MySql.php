@@ -563,7 +563,7 @@ class MySql extends PdoRepository
                 }
 
                 // Check if the column name is from an intersection and update the table alias accordingly.
-                $tableAlias = isset($columns[$group]) && isset($intersectionColumnAliases[$group]) ?
+                $tableAlias = !isset($columns[$group]) && isset($intersectionColumnAliases[$group]) ?
                     $intersectionColumnAliases[$group] :
                     $sqlStatement->getAlias();
 
