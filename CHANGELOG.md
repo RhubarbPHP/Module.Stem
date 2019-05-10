@@ -4,6 +4,20 @@
 
 * Changed: MySql can now group/join by intersected columns using their name or aliased name
 
+### 1.8.4
+
+ * Added:   beforeScenario and afterScenario hooks for improving scenario seeding
+
+ ### 1.8.3	
+
+ * Added:   Some pretty colours when showing seeding titles.	
+
+ ### 1.8.2	
+
+ * Added:   Bulk flag added to seed command. BulkScenario added.	
+* Changed: Truncation of data turned off by default when seeding.	
+* Added:   getPrerequisiteSeeders() can now return class names instead of seeding objects.
+
 ### 1.8.1
 
 * Fixed:   Stopped SchemaCommandTrait from trying to use the settings folder which might not exist.
