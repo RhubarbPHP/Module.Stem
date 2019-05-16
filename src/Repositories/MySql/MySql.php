@@ -388,6 +388,10 @@ class MySql extends PdoRepository
                 $join->joinType = Join::JOIN_TYPE_LEFT;
             }
 
+            $join->parentTableAlias = !isset($columns[$collectionJoin->sourceColumnName]) && isset($intersectionColumnAliases[$collectionJoin->sourceColumnName]) ?
+                $intersectionColumnAliases[$collectionJoin->sourceColumnName] :
+                $sqlStatement->getAlias();
+
             $join->parentColumn = $collectionJoin->sourceColumnName;
             $join->childColumn = $collectionJoin->targetColumnName;
 
@@ -549,10 +553,21 @@ class MySql extends PdoRepository
         }
 
         if ($allAggregated) {
+            $columnAliases = $collection->getAliasedColumns();
+
             // If the aggregates didn't work, we can't group yet otherwise the rows will collapse and post query
             // aggregates won't have all the rows to work on.
             foreach ($collection->getGroups() as $group) {
-                $sqlStatement->groups[] = new GroupExpression("`" . $sqlStatement->getAlias() . "`.`" . $group . "`");
+                if (isset($columnAliases[$group])){
+                    $group = $columnAliases[$group];
+                }
+
+                // Check if the column name is from an intersection and update the table alias accordingly.
+                $tableAlias = !isset($columns[$group]) && isset($intersectionColumnAliases[$group]) ?
+                    $intersectionColumnAliases[$group] :
+                    $sqlStatement->getAlias();
+
+                $sqlStatement->groups[] = new GroupExpression("`" . $tableAlias . "`.`" . $group . "`");
             }
         }
 

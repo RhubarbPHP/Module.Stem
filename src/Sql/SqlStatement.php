@@ -177,7 +177,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
         $sql = "UPDATE `".$this->schemaName."` AS `".$this->getAlias()."`";
 
         foreach($this->joins as $join){
-            $sql .= " ".$join->joinType." (".$join->getSql($this).") AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
+            $sql .= " ".$join->joinType." (".$join->getSql($this).") AS `".$join->statement->getAlias()."` ON `".$join->parentTableAlias."`.`".
                 $join->parentColumn."` = `".$join->statement->getAlias()."`.`".$join->childColumn."`";
         }
 
@@ -215,7 +215,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
                 $joinsSql = "(".$joinsSql.")";
             }
 
-            $sql .= " ".$join->joinType." ".$joinsSql." AS `".$join->statement->getAlias()."` ON `".$this->getAlias()."`.`".
+            $sql .= " ".$join->joinType." ".$joinsSql." AS `".$join->statement->getAlias()."` ON `".$join->parentTableAlias."`.`".
                 $join->parentColumn."` = `".$join->statement->getAlias()."`.`".$join->childColumn."`";
         }
 

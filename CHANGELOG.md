@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.5
+
+* Changed: MySql can now group/join by intersected columns using their name or aliased name
+
 ### 1.8.4
 
 * Added:   beforeScenario and afterScenario hooks for improving scenario seeding
