@@ -363,6 +363,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     final public function addCustomSort(Sort $sort)
     {
         $this->sorts[] = $sort;
+        $this->invalidate();
     }
 
     /**

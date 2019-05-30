@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.8.8
+
+* Fixed: Custom sorts now invalidate collections
+* Added: MySqlRandom Sort
+
 ### 1.8.7
 
 * Fixed:   Added value inspection to determine type when unit testing and no column
