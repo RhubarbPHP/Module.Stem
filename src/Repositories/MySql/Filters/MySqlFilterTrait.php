@@ -120,7 +120,7 @@ trait MySqlFilterTrait
             $isAlias = false;
 
             if (in_array($columnName, $aliases)) {
-                $isAlias = true;
+                $isAlias = false;
             } else {
                 $aggregates = $collection->getAggregateColumns();
 
