@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.8.7
+
+* Fixed:   Added value inspection to determine type when unit testing and no column
+           type information available on aggregate filters.
+
 ### 1.8.6
 
 * Fixed:   Pullups from aggregates can now be used in where clauses

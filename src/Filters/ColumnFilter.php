@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Filters;
 
 require_once __DIR__ . '/Filter.php';
 
+use Rhubarb\Crown\DateTime\RhubarbDate;
 use Rhubarb\Stem\Collections\Collection;
 use Rhubarb\Stem\Exceptions\CreatedIntersectionException;
 use Rhubarb\Stem\Models\Model;
@@ -81,6 +82,11 @@ abstract class ColumnFilter extends Filter
 
             if ($closure !== null) {
                 $rawComparisonValue = $closure($rawComparisonValue);
+            }
+        } else {
+            // No column type - possibly an aggregate. Look for some common patterns.
+            if (preg_match("/\d{4}-\d{2}-\d{2}/", $rawComparisonValue)){
+                $rawComparisonValue = new RhubarbDate($rawComparisonValue);
             }
         }
 
