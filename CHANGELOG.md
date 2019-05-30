@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.6
+
+* Fixed:   Pullups from aggregates can now be used in where clauses
+
 ### 1.8.5
 
 * Changed: MySql can now group/join by intersected columns using their name or aliased name
