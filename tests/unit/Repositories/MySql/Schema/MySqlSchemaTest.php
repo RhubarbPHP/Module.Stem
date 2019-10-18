@@ -26,7 +26,7 @@ class MySqlSchemaTest extends MySqlTestCase
 
         $this->setExpectedException(SchemaException::class);
 
-        new MySqlEnumColumn("Test", null, ["A", "B"]);
+        new MySqlEnumColumn("Test", 'C', ["A", "B"]);
     }
 
     public function testSchemaIsCreated()

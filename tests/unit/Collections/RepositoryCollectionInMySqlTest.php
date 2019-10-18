@@ -107,12 +107,6 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         $sql = MySql::getPreviousStatement();
 
         $this->assertContains("HAVING", $sql);
-
-        $this->testAggregatesOnIntersections();
-
-        $sql = MySql::getPreviousStatement();
-
-        $this->assertContains("HAVING", $sql);
     }
 
     public function testPullUpsHaveCorrectTypes()
