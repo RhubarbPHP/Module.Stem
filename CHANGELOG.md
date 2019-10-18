@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.9
+
+* Fixed: Aggregates can now be sorted on
+
 ### 1.8.8
 
 * Fixed: Custom sorts now invalidate collections

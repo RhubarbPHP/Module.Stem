@@ -487,6 +487,12 @@ class MySql extends PdoRepository
             $allFiltered = $filter->wasFilteredByRepository();
         }
 
+        foreach ($collection->getAggregateColumns() as $aggregate) {
+            if (isset($intersectionColumnAliases[$aggregate->getAggregateColumnName()])) {
+                $intersectionColumnAliases[$aggregate->getAlias()] = '';
+            }
+        }
+
         $sorts = $collection->getSorts();
 
         $allSorted = true;
@@ -526,7 +532,12 @@ class MySql extends PdoRepository
                     $sqlStatement->sorts[] = new SortExpression("`" . $sort->columnName . '`', $sort->ascending);
                 } else {
                     $alias = $intersectionColumnAliases[$sort->columnName];
-                    $sqlStatement->sorts[] = new SortExpression("`" . $alias . "`.`" . $sort->columnName . '`', $sort->ascending);
+
+                    if ($alias) {
+                        $sqlStatement->sorts[] = new SortExpression("`" . $alias . "`.`" . $sort->columnName . '`', $sort->ascending);
+                    } else {
+                        $sqlStatement->sorts[] = new SortExpression("`" . $sort->columnName . '`', $sort->ascending);
+                    }
                 }
             }
         }
