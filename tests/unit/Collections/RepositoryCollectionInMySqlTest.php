@@ -109,6 +109,15 @@ class RepositoryCollectionInMySqlTest extends RepositoryCollectionTest
         $this->assertContains("HAVING", $sql);
     }
 
+    public function testSortsOnAggregatesUsesOrderBy()
+    {
+        $this->testSortsOnAggregates();
+
+        $sql = MySql::getPreviousStatement();
+
+        $this->assertContains("ORDER BY `SumOfBalance` DESC", $sql);
+    }
+
     public function testPullUpsHaveCorrectTypes()
     {
         $collection = Company::all();

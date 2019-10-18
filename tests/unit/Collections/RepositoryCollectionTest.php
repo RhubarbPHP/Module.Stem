@@ -81,6 +81,19 @@ class RepositoryCollectionTest extends ModelUnitTestCase
         $this->assertCount(1, $collection);
     }
 
+    public function testSortsOnAggregates()
+    {
+        $collection = Company::all();
+        $collection->addAggregateColumn(
+            new Sum("Balance")
+        );
+        $collection->addGroup('CompanyID');
+        $collection->addSort("SumOfBalance", false);
+
+        $this->assertEquals(3, $collection[0]->SumOfBalance);
+        $this->assertCount(3, $collection);
+    }
+
     public function testAggregatesOnIntersections()
     {
         $collection = Company::all();
