@@ -1,13 +1,17 @@
 # Change Log
 
+### 1.8.10
+
+* Fixed:   Sort by Aggregate now works in MySql on the outer collection
+
 ### 1.8.9
 
-* Fixed: Aggregates can now be sorted on
+* Fixed:   Aggregates can now be sorted on
 
 ### 1.8.8
 
-* Fixed: Custom sorts now invalidate collections
-* Added: MySqlRandom Sort
+* Fixed:   Custom sorts now invalidate collections
+* Added:   MySqlRandom Sort
 
 ### 1.8.7
 
