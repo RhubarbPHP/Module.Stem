@@ -22,7 +22,6 @@ require_once __DIR__ . "/../PdoRepository.php";
 
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Collections\CollectionJoin;
-use Rhubarb\Stem\Collections\JoinType;
 use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Exceptions\BatchUpdateNotPossibleException;
 use Rhubarb\Stem\Exceptions\RecordNotFoundException;
@@ -343,14 +342,32 @@ class MySql extends PdoRepository
      */
     public function getSqlStatementForCollection(RepositoryCollection $collection, &$namedParams, $intersectionColumnName = "")
     {
+        return $this->getSqlStatementForCollectionWithColumns($collection, $namedParams);
+    }
+
+    /**
+     * @param RepositoryCollection $collection
+     * @param string[]             $namedParams
+     * @param array                $columns The columns to populate in the collection. Empty results in all columns.
+     *
+     * @return SqlStatement
+     */
+    public function getSqlStatementForCollectionWithColumns(RepositoryCollection $collection, &$namedParams, array $columns = [])
+    {
         $model = $collection->getModelClassName();
         $schema = SolutionSchema::getModelSchema($model);
-        $columns = $schema->getColumns();
-
         $sqlStatement = new SqlStatement();
         $sqlStatement->setAlias($collection->getUniqueReference());
         $sqlStatement->schemaName = $schema->schemaName;
-        $sqlStatement->columns[] = new SelectExpression("`".$sqlStatement->getAlias()."`.*");
+        if (count($columns) > 0) {
+            foreach ($columns as $column) {
+                $sqlStatement->columns[] = new SelectExpression("`" . $sqlStatement->getAlias() . "`.{$column}");
+            }
+            $columns = array_intersect_key($schema->getColumns(), array_flip($columns));
+        } else {
+            $sqlStatement->columns[] = new SelectExpression("`" . $sqlStatement->getAlias() . "`.*");
+            $columns = $schema->getColumns();
+        }
 
         $allIntersected = true;
 

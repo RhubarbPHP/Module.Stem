@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.8.11
+
+* Added:   OneOfCollection Filter
+* Added:   MySql repository support for hydrating a subset of a model's columns
+
 ### 1.8.10
 
 * Fixed:   Sort by Aggregate now works in MySql on the outer collection
