@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.12
+
+* Fixed:  implode param order to remove php 7.4 warning
+
 ### 1.8.11
 
 * Added:   OneOfCollection Filter

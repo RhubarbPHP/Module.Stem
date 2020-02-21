@@ -159,7 +159,7 @@ class SqlStatement extends SqlClause implements WhereExpressionCollector
             $statements[] = $clause->getSql($this);
         }
 
-        return implode($statements, $glue);
+        return implode($glue, $statements);
     }
 
     /**
