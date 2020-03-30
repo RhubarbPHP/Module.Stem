@@ -54,7 +54,7 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
                 throw new \InvalidArgumentException(get_class($seeder)." does not extend DemoDataSeederInterface.");
             }
 
-            $seeder->seedData($output);
+            $seeder->seedData($output, $includeBulk);
         }
 
         foreach ($this->getScenarios() as $scenario) {
