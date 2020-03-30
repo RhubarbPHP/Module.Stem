@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.13
+
+* Fixed: includeBulk flag passed to prereq seeders
+
 ### 1.8.12
 
 * Fixed:  implode param order to remove php 7.4 warning
