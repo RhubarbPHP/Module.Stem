@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.16
+
+* Fixed: OneOfCollection filters on subquery can be performed on all fields
+
 ### 1.8.13
 
 * Fixed: includeBulk flag passed to prereq seeders
