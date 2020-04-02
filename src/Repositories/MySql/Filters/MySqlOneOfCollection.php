@@ -51,7 +51,7 @@ class MySqlOneOfCollection extends OneOfCollection
             $columnName = self::getRealColumnName($this, $collection);
             $toAlias = self::getTableAlias($this, $collection);
 
-            $subQuery = $repository->getSqlStatementForCollectionWithColumns(
+            $subQuery = $this->collection->getRepository()->getSqlStatementForCollectionWithColumns(
                 $this->collection,
                 $params,
                 [$this->collectionColumnName]
