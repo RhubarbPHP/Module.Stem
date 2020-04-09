@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.8.14
+
+* Fixed: ensure that there is an alias mapping in place for fields that have been pulled up through multiple
+         intersections 
+
 ### 1.8.13
 
 * Fixed: includeBulk flag passed to prereq seeders

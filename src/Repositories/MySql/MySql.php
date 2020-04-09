@@ -467,6 +467,11 @@ class MySql extends PdoRepository
 
                 if ($inQuery){
                     $sqlStatement->columns[] = new SelectColumn("`" . $join->statement->getAlias() . "`." . $column, $alias);
+
+                    // We found it, we should make sure there's a mapping for this column so that it can be referenced later
+                    if (!isset($intersectionColumnAliases[$column])) {
+                        $intersectionColumnAliases[$column] = $join->statement->getAlias();
+                    }
                 }
             }
 
