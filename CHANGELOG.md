@@ -1,17 +1,21 @@
 # Change Log
 
+### 1.8.15
+
+* Added:   Forward compatibility for later version of symfony Console
+
 ### 1.8.14
 
-* Fixed: ensure that there is an alias mapping in place for fields that have been pulled up through multiple
-         intersections 
+* Fixed:   ensure that there is an alias mapping in place for fields that have been pulled up through multiple
+           intersections 
 
 ### 1.8.13
 
-* Fixed: includeBulk flag passed to prereq seeders
+* Fixed:   includeBulk flag passed to prereq seeders
 
 ### 1.8.12
 
-* Fixed:  implode param order to remove php 7.4 warning
+* Fixed:   implode param order to remove php 7.4 warning
 
 ### 1.8.11
 

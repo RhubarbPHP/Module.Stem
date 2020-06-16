@@ -26,7 +26,15 @@ abstract class RequiresRepositoryCommand extends CustardCommand
             self::$repositoryConnector->connect($input, $output);
         }
 
-        $this->executeWithConnection($input, $output);
+        $result = $this->executeWithConnection($input, $output);
+
+        // Forward compatibility for later versions of Symfony Console. See the commits in
+        // Custard version 1.1.1 for more details.
+        if (is_int($result)){
+            return $result;
+        }
+
+        return 0;
     }
 
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
