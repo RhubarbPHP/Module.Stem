@@ -3,6 +3,12 @@
 namespace Rhubarb\Stem\Custard\CommandHelpers;
 
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlock\Description;
+use phpDocumentor\Reflection\DocBlock\Tags\Property;
+use phpDocumentor\Reflection\DocBlock\Tags\PropertyRead;
+use phpDocumentor\Reflection\DocBlock\Tags\PropertyWrite;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\Context;
 use Rhubarb\Crown\Exceptions\RhubarbException;
 use Rhubarb\Crown\String\StringTools;
 use Rhubarb\Stem\Collections\RepositoryCollection;
@@ -26,7 +32,7 @@ class ReflectionModel extends \ReflectionClass
     /** @var DocBlock */
     protected $classDocBlock;
 
-    /** @var DocBlock\Tag\PropertyTag[] */
+    /** @var Property[] */
     protected $fields = [];
 
     /** @var \Rhubarb\Stem\Schema\Relationships\Relationship[] */
@@ -47,7 +53,7 @@ class ReflectionModel extends \ReflectionClass
 
         $this->model = $model;
 
-        $this->classDocBlock = new DocBlock($this);
+        $this->classDocBlock = DocBlockFactory::createInstance()->create($this);
 
         $this->queryFields();
 
@@ -62,7 +68,7 @@ class ReflectionModel extends \ReflectionClass
     {
         $properties = $this->classDocBlock->getTags();
         foreach ($properties as $property) {
-            if ($property instanceof DocBlock\Tag\PropertyTag) {
+            if ($property instanceof Property) {
                 $this->fields[$property->getVariableName()] = $property;
             }
         }
@@ -122,7 +128,11 @@ class ReflectionModel extends \ReflectionClass
         if ($removeOld) {
             $propertiesToRemove = array_diff(array_keys($this->fields), $this->touchedProperties);
             if (count($propertiesToRemove)) {
-                DocBlockHelper::removePropertyTags($this->classDocBlock, $propertiesToRemove);
+
+                foreach($propertiesToRemove as $propertyToRemove){
+                    unset($this->fields[$propertyToRemove]);
+                }
+
                 $changed = true;
             }
         }
@@ -263,8 +273,8 @@ class ReflectionModel extends \ReflectionClass
     protected function getPropertyContentForGetterOrSetter(\ReflectionMethod $method, $getter, &$description)
     {
         $currentNamespace = $method->getDeclaringClass()->getNamespaceName();
-        $context = new DocBlock\Context($currentNamespace, $this->availableClassAliases);
-        $comment = new DocBlock($method->getDocComment(), $context);
+        $context = new Context($currentNamespace, $this->availableClassAliases);
+        $comment = new DocBlock($method->getDocComment(), null, [], $context);
 
         $tagName = $getter ? 'return' : 'param';
 
@@ -277,12 +287,12 @@ class ReflectionModel extends \ReflectionClass
             $type = 'mixed';
         }
 
-        $description = $comment->getShortDescription();
+        $description = $comment->getSummary();
 
         return $type . ' $' . substr($method->getName(), 3);
     }
 
-    protected function getTypeForTag(DocBlock\Tag\ReturnTag $tag)
+    protected function getTypeForTag($tag)
     {
         $types = $this->shortenNamespaces($tag->getTypes());
 
@@ -350,6 +360,20 @@ class ReflectionModel extends \ReflectionClass
         return $type;
     }
 
+    private function getTagClass($tagName)
+    {
+        switch($tagName) {
+            case "property":
+                return Property::class;
+            case "property-read":
+                return PropertyRead::class;
+            case "property-write":
+                return PropertyWrite::class;                                    
+        }
+
+        return "";
+    }
+
     /**
      * @param bool $updateExisting Whether the content should be updated if the property definition already exists
      * @param string $tagName One of 'property', 'property-read', or 'property-write'
@@ -366,16 +390,16 @@ class ReflectionModel extends \ReflectionClass
         }
 
         $changed = false;
+        $newTag = null;        
 
         if (isset($this->fields['$' . $variableName])) {
+
+            $class = $this->getTagClass($tagName);
+
             if ($updateExisting) {
+
                 // Update existing phpDoc field
                 $tag = $this->fields['$' . $variableName];
-
-                if ($tagName != $tag->getName()) {
-                    $tag->setName($tagName);
-                    $changed = true;
-                }
 
                 $tagDescription = $tag->getDescription();
                 if (!$rewriteDescriptions && $tagDescription) {
@@ -383,17 +407,26 @@ class ReflectionModel extends \ReflectionClass
                 }
                 $content = trim($content . ' ' . $description);
 
-                if ($content != $tag->getContent()) {
-                    $tag->setContent($content);
+                $newTag = new $class($variableName, $tag->getType(), new Description($content));
+
+                if ($tagName != $tag->getName()) {                    
+                    $changed = true;
+                }
+
+                if ($content != $tag->getDescription()) {
                     $changed = true;
                 }
             }
-        } else {
+        } else {            
+            $class = $this->getTagClass($tagName);
             // Add new field
             $content = trim($content . ' ' . $description);
-            $tag = new DocBlock\Tag\PropertyTag($tagName, $content);
-            $this->classDocBlock->appendTag($tag);
+            $newTag = new $class($variableName, null, new Description($content));                                    
             $changed = true;
+        }
+
+        if ($newTag){
+            $this->fields['$'.$variableName] = $newTag;
         }
 
         return $changed;
@@ -408,7 +441,9 @@ class ReflectionModel extends \ReflectionClass
         $existingDoc = $this->getDocComment();
 
         $serializer = new DocBlock\Serializer();
-        $newDoc = $serializer->getDocComment($this->classDocBlock);
+
+        $newClassBlock = new DocBlock($this->classDocBlock->getSummary(), $this->classDocBlock->getDescription(), array_values($this->fields), $this->classDocBlock->getContext());
+        $newDoc = $serializer->getDocComment($newClassBlock);
 
         // PhpDocumentor inserts a space between @SuppressWarnings and its following bracket,
         // which prevents PHP Mess Detector from picking up on the comment

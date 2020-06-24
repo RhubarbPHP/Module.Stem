@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.16
+
+* Added:   Compatibility with phpDocumentor 2.0 for document models command.
+
 ### 1.8.15
 
 * Added:   Forward compatibility for later version of symfony Console

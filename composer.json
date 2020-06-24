@@ -21,7 +21,8 @@
     "bin-dir": "bin/"
   },
   "require": {
-    "rhubarbphp/rhubarb": "^1.5.2"
+    "rhubarbphp/rhubarb": "^1.5.2",
+    "phpDocumentor/phpDocumentor": "^2.0.0"
   },
   "require-dev": {
     "rhubarbphp/custard" : "^1.0.0",
