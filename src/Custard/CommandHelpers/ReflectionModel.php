@@ -8,6 +8,7 @@ use phpDocumentor\Reflection\DocBlock\Tags\Property;
 use phpDocumentor\Reflection\DocBlock\Tags\PropertyRead;
 use phpDocumentor\Reflection\DocBlock\Tags\PropertyWrite;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Context;
 use Rhubarb\Crown\Exceptions\RhubarbException;
 use Rhubarb\Crown\String\StringTools;
@@ -150,9 +151,9 @@ class ReflectionModel extends \ReflectionClass
         $changed = false;
 
         foreach ($this->model->getSchema()->getColumns() as $field) {
-            $content = $this->getPropertyContentForColumn($field);
+            list($content, $types) = $this->getPropertyContentForColumn($field);
 
-            $changed |= $this->setProperty($updateExisting, 'property', $field->columnName, $content, $rewriteDescriptions, 'Repository field');
+            $changed |= $this->setProperty($updateExisting, 'property', $field->columnName, $content, $rewriteDescriptions, 'Repository field', $types);
         }
 
         return $changed;
@@ -170,9 +171,9 @@ class ReflectionModel extends \ReflectionClass
         foreach ($this->relationships as $relationship) {
             $propertyName = $relationship->getNavigationPropertyName();
 
-            $content = $this->getPropertyContentForRelationship($relationship);
+            list($content, $type) = $this->getPropertyContentForRelationship($relationship);
 
-            $changed |= $this->setProperty($updateExisting, 'property-read', $propertyName, $content, $rewriteDescriptions, 'Relationship');
+            $changed |= $this->setProperty($updateExisting, 'property-read', $propertyName, $content, $rewriteDescriptions, 'Relationship', $type);
         }
 
         return $changed;
@@ -188,7 +189,7 @@ class ReflectionModel extends \ReflectionClass
         $changed = false;
 
         foreach ($this->gettersAndSetters as $propertyName => $method) {
-            $content = $this->getPropertyContentForGetterOrSetter($method->getReflectionMethod(), $method->isReadable(), $description);
+            list($content, $type) = $this->getPropertyContentForGetterOrSetter($method->getReflectionMethod(), $method->isReadable(), $description);
 
             $tagName = $method->getTagName();
 
@@ -199,7 +200,7 @@ class ReflectionModel extends \ReflectionClass
                 $description = trim($description . " {@link set$propertyName()}");
             }
 
-            $changed |= $this->setProperty($updateExisting, $tagName, $propertyName, $content, $rewriteDescriptions, $description);
+            $changed |= $this->setProperty($updateExisting, $tagName, $propertyName, $content, $rewriteDescriptions, $description, $type);
         }
 
         return $changed;
@@ -222,15 +223,13 @@ class ReflectionModel extends \ReflectionClass
 
     /**
      * @param Column $column
-     * @return string
+     * @return array
      */
     protected function getPropertyContentForColumn(Column $column)
     {
-        $types = explode('|', $column->getPhpType());
+        $type = (new \phpDocumentor\Reflection\TypeResolver())->resolve($column->getPhpType());
 
-        $types = $this->shortenNamespaces($types);
-
-        return implode('|', $types) . ' $' . $column->columnName;
+        return [$column->columnName, $type];
     }
 
     /**
@@ -260,14 +259,14 @@ class ReflectionModel extends \ReflectionClass
         }
 
         if ($collectionType) {
-            $types = [$type . '[]', '\\' . RepositoryCollection::class];
+            $types = $type . '[]|\\' . RepositoryCollection::class;
         } else {
-            $types = [$type];
+            $types = $type;
         }
 
-        $types = $this->shortenNamespaces($types);
+        $types = (new TypeResolver())->resolve($types);
 
-        return implode('|', $types) . ' $' . $relationship->getNavigationPropertyName();
+        return [$relationship->getNavigationPropertyName(), $types];
     }
 
     protected function getPropertyContentForGetterOrSetter(\ReflectionMethod $method, $getter, &$description)
@@ -287,9 +286,11 @@ class ReflectionModel extends \ReflectionClass
             $type = 'mixed';
         }
 
+        $type = (new TypeResolver())->resolve($type);
+
         $description = $comment->getSummary();
 
-        return $type . ' $' . substr($method->getName(), 3);
+        return [substr($method->getName(), 3), $type];
     }
 
     protected function getTypeForTag($tag)
@@ -383,7 +384,7 @@ class ReflectionModel extends \ReflectionClass
      * @param string $description If not set, any existing description will be retained
      * @return bool True if a change was made
      */
-    protected function setProperty($updateExisting, $tagName, $variableName, $content, $rewriteDescriptions, $description = null)
+    protected function setProperty($updateExisting, $tagName, $variableName, $content, $rewriteDescriptions, $description = null, \phpDocumentor\Reflection\Type $type = null)
     {
         if (!$this->touchProperty($variableName)) {
             return false;
@@ -392,21 +393,21 @@ class ReflectionModel extends \ReflectionClass
         $changed = false;
         $newTag = null;        
 
-        if (isset($this->fields['$' . $variableName])) {
+        if (isset($this->fields[$variableName])) {
 
             $class = $this->getTagClass($tagName);
 
             if ($updateExisting) {
 
                 // Update existing phpDoc field
-                $tag = $this->fields['$' . $variableName];
+                $tag = $this->fields[$variableName];
 
                 $tagDescription = $tag->getDescription();
                 if (!$rewriteDescriptions && $tagDescription) {
                     $description = $tagDescription;
                 }
                 $content = trim($content . ' ' . $description);
-
+                
                 $newTag = new $class($variableName, $tag->getType(), new Description($content));
 
                 if ($tagName != $tag->getName()) {                    
@@ -420,13 +421,13 @@ class ReflectionModel extends \ReflectionClass
         } else {            
             $class = $this->getTagClass($tagName);
             // Add new field
-            $content = trim($content . ' ' . $description);
-            $newTag = new $class($variableName, null, new Description($content));                                    
+            $description = trim($description);            
+            $newTag = new $class($variableName, $type, new Description($description));                                    
             $changed = true;
         }
 
         if ($newTag){
-            $this->fields['$'.$variableName] = $newTag;
+            $this->fields[$variableName] = $newTag;
         }
 
         return $changed;

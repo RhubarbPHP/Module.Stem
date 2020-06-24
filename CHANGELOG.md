@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.18
+
+* Changed: Further fixes for phpDocumentor
+
 ### 1.8.17
 
 * Changed: Had to remove constraint on phpDocumentor
