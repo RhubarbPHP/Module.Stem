@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.8.17
+
+* Changed: Had to remove constraint on phpDocumentor
+
 ### 1.8.16
 
 * Added:   Compatibility with phpDocumentor 2.0 for document models command.
