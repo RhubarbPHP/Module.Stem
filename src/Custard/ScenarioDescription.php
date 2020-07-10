@@ -6,27 +6,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ScenarioDescription
 {
     /**
-     * @var string[] message lines to write
+     * @var OutputInterface
      */
-    private $lines = [];
+    private $output;
 
     /**
      * @param string $line to write
-     * @param string $spacer indentation 
+     * @param string $spacer indentation
      * @return $this for the fluent pattern
      */
     public function writeLine(string $line, $spacer = "   ")
     {
-        $this->lines[] = $spacer . $line;
+        $string = $spacer . $line;
+        $this->output->writeln($string);
         return $this;
     }
 
     /**
      * @param OutputInterface $output
-     * Write all oif the lines
+     * @return $this;
      */
-    public function describe(OutputInterface $output)
+    public function setOutput(OutputInterface $output)
     {
-        $output->writeln($this->lines);
+        $this->output = $output;
+        return $this;
     }
 }

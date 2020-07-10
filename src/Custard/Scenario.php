@@ -41,8 +41,8 @@ class Scenario
     public function run(OutputInterface $output)
     {
         $seedScenario = $this->seedScenario;
+        $this->scenarioDescription->setOutput($output);
         $seedScenario($this->scenarioDescription);
-        $this->scenarioDescription->describe($output);
     }
 
     /**
