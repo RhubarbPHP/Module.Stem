@@ -1,5 +1,11 @@
 # Change Log
 
+### 1.9.0
+
+* Changed: Collections now support per repository optimisation of collection counting. This is implemented
+           in MySql as a COUNT(*) on the original query. This results in more queries overall, but in many
+           cases greatly increased performance and reduced network traffic.
+
 ### 1.8.18
 
 * Changed: Further fixes for phpDocumentor
