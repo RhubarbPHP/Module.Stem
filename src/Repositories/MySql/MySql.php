@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\MySql;
 
 require_once __DIR__ . "/../PdoRepository.php";
 
+use PDO;
 use Rhubarb\Stem\Aggregates\Aggregate;
 use Rhubarb\Stem\Collections\CollectionJoin;
 use Rhubarb\Stem\Collections\RepositoryCollection;
@@ -280,6 +281,41 @@ class MySql extends PdoRepository
         $sql = $statement->getUpdateSql(array_keys($propertyPairs));
 
         static::executeStatement($sql, $namedParams);
+    }
+
+    /**
+     * Provides an opportunity for a collection's size to be calculated in an optimised way
+     * 
+     * By default just gets a collection cursor and counts the rows.
+     */
+    public function countRowsInCollection(RepositoryCollection $collection)
+    {        
+        $clone = clone $collection;
+        $clone->disableRanging();
+
+        $sqlStatement = $this->getSqlStatementForCollection($clone, $params);        
+        
+        if ($sqlStatement->columns[0] instanceof SelectExpression){
+            if (stripos($sqlStatement->columns[0]->expression, "*") !== false) {
+                // The query includes a wild card select on the outermost table. In some instances there can
+                // be a pull up that clashes with column names in the outermost table. This is okay for a normal
+                // result set (right most column wins) but when you wrap with a SELECT COUNT(*) MySql complains about
+                // the duplicate column. Easiest solution is to change the * for just the ID.
+                //
+                // Note that while we don't care about the data in all pull up columns we can't remove them as sometimes
+                // orders and having clauses expect them to be in the select list.
+                //
+                // Note also that we alias the ID as uniqid() as sometimes the pull ups are pulling up an identifier column
+                // from a joined table and the names can still clash.
+                $sqlStatement->columns[0]->expression = str_replace("*", $collection->getModelSchema()->uniqueIdentifierColumnName." AS ".uniqid(), $sqlStatement->columns[0]->expression);                                
+            }
+        }
+
+        $sqlStatement = "SELECT COUNT(*) AS rowCount FROM (".$sqlStatement.") AS countableList";
+        $connection = static::getReadOnlyConnection();        
+        $statement = static::executeStatement((string)$sqlStatement, $params, $connection);
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+        return $row["rowCount"];
     }
 
     /**

@@ -235,12 +235,14 @@ abstract class PdoRepository extends Repository
         Log::createEntry(Log::PERFORMANCE_LEVEL | Log::REPOSITORY_LEVEL, function () use ($statement, $namedParameters, $connection) {
             $newStatement = $statement;
 
-            array_walk($namedParameters, function ($value, $key) use (&$newStatement, &$params, $connection) {
-                // Note this is not attempting to make secure queries - this is purely illustrative for the logs
-                // However we do at least do addslashes so if you want to cut and paste a query from the log to
-                // try it - it should work in most cases.
-                $newStatement = preg_replace('/(\:' . preg_quote($key) . ')([^\w]|$)/' , $connection->quote($value) . '$2', $newStatement);
-            });
+            if (is_array($namedParameters)){
+                array_walk($namedParameters, function ($value, $key) use (&$newStatement, &$params, $connection) {
+                    // Note this is not attempting to make secure queries - this is purely illustrative for the logs
+                    // However we do at least do addslashes so if you want to cut and paste a query from the log to
+                    // try it - it should work in most cases.
+                    $newStatement = preg_replace('/(\:' . preg_quote($key) . ')([^\w]|$)/' , $connection->quote($value) . '$2', $newStatement);
+                });
+            }
 
             return "Executing PDO statement " . $newStatement;
         }, "PDO");

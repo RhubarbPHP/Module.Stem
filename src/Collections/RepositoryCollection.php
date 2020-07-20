@@ -67,6 +67,25 @@ class RepositoryCollection extends Collection
         return true;
     }
 
+    private $count = null;
+
+    public function count()
+    {
+        if ($this->count === null){
+            $this->prepareCollectionForExecution();
+            $this->count = $this->getRepository()->countRowsInCollection($this);            
+        }
+
+        return $this->count;
+    }
+
+    protected function invalidate()
+    {
+        parent::invalidate();
+
+        $this->count = null;
+    }
+
     protected function createCursor()
     {
         $repository = $this->getRepository();
