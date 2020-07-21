@@ -81,8 +81,8 @@ class Offline extends Repository
         // has a method "prepareCursor". This actually executes the queries and afterwards
         // it tries to 'complete' filtering, sorting and aggregating in the event that some
         // of those could not be done in the repository back end store. However the Offline
-        // repository relies on that secondary behaviour to work (hence this class) is almost
-        // empty.
+        // repository relies on that secondary behaviour to work (hence this class is almost
+        // empty).
         //
         // It would have been better a) not to support post iteration filtering etc. anyway
         // as it's caused no end of performance problems and b) to have that code in here.
