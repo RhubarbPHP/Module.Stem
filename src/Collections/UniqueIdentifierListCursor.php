@@ -136,7 +136,6 @@ class UniqueIdentifierListCursor extends CollectionCursor
             $newoffset = $offset - count($this->uniqueIdentifiers);
             $values = array_values($this->duplicatedRows);
             $keys = array_keys($this->duplicatedRows);
-
             $id = rtrim($values[$newoffset], "_");
             $augmentationId = $keys[$newoffset];
         } else {

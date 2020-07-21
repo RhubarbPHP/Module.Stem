@@ -43,7 +43,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @var CollectionCursor
      */
-    private $collectionCursor;
+    protected $collectionCursor;
 
     /**
      * The only or top level group filter to apply to the list.

@@ -293,7 +293,7 @@ abstract class Repository
      * By default just gets a collection cursor and counts the rows.
      */
     public function countRowsInCollection(RepositoryCollection $collection)
-    {
+    {        
         return $this->createCursorForCollection($collection)->count();
     }
 
@@ -305,7 +305,7 @@ abstract class Repository
      * @return ArrayAccess
      */
     public function createCursorForCollection(RepositoryCollection $collection)
-    {
+    {        
         $ids = array_keys($this->cachedObjectData);
 
         return new UniqueIdentifierListCursor(array_values($ids), $this->modelClassName);

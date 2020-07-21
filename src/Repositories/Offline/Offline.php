@@ -20,6 +20,7 @@ namespace Rhubarb\Stem\Repositories\Offline;
 
 require_once __DIR__ . "/../Repository.php";
 
+use Rhubarb\Stem\Collections\RepositoryCollection;
 use Rhubarb\Stem\Models\Model;
 use Rhubarb\Stem\Repositories\Repository;
 use Rhubarb\Stem\Schema\Columns\AutoIncrementColumn;
@@ -72,5 +73,25 @@ class Offline extends Repository
     public function clearRepositoryData()
     {
         $this->clearObjectCache();
+    }
+
+    public function countRowsInCollection(RepositoryCollection $collection)
+    {
+        // Force a cursor to be made. This is a weakness in our placement of code. Collection
+        // has a method "prepareCursor". This actually executes the queries and afterwards
+        // it tries to 'complete' filtering, sorting and aggregating in the event that some
+        // of those could not be done in the repository back end store. However the Offline
+        // repository relies on that secondary behaviour to work (hence this class) is almost
+        // empty.
+        //
+        // It would have been better a) not to support post iteration filtering etc. anyway
+        // as it's caused no end of performance problems and b) to have that code in here.
+        // 
+        // However the existing design is non trivial to modify so for now we simply
+        // call offsetExists() which will result in prepareCursor() being called and then
+        // we try the count a second time. As a cursor now exists it will not come back
+        // so an infinite loop is avoided.
+        $collection->offsetExists(0);
+        return count($collection);
     }
 }
