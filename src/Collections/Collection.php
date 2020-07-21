@@ -431,6 +431,8 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     final public function clearIntersections()
     {
         $this->intersections = [];
+        
+        return $this;
     }
 
     /**
