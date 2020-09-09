@@ -302,7 +302,7 @@ abstract class Repository
      *
      * @param  RepositoryCollection $collection
      * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
-     * @return ArrayAccess
+     * @return UniqueIdentifierListCursor
      */
     public function createCursorForCollection(RepositoryCollection $collection)
     {        
