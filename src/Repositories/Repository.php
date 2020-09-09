@@ -288,14 +288,24 @@ abstract class Repository
     }
 
     /**
+     * Provides an opportunity for a collection's size to be calculated in an optimised way
+     * 
+     * By default just gets a collection cursor and counts the rows.
+     */
+    public function countRowsInCollection(RepositoryCollection $collection)
+    {        
+        return $this->createCursorForCollection($collection)->count();
+    }
+
+    /**
      * Get's a sorted list of unique identifiers for the supplied list.
      *
      * @param  RepositoryCollection $collection
      * @throws \Rhubarb\Stem\Exceptions\SortNotValidException
-     * @return array
+     * @return UniqueIdentifierListCursor
      */
     public function createCursorForCollection(RepositoryCollection $collection)
-    {
+    {        
         $ids = array_keys($this->cachedObjectData);
 
         return new UniqueIdentifierListCursor(array_values($ids), $this->modelClassName);

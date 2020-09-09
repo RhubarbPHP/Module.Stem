@@ -43,7 +43,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
      *
      * @var CollectionCursor
      */
-    private $collectionCursor;
+    protected $collectionCursor;
 
     /**
      * The only or top level group filter to apply to the list.
@@ -302,6 +302,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
+     * Removes all groups
+     */
+    final public function clearGroups($columnName)
+    {
+        $this->groups = [];
+
+        return $this;
+    }
+
+    /**
      * Adds another sort condition.
      *
      * @param string $columnName The name of the column to sort on.
@@ -413,6 +423,16 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         $this->invalidate();
 
         return ($result === null) ? $model : $result;
+    }
+
+    /**
+     * Removes all intersections
+     */
+    final public function clearIntersections()
+    {
+        $this->intersections = [];
+        
+        return $this;
     }
 
     /**
@@ -807,7 +827,7 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
         return $this->intersections;
     }
 
-    private function invalidate()
+    protected function invalidate()
     {
         $this->rangeApplied = false;
         $this->collectionCursor = null;
@@ -878,16 +898,10 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * Create a cursor for the collection if one has not been already.
-     *
-     * If the repository cannot handle any feature of the collection this function will 'polyfill' support.
+     * Performs some pre-query checks on our collection
      */
-    private function prepareCursor()
+    protected function prepareCollectionForExecution()
     {
-        if ($this->collectionCursor != null) {
-            // Cursor already exists, we shouldn't bother making a new one.
-            return;
-        }
 
         // Before we prepare the cursor we should ask all of our filters, sorts and aggregates to
         // check if they have any dot notations that need expanded into intersections.
@@ -915,7 +929,21 @@ abstract class Collection implements \ArrayAccess, \Iterator, \Countable
                 $this->groups[] = $uniqueIdentifier;
             }
         }
+    }
 
+    /**
+     * Create a cursor for the collection if one has not been already.
+     *
+     * If the repository cannot handle any feature of the collection this function will 'polyfill' support.
+     */
+    private function prepareCursor()
+    {
+        if ($this->collectionCursor != null) {
+            // Cursor already exists, we shouldn't bother making a new one.
+            return;
+        }
+
+        $this->prepareCollectionForExecution();
         $this->collectionCursor = $this->createCursor();
 
         /**

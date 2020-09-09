@@ -67,6 +67,31 @@ class RepositoryCollection extends Collection
         return true;
     }
 
+    private $count = null;
+
+    public function count()
+    {
+        // If we already have a cursor (i.e. data is already fetched) we already know how many
+        // rows we have.
+        if ($this->collectionCursor){
+            return $this->collectionCursor->count();
+        }
+
+        if ($this->count === null){
+            $this->prepareCollectionForExecution();
+            $this->count = $this->getRepository()->countRowsInCollection($this);            
+        }
+
+        return $this->count;
+    }
+
+    protected function invalidate()
+    {
+        parent::invalidate();
+
+        $this->count = null;
+    }
+
     protected function createCursor()
     {
         $repository = $this->getRepository();
