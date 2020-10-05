@@ -32,7 +32,7 @@ class MySqlFullTextSearch extends FullTextSearch
 
             $originalFilter->filteredByRepository = true;
 
-            return "MATCH (`{$implodedColumns}`) AGAINST (`{$searchPhrase}` IN `{$settings["mode"]}` MODE)";
+            return "MATCH ({$implodedColumns}) AGAINST ('{$searchPhrase}' IN {$settings["mode"]} MODE)";
         }
 
         parent::doFilterWithRepository($repository, $originalFilter, $params, $propertiesToAutoHydrate);
