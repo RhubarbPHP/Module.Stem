@@ -28,7 +28,6 @@ class MySqlFullTextSearch extends FullTextSearch
         if (self::canFilter($repository, $implodedColumns, $propertiesToAutoHydrate)) {
             $searchPhrase = $settings["searchPhrase"];
             $paramName = uniqid() . str_replace(".", "", $implodedColumns);
-            $params[$paramName] = $searchPhrase;
 
             $originalFilter->filteredByRepository = true;
 
@@ -40,7 +39,9 @@ class MySqlFullTextSearch extends FullTextSearch
 
             $searchPhrase = implode(" ", $newWords);
 
-            return "MATCH ({$implodedColumns}) AGAINST ('{$searchPhrase}' IN {$settings["mode"]} MODE)";
+            $params[$paramName] = $searchPhrase;
+
+            return "MATCH ({$implodedColumns}) AGAINST ('{$paramName}' IN {$settings["mode"]} MODE)";
         }
 
         parent::doFilterWithRepository($repository, $originalFilter, $params, $propertiesToAutoHydrate);
