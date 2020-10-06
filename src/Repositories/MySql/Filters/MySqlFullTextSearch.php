@@ -32,6 +32,14 @@ class MySqlFullTextSearch extends FullTextSearch
 
             $originalFilter->filteredByRepository = true;
 
+            $words = preg_split("/\s+/", $searchPhrase);            
+            $newWords = [];
+            foreach($words as $word){
+                $newWords[] = $word."*";
+            }
+
+            $searchPhrase = implode(" ", $newWords);
+
             return "MATCH ({$implodedColumns}) AGAINST ('{$searchPhrase}' IN {$settings["mode"]} MODE)";
         }
 
