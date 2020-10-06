@@ -41,7 +41,7 @@ class MySqlFullTextSearch extends FullTextSearch
 
             $params[$paramName] = $searchPhrase;
 
-            return "MATCH ({$implodedColumns}) AGAINST ('{$paramName}' IN {$settings["mode"]} MODE)";
+            return "MATCH ({$implodedColumns}) AGAINST (':{$paramName}' IN {$settings["mode"]} MODE)";
         }
 
         parent::doFilterWithRepository($repository, $originalFilter, $params, $propertiesToAutoHydrate);
