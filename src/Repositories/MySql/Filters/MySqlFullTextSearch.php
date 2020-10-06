@@ -32,7 +32,7 @@ class MySqlFullTextSearch extends FullTextSearch
 
             $originalFilter->filteredByRepository = true;
 
-            $words = preg_split("/\s+/", $searchPhrase);            
+            $words = preg_split("/\W+/", $searchPhrase);            
             $newWords = [];
             foreach($words as $word){
                 $newWords[] = $word."*";
