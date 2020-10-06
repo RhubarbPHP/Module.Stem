@@ -34,7 +34,9 @@ class MySqlFullTextSearch extends FullTextSearch
             $words = preg_split("/\W+/", $searchPhrase);            
             $newWords = [];
             foreach($words as $word){
-                $newWords[] = $word."*";
+                if ($word) {
+                    $newWords[] = $word."*";
+                }
             }
 
             $searchPhrase = implode(" ", $newWords);
@@ -44,7 +46,7 @@ class MySqlFullTextSearch extends FullTextSearch
             $parameter = ":" . $paramName;
 
             return "MATCH ({$implodedColumns}) AGAINST ({$parameter} IN {$settings["mode"]} MODE)";
-        }
+        }        
 
         parent::doFilterWithRepository($repository, $originalFilter, $params, $propertiesToAutoHydrate);
     }
