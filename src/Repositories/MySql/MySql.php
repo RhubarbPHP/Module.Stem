@@ -307,7 +307,7 @@ class MySql extends PdoRepository
                 //
                 // Note also that we alias the ID as uniqid() as sometimes the pull ups are pulling up an identifier column
                 // from a joined table and the names can still clash.
-                $sqlStatement->columns[0]->expression = str_replace("*", $collection->getModelSchema()->uniqueIdentifierColumnName." AS ".uniqid(), $sqlStatement->columns[0]->expression);                                
+                $sqlStatement->columns[0]->expression = str_replace("*", $collection->getModelSchema()->uniqueIdentifierColumnName." AS `".uniqid()."`", $sqlStatement->columns[0]->expression);                             
             }
         }
 
