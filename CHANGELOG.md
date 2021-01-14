@@ -1,5 +1,8 @@
 # Change Log
 
+### 1.9.1
+
+* Fixed:   Aliases now fully quoted
 ### 1.9.0
 
 * Changed: Collections now support per repository optimisation of collection counting. This is implemented
