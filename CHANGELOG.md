@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.9.2
+
+* Fixed:   Repository timezone can be set in StemSettings
+
 ### 1.9.1
 
 * Fixed:   Aliases now fully quoted
