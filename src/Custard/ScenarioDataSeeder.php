@@ -18,25 +18,55 @@ abstract class ScenarioDataSeeder implements DemoDataSeederInterface
         return [];
     }
 
-    public function seedData(OutputInterface $output)
+    /**
+     * A hook for logic to run before each scenario
+     * @param Scenario $scenario
+     */
+    protected function beforeScenario(Scenario $scenario)
+    {
+    }
+
+    /**
+     * A hook for logic to run after each scenario
+     * @param Scenario $scenario
+     */
+    protected function afterScenario(Scenario $scenario)
+    {
+    }
+
+    public function seedData(OutputInterface $output, $includeBulk = false)
     {
         $class = get_class($this);
-        if (in_array($class, self::$alreadyRan)){
+        if (in_array($class, self::$alreadyRan)) {
             return;
         }
 
         self::$alreadyRan[] = $class;
 
-        foreach($this->getPreRequisiteSeeders() as $seeder){
-            $seeder->seedData($output);
+        foreach ($this->getPreRequisiteSeeders() as $seeder) {
+            if (is_string($seeder)) {
+                $seeder = new $seeder();
+            }
+
+            if (!($seeder instanceof DemoDataSeederInterface)) {
+                throw new \InvalidArgumentException(get_class($seeder) . " does not extend DemoDataSeederInterface.");
+            }
+
+            $seeder->seedData($output, $includeBulk);
         }
 
         foreach ($this->getScenarios() as $scenario) {
-            $output->writeln("");
-            $output->writeln("Scenario ".self::$scenarioCount.": " . $scenario->getName());
-            $output->writeln("");
-            $scenario->run($output);
-            self::$scenarioCount++;
+            if ($includeBulk || !($scenario instanceof BulkScenario)) {
+                $this->beforeScenario($scenario);
+
+                $output->writeln("");
+                $output->writeln("<comment>Scenario " . self::$scenarioCount . ": <bold>" . $scenario->getName() . '</bold></comment>');
+                $output->writeln(str_repeat('-', 11 + strlen(self::$scenarioCount) + strlen($scenario->getName())));
+                $scenario->run($output);
+                self::$scenarioCount++;
+
+                $this->afterScenario($scenario);
+            }
         }
     }
 
