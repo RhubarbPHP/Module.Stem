@@ -252,7 +252,6 @@ class MySql extends PdoRepository
 
             $namedParams[$paramName] = $value;
             $sets[] = "`" . $key . "` = :" . $paramName;
-
         }
 
         $sql = "UPDATE `{$table}` SET " . implode(",", $sets) . $whereClause;

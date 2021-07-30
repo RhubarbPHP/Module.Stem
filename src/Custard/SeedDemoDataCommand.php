@@ -17,10 +17,11 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
     {
         $this->setName('stem:seed-data')
             ->setDescription('Seeds the repositories with demo data')
-        ->addOption("list", "l", null, "Lists the seeders available")
-        ->addOption("obliterate", "o", InputOption::VALUE_NONE, "Obliterate the entire database first")
-        ->addOption("force", "f", InputOption::VALUE_NONE, "Forces obliteration even if running only a single seeder")
-        ->addArgument("seeder", InputArgument::OPTIONAL, "The name of the seeder to run, leave out for all");
+            ->addOption("list", "l", null, "Lists the seeders available")
+            ->addOption("obliterate", "o", InputOption::VALUE_NONE, "Obliterate the entire database first")
+            ->addOption("bulk", "b", InputOption::VALUE_NONE, "Include bulk seed sets")
+            ->addOption("force", "f", InputOption::VALUE_NONE, "Forces obliteration even if running only a single seeder")
+            ->addArgument("seeder", InputArgument::OPTIONAL, "The name of the seeder to run, leave out for all");
 
         parent::configure();
     }
@@ -30,20 +31,30 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
      */
     private static $seeders = [];
 
-    private static $enableTruncating = true;
+    private static $enableTruncating = false;
+
+    /**
+     * True if we're presently seeding the database
+     * 
+     * Used to stop event chains based of model chains that the seeder should not cause.
+     * e.g. user activation emails
+     */
+    public static $seeding = false;
 
     protected function executeWithConnection(InputInterface $input, OutputInterface $output)
     {
+        SeedDemoDataCommand::$seeding = true;
+
         $output->getFormatter()->setStyle('bold', new OutputFormatterStyle(null, null, ['bold']));
         $output->getFormatter()->setStyle('blink', new OutputFormatterStyle(null, null, ['blink']));
         $output->getFormatter()->setStyle('critical', new OutputFormatterStyle('red', null, ['bold']));
 
-        if ($input->getOption("list")!=null){
+        if ($input->getOption("list") != null) {
 
             $output->writeln("Listing possible seeders:");
             $output->writeln("");
 
-            foreach(self::$seeders as $seeder){
+            foreach (self::$seeders as $seeder) {
                 $output->writeln("\t" . basename(str_replace("\\", "/", get_class($seeder))));
             }
 
@@ -53,11 +64,10 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
         $chosenSeeder = $input->getArgument("seeder");
 
-
-        if (($input->getOption("obliterate")===true) && (!empty($chosenSeeder))){
+        if (($input->getOption("obliterate") === true) && (!empty($chosenSeeder))) {
             // Running a single seeder after an obliteration makes no sense - this is probably
             // a mistake.
-            if ($input->getOption("force")===false){
+            if ($input->getOption("force") === false) {
                 $output->writeln("<critical>Running a single seeder after obliteration is probably not sane. Use with -f to force.");
                 return;
             }
@@ -72,7 +82,7 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
             $schema->checkModelSchemas();
         }
 
-        if (($input->getOption("obliterate")===true) || self::$enableTruncating) {
+        if (($input->getOption("obliterate") === true) || self::$enableTruncating) {
 
             $this->writeNormal("Clearing existing data.", true);
 
@@ -96,7 +106,6 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
                 $this->writeNormal(" Truncating " . str_pad(basename($schema->schemaName), 50, ' ', STR_PAD_RIGHT));
 
                 $repository->clearRepositoryData();
-
             }
 
             $progressBar->finish();
@@ -107,10 +116,12 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
         $this->writeNormal("Running seed scripts...", true);
 
-        if ($chosenSeeder){
+        $includeBulk = ($input->getOption("bulk") === true);
+
+        if ($chosenSeeder) {
             $found = false;
             foreach (self::$seeders as $seeder) {
-                if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)){
+                if (strtolower(basename(str_replace("\\", "/", get_class($seeder)))) == strtolower($chosenSeeder)) {
                     $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
                     $output->writeln(['', '']);
 
@@ -118,18 +129,17 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
                         $seeder->describeDemoData($output);
                     }
 
-                    $seeder->seedData($output);
+                    $seeder->seedData($output, $includeBulk);
                     $found = true;
                 }
             }
 
-            if (!$found){
-                $output->writeln("No seeder matching `".$chosenSeeder."`");
+            if (!$found) {
+                $output->writeln("No seeder matching `" . $chosenSeeder . "`");
                 $this->writeNormal("", true);
 
                 return;
             }
-
         } else {
             $progressBar = new ProgressBar($output, sizeof(self::$seeders));
 
@@ -138,16 +148,16 @@ class SeedDemoDataCommand extends RequiresRepositoryCommand
 
                 $this->writeNormal(" Processing " . str_pad(basename(str_replace("\\", "/", get_class($seeder))), 50, ' ', STR_PAD_RIGHT));
 
-                $seeder->seedData($output);
+                $seeder->seedData($output, $includeBulk);
             }
 
             $progressBar->finish();
-
         }
 
         $this->writeNormal("", true);
+        $this->writeNormal("<info>Seeding Complete</info>", true);
 
-        $this->writeNormal("Seeding Complete", true);
+        SeedDemoDataCommand::$seeding = false;
     }
 
     public static function setEnableTruncating($enableTruncating)
