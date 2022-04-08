@@ -24,15 +24,17 @@ class DecimalColumn extends Column
 {
     protected $totalDigits = 8;
     protected $decimalDigits = 2;
+    protected $maintainNull;
     protected $maxValue;
     protected $minValue;
 
-    public function __construct($columnName, $totalDigits = 8, $decimalDigits = 2, $defaultValue = null)
+    public function __construct($columnName, $totalDigits = 8, $decimalDigits = 2, $defaultValue = null, $maintainNull = false)
     {
         parent::__construct($columnName, $defaultValue);
 
         $this->totalDigits = $totalDigits;
         $this->decimalDigits = $decimalDigits;
+        $this->maintainNull = $maintainNull;
 
         // Calculate the range of values allowed by $totalDigits
         $padding = ($decimalDigits > 1) ? str_repeat('0', $decimalDigits - 1) : "";
@@ -64,7 +66,11 @@ class DecimalColumn extends Column
     public function getTransformIntoModelData()
     {
         return function ($value) {
-            $value = round((float)$value, $this->decimalDigits);
+            if($this->maintainNull && $value === null) {
+                $value = round($value, $this->decimalDigits);
+            } else {
+                $value = round((float)$value, $this->decimalDigits);
+            }
 
             // Ensure the value isn't outside the range that $this->totalDigits allows
             $value = min($this->maxValue, $value);
@@ -77,7 +83,11 @@ class DecimalColumn extends Column
     public function getTransformFromRepository()
     {
         return function ($data) {
-            return (float)$data[$this->columnName];
+            if($this->maintainNull && $data[$this->columnName] === null) {
+                return $data[$this->columnName];
+            } else {
+                return (float)$data[$this->columnName];
+            }            
         };
     }
 }

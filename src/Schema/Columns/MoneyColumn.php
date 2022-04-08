@@ -26,9 +26,10 @@ class MoneyColumn extends DecimalColumn
      * @param string $columnName
      * @param int $totalDigits
      * @param int $defaultValue
+     * @param bool $maintainNull
      */
-    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
+    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0, $maintainNull = false)
     {
-        parent::__construct($columnName, $totalDigits, 2, $defaultValue);
+        parent::__construct($columnName, $totalDigits, 2, $defaultValue, $maintainNull);
     }
 }

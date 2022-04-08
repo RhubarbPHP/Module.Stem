@@ -27,6 +27,14 @@ class IntegerColumn extends Column
      * @var bool
      */
     public static $cast = true;
+    protected $maintainNull;
+
+    public function __construct($columnName, $defaultValue = null, $maintainNull = false)
+    {
+        parent::__construct($columnName, $defaultValue);
+
+        $this->maintainNull = $maintainNull;
+    }
 
     public function getPhpType()
     {
@@ -37,7 +45,11 @@ class IntegerColumn extends Column
     {
         return IntegerColumn::$cast
             ? function ($value) {
-                return (int)$value;
+                if($this->maintainNull && $value === null) {
+                    return $value;
+                } else {
+                    return (int)$value;
+                }
             }
             : parent::getTransformIntoModelData();
     }
@@ -46,7 +58,11 @@ class IntegerColumn extends Column
     {
         return IntegerColumn::$cast
             ? function ($data) {
-                return (int)$data[$this->columnName];
+                if($this->maintainNull && $data[$this->columnName] === null) {
+                    return $data[$this->columnName];
+                } else {
+                    return (int)$data[$this->columnName];
+                }
             }
             : parent::getTransformFromRepository();
     }

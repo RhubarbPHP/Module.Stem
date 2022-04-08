@@ -37,6 +37,6 @@ class MySqlIntegerColumn extends IntegerColumn
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new self($genericColumn->columnName, $genericColumn->defaultValue);
+        return new self($genericColumn->columnName, $genericColumn->defaultValue, $genericColumn->maintainNull);
     }
 }
