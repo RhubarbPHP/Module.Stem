@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.9.3
+
+* Changed:  A flag added to allow a null value to be passed to the front end instead if being cast to 0. 
+
 ### 1.9.2
 
 * Fixed:   Repository timezone can be set in StemSettings

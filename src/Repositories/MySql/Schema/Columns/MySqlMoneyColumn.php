@@ -33,14 +33,15 @@ class MySqlMoneyColumn extends MySqlDecimalColumn
      * @param string $columnName
      * @param int $totalDigits
      * @param int $defaultValue
+     * @param bool $maintainNull
      */
-    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0)
+    public function __construct($columnName, $totalDigits = 8, $defaultValue = 0, $maintainNull = false)
     {
-        parent::__construct($columnName, $totalDigits, 2, $defaultValue);
+        parent::__construct($columnName, $totalDigits, 2, $defaultValue, $maintainNull);
     }
 
     protected static function fromGenericColumnType(Column $genericColumn)
     {
-        return new self($genericColumn->columnName, $genericColumn->totalDigits, $genericColumn->defaultValue);
+        return new self($genericColumn->columnName, $genericColumn->totalDigits, $genericColumn->defaultValue, $genericColumn->maintainNull);
     }
 }

@@ -41,7 +41,8 @@ class MySqlDecimalColumn extends DecimalColumn
             $genericColumn->columnName,
             $genericColumn->totalDigits,
             $genericColumn->decimalDigits,
-            $genericColumn->defaultValue
+            $genericColumn->defaultValue,
+            $genericColumn->maintainNull
         );
     }
 
