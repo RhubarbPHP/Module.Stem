@@ -205,7 +205,10 @@ class MySqlCursor extends CollectionCursor
             return $this->offsetGet($index+1);
         }
 
-        $id = $this->rowsFetched[$index];
+        $id = null;
+        if (isset($this->rowsFetched[$index])) {
+            $id = $this->rowsFetched[$index];
+        }
 
         if (in_array($id, $this->filteredIds)){
             return $this->offsetGet($index+1);
