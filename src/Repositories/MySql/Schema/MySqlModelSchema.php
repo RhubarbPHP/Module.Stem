@@ -156,12 +156,12 @@ class MySqlModelSchema extends ModelSchema
 
         // By simply adding the columns to the specific repository versioned schema, the columns
         // should be 'upgraded' automatically.
-        call_user_func_array([$schema, "addFromGenericColumn"], $columns);
+        call_user_func_array([$schema, "addFromGenericColumn"], array_values($columns));
 
         $schema->uniqueIdentifierColumnName = $genericSchema->uniqueIdentifierColumnName;
 
         if (count($genericSchema->indexes)) {
-            call_user_func_array([$schema, "addFromGenericIndex"], $genericSchema->indexes);
+            call_user_func_array([$schema, "addFromGenericIndex"], array_values($genericSchema->indexes));
         }
 
         return $schema;
