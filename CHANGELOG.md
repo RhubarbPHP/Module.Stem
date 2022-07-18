@@ -1,6 +1,6 @@
 # Change Log
 
-### 1.9.3
+### 1.9.4
 
 * Fixed:  PHP 8 has added supported for named arguments. This can cause problems when using call_user_func_array().
 
