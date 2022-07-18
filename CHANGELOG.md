@@ -2,6 +2,10 @@
 
 ### 1.9.3
 
+* Fixed:  PHP 8 has added supported for named arguments. This can cause problems when using call_user_func_array().
+
+### 1.9.3
+
 * Changed:  A flag added to allow a null value to be passed to the front end instead if being cast to 0. 
 
 ### 1.9.2
