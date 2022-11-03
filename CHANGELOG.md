@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.9.5
+
+* Fixed:  PHP 8 makes PDO::ERRMODE_EXCEPTION the default, meaning the RepositoryStatementException was no longer being
+          caught as a PDOException was being thrown. Added a catch for PDOException.
+
 ### 1.9.4
 
 * Fixed:  PHP 8 has added supported for named arguments. This can cause problems when using call_user_func_array().
