@@ -40,19 +40,24 @@ class MySqlCollectionPropertyMatches extends CollectionPropertyMatches
         // Get the relationship
         $relationships = SolutionSchema::getAllRelationshipsForModel($repository->getModelClass());
 
-        /**
-         * @var OneToMany $relationship
-         */
-        $relationship = $relationships[$originalFilter->collectionProperty];
+        if ($relationships) {
 
-        $columnName = $relationship->getNavigationPropertyName() . "`.`" . $originalFilter->columnName;
+            /**
+             * @var OneToMany $relationship
+             */
+            $relationship = $relationships[$originalFilter->collectionProperty];
 
-        $paramName = uniqid() . str_replace("`.`", "", $columnName);
+            $columnName = $relationship->getNavigationPropertyName() . "`.`" . $originalFilter->columnName;
 
-        $params[$paramName] = $originalFilter->equalTo;
+            $paramName = uniqid() . str_replace("`.`", "", $columnName);
 
-        $originalFilter->filteredByRepository = true;
+            $params[$paramName] = $originalFilter->equalTo;
 
-        return "`{$columnName}` = :{$paramName}";
+            $originalFilter->filteredByRepository = true;
+
+            return "`{$columnName}` = :{$paramName}";
+        }
+
+        return "";
     }
 }

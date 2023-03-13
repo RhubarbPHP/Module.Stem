@@ -459,40 +459,42 @@ class MySql extends PdoRepository
         $propertiesToAutoHydrate = array_unique($propertiesToAutoHydrate);
 
         foreach ($propertiesToAutoHydrate as $joinRelationship) {
-            /**
-             * @var OneToMany $relationship
-             */
-            $relationship = $relationships[$joinRelationship];
+            if ($relationships) {
+                /**
+                 * @var OneToMany $relationship
+                 */
+                $relationship = $relationships[$joinRelationship];
 
-            $targetModelName = $relationship->getTargetModelName();
-            $targetModelClass = SolutionSchema::getModelClass($targetModelName);
+                $targetModelName = $relationship->getTargetModelName();
+                $targetModelClass = SolutionSchema::getModelClass($targetModelName);
 
-            /**
-             * @var Model $targetModel
-             */
-            $targetModel = new $targetModelClass();
-            $targetSchema = $targetModel->getRepository()->getRepositorySchema();
+                /**
+                 * @var Model $targetModel
+                 */
+                $targetModel = new $targetModelClass();
+                $targetSchema = $targetModel->getRepository()->getRepositorySchema();
 
-            $columns = $targetSchema->getColumns();
+                $columns = $targetSchema->getColumns();
 
-            foreach ($columns as $column) {
-                $storageColumns = $column->getStorageColumns();
+                foreach ($columns as $column) {
+                    $storageColumns = $column->getStorageColumns();
 
-                foreach ($storageColumns as $storageColumn) {
-                    $columnName = $storageColumn->columnName;
+                    foreach ($storageColumns as $storageColumn) {
+                        $columnName = $storageColumn->columnName;
 
-                    $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
-                    $joinOriginalToAliasLookup[$targetModelName . "." . $columnName] = $targetModelName . $columnName;
+                        $joinColumns[$targetModelName . $columnName] = "`{$joinRelationship}`.`{$columnName}`";
+                        $joinOriginalToAliasLookup[$targetModelName . "." . $columnName] = $targetModelName . $columnName;
 
-                    if (!isset($joinColumnsByModel[$targetModelName])) {
-                        $joinColumnsByModel[$targetModelName] = [];
+                        if (!isset($joinColumnsByModel[$targetModelName])) {
+                            $joinColumnsByModel[$targetModelName] = [];
+                        }
+
+                        $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
                     }
-
-                    $joinColumnsByModel[$targetModelName][$targetModelName . $columnName] = $columnName;
                 }
-            }
 
-            $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
+                $joins[] = "LEFT JOIN `{$targetSchema->schemaName}` AS `{$joinRelationship}` ON `{$this->reposSchema->schemaName}`.`" . $relationship->getSourceColumnName() . "` = `{$joinRelationship}`.`" . $relationship->getTargetColumnName() . "`";
+            }
         }
 
         $joinString = "";
