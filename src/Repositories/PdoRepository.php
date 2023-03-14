@@ -173,11 +173,16 @@ abstract class PdoRepository extends Repository
             return "Executing PDO statement " . $newStatement;
         }, "PDO");
 
-        if (!$pdoStatement->execute($namedParameters)) {
-            $error = $pdoStatement->errorInfo();
+        try {
+            if (!$pdoStatement->execute($namedParameters)) {
+                $error = $pdoStatement->errorInfo();
 
-            throw new RepositoryStatementException($error[2], $statement);
+                throw new RepositoryStatementException($error[2], $statement);
+            }
+        } catch (\PDOException $exception) {
+            throw new RepositoryStatementException($exception->getMessage(), $statement);
         }
+
 
         $insertedId = $connection->lastInsertId();
 
