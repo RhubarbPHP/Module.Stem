@@ -1,5 +1,9 @@
 # Change Log
 
+### 1.9.6
+
+* Fixed: Deprecation warnings for undeclared parameter types on DataDecorator ArrayAccess methods.
+
 ### 1.9.5
 
 * Fixed:  PHP 8 makes PDO::ERRMODE_EXCEPTION the default, meaning the RepositoryStatementException was no longer being
