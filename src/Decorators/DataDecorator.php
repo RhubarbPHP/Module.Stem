@@ -334,7 +334,7 @@ abstract class DataDecorator implements \ArrayAccess
      * <p>
      *       The return value will be casted to boolean if non-boolean was returned.
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return (isset($this->model[$offset]) || isset($this->columnDecorators[$offset]));
     }
@@ -348,7 +348,7 @@ abstract class DataDecorator implements \ArrayAccess
      * </p>
      * @return mixed Can return all value types.
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->$offset;
     }
@@ -366,7 +366,7 @@ abstract class DataDecorator implements \ArrayAccess
      * @throws \Rhubarb\Crown\Exceptions\ImplementationException
      * @return void
      */
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         throw new ImplementationException("Decorators cannot be modified");
     }
@@ -381,7 +381,7 @@ abstract class DataDecorator implements \ArrayAccess
      * @throws \Rhubarb\Crown\Exceptions\ImplementationException
      * @return void
      */
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         throw new ImplementationException("Decorators cannot be modified");
     }
