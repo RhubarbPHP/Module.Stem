@@ -124,7 +124,7 @@ class ModelLoginProvider extends LoginProvider
      * @param  Model $user Required
      * @throws ImplementationException
      */
-    public function forceLogin(Model $user = null)
+    public function forceLogin(?Model $user = null)
     {
         // The model parameter must be optional to comply with PHP Strict Mode method override rules and as the model
         // is actually required, this ensures that it is provided
