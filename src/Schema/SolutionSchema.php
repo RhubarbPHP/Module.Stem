@@ -28,6 +28,7 @@ use Rhubarb\Stem\Schema\Relationships\ManyToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToMany;
 use Rhubarb\Stem\Schema\Relationships\OneToOne;
 use Rhubarb\Stem\Schema\Relationships\Relationship;
+use Rhubarb\Stem\StemSettings;
 
 /**
  * Encapsulates an entire solution schema including it's model objects and the relationships between them.
@@ -670,6 +671,10 @@ abstract class SolutionSchema
      */
     public function checkModelSchemasIfNecessary()
     {
+        if (!(new StemSettings())->CheckSchemasAutomatically) {
+            return;
+        }
+
         if (!file_exists("cache/schema-versions")) {
             mkdir("cache/schema-versions", 0777, true);
         }

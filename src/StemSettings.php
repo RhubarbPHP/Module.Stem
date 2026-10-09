@@ -29,6 +29,10 @@ namespace Rhubarb\Stem;
  * @property string $Charset
  * @property \DateTimeZone $RepositoryTimeZone
  * @property \DateTimeZone $ProjectTimeZone
+ * @property bool $CheckSchemasAutomatically    True to update repository schemas when a request finds the
+ *                                               schema version has changed. Turn off where several releases
+ *                                               share a cache and database (e.g. blue/green deploys) and run
+ *                                               stem:update-schemas as part of the release instead.
  */
 class StemSettings extends \Rhubarb\Crown\Settings
 {
@@ -38,6 +42,7 @@ class StemSettings extends \Rhubarb\Crown\Settings
 
         $this->Port = 3306;
         $this->Charset = 'utf8';
+        $this->CheckSchemasAutomatically = true;
         $this->ProjectTimeZone = new \DateTimeZone(date_default_timezone_get());
     }
 }
